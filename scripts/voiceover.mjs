@@ -36,6 +36,7 @@ import {existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:f
 import {createHash} from 'node:crypto';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {lexiconOf, loadRules} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = resolve(ROOT, 'public/voiceover');
@@ -65,16 +66,10 @@ const DEVICE = opt('device', 'mps');
 const SPEED = Number(opt('speed', '1.0'));
 /**
  * Written term → spoken form, whole-word, applied per sentence right before synthesis. A term at
- * the start of a sentence gets its spoken form capitalised, like any first word.
+ * the start of a sentence gets its spoken form capitalised, like any first word. It is the
+ * lexicon of the rules that grade the reel (scripts/lib/rules.mjs), set once the reel is read.
  */
-const LEXICON = (() => {
-  try {
-    const lex = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8')).voice?.lexicon ?? {};
-    return Object.entries(lex).filter(([k, v]) => !k.startsWith('_') && typeof v === 'string');
-  } catch {
-    return [];
-  }
-})();
+let LEXICON = [];
 const escapeRe = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const sayAs = (text) => LEXICON.reduce(
   (t, [word, say]) => t.replace(
@@ -275,6 +270,11 @@ if (ENGINE === 'say') {
 mkdirSync(OUT_DIR, {recursive: true});
 mkdirSync(CACHE_DIR, {recursive: true});
 const reel = JSON.parse(readFileSync(CONTENT, 'utf8'));
+try {
+  LEXICON = lexiconOf(loadRules(ROOT, {reel}));
+} catch (e) {
+  console.warn(`no pronunciation lexicon (${e.message}) — terms are read as written`);
+}
 if (ONLY) {
   const known = new Set(reel.scenes.map((s) => s.id));
   const bad = [...ONLY].filter((id) => !known.has(id));

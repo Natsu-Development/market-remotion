@@ -31,9 +31,9 @@ import {basename, dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {reels} from './lib/reels.mjs';
 import {roleOf as roleIn, roleSpec} from './lib/roles.mjs';
+import {loadRules} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
 const argv = process.argv.slice(2);
 const flag = (n) => argv.includes(`--${n}`);
 const opt = (n) => {
@@ -58,6 +58,8 @@ if (!id) {
 }
 const name = basename(path, '.json');
 const reel = JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));
+/** The rules grading this reel: its own `rules` file, or content-rules.json (scripts/lib/rules.mjs). */
+const R = loadRules(ROOT, {reel});
 const OUT = resolve(ROOT, opt('out') ?? `out/review/${name}`);
 const STILLS = resolve(OUT, 'stills');
 mkdirSync(STILLS, {recursive: true});
@@ -234,6 +236,8 @@ if (facts) {
   if (yrs.length) anchors.push([yrs.map((y) => esc(y.year)).join(' · '), `cao ${yrs.map((y) => num(y.high)).join(' · ')}`, 'years[]']);
   const vol = d?.volume;
   if (vol?.maxMonth) anchors.push(['Khối lượng tháng (tr cp/phiên)', `${esc(vol.maxMonth.month)} ${num(vol.maxMonth.avgM)} · ${esc(vol.minMonth?.month)} ${num(vol.minMonth?.avgM)} · ${esc(vol.latestMonth?.month)} ${num(vol.latestMonth?.avgM)}${vol.latestMonth?.sessions ? ` (${vol.latestMonth.sessions} phiên)` : ''}`, 'daily.volume']);
+  // A fact pack may carry its own rows for this table (market-review's does): [{label, value, path}].
+  for (const a of Array.isArray(facts.anchors) ? facts.anchors : []) anchors.push([esc(a.label), esc(a.value), esc(a.path)]);
   const sig = facts.terminal?.signals?.latest;
   if (sig && typeof sig === 'object') anchors.push(['Tín hiệu terminal mới nhất', Object.entries(sig).filter(([, x]) => ['string', 'number', 'boolean'].includes(typeof x)).map(([k, x]) => `${esc(k)} ${num(x)}`).join(' · '), 'terminal.signals.latest']);
 }

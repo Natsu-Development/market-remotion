@@ -16,9 +16,9 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {reels} from './lib/reels.mjs';
 import {roleOf as roleIn} from './lib/roles.mjs';
+import {loadRules} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
 const arg = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
 if (!arg) {
@@ -32,6 +32,7 @@ if (!path) {
   process.exit(2);
 }
 const reel = JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));
+const R = loadRules(ROOT, {reel});
 const id = arg.endsWith('.json') ? [...REG].find(([, p]) => p === arg)?.[0] ?? '(unregistered)' : arg;
 
 const words = (s) => String(s ?? '').trim().split(/\s+/).filter(Boolean).length;

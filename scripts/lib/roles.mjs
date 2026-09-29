@@ -9,10 +9,10 @@
  */
 
 /** Role names in story order. */
-export const roleNames = (R) => Object.keys(R.arc.roles);
+export const roleNames = (R) => Object.keys(R.arc?.roles ?? {});
 
 /** The role's entry in content-rules, or null for a name that is not a role. */
-export const roleSpec = (R, role) => (role && Object.hasOwn(R.arc.roles, role) ? R.arc.roles[role] : null);
+export const roleSpec = (R, role) => (role && R.arc?.roles && Object.hasOwn(R.arc.roles, role) ? R.arc.roles[role] : null);
 
 /**
  * A scene's role: the `role` field enrich writes. A scene scaffolded before that
@@ -23,7 +23,7 @@ export const roleSpec = (R, role) => (role && Object.hasOwn(R.arc.roles, role) ?
 export const roleOf = (R, scene) => {
   if (scene.role) return scene.role;
   const parts = String(scene.id ?? '').split('-').filter((p) => !/^\d+$/.test(p));
-  return [...parts].reverse().find((p) => Object.hasOwn(R.arc.roles, p)) ?? '';
+  return [...parts].reverse().find((p) => Object.hasOwn(R.arc?.roles ?? {}, p)) ?? '';
 };
 
 /**

@@ -23,12 +23,19 @@
 import {execFileSync} from 'node:child_process';
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {reels} from './lib/reels.mjs';
 import {roleNames, roleOf, roleSpec} from './lib/roles.mjs';
+import {lexiconOf, loadRules} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
+/**
+ * The rules grading the reel being checked. market-video's reels use content-rules.json; a reel
+ * with its own `rules` field (market-review's) is graded by that file, engine constants inherited
+ * (scripts/lib/rules.mjs). Set per reel in the run loop; the repo-wide checks use BASE.
+ */
+const BASE = loadRules(ROOT);
+let R = BASE;
 
 const SEV = {pass: 'PASS', warn: 'WARN', fail: 'FAIL', skip: 'SKIP'};
 
@@ -164,7 +171,7 @@ const VISUAL_REQUIRED = {
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
 const ACCENTS = new Set(['gold', 'red', 'green', 'white']);
 /** The TTS pronunciation map (voice.lexicon) as scripts/voiceover.mjs applies it. */
-const LEXICON = Object.entries(R.voice?.lexicon ?? {}).filter(([k, v]) => !k.startsWith('_') && typeof v === 'string');
+let LEXICON = lexiconOf(R);
 const sayAs = (text) => LEXICON.reduce(
   (t, [word, say]) => t.replace(new RegExp(`(?<![\\p{L}\\p{N}])${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'gu'), say),
   String(text ?? ''),
@@ -182,9 +189,9 @@ function checkSchema(t, reel) {
       if (s[k] === undefined) errs.push(`${at}: missing ${k}`);
     }
     if (s.eyebrow === undefined) errs.push(`${at}: missing eyebrow (use "" for none)`);
-    if (s.act && !R.arc.acts.includes(s.act)) errs.push(`${at}: act "${s.act}" not in ${R.arc.acts.join('|')}`);
+    if (s.act && R.arc && !R.arc.acts.includes(s.act)) errs.push(`${at}: act "${s.act}" not in ${R.arc.acts.join('|')}`);
     if (s.role !== undefined && !roleSpec(R, s.role)) errs.push(`${at}: role "${s.role}" not in ${roleNames(R).join('|')}`);
-    if (s.id && !new RegExp(R.arc.sceneIdPattern).test(s.id)) errs.push(`${at}: id "${s.id}" must be lower-kebab`);
+    if (s.id && R.arc?.sceneIdPattern && !new RegExp(R.arc.sceneIdPattern).test(s.id)) errs.push(`${at}: id "${s.id}" does not match ${R.arc.sceneIdPattern}`);
     const v = s.visual ?? {};
     if (!VISUAL_REQUIRED[v.type]) {
       errs.push(`${at}: visual.type "${v.type}" is not one of ${Object.keys(VISUAL_REQUIRED).join('|')}`);
@@ -316,6 +323,7 @@ function checkBeats(t, reel) {
 function checkNarration(t, reel) {
   const bad = [], warn = [];
   const N = R.narration;
+  if (!N) { add(t, 'narration', SEV.skip, 'no narration block in this reel\'s rules'); return; }
   for (const s of reel.scenes) {
     if (!s.narration) continue;
     if (/\d/.test(s.narration)) {
@@ -451,6 +459,7 @@ function checkStatus(t, reel) {
 }
 
 function checkArc(t, reel) {
+  if (!R.arc) { add(t, 'arc', SEV.skip, 'no arc block in this reel\'s rules'); return; }
   const n = reel.scenes.length;
   const notes = [];
   const note = (rule, text) => notes.push({sev: sevOf(rule), text});
@@ -480,6 +489,7 @@ function checkArc(t, reel) {
  * consecutive runs, and a role with `mustSay` (a scenario) says out loud what it is.
  */
 function checkRoles(t, reel) {
+  if (!R.arc?.roles) { add(t, 'roles', SEV.skip, 'no arc.roles in this reel\'s rules'); return; }
   const notes = [];
   const note = (rule, text) => notes.push({sev: sevOf(rule), text});
   const roles = reel.scenes.map((s) => roleOf(R, s));
@@ -710,7 +720,7 @@ function checkFacts(t, reel) {
   // A number that is a calendar month or a count of what is drawn is not a
   // claim about the data. Patterns live in content-rules.json; adding one
   // widens the gate, which is the user's call.
-  const exemptions = (R.claims.factsExemptions ?? []).map((e) => new RegExp(e.pattern, 'giu'));
+  const exemptions = (R.claims?.factsExemptions ?? []).map((e) => new RegExp(e.pattern, 'giu'));
   const exemptNumbers = (text) => {
     const out = new Set();
     for (const re of exemptions) {
@@ -760,6 +770,7 @@ function checkFacts(t, reel) {
 
 /** Superlatives and "right now" claims the data does not support. */
 function checkClaims(t, reel) {
+  if (!R.claims) { add(t, 'claims', SEV.skip, 'no claims block in this reel\'s rules'); return; }
   if (!SERIES) { add(t, 'claims', SEV.skip, `${R.series.path} not readable`); return; }
   const lastMonth = SERIES[SERIES.length - 1].t;
   const warn = [];
@@ -920,6 +931,12 @@ for (const id of ids) {
   // A draft is checked on its own: its stems are meant to replace the registered reel's, so it
   // stays out of the cross-reel collision check.
   if (!DRAFTS.has(id)) loaded.push([id, reel]);
+  try {
+    R = loadRules(ROOT, {reel});
+  } catch (e) {
+    die(`${rel}: its rules file ${reel.rules} cannot be read — ${e.message}`);
+  }
+  LEXICON = lexiconOf(R);
   if (checkSchema(t.checks, reel).length) continue;   // gate, not a peer
   checkStatus(t.checks, reel);
   checkSentenceSync(t.checks, reel);
@@ -936,7 +953,20 @@ for (const id of ids) {
   checkClaims(t.checks, reel);
   checkVoiceAssets(t.checks, reel);
   checkAudio(t.checks, reel, id);
+  // A rules file may add its own checks (market-review: scripts/review/checks.mjs). Each module's
+  // default export returns [{id, level: pass|warn|fail|skip, message, fix?}].
+  for (const mod of R.extraChecks ?? []) {
+    let out;
+    try {
+      out = await (await import(pathToFileURL(resolve(ROOT, mod)).href)).default(reel, {root: ROOT, rules: R, id});
+    } catch (e) {
+      die(`extra check ${mod} broke on ${id} — ${e.message}`);
+    }
+    for (const c of out ?? []) add(t.checks, c.id, SEV[c.level] ?? SEV.warn, c.message, c.fix);
+  }
 }
+R = BASE;
+LEXICON = lexiconOf(R);
 checkRegistration(report);
 checkVoiceStems(report, loaded);
 checkSeries(report);

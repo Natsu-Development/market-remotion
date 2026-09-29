@@ -145,7 +145,13 @@
       "aboveEma50": 496,
       "aboveSma200": 250,
       "up": 492,
-      "down": 505
+      "down": 505,
+      "withSma200": 895,
+      "withEma50": 1455,
+      "aboveSma200Percent": 27.9,
+      "aboveEma50Percent": 34.1,
+      "upPercent": 33.6,
+      "downPercent": 34.4
     },
     "spike": {
       "filter": "Volume spike",
@@ -347,6 +353,11 @@
       "label": "RS Strong ∩ Uptrend (10 mã)",
       "value": "BSR RS1M 94 · +0,31% · MSR RS1M 94 · +4,37% · PVT RS1M 94 · +6,4%",
       "path": "screener.leaders.top"
+    },
+    {
+      "label": "Độ rộng",
+      "value": "250/895 mã trên SMA200 (27,9%) · 492 tăng · 505 giảm",
+      "path": "screener.breadth"
     },
     {
       "label": "Bộ lọc terminal",

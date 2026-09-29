@@ -15,6 +15,7 @@
     "prev": 1780.68,
     "asOf": "2026-09-29"
   },
+  "_indexPhoto": "terminal (FireAnt capture unavailable)",
   "scenes": [
     {
       "id": "rd-260929-hook",
@@ -22,21 +23,21 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Ba phiên phân phối trong ba tuần. Theo quy tắc vẫn là xu hướng tăng xác nhận, nhờ phiên xác nhận ba tháng tám. Mức nào thủng thì gãy, để cuối.",
+      "narration": "Theo quy tắc, xu hướng tăng vẫn được xác nhận. Mốc là phiên FTD ba tháng tám. Sau đó có ba phiên phân phối, hôm nay không thêm phiên nào.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "3 phiên phân phối",
-          "line2": "Thêm một là chịu áp lực",
-          "accent": "red"
+          "line1": "Vẫn xu hướng tăng xác nhận",
+          "line2": "Mốc: phiên FTD 3/8",
+          "accent": "green"
         },
         {
-          "atSentence": 1,
-          "at": 3.75,
-          "line1": "FTD 3/8 vẫn đang giữ",
-          "line2": "Xu hướng tăng xác nhận",
-          "accent": "green"
+          "atSentence": 2,
+          "at": 4.2,
+          "line1": "3 phiên phân phối",
+          "line2": "Hôm nay không thêm phiên",
+          "accent": "gold"
         }
       ],
       "visual": {
@@ -100,6 +101,29 @@
             "kind": "arrow",
             "style": "block",
             "from": [
+              0.6296,
+              0.4638
+            ],
+            "to": [
+              0.6296,
+              0.4388
+            ],
+            "accent": "up",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.6296,
+            "y": 0.4938,
+            "text": "FTD 3/8 +1,56%",
+            "accent": "green",
+            "beat": 0,
+            "anchor": "middle"
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
               0.7741,
               0.3023
             ],
@@ -108,7 +132,7 @@
               0.3273
             ],
             "accent": "down",
-            "beat": 0
+            "beat": 1
           },
           {
             "kind": "arrow",
@@ -122,7 +146,7 @@
               0.327
             ],
             "accent": "down",
-            "beat": 0
+            "beat": 1
           },
           {
             "kind": "arrow",
@@ -136,7 +160,7 @@
               0.353
             ],
             "accent": "down",
-            "beat": 0
+            "beat": 1
           },
           {
             "kind": "label",
@@ -144,31 +168,8 @@
             "y": 0.2813,
             "text": "3 phiên phân phối",
             "accent": "red",
-            "beat": 0,
-            "anchor": "end"
-          },
-          {
-            "kind": "arrow",
-            "style": "block",
-            "from": [
-              0.6296,
-              0.4638
-            ],
-            "to": [
-              0.6296,
-              0.4388
-            ],
-            "accent": "up",
-            "beat": 1
-          },
-          {
-            "kind": "label",
-            "x": 0.6296,
-            "y": 0.4938,
-            "text": "FTD 3/8 +1,56%",
-            "accent": "green",
             "beat": 1,
-            "anchor": "middle"
+            "anchor": "end"
           },
           {
             "kind": "circle",
@@ -182,28 +183,26 @@
         "shots": [
           {
             "beat": 0,
-            "x": 0.8074,
-            "y": 0.4008,
-            "zoom": 2,
+            "x": 0.7352,
+            "y": 0.3946,
+            "zoom": 1.5,
             "move": "push_in"
           },
           {
             "beat": 1,
-            "x": 0.7352,
-            "y": 0.3946,
-            "zoom": 1.35,
-            "move": "pull_out"
+            "x": 0.7607,
+            "y": 0.3856,
+            "zoom": 2.3,
+            "move": "pan"
           }
         ]
       },
       "citedFacts": [
-        "distribution.count",
-        "distribution.active",
-        "distribution.toUnderPressure",
         "state.status",
-        "state.label",
-        "state.ftd.dm",
-        "state.ftd.changePercent"
+        "state.ftd.date",
+        "state.ftd.changePercent",
+        "distribution.count",
+        "session.isDistribution"
       ]
     },
     {
@@ -212,27 +211,20 @@
       "eyebrow": "Trạng thái theo quy tắc",
       "act": "blue",
       "duration": 10.1,
-      "narration": "Cả ba giảm mà khối lượng tăng, nặng nhất mười một tháng chín. Neo là phiên xác nhận ba tháng tám và đáy nhịp hồi. Phiên cũ nhất hết hạn sau mười hai phiên. Bốn là chịu áp lực, sáu là điều chỉnh. Nhìn rộng ra thì khác.",
+      "narration": "Ba phiên ấy vẫn còn hiệu lực, phiên cũ nhất hết hạn sau mười hai phiên. Thêm một là chịu áp lực, thêm ba là điều chỉnh. Nếu thủng đáy nhịp hồi, phiên xác nhận xu hướng ngày ba tháng tám thất bại. Vậy tiền vào đâu?",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
           "line1": "3/25 phiên phân phối",
-          "line2": "Tổ chức đang bán ra",
+          "line2": "Thêm một là chịu áp lực",
           "accent": "red"
         },
         {
-          "atSentence": 1,
+          "atSentence": 2,
           "at": 3.75,
           "line1": "FTD 3/8 · đáy 1651,20",
-          "line2": "Neo của xu hướng tăng",
-          "accent": "gold"
-        },
-        {
-          "atSentence": 2,
-          "at": 7.25,
-          "line1": "11/9 hết hạn sau 12 phiên",
-          "line2": "Đủ bốn là chịu áp lực",
+          "line2": "Thủng đáy là FTD thất bại",
           "accent": "gold"
         }
       ],
@@ -341,8 +333,7 @@
             "y": 0.2071,
             "text": "3/25 phiên phân phối",
             "accent": "red",
-            "beat": 0,
-            "until": 1
+            "beat": 0
           },
           {
             "kind": "label",
@@ -383,97 +374,38 @@
             "beat": 1,
             "label": "Đáy nhịp hồi 1651,20",
             "labelSide": "left"
-          },
-          {
-            "kind": "label",
-            "x": 0.7621,
-            "y": 0.2623,
-            "text": "11/9 hết hạn sau 12 phiên",
-            "accent": "white",
-            "beat": 2,
-            "anchor": "end"
-          },
-          {
-            "kind": "label",
-            "x": 0.5125,
-            "y": 0.2071,
-            "text": "4 phiên → chịu áp lực · 6 phiên → điều chỉnh",
-            "accent": "gold",
-            "beat": 2
           }
         ],
         "shots": [
           {
             "beat": 0,
             "x": 0.8074,
-            "y": 0.494444,
-            "zoom": 1.5,
-            "move": "pan"
+            "y": 0.51839,
+            "zoom": 1.35,
+            "move": "push_in"
           },
           {
             "beat": 1,
-            "x": 0.7352,
-            "y": 0.4617,
-            "zoom": 1.15,
-            "move": "tilt"
-          },
-          {
-            "beat": 2,
-            "x": 0.7541,
-            "y": 0.4008,
-            "zoom": 2.1,
-            "move": "push_in"
+            "x": 0.5125,
+            "y": 0.5583,
+            "zoom": 1,
+            "move": "pull_out"
           }
         ]
       },
       "citedFacts": [
         "distribution.count",
         "distribution.window",
-        "distribution.active[0].dm",
-        "distribution.active[0].changePercent",
-        "distribution.active[0].volumeRatio",
-        "distribution.active[1]",
-        "distribution.active[2]",
-        "state.ftd.dm",
-        "state.ftd.changePercent",
-        "state.rallyLow",
         "distribution.nextExpiry.dm",
         "distribution.nextExpiry.sessionsLeft",
-        "rules.underPressureAt",
-        "rules.correctionAt"
-      ]
-    },
-    {
-      "id": "rd-260929-breadth",
-      "role": "breadth",
-      "eyebrow": "Độ rộng thị trường",
-      "act": "maroon",
-      "duration": 7,
-      "narration": "Chỉ số thì tăng, nhưng chưa tới một phần ba mã đứng trên đường trung bình hai trăm phiên. Mã giảm nhiều hơn mã tăng. Vậy tiền đang ở đâu?",
-      "beats": [
-        {
-          "atSentence": 0,
-          "at": 0.25,
-          "line1": "28% mã trên SMA200",
-          "line2": "Phần lớn mã không đi cùng",
-          "accent": "gold"
-        }
-      ],
-      "visual": {
-        "type": "pictogram",
-        "glyph": "dot",
-        "rows": 6,
-        "columns": 9,
-        "filledPercent": 27.78,
-        "accent": "green"
-      },
-      "citedFacts": [
-        "screener.breadth.aboveSma200",
-        "screener.breadth.withSma200",
-        "screener.breadth.aboveSma200Percent",
-        "screener.breadth.up",
-        "screener.breadth.down",
-        "state.status"
+        "distribution.toUnderPressure",
+        "distribution.toCorrection",
+        "state.ftd.dm",
+        "state.ftd.rallyLow",
+        "watch[0]",
+        "watch[1]",
+        "watch[2]",
+        "watch[3]"
       ]
     },
     {
@@ -482,7 +414,7 @@
       "eyebrow": "Bộ lọc Volume spike",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Bộ lọc khối lượng đột biến có mười sáu mã. Hai mã dầu khí đứng đầu đều tăng, Lộc Phát giảm, khối lượng ấy là bán ra. Một mã đầu bảng cũng là mã dẫn dắt, để cuối.",
+      "narration": "Bộ lọc khối lượng đột biến có mười sáu mã. Hai mã dầu khí đứng đầu, đều tăng. Lộc Phát giảm, khối lượng ấy là bán ra, không phải mua vào. Vậy mã nào dẫn dắt?",
       "beats": [
         {
           "atSentence": 0,
@@ -492,7 +424,7 @@
           "accent": "green"
         },
         {
-          "atSentence": 1,
+          "atSentence": 2,
           "at": 3.75,
           "line1": "LPB −4,4%, KL ×1,70",
           "line2": "Là bán ra, không phải mua",
@@ -577,16 +509,13 @@
       },
       "citedFacts": [
         "screener.spike.count",
-        "screener.spike.top[0].symbol",
+        "screener.spike.top[0].name",
         "screener.spike.top[0].changePercent",
-        "screener.spike.top[0].volumeRatio",
-        "screener.spike.top[1].symbol",
+        "screener.spike.top[1].name",
         "screener.spike.top[1].changePercent",
-        "screener.spike.top[1].volumeRatio",
-        "screener.spike.top[2].symbol",
+        "screener.spike.top[2].name",
         "screener.spike.top[2].changePercent",
-        "screener.spike.top[2].volumeRatio",
-        "screener.leaders.alsoSpiking"
+        "screener.spike.top[2].volumeRatio"
       ]
     },
     {
@@ -594,8 +523,8 @@
       "role": "leaders",
       "eyebrow": "RS Strong + Uptrend",
       "act": "amber",
-      "duration": 7,
-      "narration": "Qua cả hai bộ lọc còn mười mã, đều giữ trên đường trung bình năm mươi phiên. Ba mã đầu cùng sức mạnh giá chín mươi tư. Đếm ngược từ ba.",
+      "duration": 8.4,
+      "narration": "Lọc cả xu hướng tăng lẫn sức mạnh giá: mười mã. Ba mã đầu cùng sức mạnh giá chín mươi tư. Lọc hoá dầu Bình Sơn, Masan High-Tech, Vận tải Dầu khí. Mình xem từng mã.",
       "beats": [
         {
           "atSentence": 0,
@@ -691,35 +620,35 @@
       "citedFacts": [
         "screener.leaders.filters",
         "screener.leaders.count",
-        "screener.leaders.top[0].symbol",
         "screener.leaders.top[0].rs1m",
-        "screener.leaders.top[1].symbol",
         "screener.leaders.top[1].rs1m",
-        "screener.leaders.top[2].symbol",
-        "screener.leaders.top[2].rs1m"
+        "screener.leaders.top[2].rs1m",
+        "screener.leaders.top[0].name",
+        "screener.leaders.top[1].name",
+        "screener.leaders.top[2].name"
       ]
     },
     {
       "id": "rd-260929-leader-1",
       "role": "leader",
-      "eyebrow": "Dẫn dắt #3 · BSR",
+      "eyebrow": "Dẫn dắt · BSR",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Số ba, Lọc hoá dầu Bình Sơn: mạnh, nhưng còn cách đỉnh cũ mười bảy phần trăm. Giá cao hơn đường trung bình mười sáu phẩy một phần trăm. Mã sau sát đỉnh hơn.",
+      "narration": "Lọc hoá dầu Bình Sơn chưa lấy lại đỉnh cũ, nhưng vẫn nằm trên đường trung bình năm mươi phiên. Giá cao hơn đường ấy mười sáu phẩy một phần trăm. Mã sau sát đỉnh hơn.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "BSR: −17% dưới đỉnh 39,16",
-          "line2": "Mạnh nhưng còn xa đỉnh",
-          "accent": "gold"
+          "line1": "BSR còn cách đỉnh 17%",
+          "line2": "Vẫn trên đường trung bình",
+          "accent": "green"
         },
         {
           "atSentence": 1,
           "at": 3.75,
           "line1": "+16,1% trên EMA50",
-          "line2": "Xu hướng tăng còn nguyên",
-          "accent": "green"
+          "line2": "Đà tăng chưa gãy",
+          "accent": "gold"
         }
       ],
       "visual": {
@@ -748,14 +677,6 @@
             "accent": "green",
             "beat": 0,
             "label": "EMA50 27,99",
-            "labelSide": "left"
-          },
-          {
-            "kind": "hline",
-            "y": 0.0666,
-            "accent": "gold",
-            "beat": 0,
-            "label": "Đỉnh 52T 39,16 · −17,0%",
             "labelSide": "left"
           },
           {
@@ -792,36 +713,34 @@
       },
       "citedFacts": [
         "screener.leaders.top[0].name",
-        "screener.leaders.top[0].rs1m",
-        "screener.leaders.top[0].changePercent",
-        "screener.leaders.top[0].volumeRatio",
         "screener.leaders.top[0].high52w",
         "screener.leaders.top[0].fromHigh52wPercent",
         "screener.leaders.top[0].ema50",
-        "screener.leaders.top[0].aboveEma50Percent"
+        "screener.leaders.top[0].aboveEma50Percent",
+        "screener.leaders.top[1].fromHigh52wPercent"
       ]
     },
     {
       "id": "rd-260929-leader-2",
       "role": "leader",
-      "eyebrow": "Dẫn dắt #2 · MSR",
+      "eyebrow": "Dẫn dắt · MSR",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Số hai, Masan High-Tech: mạnh, và chỉ còn cách đỉnh cũ năm phẩy ba phần trăm. Giá cao hơn đường trung bình hai mươi mốt phẩy chín phần trăm. Số một, bạn gặp rồi.",
+      "narration": "Masan High-Tech tăng mạnh, giá cũng đứng trên đường trung bình. Khoảng cách là hai mươi mốt phẩy chín phần trăm. Và chỉ còn cách đỉnh năm phẩy ba phần trăm. Mã cuối có khối lượng.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "MSR: −5,3% dưới đỉnh 58,00",
-          "line2": "Mạnh và sát đỉnh",
-          "accent": "gold"
+          "line1": "MSR tăng 4,37% hôm nay",
+          "line2": "Cũng trên đường trung bình",
+          "accent": "green"
         },
         {
           "atSentence": 1,
           "at": 3.75,
-          "line1": "+21,9% trên EMA50",
-          "line2": "Đà tăng còn mạnh",
-          "accent": "green"
+          "line1": "Cách đỉnh chỉ 5,3%",
+          "line2": "Mạnh và sát đỉnh",
+          "accent": "gold"
         }
       ],
       "visual": {
@@ -850,14 +769,6 @@
             "accent": "green",
             "beat": 0,
             "label": "EMA50 45,05",
-            "labelSide": "left"
-          },
-          {
-            "kind": "hline",
-            "y": 0.0657,
-            "accent": "gold",
-            "beat": 0,
-            "label": "Đỉnh 52T 58,00 · −5,3%",
             "labelSide": "left"
           },
           {
@@ -894,21 +805,21 @@
       },
       "citedFacts": [
         "screener.leaders.top[1].name",
-        "screener.leaders.top[1].rs1m",
         "screener.leaders.top[1].changePercent",
+        "screener.leaders.top[1].ema50",
+        "screener.leaders.top[1].aboveEma50Percent",
         "screener.leaders.top[1].high52w",
         "screener.leaders.top[1].fromHigh52wPercent",
-        "screener.leaders.top[1].ema50",
-        "screener.leaders.top[1].aboveEma50Percent"
+        "screener.leaders.top[2].volumeRatio"
       ]
     },
     {
       "id": "rd-260929-leader-3",
       "role": "leader",
-      "eyebrow": "Dẫn dắt #1 · PVT",
+      "eyebrow": "Dẫn dắt · PVT",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Số một, Vận tải Dầu khí: mạnh, tăng sáu phẩy bốn phần trăm với khối lượng đột biến. Giá cao hơn đường trung bình mười tám phẩy hai phần trăm. Đây là mã ở cả hai bộ lọc.",
+      "narration": "Vận tải Dầu khí thì bạn gặp rồi: đứng đầu khối lượng đột biến, tăng sáu phẩy bốn phần trăm. Giá vượt đường trung bình mười tám phẩy hai phần trăm. Phiên hôm nay là vậy.",
       "beats": [
         {
           "atSentence": 0,
@@ -921,7 +832,7 @@
           "atSentence": 1,
           "at": 3.75,
           "line1": "+18,2% trên EMA50",
-          "line2": "Mã ở cả hai bộ lọc",
+          "line2": "Có mặt ở cả hai bộ lọc",
           "accent": "gold"
         }
       ],
@@ -952,16 +863,6 @@
             "beat": 0,
             "label": "EMA50 21,11",
             "labelSide": "left"
-          },
-          {
-            "kind": "box",
-            "x": 0.9468,
-            "y": 0.556,
-            "w": 0.014,
-            "h": 0.135,
-            "accent": "gold",
-            "beat": 0,
-            "label": "KL ×2,44"
           },
           {
             "kind": "arrow",
@@ -996,168 +897,13 @@
         ]
       },
       "citedFacts": [
-        "screener.leaders.top[2].name",
-        "screener.leaders.top[2].rs1m",
-        "screener.leaders.top[2].changePercent",
-        "screener.leaders.top[2].volumeRatio",
-        "screener.leaders.top[2].ema50",
-        "screener.leaders.top[2].aboveEma50Percent",
         "screener.spike.top[0].symbol",
         "screener.spike.top[0].volumeRatio",
+        "screener.leaders.top[2].name",
+        "screener.leaders.top[2].changePercent",
+        "screener.leaders.top[2].ema50",
+        "screener.leaders.top[2].aboveEma50Percent",
         "screener.leaders.alsoSpiking"
-      ]
-    },
-    {
-      "id": "rd-260929-watch",
-      "role": "watch",
-      "eyebrow": "Mức phải canh",
-      "act": "amber",
-      "duration": 8.4,
-      "narration": "Nếu thủng đáy nhịp hồi một nghìn sáu trăm năm mươi mốt là gãy. Nếu chạm mức xanh, một phiên phân phối hết hạn. Nếu thêm một phiên phân phối, chịu áp lực. Phiên cũ nhất còn mười hai phiên.",
-      "beats": [
-        {
-          "atSentence": 0,
-          "at": 0.25,
-          "line1": "Thủng 1651,20 là gãy",
-          "line2": "FTD thất bại về điều chỉnh",
-          "accent": "gold"
-        },
-        {
-          "atSentence": 2,
-          "at": 3.75,
-          "line1": "12 phiên nữa, 11/9 hết hạn",
-          "line2": "Không thêm là số đếm giảm",
-          "accent": "gold"
-        }
-      ],
-      "visual": {
-        "type": "image",
-        "src": "shots/review/2026-09-29/vnindex-daily.png",
-        "source": "fireant.vn",
-        "fit": "contain",
-        "crop": {
-          "x": 0.0574,
-          "y": 0.1592,
-          "w": 0.9102,
-          "h": 0.7982
-        },
-        "masks": [
-          {
-            "x": 0.0574,
-            "y": 0.1546,
-            "w": 0.8454,
-            "h": 0.0254
-          },
-          {
-            "x": 0.0574,
-            "y": 0.1811,
-            "w": 0.1944,
-            "h": 0.0254
-          },
-          {
-            "x": 0.0611,
-            "y": 0.2088,
-            "w": 0.037,
-            "h": 0.03
-          },
-          {
-            "x": 0.0574,
-            "y": 0.6701,
-            "w": 0.7222,
-            "h": 0.0144
-          },
-          {
-            "x": 0.0574,
-            "y": 0.684,
-            "w": 0.7222,
-            "h": 0.009
-          },
-          {
-            "x": 0.0648,
-            "y": 0.8593,
-            "w": 0.0407,
-            "h": 0.0507
-          },
-          {
-            "x": 0.9287,
-            "y": 0.9181,
-            "w": 0.0278,
-            "h": 0.03
-          }
-        ],
-        "maskColor": "#161921",
-        "annotations": [
-          {
-            "kind": "hline",
-            "y": 0.5379,
-            "accent": "gold",
-            "beat": 0,
-            "label": "Thủng 1651,20 → FTD thất bại",
-            "labelSide": "left"
-          },
-          {
-            "kind": "hline",
-            "y": 0.2819,
-            "accent": "green",
-            "beat": 0,
-            "label": "Chạm 1863,84 → phiên 24/9 hết hạn",
-            "labelSide": "left"
-          },
-          {
-            "kind": "circle",
-            "x": 0.8407,
-            "y": 0.3856,
-            "r": 0.022,
-            "accent": "gold",
-            "beat": 1
-          },
-          {
-            "kind": "label",
-            "x": 0.8107,
-            "y": 0.2856,
-            "text": "Thêm 1 phiên phân phối → chịu áp lực",
-            "accent": "red",
-            "beat": 1,
-            "anchor": "end"
-          },
-          {
-            "kind": "label",
-            "x": 0.8107,
-            "y": 0.3256,
-            "text": "11/9 hết hạn sau 12 phiên",
-            "accent": "white",
-            "beat": 1,
-            "anchor": "end"
-          }
-        ],
-        "shots": [
-          {
-            "beat": 0,
-            "x": 0.55801,
-            "y": 0.4099,
-            "zoom": 1,
-            "move": "tilt"
-          },
-          {
-            "beat": 1,
-            "x": 0.7707,
-            "y": 0.3856,
-            "zoom": 2.2,
-            "move": "static"
-          }
-        ]
-      },
-      "citedFacts": [
-        "watch[2]",
-        "watch[0]",
-        "watch[3]",
-        "state.rallyLow",
-        "distribution.active[2].expireLevel",
-        "distribution.active[2].dm",
-        "distribution.lowestExpireLevel",
-        "distribution.nextExpiry.dm",
-        "distribution.nextExpiry.sessionsLeft",
-        "distribution.toUnderPressure"
       ]
     },
     {
@@ -1193,40 +939,16 @@
   ],
   "unsupported": [
     {
-      "id": "rd-260929-hook",
-      "why": "“Trong ba tuần” là cách đạo diễn gói ba phiên 11/9, 23/9, 24/9 (ba tuần lịch liên tiếp) — fact pack không có trường tuần, chỉ có cửa sổ 25 phiên. Lời đọc gọi FTD là “phiên xác nhận” (writer.md cho phép “phiên FTD”, nhưng rules.voice ghi TTS chưa đo chữ FTD nên lời tránh đọc chữ đó; màn hình vẫn ghi FTD 3/8). Beat 2 ghim vào câu neo (câu 1), không phải câu 2 như khung mặc định — mũi tên xanh FTD hiện đúng lúc nói “nhờ phiên xác nhận ba tháng tám”."
-    },
-    {
-      "id": "rd-260929-market",
-      "why": "Lời chỉ đọc hai số (ngày 11/9 và 12 phiên); −1,86%, ×1,64 và đáy 1651,20 nằm trên nhãn chart và headline. “Giảm mà khối lượng tăng” là định nghĩa phiên phân phối của rules (giảm từ 0,5% với khối lượng cao hơn phiên trước); “tổ chức đang bán ra” trên headline là cách đọc của quy tắc, không phải số đo. Ba beat ghim vào câu 0, 1, 2 (khung mặc định 0, 2, 3) để mũi tên FTD hiện đúng câu neo và đồng hồ hiện đúng câu “phiên cũ nhất hết hạn”."
-    },
-    {
-      "id": "rd-260929-breadth",
-      "why": "“Chưa tới một phần ba” = 250/895 mã có SMA200 = 27,9%; headline ghi 28% (làm tròn 0 chữ số, có trong pack). 492 mã tăng / 505 mã giảm chỉ đọc thành “mã giảm nhiều hơn mã tăng”, không lên màn hình để headline khỏi thành hai dòng số."
-    },
-    {
       "id": "rd-260929-spike",
-      "why": "“Hai mã dầu khí” là PVT và PVS, gộp theo tên công ty trong fact pack (Vận tải Dầu khí, Dịch vụ Kỹ thuật Dầu khí) — pack không có trường ngành. LPB đọc là “Lộc Phát”. Móc 2 nói “một mã đầu bảng” chứ không “một mã trong bảng”: alsoSpiking có cả BSR (trong 16 mã, KL ×1,09, không ở top 3), nên chỉ PVT ở đầu bảng vừa là mã dẫn dắt; câu này không nêu tên, leader #1 trả."
+      "why": "“Hai mã dầu khí” là PVT và PVS, gộp theo tên công ty trong fact pack (Vận tải Dầu khí, Dịch vụ Kỹ thuật Dầu khí) — fact pack không có trường ngành. LPB đọc là “Lộc Phát”, không có chữ Anh."
     },
     {
       "id": "rd-260929-leaders",
-      "why": "“Đều giữ trên đường trung bình năm mươi phiên” là điều kiện của bộ lọc Uptrend (giá trên EMA50, EMA50 trên SMA200) — nói đủ tên đường trung bình một lần ở đây; ba scene leader chỉ nói “đường trung bình” vì nhãn EMA50 đã ở trên chart và mỗi scene chỉ giữ hai số đọc ra. Thứ tự đọc tên trên headline BSR, MSR, PVT theo thứ tự picks (bảng terminal xếp khác vì cả ba cùng RS 1M 94)."
-    },
-    {
-      "id": "rd-260929-leader-1",
-      "why": "“Đỉnh cũ” là đỉnh 52 tuần 39,16 (fromHigh52wPercent −17); lời không đọc “năm mươi hai tuần” (thêm một con số đọc ra) và headline không ghi “52T” dù mẫu miễn trừ \\b52\\s?T\\b đã có — giá đỉnh 39,16 trên headline là đủ. Hộp vàng “KL ×1,09” của đạo diễn nói BSR cũng ở bộ lọc Volume spike; lời không nhắc để móc 2 dồn về PVT. Tín hiệu terminal breakdown_confirmed 26,30 ngày 7/9 không nhắc — giá đã ở 32,50, trên EMA50, tín hiệu đó không khớp chart đang chiếu."
+      "why": "MSR đọc là “Masan High-Tech” — TTS chưa được đo cho chữ Anh này; xem ghi chú ở rd-260929-leader-2."
     },
     {
       "id": "rd-260929-leader-2",
-      "why": "Tên MSR đọc là “Masan High-Tech” (rút gọn Masan High-Tech Materials; chỉ “Masan” thì lẫn với MSN). TTS chưa được đo cho chữ Anh “High-Tech”: nếu Whisper nghe sai, thêm dạng đọc vào voice.lexicon của .claude/skills/market-review/rules.json sau khi đo (ví dụ “High-Tech” → “hai tếch”) rồi thu lại bằng --force --only cho scene này; không viết phiên âm vào narration. Nhãn của đạo diễn “Đỉnh 52T 58,00 · −5,3%” chép nguyên; số 52 không có trong fact pack nhưng rules.claims.factsExemptions đã có mẫu \\b52\\s?T\\b nên check facts bỏ qua nó. Headline vẫn không dùng “52T” — nói “đỉnh cũ” trong lời, giá đỉnh 58,00 trên headline."
-    },
-    {
-      "id": "rd-260929-leader-3",
-      "why": "Trả móc 2: “mã ở cả hai bộ lọc” = PVT, đứng đầu Volume spike (KL ×2,44) và #1 nhóm dẫn dắt; alsoSpiking còn có BSR (không ở top 3 spike) nên lời spike gieo “một mã đầu bảng”. Khối lượng ×2,44 không đọc ra lời (đã hai số: 6,4% và 18,2%) — hộp vàng và headline gánh. Tín hiệu terminal breakout_confirmed 20,30 ngày 17/8 không nhắc vì không chắc khớp khung chart đang chiếu."
-    },
-    {
-      "id": "rd-260929-watch",
-      "why": "“Là gãy” trả đúng chữ của lời hứa ở hook (“mức nào thủng thì gãy”); tên quy tắc “FTD thất bại” nằm trên nhãn và headline, và “thị trường về điều chỉnh” sau FTD thất bại là theo ghi chú đạo diễn — watch[] của pack chỉ ghi “FTD thất bại”. “Mức xanh” là đường 1863,84 (expireLevel của phiên 24/9, thấp nhất trong ba mức hết hạn); lời không đọc số này để giữ hai số đọc ra (1651 và 12 phiên). Đáy 1651,20 đọc gọn “một nghìn sáu trăm năm mươi mốt”, nhãn giữ hai số lẻ."
+      "why": "Tên MSR đọc là “Masan High-Tech” (rút gọn Masan High-Tech Materials; chỉ “Masan” thì lẫn với MSN). TTS chưa được đo cho chữ Anh “High-Tech”. Nếu Whisper nghe sai, thêm dạng đọc vào voice.lexicon của .claude/skills/market-review/rules.json sau khi đo (ví dụ “High-Tech” → “hai tếch”), rồi thu lại bằng --force --only cho scene này và rd-260929-leaders; không viết phiên âm vào narration."
     }
   ]
 }

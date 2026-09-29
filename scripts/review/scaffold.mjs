@@ -141,17 +141,33 @@ const lastY = priceY(index, F.session.close, indexUnit);
  * GAP above the wick (below for the FTD) so it never covers it; the shaft is ARROW long. Positions
  * come from the photo's calibration: x of the session, y of its high/low.
  */
-const ARROW = 0.055;
-const GAP = 0.01;
-const WEIGHT = 2;
+const ARROW = 0.075;
+const GAP = 0.007;
 const barOf = (t) => daily.find((b) => b.t === t);
+/**
+ * Solid block arrows (style: 'block'; user 2026-09-29, the line arrows were "so hard to see"). Two
+ * distribution days a session or two apart would stack their heads on the same few pixels, so a
+ * cluster fans out: the earlier arrow comes in from the upper left, the later from the upper right —
+ * each tip still lands on its own candle.
+ */
+const FAN = 0.4;                       // horizontal lean of a fanned arrow, as a share of its length
+const sessionIndex = new Map(daily.map((b, i) => [b.t, i]));
+const leanOf = (d) => {
+  const i = sessionIndex.get(d.date);
+  const near = (j) => ddXs.some((o) => o !== d && Math.abs(sessionIndex.get(o.date) - j) <= 0);
+  const before = near(i - 1) || near(i - 2);
+  const after = near(i + 1) || near(i + 2);
+  return after && !before ? -1 : before && !after ? 1 : 0;
+};
+const aspect = index.W / index.H;
 const ddArrow = (d, beat) => {
   const tip = priceY(index, barOf(d.date).h, indexUnit) - GAP;
-  return {kind: 'arrow', from: [clamp(d.x), clamp(tip - ARROW)], to: [clamp(d.x), clamp(tip)], accent: 'red', beat, weight: WEIGHT};
+  const lean = leanOf(d) * FAN * ARROW / aspect;
+  return {kind: 'arrow', style: 'block', from: [clamp(d.x + lean), clamp(tip - ARROW)], to: [clamp(d.x), clamp(tip)], accent: 'red', beat};
 };
 const ftdArrow = (f, x, beat) => {
   const tip = priceY(index, barOf(f.date).l, indexUnit) + GAP;
-  return {kind: 'arrow', from: [clamp(x), clamp(tip + ARROW)], to: [clamp(x), clamp(tip)], accent: 'blue', beat, weight: WEIGHT};
+  return {kind: 'arrow', style: 'block', from: [clamp(x), clamp(tip + ARROW)], to: [clamp(x), clamp(tip)], accent: 'blue', beat};
 };
 const ftdBase = (f) => priceY(index, barOf(f.date).l, indexUnit) + GAP + ARROW;
 const idxMarks = (beat) => ddXs.map((d) => ddArrow(d, beat));

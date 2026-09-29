@@ -86,7 +86,7 @@ export type Visual =
       divergence?: {from: string; to: string; label: string}
     }
   /** Grid of person glyphs — n filled out of total. */
-  | {type: 'pictogram'; rows: number; columns: number; filledPercent: number; accent: AccentName}
+  | {type: 'pictogram'; rows: number; columns: number; filledPercent: number; accent: AccentName; glyph?: 'person' | 'dot'}
   /** Two labelled bars that race to their percentage. */
   | {type: 'bars'; bars: {label: string; percent: number; accent: AccentName}[]}
   /** Icon + text rows that reveal in sequence. */

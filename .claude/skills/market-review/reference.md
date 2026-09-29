@@ -101,15 +101,15 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 
 | Scene | Beat 1 | Beat 2 |
 |---|---|---|
-| hook | mũi tên XANH DƯƠNG chỉ LÊN đáy nến FTD + nhãn "FTD d/m ±x%" (khi FTD nằm trong ảnh) | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối, nhãn "N phiên phân phối", vòng vàng ở nến hôm nay; máy cận và lia |
-| market | mũi tên đỏ trên từng phiên phân phối, nhãn "N/25 phiên phân phối", nhãn phiên nặng nhất | mũi tên xanh dương ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
+| hook | mũi tên XANH LÁ chỉ LÊN đáy nến FTD + nhãn "FTD d/m ±x%" (khi FTD nằm trong ảnh) | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối, nhãn "N phiên phân phối", vòng vàng ở nến hôm nay; máy cận và lia |
+| market | mũi tên đỏ trên từng phiên phân phối, nhãn "N/25 phiên phân phối", nhãn phiên nặng nhất | mũi tên xanh lá ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
 
-Người dùng chốt 2026-09-29: phiên phân phối và FTD là MŨI TÊN chỉ đúng vào nến — đỏ chỉ xuống (màu giảm), xanh dương
-`#3D8BFF` chỉ lên (màu tăng; accent `blue` mới trong `src/theme.ts`, qua validator: ΔE mù màu 29,5 với đỏ trên nền
-FireAnt). Kiểu `style: "block"` (người dùng 29/9: mũi tên nét mảnh "so hard to see"): thân đặc, đầu rộng, viền trắng
-để mũi tên đỏ không lẫn vào nến đỏ, quầng tối tách khỏi chart. Người dùng chốt tiếp: NGẮN và THẲNG vào nến — thân +
-đầu ~36 px (`ARROW` 0,042 ảnh), luôn thẳng đứng (đã bỏ kiểu xoè), đầu mũi tên cách đỉnh/đáy nến ~4 px (`GAP`). Hai
-phiên phân phối sát nhau vẫn tách được vì mỗi đầu nằm ở đỉnh nến của chính nó (khác độ cao). Trục thời gian của hiệu chỉnh được khớp
+Người dùng chốt 2026-09-29: phiên phân phối và FTD là MŨI TÊN chỉ đúng vào nến — FTD XANH LÁ chỉ lên, phiên phân phối
+ĐỎ chỉ xuống. Mũi tên là mark nên dùng cặp màu hướng của repo, accent `up` (#1FA377) / `down` (#EC5F38, ΔE mù màu 10,2;
+với đỏ chữ #E5333A cũng đạt 8,1 — đo bằng validator trên nền FireAnt); nhãn đi kèm dùng màu CHỮ `green` / `red`. verify
+chỉ nhận `up`/`down` trên mark ảnh, không trên headline. Kiểu `style: "block"`: thân đặc, đầu rộng, viền trắng, quầng tối;
+NGẮN (~22 px, `ARROW` 0,025) và THẲNG đứng, đầu mũi tên cách đỉnh/đáy nến ~4 px (`GAP`). Hai phiên phân phối sát nhau vẫn
+tách được vì mỗi đầu nằm ở đỉnh nến của chính nó (khác độ cao). Trục thời gian của hiệu chỉnh được khớp
 lại trên chính các cột nến (`calib_auto.py`, `xFit`) — chỉ dùng `calib_chart.py` thì đầu mũi tên lệch ~0,4 nến.
 | spike | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
 | leaders | hộp quanh ba dòng; nhãn "N mã qua RS Strong + Uptrend" | hộp từng ô RS 1M, máy cận |

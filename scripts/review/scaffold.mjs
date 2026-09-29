@@ -141,7 +141,7 @@ const lastY = priceY(index, F.session.close, indexUnit);
  * GAP above the wick (below for the FTD) so it never covers it; the shaft is ARROW long. Positions
  * come from the photo's calibration: x of the session, y of its high/low.
  */
-const ARROW = 0.042;                   // short: a stem and a head (user, 2026-09-29)
+const ARROW = 0.025;                   // short: mostly head, a stub of stem (user, 2026-09-29, twice)
 const GAP = 0.0045;                    // ~4 px: the tip points right onto the wick without covering it
 const barOf = (t) => daily.find((b) => b.t === t);
 /**
@@ -152,11 +152,11 @@ const barOf = (t) => daily.find((b) => b.t === t);
  */
 const ddArrow = (d, beat) => {
   const tip = priceY(index, barOf(d.date).h, indexUnit) - GAP;
-  return {kind: 'arrow', style: 'block', from: [clamp(d.x), clamp(tip - ARROW)], to: [clamp(d.x), clamp(tip)], accent: 'red', beat};
+  return {kind: 'arrow', style: 'block', from: [clamp(d.x), clamp(tip - ARROW)], to: [clamp(d.x), clamp(tip)], accent: 'down', beat};
 };
 const ftdArrow = (f, x, beat) => {
   const tip = priceY(index, barOf(f.date).l, indexUnit) + GAP;
-  return {kind: 'arrow', style: 'block', from: [clamp(x), clamp(tip + ARROW)], to: [clamp(x), clamp(tip)], accent: 'blue', beat};
+  return {kind: 'arrow', style: 'block', from: [clamp(x), clamp(tip + ARROW)], to: [clamp(x), clamp(tip)], accent: 'up', beat};
 };
 const ftdBase = (f) => priceY(index, barOf(f.date).l, indexUnit) + GAP + ARROW;
 const idxMarks = (beat) => ddXs.map((d) => ddArrow(d, beat));
@@ -178,7 +178,7 @@ const recentTop = Math.min(...daily.slice(-15).map((b) => priceY(index, b.h, ind
 const hookMarks = ftdIn
   ? [
       ftdArrow(ftdIn.f, ftdIn.x, 0),
-      lab(ftdIn.x, clamp(ftdBase(ftdIn.f) + 0.03), `FTD ${ftdIn.f.dm} ${fmtPct(ftdIn.f.changePercent)}`, 'blue', 0, 'middle'),
+      lab(ftdIn.x, clamp(ftdBase(ftdIn.f) + 0.03), `FTD ${ftdIn.f.dm} ${fmtPct(ftdIn.f.changePercent)}`, 'green', 0, 'middle'),
       ...idxMarks(1),
       ...(ddXs.length ? [lab(Math.min(...ddXs.map((d) => d.x)) - 0.012, clamp(Math.min(ddTop(), recentTop - GAP - ARROW) + 0.01), `${F.distribution.count} phiên phân phối`, 'red', 1, 'end')] : []),
       {kind: 'circle', x: clamp(lastX), y: clamp(lastY), r: 0.022, accent: 'gold', beat: 1},
@@ -230,7 +230,7 @@ const biggest = [...ddXs].sort((a, b) => a.changePercent - b.changePercent)[0];
 if (biggest) marketMarks.push(lab(biggest.x - 0.012, clamp(priceY(index, barOf(biggest.date).h, indexUnit) - GAP - ARROW / 2), `${biggest.dm} ${fmtPct(biggest.changePercent)} · KL ×${vi(biggest.volumeRatio)}`, 'red', 0, 'end'));
 if (ftd && ftdX != null && ftdX > C.x && ftdX < C.x + C.w) {
   marketMarks.push(ftdArrow(ftd, ftdX, 1));
-  marketMarks.push(lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'blue', 1, 'middle'));
+  marketMarks.push(lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', 1, 'middle'));
 }
 const holdLow = F.state.rallyLow ?? F.state.correctionLow;
 const holdY = holdLow != null ? priceY(index, holdLow, indexUnit) : null;

@@ -102,21 +102,21 @@
             "style": "block",
             "from": [
               0.6296,
-              0.4808
+              0.4638
             ],
             "to": [
               0.6296,
               0.4388
             ],
-            "accent": "blue",
+            "accent": "up",
             "beat": 0
           },
           {
             "kind": "label",
             "x": 0.6296,
-            "y": 0.5108,
+            "y": 0.4938,
             "text": "FTD 3/8 +1,56%",
-            "accent": "blue",
+            "accent": "green",
             "beat": 0,
             "anchor": "middle"
           },
@@ -125,13 +125,13 @@
             "style": "block",
             "from": [
               0.7741,
-              0.2853
+              0.3023
             ],
             "to": [
               0.7741,
               0.3273
             ],
-            "accent": "red",
+            "accent": "down",
             "beat": 1
           },
           {
@@ -139,13 +139,13 @@
             "style": "block",
             "from": [
               0.8185,
-              0.285
+              0.302
             ],
             "to": [
               0.8185,
               0.327
             ],
-            "accent": "red",
+            "accent": "down",
             "beat": 1
           },
           {
@@ -153,19 +153,19 @@
             "style": "block",
             "from": [
               0.8241,
-              0.311
+              0.328
             ],
             "to": [
               0.8241,
               0.353
             ],
-            "accent": "red",
+            "accent": "down",
             "beat": 1
           },
           {
             "kind": "label",
             "x": 0.7621,
-            "y": 0.2643,
+            "y": 0.2813,
             "text": "3 phiên phân phối",
             "accent": "red",
             "beat": 1,
@@ -290,13 +290,13 @@
             "style": "block",
             "from": [
               0.7741,
-              0.2853
+              0.3023
             ],
             "to": [
               0.7741,
               0.3273
             ],
-            "accent": "red",
+            "accent": "down",
             "beat": 0
           },
           {
@@ -304,13 +304,13 @@
             "style": "block",
             "from": [
               0.8185,
-              0.285
+              0.302
             ],
             "to": [
               0.8185,
               0.327
             ],
-            "accent": "red",
+            "accent": "down",
             "beat": 0
           },
           {
@@ -318,13 +318,13 @@
             "style": "block",
             "from": [
               0.8241,
-              0.311
+              0.328
             ],
             "to": [
               0.8241,
               0.353
             ],
-            "accent": "red",
+            "accent": "down",
             "beat": 0
           },
           {
@@ -338,7 +338,7 @@
           {
             "kind": "label",
             "x": 0.7621,
-            "y": 0.3063,
+            "y": 0.3148,
             "text": "11/9 −1,86% · KL ×1,64",
             "accent": "red",
             "beat": 0,
@@ -349,21 +349,21 @@
             "style": "block",
             "from": [
               0.6296,
-              0.4808
+              0.4638
             ],
             "to": [
               0.6296,
               0.4388
             ],
-            "accent": "blue",
+            "accent": "up",
             "beat": 1
           },
           {
             "kind": "label",
             "x": 0.6296,
-            "y": 0.5108,
+            "y": 0.4938,
             "text": "FTD 3/8 +1,56%",
-            "accent": "blue",
+            "accent": "green",
             "beat": 1,
             "anchor": "middle"
           },

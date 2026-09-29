@@ -134,7 +134,7 @@ const roleOf = (scene) => roleIn(R, scene);
 const headline = (b) => [b.line1, b.line2].filter(Boolean).join(' / ');
 /** vox-director shot sizes, from how far the camera has zoomed into the photo. */
 const shotSize = (z) => (z < 1.15 ? 'EST_WIDE' : z < 1.6 ? 'WIDE' : z < 2.2 ? 'MEDIUM' : z < 3 ? 'CLOSE' : 'DETAIL');
-const ACCENT = {gold: 'var(--gold)', red: 'var(--fail)', green: 'var(--pass)', white: 'var(--ink)'};
+const ACCENT = {gold: 'var(--gold)', red: 'var(--fail)', green: 'var(--pass)', white: 'var(--ink)', blue: '#3D8BFF'};
 const LEVEL = {pass: ['Đạt', 'pass'], warn: ['Cần sửa', 'warn'], fail: ['Hỏng', 'fail']};
 const sevClass = (c) => ({fail: 'fail', warn: 'warn', pass: 'pass', skip: 'warn'}[sev(c)] ?? 'warn');
 const sevText = (c) => ({fail: 'FAIL', warn: 'WARN', pass: 'PASS', skip: 'SKIP'}[sev(c)] ?? '?');

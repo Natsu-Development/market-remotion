@@ -169,7 +169,7 @@ const VISUAL_REQUIRED = {
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
-const ACCENTS = new Set(['gold', 'red', 'green', 'white']);
+const ACCENTS = new Set(['gold', 'red', 'green', 'white', 'blue']);
 /** The TTS pronunciation map (voice.lexicon) as scripts/voiceover.mjs applies it. */
 let LEXICON = lexiconOf(R);
 const sayAs = (text) => LEXICON.reduce(

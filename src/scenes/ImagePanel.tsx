@@ -244,10 +244,12 @@ const Mark: React.FC<{a: ImageAnnotation; rect: Rect; view: Rect; s: number; ui?
       const ex = x1 + (x2 - x1) * s;
       const ey = y1 + (y2 - y1) * s;
       const ang = Math.atan2(y2 - y1, x2 - x1);
-      const head = sw(12);
+      // `weight` thickens a signal arrow (market-review's distribution/FTD arrows use 2); default 1.
+      const wt = 'weight' in a && typeof a.weight === 'number' ? a.weight : 1;
+      const head = sw(12 * Math.sqrt(wt));
       return (
         <g>
-          <line x1={x1} y1={y1} x2={ex} y2={ey} stroke={c} strokeWidth={sw(2.4)} strokeLinecap="round" />
+          <line x1={x1} y1={y1} x2={ex} y2={ey} stroke={c} strokeWidth={sw(2.4 * wt)} strokeLinecap="round" />
           <path
             d={`M${ex},${ey} L${ex - head * Math.cos(ang - 0.45)},${ey - head * Math.sin(ang - 0.45)} L${ex - head * Math.cos(ang + 0.45)},${ey - head * Math.sin(ang + 0.45)} Z`}
             fill={c}

@@ -28,7 +28,7 @@ export type Candle = {t: string; o: number; h: number; l: number; c: number; v: 
 export type ImageAnnotation =
   | {kind: 'box'; x: number; y: number; w: number; h: number; label?: string; accent?: AccentName; beat?: number; until?: number}
   | {kind: 'circle'; x: number; y: number; r: number; label?: string; accent?: AccentName; beat?: number; until?: number}
-  | {kind: 'arrow'; from: [number, number]; to: [number, number]; label?: string; accent?: AccentName; beat?: number; until?: number}
+  | {kind: 'arrow'; from: [number, number]; to: [number, number]; label?: string; accent?: AccentName; beat?: number; until?: number; weight?: number}
   /** Straight segment between two photo points — a trendline or channel boundary. Extends nothing:
    *  give it the endpoints you want drawn. `dashed` for a projection; label sits at the `to` end. */
   | {kind: 'line'; from: [number, number]; to: [number, number]; label?: string; labelAt?: 'from' | 'to'; dashed?: boolean; accent?: AccentName; beat?: number; until?: number}

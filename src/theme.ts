@@ -69,13 +69,6 @@ export const COLORS = {
   down: '#EC5F38',
   /** Indicator signal line and channel rails: one cool hue, never confused with direction. */
   signal: '#6C7CE8',
-  /**
-   * Mark accent for an up-pointing signal — the follow-through day's arrow, paired with `red` for the
-   * distribution days' down arrows (user, 2026-09-29: "up color blue for FTD and down color red for
-   * DD"). Picked with the dataviz validator against `red` on FireAnt's chart surface #161921: dark
-   * lightness band, >= 3:1 contrast, protan ΔE 29.5.
-   */
-  blue: '#3D8BFF',
   /** The plot area inside chart panels. */
   plot: '#04060A',
   /** Eyebrow / secondary copy. */
@@ -91,7 +84,12 @@ export const COLORS = {
   panelStroke: 'rgba(255, 255, 255, 0.075)',
 } as const;
 
-export type AccentName = 'gold' | 'red' | 'green' | 'white' | 'blue';
+/**
+ * `up`/`down` are the direction MARK pair above, offered as accents for image marks only — arrows on
+ * candles (market-review's FTD green up, distribution days red down; user 2026-09-29). verify refuses
+ * them on headlines: text keeps the text accents.
+ */
+export type AccentName = 'gold' | 'red' | 'green' | 'white' | 'up' | 'down';
 
 export const accentColor = (a: AccentName): string => COLORS[a];
 

@@ -169,7 +169,9 @@ const VISUAL_REQUIRED = {
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
-const ACCENTS = new Set(['gold', 'red', 'green', 'white', 'blue']);
+const ACCENTS = new Set(['gold', 'red', 'green', 'white']);
+/** Image marks may also take the direction pair (src/theme.ts COLORS.up/down) — never text. */
+const MARK_ACCENTS = new Set([...ACCENTS, 'up', 'down']);
 /** The TTS pronunciation map (voice.lexicon) as scripts/voiceover.mjs applies it. */
 let LEXICON = lexiconOf(R);
 const sayAs = (text) => LEXICON.reduce(
@@ -218,7 +220,7 @@ function checkSchema(t, reel) {
           }
           if (a.kind === 'label' && !a.text) errs.push(`${where}: label needs text`);
           if (a.kind === 'label' && a.anchor !== undefined && !['start', 'middle', 'end'].includes(a.anchor)) errs.push(`${where}: anchor "${a.anchor}" not in start|middle|end`);
-          if (a.accent && !ACCENTS.has(a.accent)) errs.push(`${where}: accent "${a.accent}" invalid`);
+          if (a.accent && !MARK_ACCENTS.has(a.accent)) errs.push(`${where}: accent "${a.accent}" invalid`);
           if (a.until !== undefined && !(Number.isInteger(a.until) && a.until >= (a.beat ?? 0))) {
             errs.push(`${where}: until ${a.until} must be an integer beat at or after its beat (${a.beat ?? 0})`);
           }
@@ -365,7 +367,10 @@ function checkStyle(t, reel) {
   // article, "hai năm" two years — people say those; they are not figures being read out.
   const spokenNumbers = (text) => {
     const toks = String(text).toLowerCase().replace(/[.,!?;:…()]/g, ' ').split(/\s+/).filter(Boolean);
-    const isTok = (i) => BASIC.has(toks[i]) || STRONG.has(toks[i]) || (toks[i] === 'phần' && toks[i + 1] === 'trăm');
+    // 'không' is part of the number in 'một nghìn không trăm chín mươi chín' (1099) and 'hai nghìn không trăm
+    // hai mươi hai'; elsewhere (hai không mười tám, không phải) it is not a figure.
+    const isTok = (i) => BASIC.has(toks[i]) || STRONG.has(toks[i]) || (toks[i] === 'phần' && toks[i + 1] === 'trăm')
+      || (toks[i] === 'không' && (toks[i + 1] === 'trăm' || toks[i - 1] === 'nghìn'));
     let runs = 0;
     for (let i = 0; i < toks.length;) {
       if (!isTok(i)) { i++; continue; }

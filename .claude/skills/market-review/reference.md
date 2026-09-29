@@ -107,8 +107,9 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 Người dùng chốt 2026-09-29: phiên phân phối và FTD là MŨI TÊN chỉ đúng vào nến — đỏ chỉ xuống (màu giảm), xanh dương
 `#3D8BFF` chỉ lên (màu tăng; accent `blue` mới trong `src/theme.ts`, qua validator: ΔE mù màu 29,5 với đỏ trên nền
 FireAnt). Kiểu `style: "block"` (người dùng 29/9: mũi tên nét mảnh "so hard to see"): thân đặc, đầu rộng, viền trắng
-để mũi tên đỏ không lẫn vào nến đỏ, quầng tối tách khỏi chart. Đầu mũi tên cách đỉnh/đáy nến `GAP` (~6 px), thân dài
-`ARROW`. Hai phiên phân phối sát nhau (≤ 2 phiên) thì xoè ra — phiên trước vào từ trên-trái, phiên sau từ trên-phải. Trục thời gian của hiệu chỉnh được khớp
+để mũi tên đỏ không lẫn vào nến đỏ, quầng tối tách khỏi chart. Người dùng chốt tiếp: NGẮN và THẲNG vào nến — thân +
+đầu ~36 px (`ARROW` 0,042 ảnh), luôn thẳng đứng (đã bỏ kiểu xoè), đầu mũi tên cách đỉnh/đáy nến ~4 px (`GAP`). Hai
+phiên phân phối sát nhau vẫn tách được vì mỗi đầu nằm ở đỉnh nến của chính nó (khác độ cao). Trục thời gian của hiệu chỉnh được khớp
 lại trên chính các cột nến (`calib_auto.py`, `xFit`) — chỉ dùng `calib_chart.py` thì đầu mũi tên lệch ~0,4 nến.
 | spike | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
 | leaders | hộp quanh ba dòng; nhãn "N mã qua RS Strong + Uptrend" | hộp từng ô RS 1M, máy cận |

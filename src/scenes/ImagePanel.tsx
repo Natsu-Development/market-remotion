@@ -250,9 +250,12 @@ const Mark: React.FC<{a: ImageAnnotation; rect: Rect; view: Rect; s: number; ui?
         const L = Math.hypot(x2 - x1, y2 - y1) || 1;
         const ux = (x2 - x1) / L, uy = (y2 - y1) / L;
         const vx = -uy, vy = ux;
-        const hl = Math.min(sw(20 * k), L * 0.6);
-        const hh = sw(12 * k);
-        const hw = sw(4.5 * k);
+        // Sized for candles ~6 px apart (FireAnt daily): the head of one arrow must not cover its
+        // neighbour's candle even when two distribution days are adjacent (user 2026-09-29: shorter,
+        // straight onto the candle).
+        const hl = Math.min(sw(15 * k), L * 0.62);
+        const hh = sw(8 * k);
+        const hw = sw(3.2 * k);
         const len = Math.max(hl, L * s);
         const tx = x1 + ux * len, ty = y1 + uy * len;
         const bx = tx - ux * hl, by = ty - uy * hl;
@@ -262,7 +265,7 @@ const Mark: React.FC<{a: ImageAnnotation; rect: Rect; view: Rect; s: number; ui?
         ].map(([px, py]) => `${px.toFixed(2)},${py.toFixed(2)}`).join(' ');
         return (
           <g opacity={Math.min(1, s * 1.6)}>
-            <polygon points={pts} fill="none" stroke="rgba(4, 6, 10, 0.72)" strokeWidth={sw(7)} strokeLinejoin="round" />
+            <polygon points={pts} fill="none" stroke="rgba(4, 6, 10, 0.72)" strokeWidth={sw(5)} strokeLinejoin="round" />
             <polygon points={pts} fill={c} stroke="#FFFFFF" strokeWidth={sw(2.2)} strokeLinejoin="round" paintOrder="stroke" />
             {a.label ? <Halo ui={ui} x={x1} y={y1 - sw(10)} text={a.label} color={c} anchor={x2 < x1 ? 'end' : 'start'} opacity={Math.max(0, s * 1.4 - 0.4)} /> : null}
           </g>

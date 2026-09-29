@@ -58,19 +58,39 @@
   "arc": {
     "minScenes": 6,
     "maxScenes": 12,
-    "roles": [
-      "hook",
-      "evidence",
-      "concept",
-      "counterpoint",
-      "mechanism",
-      "warning",
-      "action",
-      "principle",
-      "outro"
+    "totalSecondsWarn": [
+      45,
+      105
     ],
+    "_totalSeconds": "sum of scene durations (estimated at scaffold, measured once voiced). Set by the user 2026-09-29.",
+    "roles": {
+      "hook": {"job": "Mở bằng lời hứa: một nghịch lý hay một con số giữ người xem lại; không dựng bối cảnh trước.", "act": "blue", "pace": "short", "shots": ["push_in", "pull_out"]},
+      "concept": {"job": "Giải thích chỉ báo, hoặc dựng khung phân tích (kênh giá, trendline, vùng giá) mà các scene sau dùng.", "act": "blue", "pace": "mid", "shots": ["pan", "push_in"]},
+      "chapter": {"job": "Một lần trong lịch sử, kể cùng khuôn với các chương liền kề (chạm → tín hiệu → kết quả) để người xem tự thấy vần lặp; mỗi chương một chi tiết riêng.", "act": "blue", "pace": "mid", "shots": ["pan", "tilt"], "minRun": 2},
+      "evidence": {"job": "Xác nhận từ một góc khác: khối lượng, động lượng, phân kỳ, tần suất — thứ các scene trước chưa nói.", "act": "blue", "pace": "long", "shots": ["pan", "push_in"]},
+      "counterpoint": {"job": "Phản biện thật lòng: điều người xem đang tin, hoặc lý do luận điểm có thể sai.", "act": "blue", "pace": "mid", "shots": ["pan", "push_in"]},
+      "principle": {"job": "Một nguyên tắc đọng lại, thường là rủi ro so với phần thưởng tính từ chỗ giá đang đứng — hai mũi tên trên chart.", "act": "blue", "pace": "mid", "shots": ["tilt", "pull_out"]},
+      "mechanism": {"job": "Một quá trình diễn ra theo trình tự nào (pha phân phối, dòng tiền rút) — giải thích, không dự báo.", "act": "maroon", "pace": "mid"},
+      "scenario": {"job": "Kịch bản có điều kiện: nếu … thì giá về đâu; nói rõ là kịch bản, không phải dự báo — nét đứt tới mức đích.", "act": "maroon", "pace": "mid", "shots": ["push_in", "pull_out"], "mustSay": ["nếu", "kịch bản", "giả định"]},
+      "levels": {"job": "Các mức phải canh, phía trên và phía dưới, mỗi mức một phản ứng — nhãn gắn đúng mức giá.", "act": "maroon", "pace": "mid", "shots": ["pan", "tilt"]},
+      "warning": {"job": "Ai hoặc cái gì dễ gãy: nhóm ngành, đòn bẩy, sai lầm hay gặp.", "act": "maroon", "pace": "mid"},
+      "action": {"job": "Việc cần làm, gắn vào đúng mức giá trên chart (nhãn trên hline), không phải danh sách số.", "act": "amber", "pace": "mid", "shots": ["push_in", "tilt"]},
+      "outro": {"job": "Người làm kênh chào người xem: thả tim · chia sẻ · theo dõi, một câu hứa cập nhật; không số, không thuật ngữ.", "act": "navy", "pace": "short"}
+    },
+    "_roles": "One entry per scene role, in story order; the single definition, read by enrich, verify, merge, review and review-page through scripts/lib/roles.mjs (user 2026-09-29, after the act map lived in enrich.mjs, the pace in style.pace and the jobs in reference.md). job: what the scene does — the writer reads it. act: default background; a brief may set `act:` per scene. pace: short|mid|long picks enrich's _words target inside narration.warnWordsPerScene, and verify's style check holds short roles at or below the reel's median word count and long roles at or above. shots: default camera move per beat of an image scene, taken from Channel's approved shots — enrich writes it as the hint _camera, the director still places every shot. mustSay: the narration must use one of these words. minRun: scenes of that role come in consecutive runs at least this long.",
     "firstRole": "hook",
     "lastRole": "outro",
+    "severity": {
+      "sceneCount": "warn",
+      "actOrder": "warn",
+      "outroPanel": "warn",
+      "totalSeconds": "warn",
+      "roleOrder": "fail",
+      "mustSay": "fail",
+      "minRun": "warn",
+      "shots": "warn"
+    },
+    "_severity": "how verify grades each story rule (checks arc, roles, camera). The user set 2026-09-29: roleOrder and mustSay fail — a reel that does not open on its hook breaks the three-second rule, and an unconditional price call reads as the advice the disclaimer rules out; everything else warns. Changing a level is the user's decision.",
     "sceneIdPattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
     "acts": [
       "blue",
@@ -156,8 +176,7 @@
     "_tradeWords": "positive side of the vocabulary rule (user 2026-09-23: trading terms, not everyday metaphors). WARN when fewer than this share of narrated scenes use at least one of them.",
     "sentenceContrastWords": 5,
     "_contrast": "within a scene of three or more sentences: longest minus shortest sentence, in words. Below this every sentence is the same length; the prompt asks for a short sentence after a long one.",
-    "pace": {"shortRoles": ["hook", "outro"], "longRoles": ["evidence"]},
-    "_pace": "hook and outro sit at or below the reel's median word count, evidence at or above. enrich.mjs uses the same map to set the _words target of each scaffold scene, so the shape is designed, not accidental.",
+    "_pace": "role pace moved to arc.roles.<role>.pace on 2026-09-29; this check still reads it.",
     "_opening": "a scene whose first sentence is mostly a spoken number opens like a report, not a person"
   },
   "voice": {

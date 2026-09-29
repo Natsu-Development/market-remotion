@@ -100,6 +100,15 @@ và chết ở `import omnivoice`, hiện ra dưới dạng stack trace Node ch�
 `verify.mjs` đều đọc lại từ đó qua `scripts/lib/reels.mjs`. Trước đây ba file giữ ba bản sao và
 chúng đã lệch nhau — đó là lý do có module ấy.
 
+**Vai của scene khai ở ĐÚNG MỘT nơi: `arc.roles` trong `src/shared/content-rules.json`** (người dùng
+chốt 2026-09-29) — việc, act mặc định, nhịp, máy quay mặc định của từng vai; enrich, verify, merge, review
+và review-page đọc qua `scripts/lib/roles.mjs`. Trước đó act nằm trong `enrich.mjs`, nhịp ở `style.pace`,
+việc của vai ở reference.md, và ba script tự đoán vai từ id — bốn chỗ đã lệch nhau. Reel phân tích chart
+có ba vai riêng: `chapter` (các lần lịch sử, ít nhất hai liền nhau), `scenario` (lời phải có chữ của
+`mustSay` — verify FAIL, vì câu gọi giá không điều kiện nghe như khuyến nghị), `levels` (mức phải canh, trên
+và dưới). Scene mang trường `role`; đổi vai scene đã có giọng thì sửa `role`, KHÔNG sửa `id` — id là tên file
+giọng (`channel-mechanism` giữ id, mang `role: scenario`).
+
 **`content/*.json` là JSON nghiêm ngặt.** README in ví dụ dạng jsonc có `//` cho dễ đọc — dán
 nguyên vào là `JSON.parse` ném.
 
@@ -110,8 +119,9 @@ ngày nhiều năm (`--range=5y`, `--interval=D|W|2W|M` bấm nút interval ngư
 `--zoom-out=6` lăn chuột để thấy lịch sử tới ~2001). `candles`/`macd`/`rsi` vẽ TẮT mặc định (người dùng chốt 2026-09-23:
 FireAnt đã có hết) — chỉ khi được bảo đích danh. **Người dùng chốt 2026-09-28: scene nào có SỐ trên màn
 hình đều là ảnh chart có mark** — không cột `riskReward`/`bars`, không `list` chứa số; tỉ lệ lời/lỗ là
-hai mũi tên trên chart, danh sách việc là nhãn gắn vào đúng mức giá. Thẻ outro cũng không mang số. Lưu ý: fact pack và ticker còn tính từ chuỗi tháng DỰNG LẠI nên lệch với
-ảnh FireAnt thật (1.878 vs 1816,93 đo 2026-09-22) — thay chuỗi bằng dữ liệu thật là việc kế tiếp.
+hai mũi tên trên chart, danh sách việc là nhãn gắn vào đúng mức giá. Thẻ outro cũng không mang số. Từ
+2026-09-23 chuỗi tháng là dữ liệu thật (SSI) nên fact pack, ticker và ảnh FireAnt cùng số khi kéo cùng ngày
+(đóng cửa 28/9: 1780,68 ở cả ba) — trước đó bản dựng lại lệch ảnh thật (1.878 vs 1816,93, đo 2026-09-22).
 Ảnh vào brief bằng dòng `src:`/`source:` trong scene; enrich điền `visual`.
 
 **Ảnh chụp trang web là panel `image`, chụp bằng `scripts/shoot.mjs`.** Người dùng cho phép
@@ -137,8 +147,9 @@ giao diện FireAnt (dòng OHLC ở y 0,085–0,125 của ảnh tháng) — soá
 **Hai bộ màu, đừng gộp.** `COLORS.red/green/gold` là màu CHỮ headline. `COLORS.up/down`
 (`#1FA377`/`#EC5F38`) là màu MARK — nến, histogram, mũi tên ticker — chọn bằng validator của
 skill dataviz trên nền plot: cặp xanh/đỏ thường chỉ đạt ΔE mù màu 6,7, cặp này 10,2. Khung hình
-có ticker (trên) và footer (dưới) trên mọi scene, tính từ chuỗi giá; footer mặc định KHÔNG nêu
-nguồn vì chuỗi tháng là bản dựng lại — đặt `footer` ở cấp reel khi dữ liệu thật.
+có ticker (trên) và footer (dưới) trên mọi scene, tính từ chuỗi giá; footer mặc định ghi nguồn từ
+`vnindex-monthly.meta.json` (`Nguồn: SSI iBoard · tới T9/2026`), và chỉ ghi "Dữ liệu" khi meta báo
+`reconstructed` — đặt `footer` ở cấp reel khi số đến từ nhiều nguồn (`Channel`: `Nguồn: SSI · zionle.io.vn · FireAnt`).
 
 **Chữ Việt cần subset `vietnamese` của font.** Thiếu nó thì dấu chồng (Ổ, Ữ, Ặ) rơi về font
 khác và lệch khỏi cap height. Icon thì vẽ bằng SVG chứ không gõ ký tự, vì ✓ và ⚠ thiếu ở vài
@@ -170,12 +181,13 @@ file của họ vào `public/` và đặt `visual.logo` thì monogram tự biế
 - TTS đọc thuật ngữ lung tung (MACD → "Macy đi") → thêm dạng đọc vào `voice.lexicon` ở content-rules, thu lại bằng `--force --only`; đừng viết "em a xê đê" vào `narration`
 - bản ghi thật biến mất → chạy `--force` lúc file đang nằm trong `public/voiceover/`
 - headline rơi sai câu → `sentenceStarts` cũ, hoặc thêm câu ngắn làm lệch `atSentence`
-- `No candle for <tháng>` → `PEAK_MONTHS`/`TROUGH_MONTHS` ở `src/lib/series.ts` vượt dải dữ liệu
+- `No candle for <tháng>` → `series.peakMonths`/`troughMonths` ở `content-rules.json` (nguồn của `PEAK_MONTHS` trong `src/lib/series.ts`) vượt dải dữ liệu
 - stack trace Node ở bước synthesize → chạy `scripts/tts_omnivoice.py` tay để thấy dòng `FAIL`
 - `400 config_id is required` → chưa đặt `.zionle-config`
 - `404 configuration not found` → id sai hoặc đã hết hạn, không phải sai đường dẫn
 - panel thiếu chi tiết → chi tiết đó gác sau `beatIndex >= 1`, scene chỉ có một beat
 - `Unknown --id=X` → quên `REELS` ở `src/Root.tsx`
+- `roles` FAIL "has to say it is one" → scene `scenario` kể như lời gọi giá; viết lại thành nhánh nếu … thì, đừng thêm chữ vào `mustSay`
 - `voice-stems` FAIL giữa hai reel scaffold → id kiểu cũ `hook-1` trùng vị trí; enrich giờ sinh `<tên>-<vai>`
 - cận cảnh ảnh hiện chữ FireAnt khổng lồ ở mép trên → khung `shots` cắt vào dòng OHLC; đặt mép trên khung ≥ 0,125
 - khung đầu scene ảnh đen một lúc → quét mở màn đang chạy trong lớp đã phóng; với `shots` nó phải ở toạ độ màn hình (ImagePanel)

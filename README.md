@@ -22,7 +22,7 @@ next to it and adding one row to `REELS`.
 
 ```bash
 npm install
-npm run build          # voiceover + render -> out/reel.mp4
+npm run build          # voiceover + render -> out/channel.mp4
 ```
 
 `npm run build` runs three steps, each of which you can also run alone:
@@ -32,7 +32,7 @@ npm run build          # voiceover + render -> out/reel.mp4
 | 0. Market data | `node scripts/fetch-market.mjs --symbol=VNINDEX --signals` | Pulls price history and RSI-divergence signals from **[zionle.io.vn](https://zionle.io.vn)**, the project's source of record (1,492 tickers). Needs a `config_id` — see below. |
 | 1. Long series | `node scripts/fetch-market.mjs --symbol=VNINDEX --source=ssi --replace-series` | Real monthly VNINDEX since 2013 from SSI iBoard (no auth), plus a `.meta.json` with provenance. `--source=entrade` is the alternate. `scripts/make-series.mjs` is the old reconstruction, offline use only. |
 | 2. Voice | `npm run voiceover` | Speaks each scene's `narration` into `public/voiceover/` with **OmniVoice**, cloning the reference in `assets/voices/`. Writes the `audio` path back into the content file. |
-| 3. Render | `npm run render` | Renders `out/reel.mp4`. |
+| 3. Render | `npm run render` | Renders `out/channel.mp4`. |
 
 While designing, skip the render loop entirely:
 
@@ -43,7 +43,7 @@ npm run studio         # live preview, scrub the timeline, edit props
 ### Useful variations
 
 ```bash
-npm run build -- --id=RSI        # a different reel: its content, its output file
+npm run build -- --id=<Id>       # another registered reel: its content, its output file
 npm run build -- --retime        # stretch/shrink each scene to fit its narration
 npm run build -- --no-voice      # silent render
 npm run build -- --revoice       # re-synthesize the voice first (narration changed); --revoice=<sceneId,...> for some scenes
@@ -179,11 +179,13 @@ Accents are `gold`, `red`, `green`, `white`.
   `Kênh của bạn` and a generated monogram. Put your mark in `public/` and set
   `visual.logo` on the outro scene — the monogram and the duplicate brand line
   both disappear in favour of your image.
-- **Real prices.** `content/vnindex-monthly.json` is a stylized reconstruction
-  from the turning points the reel argues about, not an exchange export. For
-  published analysis, replace it with real data in the same shape
-  (`{t, o, h, l, c, v}` per month, `t` as `YYYY-MM`). `src/lib/series.ts` fits
-  the channel through the months named in `PEAK_MONTHS` / `TROUGH_MONTHS`.
+- **Real prices.** `content/vnindex-monthly.json` is real SSI iBoard data (daily
+  bars since 2013-01, merged into months, `{t, o, h, l, c, v}` with `t` as
+  `YYYY-MM`); `.meta.json` records source and fetch time, and the footer names
+  the source from it. Refresh with step 1 above. `scripts/make-series.mjs` is the
+  old reconstruction, offline only. `src/lib/series.ts` fits the channel through
+  the months in `series.peakMonths` / `series.troughMonths` of
+  `src/shared/content-rules.json`.
 - **Music.** Add `"music": "bed.mp3"` (a path under `public/`) and optionally
   `"musicVolume": 0.1` at the top level of the content file.
 - **A new panel type.** Add a variant to `Visual` in `src/types.ts`, write the

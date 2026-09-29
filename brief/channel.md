@@ -6,6 +6,13 @@ ticker: daily
 footer: Nguồn: SSI · zionle.io.vn · FireAnt
 disclaimer: Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.
 
+# v5 — 2026-09-29: vai theo bộ vai ở content-rules `arc.roles` — ba chương lịch sử là `chapter`, "nếu lặp lại"
+# là `scenario`, hai mức phải canh là `levels`; `principle` và `action` là ảnh chart có mark như bản đã duyệt
+# 2026-09-28, outro là lời kêu gọi. Lời, hình, giọng không đổi. Id scene trong content/channel.json giữ tên cũ
+# (channel-evidence-3…5, channel-mechanism, channel-warning) vì id là tên file giọng; vai nằm ở trường `role`.
+# Enrich lại từ brief này sẽ sinh id mới (channel-chapter-3…) và phải thu giọng lại. Caption và số trong
+# ý đồ theo vòng 5 (fact pack và ảnh 28/9); phần v4 dưới đây giữ nguyên làm lịch sử.
+#
 # v4 — 2026-09-28, dựng lại theo vox-director (github.com/Alisa0808/vox-director, tầng STORY: beat-layer.md).
 # Cùng luận điểm và cùng số của v3 (fact pack 23/9, ảnh 23/9); đổi cấu trúc, nhịp và máy quay.
 #
@@ -13,7 +20,7 @@ disclaimer: Mọi thông tin chỉ là thông tin tham khảo, không phải khu
 # một khuôn (chạm → MACD tháng cắt → rơi bao nhiêu) để người xem tự thấy vần lặp, rồi chương 2026 dừng ở
 # đúng chỗ hai lần trước đã cắt. Sau đó mới là phản biện, nguyên tắc, kịch bản, mức phải canh, việc làm.
 # Hook ≤ 3 giây: câu đầu ≤ 10 chữ, headline beat 1 đã mang lời hứa (surprising_stat + urgent_warning),
-# không mở bằng dựng bối cảnh. Kết `loop_close`: câu cuối outro vọng lại câu đầu hook để xem lại liền mạch.
+# không mở bằng dựng bối cảnh. Kết bằng lời kêu gọi ở outro (câu vọng lại hook — `loop_close` — bị bỏ 2026-09-28).
 #
 # Nhịp (vox: đổi khung 3–5 giây, không giữ một khung quá 8 giây): 12 scene, mỗi scene 2 beat, mỗi beat
 # một khung máy (`visual.shots`: wide định hướng → cận vào chi tiết lời đang gọi tên). Tổng ~87 giây,
@@ -45,7 +52,7 @@ Kênh giá song song: biên dưới qua đáy 3/2020 (649) và đáy 11/2022 (87
 điểm/năm, lệch 2,8% — song song thật, không vẽ cho vừa mắt. Beat 0: máy trên vùng hai đáy, biên dưới vẽ ra.
 Beat 1: lùi ra cả kênh. Kết mở timeline: kênh này đã hai lần báo đỉnh — xem lại từng lần. ~28 chữ.
 
-## evidence · image
+## chapter · image
 src: public/shots/vnindex-fireant-monthly.png
 source: fireant.vn
 fit: contain
@@ -54,7 +61,7 @@ Chương 1 — 2018. Tháng 4/2018 chạm biên trên ở 1211. Ba tháng sau (7
 hiệu. Từ đỉnh, thị trường rơi 28,9% về 862 (1/2019), mất 9 tháng. Beat 0: cận vào đỉnh 2018. Beat 1: máy
 lùi xuống, thấy cả mũi tên rơi và hộp MACD cắt 7/2018. Tối đa hai số đọc ra lời. ~32 chữ.
 
-## evidence · image
+## chapter · image
 src: public/shots/vnindex-fireant-monthly.png
 source: fireant.vn
 fit: contain
@@ -63,25 +70,26 @@ Chương 2 — 2022, cùng khuôn với 2018. Tháng 1/2022 chạm biên trên �
 tháng cắt xuống. Lần này rơi sâu hơn: 43,1% về 874 (11/2022), mất 10 tháng. Beat 0: cận vào đỉnh 2022.
 Beat 1: lùi xuống, mũi tên rơi và hộp MACD 5/2022. Kết dẫn sang 2026. ~32 chữ.
 
-## evidence · image
+## chapter · image
 src: public/shots/vnindex-fireant-monthly.png
 source: fireant.vn
 fit: contain
-caption: MACD THÁNG 143,4 · TÍN HIỆU 142,9 · HISTOGRAM 48,6 → 0,5 SAU 7 THÁNG
+caption: MACD THÁNG 140,7 · TÍN HIỆU 142,3 · HISTOGRAM −1,6 · THÁNG 9 CHƯA ĐÓNG
 Chương 3 — 2026, điểm ngoặt. Tháng 5/2026 chạm biên trên lần ba ở 1933. Bốn tháng sau — tức là bây giờ,
-đúng quãng hai lần trước đã cắt — MACD tháng 143,4 vẫn trên tín hiệu 142,9: chưa cắt. Nhưng histogram đã
-thu hẹp 7 tháng liền, từ 48,6 xuống 0,5. Beat 0: cận đỉnh 2026 (push_in). Beat 1: CẮT THẲNG xuống cận
-histogram tháng 9/2026, máy đứng yên — khoảnh khắc payoff của cả timeline. ~34 chữ.
+đúng nhịp 2022 — MACD tháng 140,7 đã xuống dưới tín hiệu 142,3; histogram từ 48,6 về −1,6 sau 7 tháng thu
+hẹp. Nhưng nến tháng 9 chưa đóng (30/9): tín hiệu còn tạm tính, lời phải nói rõ. Beat 0: cận đỉnh 2026
+(push_in). Beat 1: CẮT THẲNG xuống cận histogram tháng 9/2026, máy đứng yên — khoảnh khắc payoff của cả
+timeline. ~34 chữ.
 
 ## evidence · image
 src: public/shots/vnindex-fireant-weekly-macd.png
 source: fireant.vn
 fit: contain
-caption: NẾN TUẦN · KHỐI LƯỢNG 1004 (T10/2025) → 520 TRIỆU/PHIÊN (T9/2026)
+caption: NẾN TUẦN · KHỐI LƯỢNG 1004 (T10/2025) → 521 TRIỆU/PHIÊN (T9/2026)
 Khung TUẦN đi trước khung tháng. Thanh khoản: tháng 10/2025 bình quân 1004 triệu cổ phiếu/phiên, tháng
-9/2026 còn 520 triệu (52%, 14 phiên) — giá giữ vùng cao trên nền khối lượng còn một nửa. MACD tuần đã cắt
-xuống, histogram tuần đã âm (đọc từ ảnh — pack không có số MACD tuần, không đọc số). Beat 0: pane khối
-lượng. Beat 1: cận pane MACD tuần. ~34 chữ.
+9/2026 còn 521 triệu (52%, 18 phiên tới 28/9) — giá giữ vùng cao trên nền khối lượng còn một nửa. MACD tuần
+nằm dưới đường tín hiệu, histogram tuần âm sâu thêm (đọc từ ảnh 28/9 — pack không có số MACD tuần, không đọc
+số). Beat 0: pane khối lượng. Beat 1: cận pane MACD tuần. ~34 chữ.
 
 ## counterpoint · image
 src: public/shots/vnindex-terminal.png
@@ -94,11 +102,16 @@ cũng không lặp y hệt — 45 rồi 52 tháng. Nên đây là kịch bản, 
 terminal, ba đáy cao dần. Beat 1: cận mép phải, hai hỗ trợ 1777 và 1716 — còn giữ thì xu hướng ngắn hạn
 chưa gãy. ~28 chữ.
 
-## principle · riskReward
-Nguyên tắc kênh giá: sát biên trên thì rủi ro lớn hơn phần thưởng. Đóng cửa 1814, ở 82,9% chiều cao kênh;
-lên biên trên 1941 là +7%, về biên dưới 1197 là −34%. Máy đứng yên, hai cột nói thay lời. ~26 chữ.
+## principle · image
+src: public/shots/vnindex-fireant-monthly.png
+source: fireant.vn
+fit: contain
+caption: ĐÓNG CỬA 1781 · BIÊN TRÊN 1941 (+9%) · BIÊN DƯỚI 1197 (−32,8%)
+Nguyên tắc kênh giá: sát biên trên thì rủi ro lớn hơn phần thưởng. Giá 1781 ở 78,5% chiều cao kênh; lên
+biên trên 1941 là +9%, về biên dưới 1197 là −32,8% — hai mũi tên trên chart, không cột (người dùng chốt
+2026-09-28). Beat 0: máy đi dọc kênh xuống chỗ giá đứng. Beat 1: lùi ra, thấy cả hai mũi tên. ~26 chữ.
 
-## mechanism · image
+## scenario · image
 src: public/shots/vnindex-fireant-monthly.png
 source: fireant.vn
 fit: contain
@@ -107,20 +120,25 @@ Nếu chu kỳ lặp lại — KỊCH BẢN, không phải dự báo, nói rõ b
 là về 1374; lặp mức rơi 2022 (−43,1%) là về 1100 — xuyên qua biên dưới (1197 hôm nay, 1218 cuối năm).
 Beat 0: cận nửa phải, mức 1374. Beat 1: lùi ra, mức 1100 và biên dưới. ~30 chữ.
 
-## warning · image
+## levels · image
 src: public/shots/vnindex-terminal.png
 source: zionle.io.vn
 fit: contain
-caption: TÍN HIỆU MỚI: THỦNG HỖ TRỢ 1802 TIỀM NĂNG · ĐÁY NĂM 1586
-Hai mức phải canh trên khung ngày. Trên: vượt đỉnh năm 1933 mà khối lượng vẫn quanh 520 triệu/phiên là
-phá vỡ giả. Dưới: thủng 1777 rồi 1716 — chuỗi đáy cao dần của scene phản biện gãy — là chu kỳ đã quay
-đầu, mốc kế đáy năm 1586. Beat 0: cận đỉnh 1933. Beat 1: máy lùi xuống ba mức hỗ trợ. ~30 chữ.
+caption: TÍN HIỆU: THỦNG HỖ TRỢ 1802 ĐÃ XÁC NHẬN · ĐÁY NĂM 1586
+Hai mức phải canh trên khung ngày. Trên: vượt đỉnh năm 1933 mà thiếu khối lượng là phá vỡ giả. Dưới:
+thủng 1777 rồi 1716 — chuỗi đáy cao dần của scene phản biện gãy — là chu kỳ đã quay đầu, mốc kế đáy năm
+1586. Terminal đã xác nhận thủng hỗ trợ 1802 (23/9). Beat 0: cận đỉnh 1933. Beat 1: máy lùi xuống ba mức
+hỗ trợ. ~30 chữ.
 
-## action · list
-Bốn việc mình đang làm, không phải khuyến nghị: hạ đòn bẩy khi giá còn ở nửa trên kênh; canh histogram
-MACD tháng — dưới 0 là xác nhận; vượt 1933 thiếu khối lượng thì không mua đuổi; thủng 1777 rồi 1716 thì
-giảm tỷ trọng. ~32 chữ.
+## action · image
+src: public/shots/vnindex-fireant-monthly.png
+source: fireant.vn
+fit: contain
+caption: BỐN VIỆC: ĐÒN BẨY · NẾN THÁNG ĐÓNG · 1933 · 1777 / 1716
+Bốn việc mình đang làm, mỗi việc là một nhãn gắn đúng chỗ trên chart, không danh sách (người dùng chốt
+2026-09-28): nửa trên kênh → hạ đòn bẩy; histogram MACD tháng âm → chờ nến tháng đóng; vượt 1933 yếu →
+không mua đuổi; thủng 1777 rồi 1716 → giảm tỷ trọng. Lời không nói "khuyến nghị". ~32 chữ.
 
 ## outro · outro
-Mời vào cộng đồng miễn phí, link ở bio; ở đó cập nhật kênh tháng (1197–1941) và MACD tháng mỗi khi đổi.
-Câu cuối vọng lại câu đầu hook (đường kẻ qua hai đỉnh cũ) để reel lặp lại liền mạch. ~24 chữ.
+Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật khi thị trường đổi nhịp (khuôn ở mục
+"Outro" của prompts/scene-writer.md). Không số, không MACD, không câu vọng lại hook. ~24 chữ.

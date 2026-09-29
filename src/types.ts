@@ -154,6 +154,12 @@ export type Visual =
 
 export type Scene = {
   id: string;
+  /**
+   * The scene's job in the story — a key of `arc.roles` in src/shared/content-rules.json
+   * (hook, chapter, scenario…). enrich writes it, verify and the review page read it; the
+   * renderer ignores it. Relabel a voiced scene here, never in `id`: the id names its audio file.
+   */
+  role?: string;
   /** Uppercase label above the panel. */
   eyebrow: string;
   /** Mood of the background for this scene. */

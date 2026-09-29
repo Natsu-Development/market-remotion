@@ -14,17 +14,19 @@ Repo: thư mục gốc của repo này (nơi có `CLAUDE.md`). Đọc theo thứ
    `daily.*` cho chuyện 12 tháng gần nhất; `peaks`/`troughs`/`years`/`rsi`/`macd` cho chuyện nhiều năm;
    `terminal.*` cho phân kỳ, trendline, tín hiệu.
 2. `src/shared/content-rules.json` — ngân sách: `narration.*` (chữ, câu, tốc độ), `layout.headlineWarnChars`,
-   `audio.leadIn`, `claims.factsExemptions`, và `style.*` (những gì verify sẽ cảnh báo về giọng).
+   `audio.leadIn`, `claims.factsExemptions`, và `style.*` (những gì verify sẽ cảnh báo về giọng); và
+   `arc.roles` — mỗi vai một `job`: scene mang vai đó phải làm đúng việc ấy trong mạch kể.
 3. `.claude/skills/market-video/reference.md` mục 1 — trường của từng panel.
-4. `content/<tên>.json` — khung reel đang có. Bạn viết lại chữ, KHÔNG đổi `id`, `act`, `visual.type`,
+4. `content/<tên>.json` — khung reel đang có. Bạn viết lại chữ, KHÔNG đổi `id`, `role`, `act`, `visual.type`,
    `visual.src`, `visual.annotations` (toạ độ, `beat`, và **nhãn số** trên mark — nhãn là fact đạo diễn đã
    đặt), `visual.shots` (máy quay theo beat), `visual.bars[].percent`, `visual.left/right.value`. Số beat
    giữ nguyên nếu ảnh có `annotations` hay `shots` trỏ vào beat đó — mỗi beat là một khung máy, câu được
    ghim (`atSentence`) phải nói đúng thứ khung đó đang chiếu (cận vào pane MACD thì câu nói về MACD). **Scene nào nói về xu hướng giá đều là ảnh chart có mark** (mức kháng cự/hỗ trợ, hộp
    pha tích luỹ/phá vỡ); lời đọc phải chỉ vào đúng những mark đó theo thứ tự beat — người xem nhìn đường
    kẻ hiện ra trong lúc nghe bạn gọi tên nó.
-   `_words` là số chữ enrich nhắm cho scene theo vai (hook và outro ngắn, evidence dài — bản đồ ở
-   `style.pace`); lệch vài chữ được, nhưng giữ hình dạng đó cho cả reel.
+   `role` là vai của scene — việc của nó ở `arc.roles.<role>.job`. `_words` là số chữ enrich nhắm theo
+   nhịp của vai (hook và outro ngắn, evidence dài — `arc.roles.<role>.pace`); lệch vài chữ được, nhưng
+   giữ hình dạng đó cho cả reel.
 5. `brief/<tên>.md` — ý đồ của đạo diễn cho từng scene, và **ghi chú giọng** ở đầu file nếu có.
 6. `assets/voices/*.txt` — lời clip giọng mẫu. Không câu nào được mở bằng đúng ba chữ đầu của nó.
 
@@ -41,6 +43,9 @@ Repo: thư mục gốc của repo này (nơi có `CLAUDE.md`). Đọc theo thứ
   ở đúng độ chính xác đang hiện: `1536` chứ không `1.536`; `43,1%` ↔ `43.1`. "N tháng"/"N phiên" là số liệu,
   N phải có trong pack; "tháng 9", "4 điều", "12T", "RSI 14" được miễn.
 - So sánh nhất (`cao nhất`, `kỷ lục`, `chưa từng`) chỉ khi đúng trên CẢ chuỗi và có fact dẫn.
+- Scene `role: scenario` tự nói ra nó là kịch bản: lời đọc có ít nhất một chữ trong
+  `arc.roles.scenario.mustSay`, và kể như một nhánh có điều kiện (nếu … thì …). Không câu nào khẳng định giá
+  sẽ tới đâu — câu gọi giá không điều kiện nghe như khuyến nghị.
 - Beat đầu `at` = `audio.leadIn`; beat sau đặt `at` tăng dần tuỳ ý (voiceover ghi đè). Mọi beat có `atSentence`.
 
 ## Giọng người, chữ của nghề — đây là việc chính của bạn
@@ -92,11 +97,16 @@ một từ, và có chữ Việt đi kèm lần đầu. Không ẩn dụ đời 
 - **Ngân sách chữ nhắm GIỮA dải, và các scene phải khác nhau.** Hook và outro ngắn hơn; scene bằng chứng
   dài hơn. Chín scene cùng 49–50 chữ là dấu hiệu viết bằng máy — verify sẽ cảnh báo. Verify (WARN) còn
   soi ba thứ nữa về nhịp và chữ: hook/outro không dài hơn trung vị chữ của reel và evidence không ngắn
-  hơn (`style.pace`); câu trong một scene không đều nhau — sau câu dài phải có câu ngắn
+  hơn (`arc.roles.<role>.pace`); câu trong một scene không đều nhau — sau câu dài phải có câu ngắn
   (`style.sentenceContrastWords`); phần lớn scene phải có ít nhất một thuật ngữ giao dịch
   (`style.tradeWords`, `style.minTradeWordScenesPercent`).
 - **Không ẩn dụ đời thường.** Cấu trúc kể chuyện đến từ chính thuật ngữ: tích luỹ → phá vỡ → kiểm định
   → tích luỹ ở vùng cao hơn. Đó đã là một câu chuyện; không cần bậc thang hay lò xo.
+- **Các scene `chapter` liền nhau dùng chung một khuôn câu** (chạm kháng cự → tín hiệu xác nhận → rơi bao
+  nhiêu) để người xem tự nghe ra vần lặp; mỗi chương một chi tiết riêng, không chép nguyên câu. Chương cuối
+  là chỗ vần lặp dừng lại hoặc gãy — đó là payoff.
+- **Scene `levels` gọi tên từng mức theo đúng thứ tự máy quay đi qua** (trên → dưới), mỗi mức kèm một phản
+  ứng: vượt thì sao, thủng thì sao.
 
 ## Outro — người làm kênh chào người xem
 
@@ -166,5 +176,6 @@ chọn, và số chữ từng scene.
 - [ ] Không "bậc thang", "tiền mỏng", "cái biên", "trần/sàn", "kiểu dở", "xích lại", "lưng chừng", "chuyện lạ"; năm đọc `hai không hai hai`.
 - [ ] Không headline nào hai dòng cùng là số; không headline nào chép nguyên câu đọc.
 - [ ] Scene nào (trừ outro) cũng kết bằng câu mở đường.
+- [ ] Mỗi scene làm đúng `job` của vai nó; `scenario` có chữ của `mustSay` và không câu nào gọi giá; các `chapter` cùng khuôn câu.
 - [ ] Outro: thả tim · chia sẻ · theo dõi + một câu vì sao; không số, không thuật ngữ, không câu vọng hook, không "khuyến nghị".
 - [ ] Mọi chữ số trên màn hình có trong fact pack đúng độ chính xác; mọi câu không mở bằng ba chữ đầu của clip mẫu.

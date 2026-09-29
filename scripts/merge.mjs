@@ -7,11 +7,11 @@
  * <dir> holds one <scene id>.json per scene, in the shape the worker briefing
  * asks for: eyebrow, narration, beats, visual, citedFacts, unsupported.
  *
- * The script replaces those content fields, drops the scaffold's `_brief` and
- * `_role`, lifts every non-empty `unsupported` to reel level as {id, why} (the
- * reviewer reads them all in one place), and sets status: enriched. It refuses
- * when a scene's file is missing or when a worker changed `id` or
- * `visual.type` — those belong to the director, not the writer.
+ * The script replaces those content fields, keeps the scene's `role`, drops the
+ * scaffold's `_brief`, `_words` and `_camera`, lifts every non-empty `unsupported`
+ * to reel level as {id, why} (the reviewer reads them all in one place), and sets
+ * status: enriched. It refuses when a scene's file is missing or when a worker
+ * changed `id`, `role` or `visual.type` — those belong to the director, not the writer.
  *
  * Exit codes follow verify: 0 merged, 1 worker output rejected, 2 bad invocation.
  */
@@ -53,6 +53,9 @@ const scenes = reel.scenes.map((scene) => {
     return scene;
   }
   if (w.id !== undefined && w.id !== scene.id) errors.push(`${scene.id}: worker renamed the scene to "${w.id}"`);
+  // `_role` is how scaffolds before 2026-09-29 carried it.
+  const role = scene.role ?? scene._role;
+  if (w.role !== undefined && w.role !== role) errors.push(`${scene.id}: worker changed the role from ${role} to ${w.role}`);
   if (w.visual?.type !== scene.visual.type) {
     errors.push(`${scene.id}: worker changed the panel from ${scene.visual.type} to ${w.visual?.type}`);
   }
@@ -66,7 +69,7 @@ const scenes = reel.scenes.map((scene) => {
 
   // Timing fields are outputs of voiceover.mjs; they are stale the moment the
   // words change, so a re-merge with new narration drops them.
-  const {_brief, _role, _words, audio, sentenceStarts, ...rest} = scene;
+  const {_brief, _role, _words, _camera, audio, sentenceStarts, ...rest} = scene;
   const keepTiming = rest.narration === w.narration;
   // A worker file carries scaffold `at` values (0.25, 3.75, …). When the words
   // did not change, the voice on disk is still right, so pin each beat back to
@@ -81,6 +84,7 @@ const scenes = reel.scenes.map((scene) => {
     : w.beats;
   return {
     id: scene.id,
+    ...(role ? {role} : {}),
     eyebrow: w.eyebrow,
     act: scene.act,
     duration: scene.duration,

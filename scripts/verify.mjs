@@ -3,7 +3,7 @@
  * Grades content/<reel>.json before it costs anything to be wrong.
  *
  *   npm run verify                every registered reel
- *   npm run verify -- RSI         one reel
+ *   npm run verify -- Channel     one reel
  *   npm run verify -- --strict    warnings and skips become errors (CI gate)
  *   npm run verify -- --json      machine-readable, for an orchestrator
  *
@@ -25,6 +25,7 @@ import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {reels} from './lib/reels.mjs';
+import {roleNames, roleOf, roleSpec} from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
@@ -134,6 +135,21 @@ class Report {
 }
 const add = Report.add;
 
+/** The level content-rules `arc.severity` gives one story rule; unlisted rules warn. */
+const sevOf = (rule) => SEV[R.arc.severity?.[rule]] ?? SEV.warn;
+
+/**
+ * One check whose notes carry their own level (see sevOf): the worst decides the check,
+ * and each note is tagged with its level when the check mixes them.
+ */
+const addGraded = (bucket, id, notes, passMessage) => {
+  if (!notes.length) { add(bucket, id, SEV.pass, passMessage); return; }
+  const worst = notes.some((n) => n.sev === SEV.fail) ? SEV.fail : SEV.warn;
+  const mixed = new Set(notes.map((n) => n.sev)).size > 1;
+  add(bucket, id, worst, `${notes.length} ${id} ${worst === SEV.fail ? 'problem' : 'note'}(s)`,
+    notes.map((n) => (mixed ? `${n.sev}: ${n.text}` : n.text)).join('; '));
+};
+
 // ---------------------------------------------------------------- checks
 
 const VISUAL_REQUIRED = {
@@ -167,6 +183,7 @@ function checkSchema(t, reel) {
     }
     if (s.eyebrow === undefined) errs.push(`${at}: missing eyebrow (use "" for none)`);
     if (s.act && !R.arc.acts.includes(s.act)) errs.push(`${at}: act "${s.act}" not in ${R.arc.acts.join('|')}`);
+    if (s.role !== undefined && !roleSpec(R, s.role)) errs.push(`${at}: role "${s.role}" not in ${roleNames(R).join('|')}`);
     if (s.id && !new RegExp(R.arc.sceneIdPattern).test(s.id)) errs.push(`${at}: id "${s.id}" must be lower-kebab`);
     const v = s.visual ?? {};
     if (!VISUAL_REQUIRED[v.type]) {
@@ -327,7 +344,7 @@ function checkNarration(t, reel) {
  * two rows of digits. verify cannot hear tone; the reviewer reads the script aloud for that.
  * Added 2026-09-23 (later), same day the user asked for trader vocabulary and pace: a positive
  * vocabulary check (style.tradeWords), sentence-length contrast inside a scene, and role pace
- * (hook/outro at or below the reel's median words, evidence at or above).
+ * (short roles at or below the reel's median words, long roles at or above — arc.roles.*.pace).
  */
 function checkStyle(t, reel) {
   const S = R.style;
@@ -353,16 +370,12 @@ function checkStyle(t, reel) {
   };
   const counts = [];
   const perRole = [];
-  const roleOf = (sc) => {
-    const parts = sc.id.split('-').filter((p) => !/^\d+$/.test(p));
-    return [...parts].reverse().find((p) => R.arc.roles.includes(p)) ?? '';
-  };
   let tradeScenes = 0;
   for (const sc of reel.scenes) {
     if (!sc.narration) continue;
     const n = sc.narration;
     counts.push(words(n).length);
-    perRole.push({id: sc.id, role: roleOf(sc), w: words(n).length});
+    perRole.push({id: sc.id, role: roleOf(R, sc), w: words(n).length});
     if ((S.tradeWords ?? []).some((w) => n.toLowerCase().includes(w))) tradeScenes++;
     const sents = sentences(n);
     const perSentence = sents.map(spokenNumbers);
@@ -395,12 +408,14 @@ function checkStyle(t, reel) {
     const spread = Math.max(...counts) - Math.min(...counts);
     if (spread < S.minSceneWordSpread) warn.push(`every scene is ${Math.min(...counts)}–${Math.max(...counts)} words — same budget edge everywhere; let hook and outro breathe`);
   }
-  if (S.pace && counts.length >= 4) {
+  if (counts.length >= 4) {
+    // Role pace lives with the role (arc.roles.<role>.pace), the same field enrich aims _words at.
     const sorted = [...counts].sort((a, b) => a - b);
     const median = sorted[Math.floor(sorted.length / 2)];
     for (const p of perRole) {
-      if (S.pace.shortRoles?.includes(p.role) && p.w > median) warn.push(`${p.id}: ${p.role} is ${p.w} words, above the reel's median ${median} — hook and outro breathe`);
-      if (S.pace.longRoles?.includes(p.role) && p.w < median) warn.push(`${p.id}: ${p.role} is ${p.w} words, below the reel's median ${median} — the evidence carries the detail`);
+      const pace = roleSpec(R, p.role)?.pace;
+      if (pace === 'short' && p.w > median) warn.push(`${p.id}: ${p.role} is ${p.w} words, above the reel's median ${median} — hook and outro breathe`);
+      if (pace === 'long' && p.w < median) warn.push(`${p.id}: ${p.role} is ${p.w} words, below the reel's median ${median} — the evidence carries the detail`);
     }
   }
   if (S.tradeWords?.length && counts.length >= 4) {
@@ -437,21 +452,97 @@ function checkStatus(t, reel) {
 
 function checkArc(t, reel) {
   const n = reel.scenes.length;
-  const msgs = [];
+  const notes = [];
+  const note = (rule, text) => notes.push({sev: sevOf(rule), text});
   if (n < R.arc.minScenes || n > R.arc.maxScenes) {
-    msgs.push(`${n} scenes, outside ${R.arc.minScenes}-${R.arc.maxScenes}`);
+    note('sceneCount', `${n} scenes, outside ${R.arc.minScenes}-${R.arc.maxScenes}`);
   }
   const last = reel.scenes[n - 1];
-  if (last.visual?.type !== 'outro') msgs.push(`last scene is ${last.visual?.type}, expected outro`);
+  if (last.visual?.type !== 'outro') note('outroPanel', `last scene is ${last.visual?.type}, expected outro`);
   const order = R.arc.acts;
   let seen = 0;
   for (const s of reel.scenes) {
     const at = order.indexOf(s.act);
-    if (at < seen) { msgs.push(`${s.id}: act "${s.act}" goes backwards`); break; }
+    if (at < seen) { note('actOrder', `${s.id}: act "${s.act}" goes backwards`); break; }
     seen = at;
   }
-  if (msgs.length) add(t, 'arc', SEV.warn, `${msgs.length} arc note(s)`, msgs.join('; '));
-  else add(t, 'arc', SEV.pass, `${n} scenes, acts move forward, outro last`);
+  const secs = Math.round(reel.scenes.reduce((a, s) => a + (s.duration ?? 0), 0) * 10) / 10;
+  const [lo, hi] = R.arc.totalSecondsWarn ?? [0, Infinity];
+  if (secs < lo || secs > hi) {
+    note('totalSeconds', `${secs}s in all, outside ${lo}-${hi}s — ${secs > hi ? 'cut a scene or tighten the longest ones' : 'the reel ends before its argument lands'}`);
+  }
+  addGraded(t, 'arc', notes, `${n} scenes · ${secs}s, acts move forward, outro last`);
+}
+
+/**
+ * The story the roles tell (content-rules arc.roles, user 2026-09-29): it opens on the hook and
+ * closes on the outro, a role with `minRun` (the history chapters of a timeline) comes in
+ * consecutive runs, and a role with `mustSay` (a scenario) says out loud what it is.
+ */
+function checkRoles(t, reel) {
+  const notes = [];
+  const note = (rule, text) => notes.push({sev: sevOf(rule), text});
+  const roles = reel.scenes.map((s) => roleOf(R, s));
+  for (const [i, s] of reel.scenes.entries()) {
+    if (!roles[i]) note('roleOrder', `${s.id}: no role — set "role" to one of ${roleNames(R).join('|')}`);
+  }
+  const first = roles[0], last = roles[roles.length - 1];
+  if (first && first !== R.arc.firstRole) note('roleOrder', `the reel opens on ${first}, not ${R.arc.firstRole} — the promise has to land in the first seconds`);
+  if (last && last !== R.arc.lastRole) note('roleOrder', `the reel ends on ${last}, not ${R.arc.lastRole}`);
+  for (const role of roleNames(R)) {
+    const need = roleSpec(R, role).minRun;
+    if (!need) continue;
+    for (let i = 0; i < roles.length;) {
+      if (roles[i] !== role) { i++; continue; }
+      let j = i;
+      while (j < roles.length && roles[j] === role) j++;
+      if (j - i < need) note('minRun', `${reel.scenes[i].id}: ${j - i} ${role} in a row, needs ${need} — add its sibling chapters, or relabel a lone one as evidence`);
+      i = j;
+    }
+  }
+  const esc = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const [i, s] of reel.scenes.entries()) {
+    const must = roleSpec(R, roles[i])?.mustSay;
+    if (!must?.length || !s.narration || s.narration.includes('TODO')) continue;
+    const said = must.some((w) => new RegExp(`(?<![\\p{L}\\p{N}])${esc(w)}(?![\\p{L}\\p{N}])`, 'iu').test(s.narration));
+    if (!said) note('mustSay', `${s.id}: a ${roles[i]} has to say it is one — the narration needs ${must.map((w) => `"${w}"`).join(' / ')}, told as an if-then branch, not a call`);
+  }
+  // hook → concept → chapter×3 → …: the arc in one line, repeats folded.
+  const runs = [];
+  for (const r of roles) {
+    const top = runs[runs.length - 1];
+    if (top && top.r === r) top.n++;
+    else runs.push({r: r || '?', n: 1});
+  }
+  addGraded(t, 'roles', notes, runs.map((x) => (x.n > 1 ? `${x.r}×${x.n}` : x.r)).join(' → '));
+}
+
+/**
+ * vox-director's camera rules as SKILL.md 1d states them: neighbouring framings never share a
+ * move, and `static` is saved for a scene's payoff — its last shot. Framings are neighbours inside
+ * a scene, and across a scene cut when the next scene stays on the same photo.
+ */
+function checkCamera(t, reel) {
+  const notes = [];
+  const note = (text) => notes.push({sev: sevOf('shots'), text});
+  let prev = null;
+  let count = 0;
+  for (const s of reel.scenes) {
+    const v = s.visual ?? {};
+    const shots = v.type === 'image' && Array.isArray(v.shots) ? v.shots : [];
+    if (!shots.length) { prev = null; continue; }
+    for (const [j, sh] of shots.entries()) {
+      const move = sh.move ?? 'push_in';
+      count++;
+      if (prev && prev.move === move && (j > 0 || prev.src === v.src)) {
+        note(`${s.id} shot ${j}: ${move} again right after ${prev.id} shot ${prev.j} — change the move with the framing`);
+      }
+      if (move === 'static' && j < shots.length - 1) note(`${s.id} shot ${j}: static before the scene's last shot — hold still only for the payoff`);
+      prev = {src: v.src, move, id: s.id, j};
+    }
+  }
+  if (!count) { add(t, 'camera', SEV.pass, 'no image shots to check'); return; }
+  addGraded(t, 'camera', notes, `${count} shots: no move repeats back to back, static only on a payoff`);
 }
 
 /** Annotations that name a month or year the series does not contain draw nothing. */
@@ -836,6 +927,8 @@ for (const id of ids) {
   checkNarration(t.checks, reel);
   checkStyle(t.checks, reel);
   checkArc(t.checks, reel);
+  checkRoles(t.checks, reel);
+  checkCamera(t.checks, reel);
   checkDataRefs(t.checks, reel);
   checkPictogram(t.checks, reel);
   checkGeometry(t.checks, reel);

@@ -15,6 +15,7 @@
   "scenes": [
     {
       "id": "channel-hook",
+      "role": "hook",
       "eyebrow": "Kháng cự nối hai đỉnh",
       "act": "blue",
       "duration": 6.36,
@@ -247,6 +248,7 @@
     },
     {
       "id": "channel-concept",
+      "role": "concept",
       "eyebrow": "Kênh giá song song",
       "act": "blue",
       "duration": 7.6,
@@ -460,6 +462,7 @@
     },
     {
       "id": "channel-evidence-3",
+      "role": "chapter",
       "eyebrow": "Lần chạm 1 · 2018",
       "act": "blue",
       "duration": 9.02,
@@ -637,6 +640,7 @@
     },
     {
       "id": "channel-evidence-4",
+      "role": "chapter",
       "eyebrow": "Lần chạm 2 · 2022",
       "act": "blue",
       "duration": 8.59,
@@ -816,6 +820,7 @@
     },
     {
       "id": "channel-evidence-5",
+      "role": "chapter",
       "eyebrow": "Lần chạm 3 · 2026",
       "act": "blue",
       "duration": 9.73,
@@ -993,6 +998,7 @@
     },
     {
       "id": "channel-evidence-6",
+      "role": "evidence",
       "eyebrow": "Khung tuần đi trước",
       "act": "blue",
       "duration": 9.63,
@@ -1151,6 +1157,7 @@
     },
     {
       "id": "channel-counterpoint",
+      "role": "counterpoint",
       "eyebrow": "Phản biện",
       "act": "blue",
       "duration": 8.42,
@@ -1307,6 +1314,7 @@
     },
     {
       "id": "channel-principle",
+      "role": "principle",
       "eyebrow": "Rủi ro / phần thưởng",
       "act": "blue",
       "duration": 8.09,
@@ -1512,6 +1520,7 @@
     },
     {
       "id": "channel-mechanism",
+      "role": "scenario",
       "eyebrow": "Kịch bản · không phải dự báo",
       "act": "maroon",
       "duration": 8.16,
@@ -1677,6 +1686,7 @@
     },
     {
       "id": "channel-warning",
+      "role": "levels",
       "eyebrow": "Hai mức phải canh",
       "act": "maroon",
       "duration": 8.19,
@@ -1775,6 +1785,7 @@
     },
     {
       "id": "channel-action",
+      "role": "action",
       "eyebrow": "Việc mình đang làm",
       "act": "amber",
       "duration": 8.22,
@@ -2014,6 +2025,7 @@
     },
     {
       "id": "channel-outro",
+      "role": "outro",
       "eyebrow": "Theo dõi tiếp",
       "act": "navy",
       "duration": 6.38,

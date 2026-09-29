@@ -125,7 +125,7 @@ của `macd` và `endLabel` của `zigzag` chỉ hiện từ `beatIndex >= 1`.
 
 ```
 Reel:  title*  scenes[]*  status  brief  facts  unsupported  disclaimer  ticker  footer  music  musicVolume
-Scene: id*  eyebrow*  act*  duration*  beats[]*  visual*  narration  audio  sentenceStarts  headline
+Scene: id*  role  eyebrow*  act*  duration*  beats[]*  visual*  narration  audio  sentenceStarts  headline
 Beat:  at*  line1*  line2  accent  atSentence
 ```
 
@@ -138,7 +138,8 @@ Beat:  at*  line1*  line2  accent  atSentence
 | `audio`, `sentenceStarts` | **chỉ script** | đừng sửa tay |
 | `status` | `enrich.mjs` đặt `scaffolded`, merge đặt `enriched`, `approve.mjs` đặt `reviewed` | `build` từ chối khi chưa `reviewed` |
 | `brief`, `facts` | `enrich.mjs` | đường dẫn tới brief và fact pack |
-| `_brief`, `_role`, `_words` | `enrich.mjs` | chỉ có trong bản scaffold: ý đồ, vai, và số chữ nhắm theo vai (`style.pace`); merge bỏ đi |
+| `role` | `enrich.mjs` từ H2 của brief; merge giữ, worker không được đổi | vai của scene, một khoá của `arc.roles` (mục 6); verify và trang duyệt đọc nó. Đổi vai scene đã có giọng thì sửa `role`, KHÔNG sửa `id` — id là tên file giọng |
+| `_brief`, `_words`, `_camera` | `enrich.mjs` | chỉ có trong bản scaffold: ý đồ, số chữ nhắm theo nhịp của vai (`arc.roles.<vai>.pace`), máy quay mặc định của vai cho scene ảnh (gợi ý, đạo diễn vẫn đặt `shots`); merge bỏ đi |
 | `unsupported` | merge gom từ worker | mảng `{id, why}` ở CẤP REEL, không phải trong scene — người duyệt phải đọc hết |
 | `headline` | người, hiếm | ghi đè baseline/cỡ chữ; chỉ `outro` dùng, vì nó còn disclaimer bên dưới |
 | `ticker` | người, hoặc `enrich` khi brief có `ticker: daily` | cấp reel: `{symbol, timeframe, asOf, last, prev}` hoặc `false`; mặc định tính từ chuỗi giá (xem mục 3). `last`/`prev` ghi đè close; `verify` soi chúng với fact pack |
@@ -404,46 +405,66 @@ disclaimer: ...                      # tuỳ chọn, mặc định là câu mi�
 ## <vai> · <panel>
 src: public/shots/<tên>.png          # panel image: ảnh đã chụp bằng scripts/shoot.mjs (có sidecar .json)
 source: fireant.vn                   # chip nguồn trên ảnh; caption:/fit:/focus: cũng nhận ở đây
+act: blue                            # tuỳ chọn: act riêng của scene này, thắng act đầu brief và act của vai
 Một hai dòng ý đồ. Viết như đạo diễn dặn, không phải như kịch bản.
 ```
 
 Dòng `key: value` trong scene là TRƯỜNG của panel, không phải ý đồ; enrich điền thẳng vào
-`visual`. Ý đồ là những dòng còn lại.
+`visual` — trừ `act:`, thuộc về scene. Ý đồ là những dòng còn lại.
 
 `name` sinh ra `content/<name>.json`, `content/<name>.facts.json`, id scene `<name>-<vai>` và
 từ đó file giọng `public/voiceover/NN-<scene id>.wav`. Composition id thì bạn tự đặt khi đăng ký ở
 `src/Root.tsx` — quy ước là viết hoa chữ đầu (`liquidity` → `Liquidity`), chữ viết tắt thì viết
 hoa cả (`RSI`, `MACD`).
 
-### Chín vai
+### Vai — định nghĩa ở `arc.roles`
 
-Lấy từ `arc.roles`. Scene đầu phải là `hook`, scene cuối phải là `outro`, tổng
-`arc.minScenes`-`arc.maxScenes` scene.
+Mỗi vai là một khoá của `arc.roles` trong `src/shared/content-rules.json`, xếp theo thứ tự kể. Đó là
+định nghĩa DUY NHẤT (người dùng chốt 2026-09-29, sau khi act nằm trong `enrich.mjs`, nhịp ở `style.pace`,
+việc của vai ở bảng tại đây, và ba script tự đoán vai từ id — bảng cũ ở mục này còn gợi ý những panel đã
+tắt hay bị cấm). Mỗi vai mang:
 
-| Vai | Làm gì trong mạch | Panel hay dùng |
-|---|---|---|
-| `hook` | Câu mở — một con số hoặc một nghịch lý giữ người xem lại | `candles` `rsi` |
-| `evidence` | Bằng chứng: so sánh, đếm, đối chiếu lịch sử | `bars` `candles` `pictogram` |
-| `concept` | Giải thích chỉ báo hay cơ chế đang nói tới | `list` `macd` `rsi` |
-| `counterpoint` | Lật lại điều người xem đang tin | `bars` `pictogram` |
-| `mechanism` | Chuyện xảy ra theo trình tự nào | `zigzag` `macd` |
-| `warning` | Ai hoặc cái gì dễ gãy | `cards` |
-| `action` | Việc cần làm, dạng checklist | `list` |
-| `principle` | Một câu nguyên tắc đọng lại | `riskReward` |
-| `outro` | Chào cuối: thả tim · chia sẻ · theo dõi, một câu hứa cập nhật; không số, không thuật ngữ (mục "Outro" của `prompts/scene-writer.md`) | `outro` |
+- `job` — scene đó làm gì trong mạch; người viết đọc chính dòng này;
+- `act` — màu nền mặc định; scene đặt `act:` riêng trong brief khi màu mặc định sai nghĩa (một
+  `scenario` tăng giá không mang màu cảnh báo);
+- `pace` — `short`/`mid`/`long`: `_words` enrich nhắm, và check `style` giữ vai `short` không dài hơn
+  trung vị chữ của reel, vai `long` không ngắn hơn;
+- `shots` — máy quay mặc định, một `move` mỗi beat, lấy từ bản `channel` đã duyệt; enrich ghi thành
+  `_camera` làm gợi ý, đạo diễn vẫn đặt từng `shots` sau khi nhìn ảnh;
+- `mustSay` (`scenario`) — lời đọc phải có một chữ trong đó; `minRun` (`chapter`) — đi thành chuỗi liền nhau.
 
-Vai chỉ định mạch kể; nó **không** khoá panel. `act` suy từ vai: `outro` → navy,
-`action` → amber, `warning`/`mechanism` → maroon, còn lại → blue.
+In bảng hiện hành thay vì chép ra đây:
+
+```bash
+node -e 'const r=require("./src/shared/content-rules.json").arc.roles;for(const[k,v]of Object.entries(r))console.log(k.padEnd(13),v.act.padEnd(7),v.pace.padEnd(6),(v.shots??[]).join(" → ").padEnd(20),v.job)'
+```
+
+Reel phân tích chart dùng ba vai riêng: các lần lịch sử là `chapter` (cùng khuôn, ít nhất hai chương liền
+nhau — một chương đứng lẻ là `evidence`), kịch bản "nếu … thì" là `scenario`, các mức phải canh phía trên và
+phía dưới là `levels`. Vai chỉ định mạch kể; nó **không** khoá panel — nhưng scene có số trên màn hình là
+ảnh chart có mark (mục 1).
+
+Luật mạch có script gác (mức FAIL/WARN của từng luật ở `arc.severity`):
+
+| Check | Soi gì |
+|---|---|
+| `roles` | scene đầu là `arc.firstRole`, scene cuối là `arc.lastRole`, scene nào cũng có vai; chuỗi `minRun`; lời `scenario` có chữ của `mustSay` |
+| `arc` | số scene trong `arc.minScenes`–`arc.maxScenes`, act không đi ngược, scene cuối là panel `outro`, tổng thời lượng trong `arc.totalSecondsWarn` |
+| `camera` | hai khung máy liền nhau không cùng `move` (trong scene, và qua ranh giới scene khi vẫn cùng ảnh); `static` chỉ ở khung cuối của scene — payoff |
+
+Scene mang trường `role` (enrich ghi, merge giữ). Scene scaffold trước 2026-09-29 không có trường đó thì
+script đọc vai từ id (`<tên>-<vai>[-n]`). Đổi vai một scene đã có giọng: sửa `role`, KHÔNG sửa `id`.
 
 ### Sai thì báo ngay
 
 ```
-Scene 2: role "villain" is not one of hook|evidence|...|outro
+Scene 2: role "villain" is not one of hook|concept|...|outro
 Scene 1: panel "donut" is not one of candles|macd|...|outro
+Scene 8: act "red" is not one of blue|maroon|amber|navy
 No scenes found. Each scene is an H2: "## <role> · <panel>".
 ```
 
-Cả ba đều thoát mã `2` trước khi ghi file nào.
+Cả bốn đều thoát mã `2` trước khi ghi file nào — kể cả fact pack.
 
 ## 8. Trang duyệt — `scripts/review-page.mjs`
 

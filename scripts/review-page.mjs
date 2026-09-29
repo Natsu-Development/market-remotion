@@ -30,6 +30,7 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {basename, dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {reels} from './lib/reels.mjs';
+import {roleOf as roleIn, roleSpec} from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
@@ -127,10 +128,7 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 const words = (t) => String(t ?? '').trim().split(/\s+/).filter(Boolean).length;
 const num = (n) => (typeof n === 'number' ? String(Math.round(n * 100) / 100).replace('.', ',') : esc(n));
 const mmss = (fr) => { const s = Math.round(fr / fps); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
-const roleOf = (scene) => {
-  const parts = scene.id.split('-').filter((p) => !/^\d+$/.test(p));
-  return [...parts].reverse().find((p) => R.arc.roles.includes(p)) ?? '';
-};
+const roleOf = (scene) => roleIn(R, scene);
 const headline = (b) => [b.line1, b.line2].filter(Boolean).join(' / ');
 /** vox-director shot sizes, from how far the camera has zoomed into the photo. */
 const shotSize = (z) => (z < 1.15 ? 'EST_WIDE' : z < 1.6 ? 'WIDE' : z < 2.2 ? 'MEDIUM' : z < 3 ? 'CLOSE' : 'DETAIL');
@@ -139,11 +137,15 @@ const LEVEL = {pass: ['Đạt', 'pass'], warn: ['Cần sửa', 'warn'], fail: ['
 const sevClass = (c) => ({fail: 'fail', warn: 'warn', pass: 'pass', skip: 'warn'}[sev(c)] ?? 'warn');
 const sevText = (c) => ({fail: 'FAIL', warn: 'WARN', pass: 'PASS', skip: 'SKIP'}[sev(c)] ?? '?');
 
-/** Director intent per scene, in brief order (H2 sections, minus the visual key lines). */
+/**
+ * Director intent per scene, in brief order (H2 sections, minus the visual key lines). The
+ * section runs to the next H2 or the end of the file — `(?![\s\S])`, because under the `m` flag
+ * a bare `$` ends it at the first line break and kept only a section's first line.
+ */
 const intents = brief
-  ? [...brief.matchAll(/^## ([^\n]+)\n([\s\S]*?)(?=\n## |\s*$)/gm)].map((m) => ({
+  ? [...brief.matchAll(/^## ([^\n]+)\n([\s\S]*?)(?=\n## |\s*(?![\s\S]))/gm)].map((m) => ({
       head: m[1].trim(),
-      lines: m[2].split('\n').map((l) => l.trim()).filter((l) => l && !/^(src|source|fit|focus|caption|zoom|sourceCorner):/.test(l)),
+      lines: m[2].split('\n').map((l) => l.trim()).filter((l) => l && !/^(src|source|fit|focus|caption|zoom|sourceCorner|act):/.test(l)),
     }))
   : [];
 
@@ -205,6 +207,7 @@ const sceneHtml = reel.scenes.map((s, i) => {
       ${s.beats.map((b, k) => `<div class="beat"><span class="beat-k">beat ${k + 1}${b.atSentence != null ? ` · câu ${b.atSentence + 1}` : ''}</span><div class="l1">${esc(b.line1)}</div>${b.line2 ? `<div class="l2" style="color:${ACCENT[b.accent ?? 'gold'] ?? ACCENT.gold}">${esc(b.line2)}</div>` : ''}</div>`).join('')}
     </div>
     <blockquote class="narration">${esc(s.narration)}</blockquote>
+    ${roleSpec(R, roleOf(s)) ? `<div class="kv"><span class="k">Vai · ${esc(roleOf(s))}</span><p class="intent">${esc(roleSpec(R, roleOf(s)).job)}</p></div>` : ''}
     ${panel.length ? `<div class="kv"><span class="k">Panel</span><ul>${panel.map((p) => `<li>${p}</li>`).join('')}</ul></div>` : ''}
     ${cam.length ? `<div class="kv"><span class="k">Máy quay (shot)</span><ul>${cam.map((p) => `<li>${p}</li>`).join('')}</ul></div>` : ''}
     ${ann.length ? `<div class="kv"><span class="k">Mark trên ảnh</span><ul>${ann.map((p) => `<li>${p}</li>`).join('')}</ul></div>` : ''}

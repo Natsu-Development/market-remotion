@@ -2,7 +2,7 @@
 /**
  * Marks a reel reviewed, which is what opens the fan-out to voiceover and render.
  *
- *   npm run approve -- RSI
+ *   npm run approve -- Channel
  *
  * Deliberately a separate command rather than a flag on the build: the point is
  * that a person read the words. It refuses while verify still reports an error,

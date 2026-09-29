@@ -241,6 +241,33 @@ const Mark: React.FC<{a: ImageAnnotation; rect: Rect; view: Rect; s: number; ui?
     case 'arrow': {
       const [x1, y1] = [X(a.from[0]), Y(a.from[1])];
       const [x2, y2] = [X(a.to[0]), Y(a.to[1])];
+      if ('style' in a && a.style === 'block') {
+        // A solid signal arrow for a single session (market-review's distribution days and FTD, user
+        // 2026-09-29: the thin line arrow was "so hard to see"). Thick shaft, wide head, a white rim so
+        // a red arrow never melts into a red candle, and a dark halo that lifts it off the chart. It
+        // grows from the tail; the tip lands on `to`.
+        const k = 'weight' in a && typeof a.weight === 'number' ? a.weight : 1;
+        const L = Math.hypot(x2 - x1, y2 - y1) || 1;
+        const ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+        const vx = -uy, vy = ux;
+        const hl = Math.min(sw(20 * k), L * 0.6);
+        const hh = sw(12 * k);
+        const hw = sw(4.5 * k);
+        const len = Math.max(hl, L * s);
+        const tx = x1 + ux * len, ty = y1 + uy * len;
+        const bx = tx - ux * hl, by = ty - uy * hl;
+        const pts = [
+          [x1 + vx * hw, y1 + vy * hw], [bx + vx * hw, by + vy * hw], [bx + vx * hh, by + vy * hh], [tx, ty],
+          [bx - vx * hh, by - vy * hh], [bx - vx * hw, by - vy * hw], [x1 - vx * hw, y1 - vy * hw],
+        ].map(([px, py]) => `${px.toFixed(2)},${py.toFixed(2)}`).join(' ');
+        return (
+          <g opacity={Math.min(1, s * 1.6)}>
+            <polygon points={pts} fill="none" stroke="rgba(4, 6, 10, 0.72)" strokeWidth={sw(7)} strokeLinejoin="round" />
+            <polygon points={pts} fill={c} stroke="#FFFFFF" strokeWidth={sw(2.2)} strokeLinejoin="round" paintOrder="stroke" />
+            {a.label ? <Halo ui={ui} x={x1} y={y1 - sw(10)} text={a.label} color={c} anchor={x2 < x1 ? 'end' : 'start'} opacity={Math.max(0, s * 1.4 - 0.4)} /> : null}
+          </g>
+        );
+      }
       const ex = x1 + (x2 - x1) * s;
       const ey = y1 + (y2 - y1) * s;
       const ang = Math.atan2(y2 - y1, x2 - x1);

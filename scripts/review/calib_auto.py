@@ -94,6 +94,28 @@ r = subprocess.run([sys.executable, str(here.parent / 'calib_chart.py'), json.du
 if r.returncode != 0:
     sys.exit(f'calib_auto: calib_chart.py failed\n{r.stderr}')
 out = json.loads(r.stdout.strip().splitlines()[-1])
+
+# Refine the TIME axis on the candle columns themselves. calib_chart.py scores a fit by the tops and
+# bottoms it reads at each predicted x, which barely changes when x is off by less than half a candle
+# (its neighbour is only ~6 px away) — measured 2026-09-29 on FireAnt daily: y median 0.54 px, yet the
+# tips of the distribution-day arrows sat 2.4 px left of their candles. Match every detected column to
+# the session it must be (k sessions before the last) and least-squares c = last_x - d*k.
+lx, dd = out['last_x'], out['d']
+for _ in range(3):
+    pairs = []
+    for c in centres:
+        k = round((lx - c) / dd)
+        if 0 <= k < out['n'] and abs(lx - dd * k - c) < 0.45 * dd:
+            pairs.append((k, c))
+    if len(pairs) < max(10, out['n'] // 3):
+        break
+    K = np.array([p[0] for p in pairs], float)
+    Cc = np.array([p[1] for p in pairs], float)
+    slope, icept = np.polyfit(K, Cc, 1)          # c = icept + slope*k, slope = -d
+    lx, dd = float(icept), float(-slope)
+res = [abs(lx - dd * k - c) for k, c in pairs] if pairs else [float('nan')]
+out['xFit'] = {'from': {'last_x': out['last_x'], 'd': out['d']}, 'matched': len(pairs), 'res_med': float(np.median(res)), 'res_p90': float(np.percentile(res, 90))}
+out['last_x'], out['d'] = lx, dd
 out['pane'] = job['pane']
 out['columnsFound'] = len(centres)
 json.dump(out, open(spec['out'], 'w'), indent=1)

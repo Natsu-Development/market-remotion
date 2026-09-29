@@ -101,8 +101,13 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 
 | Scene | Beat 1 | Beat 2 |
 |---|---|---|
-| hook | vòng xanh ở nến FTD + nhãn "FTD d/m ±x%" (khi FTD nằm trong ảnh) | vline đỏ ở từng phiên phân phối, nhãn "N phiên phân phối", vòng vàng ở nến hôm nay; máy cận và lia |
-| market | vline phân phối, nhãn "N/25 phiên phân phối", nhãn phiên phân phối nặng nhất | vòng xanh ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
+| hook | mũi tên XANH DƯƠNG chỉ LÊN đáy nến FTD + nhãn "FTD d/m ±x%" (khi FTD nằm trong ảnh) | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối, nhãn "N phiên phân phối", vòng vàng ở nến hôm nay; máy cận và lia |
+| market | mũi tên đỏ trên từng phiên phân phối, nhãn "N/25 phiên phân phối", nhãn phiên nặng nhất | mũi tên xanh dương ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
+
+Người dùng chốt 2026-09-29: phiên phân phối và FTD là MŨI TÊN chỉ đúng vào nến — đỏ chỉ xuống (màu giảm), xanh dương
+`#3D8BFF` chỉ lên (màu tăng; accent `blue` mới trong `src/theme.ts`, qua validator: ΔE mù màu 29,5 với đỏ trên nền
+FireAnt). Đầu mũi tên cách đỉnh/đáy nến `GAP`, thân dài `ARROW`, `weight: 2`. Trục thời gian của hiệu chỉnh được khớp
+lại trên chính các cột nến (`calib_auto.py`, `xFit`) — chỉ dùng `calib_chart.py` thì đầu mũi tên lệch ~0,4 nến.
 | spike | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
 | leaders | hộp quanh ba dòng; nhãn "N mã qua RS Strong + Uptrend" | hộp từng ô RS 1M, máy cận |
 | leader | nhãn "MÃ · RS 1M … · ±x%", hline EMA50 | mũi tên vào nến cuối "±x% trên EMA50", máy cận |

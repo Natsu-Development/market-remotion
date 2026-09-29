@@ -135,7 +135,27 @@ const dd = F.distribution.active;
 const ddXs = dd.map((d) => ({...d, x: barX(index, daily, d.date)})).filter((d) => d.x != null && d.x > 0 && d.x < 1);
 const lastX = barX(index, daily, date);
 const lastY = priceY(index, F.session.close, indexUnit);
-const idxMarks = (beat, until) => ddXs.map((d) => ({kind: 'vline', x: clamp(d.x), accent: 'red', beat, ...(until != null ? {until} : {})}));
+/**
+ * Distribution days and the FTD are ARROWS whose tip touches the candle (user, 2026-09-29): red
+ * pointing DOWN onto each distribution day's high, blue pointing UP at the FTD's low. The tip sits
+ * GAP above the wick (below for the FTD) so it never covers it; the shaft is ARROW long. Positions
+ * come from the photo's calibration: x of the session, y of its high/low.
+ */
+const ARROW = 0.055;
+const GAP = 0.01;
+const WEIGHT = 2;
+const barOf = (t) => daily.find((b) => b.t === t);
+const ddArrow = (d, beat) => {
+  const tip = priceY(index, barOf(d.date).h, indexUnit) - GAP;
+  return {kind: 'arrow', from: [clamp(d.x), clamp(tip - ARROW)], to: [clamp(d.x), clamp(tip)], accent: 'red', beat, weight: WEIGHT};
+};
+const ftdArrow = (f, x, beat) => {
+  const tip = priceY(index, barOf(f.date).l, indexUnit) + GAP;
+  return {kind: 'arrow', from: [clamp(x), clamp(tip + ARROW)], to: [clamp(x), clamp(tip)], accent: 'blue', beat, weight: WEIGHT};
+};
+const ftdBase = (f) => priceY(index, barOf(f.date).l, indexUnit) + GAP + ARROW;
+const idxMarks = (beat) => ddXs.map((d) => ddArrow(d, beat));
+const ddTop = () => Math.min(...ddXs.map((d) => priceY(index, barOf(d.date).h, indexUnit))) - GAP - ARROW;
 const fmtPct = (n, dp = 2) => `${signed(n, dp)}%`;
 const lab = (x, y, text, accent, beat, anchor) => ({kind: 'label', x: clamp(x), y: clamp(y), text, accent, beat, ...(anchor ? {anchor} : {})});
 const cropOf = (c) => (c ? {crop: c} : {});
@@ -152,10 +172,10 @@ const ftdIn = (() => {
 const recentTop = Math.min(...daily.slice(-15).map((b) => priceY(index, b.h, indexUnit)));
 const hookMarks = ftdIn
   ? [
-      {kind: 'circle', x: clamp(ftdIn.x), y: clamp(ftdIn.y), r: 0.03, accent: 'green', beat: 0},
-      lab(ftdIn.x, clamp(ftdIn.y - 0.07), `FTD ${ftdIn.f.dm} ${fmtPct(ftdIn.f.changePercent)}`, 'green', 0, ftdIn.x > 0.6 ? 'end' : 'start'),
+      ftdArrow(ftdIn.f, ftdIn.x, 0),
+      lab(ftdIn.x, clamp(ftdBase(ftdIn.f) + 0.03), `FTD ${ftdIn.f.dm} ${fmtPct(ftdIn.f.changePercent)}`, 'blue', 0, 'middle'),
       ...idxMarks(1),
-      ...(ddXs.length ? [lab(Math.min(...ddXs.map((d) => d.x)) - 0.01, clamp(recentTop - 0.05), `${F.distribution.count} phiên phân phối`, 'red', 1, 'end')] : []),
+      ...(ddXs.length ? [lab(Math.min(...ddXs.map((d) => d.x)) - 0.012, clamp(Math.min(ddTop(), recentTop - GAP - ARROW) + 0.01), `${F.distribution.count} phiên phân phối`, 'red', 1, 'end')] : []),
       {kind: 'circle', x: clamp(lastX), y: clamp(lastY), r: 0.022, accent: 'gold', beat: 1},
     ]
   : idxMarks(0);
@@ -202,10 +222,10 @@ const marketMarks = [
   lab(...inC(0.5, 0.06), `${F.distribution.count}/${F.distribution.window} phiên phân phối`, 'red', 0),
 ];
 const biggest = [...ddXs].sort((a, b) => a.changePercent - b.changePercent)[0];
-if (biggest) marketMarks.push(lab(biggest.x, inC(0, 0.15)[1], `${biggest.dm} ${fmtPct(biggest.changePercent)} · KL ×${vi(biggest.volumeRatio)}`, 'red', 0, biggest.x > 0.6 ? 'end' : 'start'));
-if (ftd && ftdX != null && ftdX > 0 && ftdX < 1) {
-  marketMarks.push({kind: 'circle', x: clamp(ftdX), y: clamp(priceY(index, ftd.close, indexUnit)), r: 0.03, accent: 'green', beat: 1});
-  marketMarks.push(lab(ftdX, clamp(priceY(index, ftd.close, indexUnit) - 0.07), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', 1, ftdX > 0.6 ? 'end' : 'start'));
+if (biggest) marketMarks.push(lab(biggest.x - 0.012, clamp(priceY(index, barOf(biggest.date).h, indexUnit) - GAP - ARROW / 2), `${biggest.dm} ${fmtPct(biggest.changePercent)} · KL ×${vi(biggest.volumeRatio)}`, 'red', 0, 'end'));
+if (ftd && ftdX != null && ftdX > C.x && ftdX < C.x + C.w) {
+  marketMarks.push(ftdArrow(ftd, ftdX, 1));
+  marketMarks.push(lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'blue', 1, 'middle'));
 }
 const holdLow = F.state.rallyLow ?? F.state.correctionLow;
 const holdY = holdLow != null ? priceY(index, holdLow, indexUnit) : null;
@@ -219,7 +239,7 @@ push('market', {
     ...cropOf(indexCrop), ...maskOf(indexMasks),
     annotations: marketMarks,
     shots: [
-      {beat: 0, x: clamp(ddXs.length ? (Math.min(...ddXs.map((d) => d.x)) + (lastX ?? 0.9)) / 2 : inC(0.75, 0)[0]), y: inC(0, 0.45)[1], zoom: 1.35, move: 'pan'},
+      {beat: 0, x: clamp(ddXs.length ? (Math.min(...ddXs.map((d) => d.x)) + (lastX ?? 0.9)) / 2 : inC(0.75, 0)[0]), y: inC(0, 0.45)[1], zoom: 1.35, move: 'push_in'},
       {beat: 1, x: inC(0.5, 0)[0], y: inC(0, 0.5)[1], zoom: 1.0, move: 'pull_out'},
     ],
   }),

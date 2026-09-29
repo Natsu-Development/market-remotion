@@ -98,44 +98,74 @@
         "maskColor": "#161921",
         "annotations": [
           {
-            "kind": "circle",
-            "x": 0.629,
-            "y": 0.4035,
-            "r": 0.03,
-            "accent": "green",
-            "beat": 0
-          },
-          {
-            "kind": "label",
-            "x": 0.629,
-            "y": 0.3335,
-            "text": "FTD 3/8 +1,56%",
-            "accent": "green",
+            "kind": "arrow",
+            "from": [
+              0.6296,
+              0.4993
+            ],
+            "to": [
+              0.6296,
+              0.4443
+            ],
+            "accent": "blue",
             "beat": 0,
-            "anchor": "end"
-          },
-          {
-            "kind": "vline",
-            "x": 0.7731,
-            "accent": "red",
-            "beat": 1
-          },
-          {
-            "kind": "vline",
-            "x": 0.8174,
-            "accent": "red",
-            "beat": 1
-          },
-          {
-            "kind": "vline",
-            "x": 0.823,
-            "accent": "red",
-            "beat": 1
+            "weight": 2
           },
           {
             "kind": "label",
-            "x": 0.7631,
-            "y": 0.2508,
+            "x": 0.6296,
+            "y": 0.5293,
+            "text": "FTD 3/8 +1,56%",
+            "accent": "blue",
+            "beat": 0,
+            "anchor": "middle"
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.7741,
+              0.2668
+            ],
+            "to": [
+              0.7741,
+              0.3218
+            ],
+            "accent": "red",
+            "beat": 1,
+            "weight": 2
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.8185,
+              0.2665
+            ],
+            "to": [
+              0.8185,
+              0.3215
+            ],
+            "accent": "red",
+            "beat": 1,
+            "weight": 2
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.8241,
+              0.2925
+            ],
+            "to": [
+              0.8241,
+              0.3475
+            ],
+            "accent": "red",
+            "beat": 1,
+            "weight": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.7621,
+            "y": 0.2458,
             "text": "3 phiên phân phối",
             "accent": "red",
             "beat": 1,
@@ -143,7 +173,7 @@
           },
           {
             "kind": "circle",
-            "x": 0.8396,
+            "x": 0.8407,
             "y": 0.3856,
             "r": 0.022,
             "accent": "gold",
@@ -153,14 +183,14 @@
         "shots": [
           {
             "beat": 0,
-            "x": 0.7343,
+            "x": 0.7352,
             "y": 0.3946,
             "zoom": 1.5,
             "move": "push_in"
           },
           {
             "beat": 1,
-            "x": 0.7596,
+            "x": 0.7607,
             "y": 0.3856,
             "zoom": 2.3,
             "move": "pan"
@@ -200,71 +230,146 @@
       ],
       "visual": {
         "type": "image",
-        "src": "shots/review/2026-09-29/vnindex-terminal.png",
-        "source": "zionle.io.vn",
+        "src": "shots/review/2026-09-29/vnindex-daily.png",
+        "source": "fireant.vn",
         "fit": "contain",
         "crop": {
-          "x": 0.4,
-          "y": 0,
-          "w": 0.555,
-          "h": 0.697
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
         },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
         "annotations": [
           {
-            "kind": "vline",
-            "x": 0.9088,
+            "kind": "arrow",
+            "from": [
+              0.7741,
+              0.2668
+            ],
+            "to": [
+              0.7741,
+              0.3218
+            ],
             "accent": "red",
-            "beat": 0
+            "beat": 0,
+            "weight": 2
           },
           {
-            "kind": "vline",
-            "x": 0.9383,
+            "kind": "arrow",
+            "from": [
+              0.8185,
+              0.2665
+            ],
+            "to": [
+              0.8185,
+              0.3215
+            ],
             "accent": "red",
-            "beat": 0
+            "beat": 0,
+            "weight": 2
           },
           {
-            "kind": "vline",
-            "x": 0.942,
+            "kind": "arrow",
+            "from": [
+              0.8241,
+              0.2925
+            ],
+            "to": [
+              0.8241,
+              0.3475
+            ],
             "accent": "red",
-            "beat": 0
+            "beat": 0,
+            "weight": 2
           },
           {
             "kind": "label",
-            "x": 0.6775,
-            "y": 0.0418,
+            "x": 0.5125,
+            "y": 0.2071,
             "text": "3/25 phiên phân phối",
             "accent": "red",
             "beat": 0
           },
           {
             "kind": "label",
-            "x": 0.9088,
-            "y": 0.1046,
+            "x": 0.7621,
+            "y": 0.2943,
             "text": "11/9 −1,86% · KL ×1,64",
             "accent": "red",
             "beat": 0,
             "anchor": "end"
           },
           {
-            "kind": "circle",
-            "x": 0.813,
-            "y": 0.2844,
-            "r": 0.03,
-            "accent": "green",
-            "beat": 1
+            "kind": "arrow",
+            "from": [
+              0.6296,
+              0.4993
+            ],
+            "to": [
+              0.6296,
+              0.4443
+            ],
+            "accent": "blue",
+            "beat": 1,
+            "weight": 2
           },
           {
             "kind": "label",
-            "x": 0.813,
-            "y": 0.2144,
+            "x": 0.6296,
+            "y": 0.5293,
             "text": "FTD 3/8 +1,56%",
-            "accent": "green",
+            "accent": "blue",
             "beat": 1,
-            "anchor": "end"
+            "anchor": "middle"
           },
           {
             "kind": "hline",
-            "y": 0.4283,
+            "y": 0.5379,
             "accent": "gold",
             "beat": 1,
             "label": "Đáy nhịp hồi 1651,20",
@@ -274,15 +379,15 @@
         "shots": [
           {
             "beat": 0,
-            "x": 0.931,
-            "y": 0.31365,
+            "x": 0.8074,
+            "y": 0.51839,
             "zoom": 1.35,
-            "move": "pan"
+            "move": "push_in"
           },
           {
             "beat": 1,
-            "x": 0.6775,
-            "y": 0.3485,
+            "x": 0.5125,
+            "y": 0.5583,
             "zoom": 1,
             "move": "pull_out"
           }

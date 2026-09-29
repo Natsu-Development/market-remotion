@@ -25,7 +25,10 @@ Tra cứu (file, API, công thức ảnh, đặc tả DD/FTD): [reference.md](re
    12:00 là giữa phiên). Chạy sớm hơn thì `pull.mjs` dừng ở cửa chặn độ tươi — đúng ý, đừng lách.
 2. `ps -Ao command | grep "[r]emotion render"` — có render đang chạy thì đợi.
 3. **Chrome.** Ảnh FireAnt chụp bằng Chrome THẬT của người dùng (như market-video): nói với họ đừng đụng
-   chuột ~25 giây. Không chụp được thì reel dùng chart VNINDEX của terminal (headless) và trang duyệt nói rõ.
+   chuột ~25 giây. Màn hình ngủ (CGSSessionScreenIsLocked = true, System Events thấy 0 cửa sổ, screencapture
+   chỉ ra hình nền) thì `shots.mjs` tự đánh thức bằng phím Space như video-factory — máy không đặt mật khẩu
+   (`sysadminctl -screenLock status`: off). Space rồi vẫn khoá thì là khoá thật: dừng, không gõ mật khẩu hộ ai.
+   Không chụp được thì reel dùng chart VNINDEX của terminal (headless) và trang duyệt nói rõ.
 
 ## 1. Kéo số — GET, cộng ĐÚNG MỘT POST được phép
 
@@ -155,5 +158,10 @@ khoảng lặng, khung hai bên mốc beat). Không lồng tiếng hai reel cùn
 - `/analyze` với `1W`/`1M`/`4H` trả 500 — nến tuần gộp từ SSI.
 - Ba mã hoà RS 1M 94 (BSR, MSR, PVT ngày 29/9): thứ tự trong ảnh có thể khác, tập hợp phải trùng.
 - Chart terminal: pane giá là y 0–0,54, trục giá từ x 0,956 (thẻ giá trendline cùng màu nến) — crop bỏ trục.
-- FireAnt 29/9: `shoot_real` không mở được cửa sổ app ("no new Chrome app window") dù Chrome đang chạy —
-  reel dùng chart terminal; hỏi người dùng Chrome/hồ sơ có đang mở và màn hình không khoá.
+- FireAnt 29/9: "no new Chrome app window … appeared" = màn hình NGỦ, không phải Chrome hỏng (người dùng nhìn
+  thấy màn hình sáng — đó là màn khoá/hình nền). Space đánh thức, chụp ngay được.
+- Nút khung thời gian của FireAnt tự chọn cỡ nến và bấm interval sau đó GIỮ SỐ NẾN: `3p` rồi `D` ra 15 tháng nến
+  ngày, `6p` một mình ra nến 2 giờ (và để lại tab của người dùng ở 2h — lượt sau bấm D trả về 1D). Công thức
+  đúng: `--interval=D --reset-view` → ~6,5 tháng nến ngày, nến cuối sát mép phải; hiệu chỉnh 142 nến, trung vị 0,54 px.
+- Scene 1 (hook) là ảnh FireAnt có GHIM (người dùng yêu cầu 29/9): beat 1 vòng quanh nến FTD, beat 2 vline
+  các phiên phân phối + vòng vàng nến hôm nay; câu ghim beat 2 nói "… có ba phiên phân phối".

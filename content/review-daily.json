@@ -23,64 +23,156 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Phiên hôm nay giảm nhẹ, khối lượng thấp. Không phải phiên phân phối. Theo quy tắc, vẫn là xu hướng tăng xác nhận.",
+      "narration": "Theo quy tắc, xu hướng tăng vẫn được xác nhận. Mốc là phiên FTD ba tháng tám. Sau đó có ba phiên phân phối, hôm nay không thêm phiên nào.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "−0,17%, không phân phối",
-          "line2": "Vẫn xu hướng tăng xác nhận",
+          "line1": "Vẫn xu hướng tăng xác nhận",
+          "line2": "Mốc: phiên FTD 3/8",
           "accent": "green"
+        },
+        {
+          "atSentence": 2,
+          "at": 4.2,
+          "line1": "3 phiên phân phối",
+          "line2": "Hôm nay không thêm phiên",
+          "accent": "gold"
         }
       ],
       "visual": {
         "type": "image",
-        "src": "shots/review/2026-09-29/vnindex-terminal.png",
-        "source": "zionle.io.vn",
+        "src": "shots/review/2026-09-29/vnindex-daily.png",
+        "source": "fireant.vn",
         "fit": "contain",
         "crop": {
-          "x": 0.4,
-          "y": 0,
-          "w": 0.555,
-          "h": 0.697
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
         },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
         "annotations": [
           {
-            "kind": "vline",
-            "x": 0.9088,
-            "accent": "red",
+            "kind": "circle",
+            "x": 0.629,
+            "y": 0.4035,
+            "r": 0.03,
+            "accent": "green",
             "beat": 0
           },
           {
-            "kind": "vline",
-            "x": 0.9383,
-            "accent": "red",
-            "beat": 0
+            "kind": "label",
+            "x": 0.629,
+            "y": 0.3335,
+            "text": "FTD 3/8 +1,56%",
+            "accent": "green",
+            "beat": 0,
+            "anchor": "end"
           },
           {
             "kind": "vline",
-            "x": 0.942,
+            "x": 0.7731,
             "accent": "red",
-            "beat": 0
+            "beat": 1
+          },
+          {
+            "kind": "vline",
+            "x": 0.8174,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "vline",
+            "x": 0.823,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7631,
+            "y": 0.2508,
+            "text": "3 phiên phân phối",
+            "accent": "red",
+            "beat": 1,
+            "anchor": "end"
+          },
+          {
+            "kind": "circle",
+            "x": 0.8396,
+            "y": 0.3856,
+            "r": 0.022,
+            "accent": "gold",
+            "beat": 1
           }
         ],
         "shots": [
           {
             "beat": 0,
-            "x": 0.8831,
-            "y": 0.2652,
-            "zoom": 2,
+            "x": 0.7343,
+            "y": 0.3946,
+            "zoom": 1.5,
             "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.7596,
+            "y": 0.3856,
+            "zoom": 2.3,
+            "move": "pan"
           }
         ]
       },
       "citedFacts": [
-        "session.changePercent",
-        "session.volumeRatio",
-        "session.volumeVsAvg20",
-        "session.isDistribution",
         "state.status",
-        "state.label"
+        "state.ftd.date",
+        "state.ftd.changePercent",
+        "distribution.count",
+        "session.isDistribution"
       ]
     },
     {
@@ -89,7 +181,7 @@
       "eyebrow": "Trạng thái theo quy tắc",
       "act": "blue",
       "duration": 10.1,
-      "narration": "Nhưng còn ba phiên phân phối, phiên cũ nhất hết hạn sau mười hai phiên. Thêm một là chịu áp lực, thêm ba là điều chỉnh. Nếu thủng đáy nhịp hồi, phiên xác nhận xu hướng ngày ba tháng tám thất bại. Vậy tiền vào đâu?",
+      "narration": "Ba phiên ấy vẫn còn hiệu lực, phiên cũ nhất hết hạn sau mười hai phiên. Thêm một là chịu áp lực, thêm ba là điều chỉnh. Nếu thủng đáy nhịp hồi, phiên xác nhận xu hướng ngày ba tháng tám thất bại. Vậy tiền vào đâu?",
       "beats": [
         {
           "atSentence": 0,

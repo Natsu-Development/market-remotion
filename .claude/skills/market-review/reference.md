@@ -87,7 +87,7 @@ trên trung bình 20 phiên — đối chiếu tại chỗ khớp 100% với cá
 
 | Ảnh | Lệnh (shots.mjs tự gọi) | Ghi chú |
 |---|---|---|
-| FireAnt VNINDEX ngày | `shoot.mjs --site=fireant --symbol=VNINDEX --size=1080x900 --range=3p --interval=D --crop=full` | Chrome thật; crop/mask/pane đo ở lần chụp được đầu tiên rồi ghi vào `rules.shots.fireantDaily` |
+| FireAnt VNINDEX ngày | `shoot.mjs --site=fireant --symbol=VNINDEX --size=1080x900 --interval=D --reset-view --crop=full` | Chrome thật, tab 1D của người dùng (giá + khối lượng + MACD); ~6,5 tháng; crop/mask giống ảnh 1080×900 của Channel; pane hiệu chỉnh `paneFrac` [0,058, 0,21, 0,896, 0,66] — tiêu đề OHLC và histogram MACD cùng màu nến nên phải chặn pane |
 | terminal VNINDEX (dự phòng) | `shoot.mjs --site=zionle --page=analyze --symbol=VNINDEX --viewport=1800x1000 --clip=canvases` | hiệu chỉnh trên giá ÷ 1000 (terminal yết chỉ số theo nghìn) |
 | Screener | `shoot.mjs --site=zionle --page=screener --allow-post=/api/stocks/filter --viewport=1200x1000 --scale=2 --js=scripts/review/js/screener.js --js-args=<json>` | `{filter, sort, keep, rows, zoom}`; sidecar `js` = trang (px CSS), dòng, ô, nút; ảnh = cả trang đã phóng |
 | chart mã | `shoot.mjs --site=zionle --page=analyze --symbol=<MÃ> --viewport=1800x1000 --clip=canvases` | 2712×1520; pane giá `paneFrac` [0,015, 0, 0,955, 0,54]; crop bỏ trục giá |
@@ -101,7 +101,7 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 
 | Scene | Beat 1 | Beat 2 |
 |---|---|---|
-| hook | vline đỏ ở từng phiên phân phối; máy cận phiên cuối | — |
+| hook | vòng xanh ở nến FTD + nhãn "FTD d/m ±x%" (khi FTD nằm trong ảnh) | vline đỏ ở từng phiên phân phối, nhãn "N phiên phân phối", vòng vàng ở nến hôm nay; máy cận và lia |
 | market | vline phân phối, nhãn "N/25 phiên phân phối", nhãn phiên phân phối nặng nhất | vòng xanh ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
 | spike | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
 | leaders | hộp quanh ba dòng; nhãn "N mã qua RS Strong + Uptrend" | hộp từng ô RS 1M, máy cận |

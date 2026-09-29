@@ -88,7 +88,21 @@
 
   "shots": {
     "_shots": "Photo recipes. Sizes, crops, masks and calibration panes are measured on the first run and written here; scripts/review/shots.mjs reads them.",
-    "fireantDaily": {"size": "1080x900", "range": "3p", "interval": "D", "crop": "full"},
+    "fireantDaily": {
+      "size": "1080x900", "range": null, "interval": "D", "resetView": true, "crop": "full",
+      "cropRect": {"x": 0.0574, "y": 0.1592, "w": 0.9102, "h": 0.7982},
+      "masks": [
+        {"x": 0.0574, "y": 0.1546, "w": 0.8454, "h": 0.0254},
+        {"x": 0.0574, "y": 0.1811, "w": 0.1944, "h": 0.0254},
+        {"x": 0.0611, "y": 0.2088, "w": 0.037, "h": 0.03},
+        {"x": 0.0574, "y": 0.6701, "w": 0.7222, "h": 0.0144},
+        {"x": 0.0574, "y": 0.684, "w": 0.7222, "h": 0.009},
+        {"x": 0.0648, "y": 0.8593, "w": 0.0407, "h": 0.0507},
+        {"x": 0.9287, "y": 0.9181, "w": 0.0278, "h": 0.03}
+      ],
+      "calib": {"paneFrac": [0.058, 0.21, 0.896, 0.66]},
+      "_measured": "2026-09-29 on the user's VNINDEX 1D tab (1080x867 page): price + volume pane y 130..572, MACD pane below, price axis from x 0.9. Candles (239,58,66)/(15,141,118); volume bars are muted (27,86,80)/(121,49,58); the OHLC header and the MACD histogram share the candle colours, hence the explicit pane. Range buttons pick their own bar size and a later interval click keeps the bar count: '3p' then 'D' gave 15 months of daily candles, '6p' alone gave 2-hour bars (and left the user's tab on 2h). So: interval D, then reset view (⌥R). crop and masks are the ones measured for Channel's 1080x900 FireAnt photos (content/channel.json)."
+    },
     "fireantWeekly": {"size": "1080x900", "range": "1y", "interval": "W", "crop": "full"},
     "terminalAnalyze": {
       "viewport": "1800x1000", "clip": "canvases", "colors": [[16, 185, 129], [239, 68, 68]],

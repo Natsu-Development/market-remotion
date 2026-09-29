@@ -4,6 +4,8 @@
  *
  *   node scripts/review/scaffold.mjs --format=daily            -> content/review-daily.json + brief/review-daily.md
  *   node scripts/review/scaffold.mjs --format=daily --force    overwrite an edition the writer already filled
+ *   node scripts/review/scaffold.mjs --format=daily --out=<f>  write the skeleton elsewhere (no brief, no archive) — to
+ *                                                              rebuild one scene's visual of an edition already written
  *
  * Scenes follow rules.formats[format].roles. Every image scene gets its photo, crop and marks
  * placed from data: a vline on each active distribution day and a circle on the FTD candle from
@@ -32,7 +34,8 @@ const DIR = `${PATHS.shots}/${date}`;
 
 // ------------------------------------------------------------------ the previous edition
 
-const prior = tryJson(fmt.content);
+const OUT = opt('out');
+const prior = OUT ? null : tryJson(fmt.content);
 if (prior) {
   if (prior.edition === date && prior.status !== 'scaffolded' && !flag('force')) {
     die(`${fmt.content} is the ${date} edition and already "${prior.status}" — the writer's work would be lost. --force to rebuild it.`);
@@ -138,18 +141,39 @@ const lab = (x, y, text, accent, beat, anchor) => ({kind: 'label', x: clamp(x), 
 const cropOf = (c) => (c ? {crop: c} : {});
 const maskOf = (m) => (m?.length ? {masks: m, maskColor: R.shots.maskColor} : {});
 
-// hook — the verdict, a close-up on the latest sessions.
+// hook — the verdict pinned on the chart (user, 2026-09-29): beat 1 circles the FTD that confirmed the
+// trend; beat 2 draws the distribution days since and rings today's candle. Without an FTD in view, one
+// beat with the distribution days.
+const ftdIn = (() => {
+  const f = F.state.ftd ?? F.state.lastFtd;
+  const x = f ? barX(index, daily, f.date) : null;
+  return f && x != null && x > C.x && x < C.x + C.w ? {f, x, y: priceY(index, f.close, indexUnit)} : null;
+})();
+const recentTop = Math.min(...daily.slice(-15).map((b) => priceY(index, b.h, indexUnit)));
+const hookMarks = ftdIn
+  ? [
+      {kind: 'circle', x: clamp(ftdIn.x), y: clamp(ftdIn.y), r: 0.03, accent: 'green', beat: 0},
+      lab(ftdIn.x, clamp(ftdIn.y - 0.07), `FTD ${ftdIn.f.dm} ${fmtPct(ftdIn.f.changePercent)}`, 'green', 0, ftdIn.x > 0.6 ? 'end' : 'start'),
+      ...idxMarks(1),
+      ...(ddXs.length ? [lab(Math.min(...ddXs.map((d) => d.x)) - 0.01, clamp(recentTop - 0.05), `${F.distribution.count} phiên phân phối`, 'red', 1, 'end')] : []),
+      {kind: 'circle', x: clamp(lastX), y: clamp(lastY), r: 0.022, accent: 'gold', beat: 1},
+    ]
+  : idxMarks(0);
 push('hook', {
-  beats: todoBeats(1),
+  beats: todoBeats(ftdIn ? 2 : 1),
   visual: imageOf(index, indexSource, {
     ...cropOf(indexCrop), ...maskOf(indexMasks),
-    annotations: idxMarks(0),
-    shots: [{beat: 0, x: clamp((lastX ?? 0.8) - 0.07), y: clamp(lastY), zoom: 2.0, move: 'push_in'}],
+    annotations: hookMarks,
+    shots: ftdIn
+      ? [{beat: 0, x: clamp((ftdIn.x + (lastX ?? 0.9)) / 2), y: clamp((ftdIn.y + lastY) / 2), zoom: 1.5, move: 'push_in'},
+         {beat: 1, x: clamp((lastX ?? 0.8) - 0.08), y: clamp(lastY), zoom: 2.3, move: 'pan'}]
+      : [{beat: 0, x: clamp((lastX ?? 0.8) - 0.07), y: clamp(lastY), zoom: 2.0, move: 'push_in'}],
   }),
   brief: [
     `Kết luận phiên ${F.session.dmy}: ${F.state.label} theo quy tắc${F.state.rallyDay ? `, ngày ${F.state.rallyDay}` : ''}.`,
     `${F.distribution.count}/${F.distribution.window} phiên phân phối còn hiệu lực.`,
     `Hôm nay ${fmtPct(F.session.changePercent)}, khối lượng ×${vi(F.session.volumeRatio)} phiên trước — ${F.session.isDistribution ? 'LÀ phiên phân phối' : F.session.isFtd ? 'LÀ phiên FTD' : 'không phải phiên phân phối'}.`,
+    ftdIn ? `Beat 1 = vòng quanh FTD ${ftdIn.f.dm} (mốc của xu hướng); beat 2 = các phiên phân phối từ đó và nến hôm nay.` : '',
     'Câu đầu ≤ 10 chữ, headline beat đầu đã mang kết luận.',
   ],
 });
@@ -307,6 +331,11 @@ const reel = {
   ...(indexSource !== 'fireant.vn' ? {_indexPhoto: 'terminal (FireAnt capture unavailable)'} : {}),
   scenes,
 };
+if (OUT) {
+  writeJson(OUT, reel);
+  console.log(`${OUT}: ${scenes.length} scenes (skeleton only — ${fmt.content} and ${fmt.brief} untouched)`);
+  process.exit(0);
+}
 writeJson(fmt.content, reel);
 
 const brief = [

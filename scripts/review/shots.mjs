@@ -71,6 +71,33 @@ const calibrate = (rel, bars, spec) => {
   return c;
 };
 
+/**
+ * video-factory's wake step (its CLAUDE.md, "Đăng Facebook"): on this Mac "locked" usually means the
+ * display went to sleep behind the screen saver — there is no password (sysadminctl: screenLock is
+ * off). Space wakes it; moving the mouse and caffeinate -u do not. Space is only sent WHILE locked,
+ * when the lock screen takes it, never an app. Still locked afterwards = a real lock: stop, and
+ * never type a password for anyone.
+ */
+const wake = () => {
+  const code = [
+    'import time, Quartz',
+    'def locked():',
+    '    d = Quartz.CGSessionCopyCurrentDictionary()',
+    "    return bool(d and d.get('CGSSessionScreenIsLocked'))",
+    'if locked():',
+    '    for down in (True, False):',
+    '        Quartz.CGEventPost(Quartz.kCGHIDEventTap, Quartz.CGEventCreateKeyboardEvent(None, 49, down)); time.sleep(0.06)',
+    '    for i in range(8):',
+    '        time.sleep(1)',
+    '        if not locked(): break',
+    "print('locked' if locked() else 'awake')",
+  ].join('\n');
+  const r = spawnSync(PY, ['-c', code], {encoding: 'utf8'});
+  if ((r.stdout ?? '').trim() !== 'awake') {
+    die('The Mac is locked for real (still locked after Space). Unlock it yourself and run again — this script never types a password.', 2);
+  }
+};
+
 const index = readJson(PATHS.daily).filter((b) => b.t <= date);
 const made = [];
 
@@ -79,11 +106,12 @@ const made = [];
 if (ONLY.has('fireant')) {
   const jobs = [['vnindex-daily', R.shots.fireantDaily, index]];
   if (FORMAT === 'weekly') jobs.push(['vnindex-weekly', R.shots.fireantWeekly, weeklyBars(index)]);
+  if (!CALIB_ONLY && existsSync(PY)) wake();
   for (const [name, spec, bars] of jobs) {
     const rel = `${DIR}/${name}.png`;
     console.log('\nFireAnt opens in your real Chrome: do not touch the mouse or keyboard for ~25 seconds.');
-    shoot(`FireAnt ${name}`, ['--site=fireant', '--symbol=VNINDEX', `--size=${spec.size}`, `--range=${spec.range}`, `--interval=${spec.interval}`, `--crop=${spec.crop}`, `--out=public/${rel}`]);
-    calibrate(rel, bars, {colors: R.shots.fireantColors, ...(spec.calib ?? {})});
+    shoot(`FireAnt ${name}`, ['--site=fireant', '--symbol=VNINDEX', `--size=${spec.size}`, ...(spec.range ? [`--range=${spec.range}`] : []), ...(spec.interval ? [`--interval=${spec.interval}`] : []), ...(spec.resetView ? ['--reset-view'] : []), `--crop=${spec.crop}`, `--out=public/${rel}`]);
+    calibrate(rel, bars.slice(-300), {colors: R.shots.fireantColors, ...(spec.calib ?? {})});
     made.push(rel);
   }
 }

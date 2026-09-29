@@ -99,10 +99,14 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 
 ## 6. Mark scaffold đặt
 
-| Scene | Beat 1 | Beat 2 |
-|---|---|---|
-| hook | mũi tên XANH LÁ chỉ LÊN đáy nến FTD + nhãn "FTD d/m ±x%" (khi FTD nằm trong ảnh) | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối, nhãn "N phiên phân phối", vòng vàng ở nến hôm nay; máy cận và lia |
-| market | mũi tên đỏ trên từng phiên phân phối, nhãn "N/25 phiên phân phối", nhãn phiên nặng nhất | mũi tên xanh lá ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
+| Scene | Beat 1 | Beat 2 | Beat 3 |
+|---|---|---|---|
+| hook | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối + nhãn "N phiên phân phối"; máy cận nhịp cuối | mũi tên XANH LÁ chỉ LÊN đáy nến FTD + nhãn, vòng vàng ở nến hôm nay; máy lùi ra | — |
+| market | mũi tên đỏ, nhãn "N/25 phiên phân phối" (tắt ở beat 3), nhãn phiên nặng nhất | mũi tên xanh lá FTD + nhãn, hline vàng đáy nhịp hồi | nhãn "d/m hết hạn sau N phiên" ở phiên cũ nhất, nhãn "4 phiên → chịu áp lực · 6 phiên → điều chỉnh"; máy cận |
+| breadth | `pictogram` chấm (`glyph: dot`), lưới chọn bằng cách mô phỏng công thức rải của verify, chấm sáng = mã trên SMA200 | — | — |
+| spike / leaders | hộp quanh ba dòng; nhãn tóm tắt đè lên nút Columns/Export | hộp từng ô VOL/SMA / RS 1M, máy cận | — |
+| leader #3/#2/#1 | nhãn "MÃ · RS 1M … · ±x%", hline EMA50, và MỘT chi tiết riêng: hline đỉnh 52 tuần "Đỉnh 52T … · −x%" (mã còn xa / sát đỉnh) hoặc hộp trên cột khối lượng hôm nay "KL ×…" (mã cũng ở Volume spike) | mũi tên vào nến cuối "±x% trên EMA50", máy cận | — |
+| watch | hline vàng "Thủng <đáy nhịp hồi> → FTD thất bại", hline xanh "Chạm <mức hết hạn thấp nhất> → phiên d/m hết hạn"; máy tilt từ đáy lên | vòng vàng nến hôm nay, nhãn "Thêm N phiên phân phối → <trạng thái kế>", "d/m hết hạn sau N phiên"; máy ĐỨNG YÊN (payoff) | — |
 
 Người dùng chốt 2026-09-29: phiên phân phối và FTD là MŨI TÊN chỉ đúng vào nến — FTD XANH LÁ chỉ lên, phiên phân phối
 ĐỎ chỉ xuống. Mũi tên là mark nên dùng cặp màu hướng của repo, accent `up` (#1FA377) / `down` (#EC5F38, ΔE mù màu 10,2;

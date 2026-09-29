@@ -1,6 +1,5 @@
 {
   "$comment": "Contract of the market-review skill (daily and weekly market-review reels). It is separate from src/shared/content-rules.json, which belongs to market-video: nothing here is read by that skill, and nothing there governs this one except the ENGINE constants that scripts/lib/rules.mjs inherits (layout, audio, series, the voice clip), because the renderer and the TTS hard-code the same values. Read by scripts/review/*.mjs, by verify / review-page / voiceover for every reel whose `rules` field points here, and by .claude/skills/market-review/SKILL.md. Changing a number here changes what the reels say and what verify enforces: that is the user's decision.",
-
   "market": {
     "index": "VNINDEX",
     "tickerSymbol": "VN-INDEX",
@@ -13,7 +12,6 @@
     "_sessionClose": "HOSE's ATC ends 14:45 and put-through trading at 15:00. A bar fetched before 15:00 ICT on its own day is still moving and is dropped.",
     "_volume": "SSI reports matched volume (khớp lệnh, FireAnt's 'KL khớp'); the terminal's daily volume is within 0.2% of it, Entrade's is 25-35% higher because it adds put-through deals (measured 2026-09-29). Distribution days compare volume session to session, so the whole engine uses one source."
   },
-
   "distribution": {
     "maxChangePercent": -0.5,
     "_threshold": "User set -0.5% on 2026-09-29. IBD itself uses -0.2%; at -0.2% the VNINDEX sessions of 14/9, 18/9 and 28/9/2026 would also count (6 active DDs, correction since 28/9) instead of 3.",
@@ -31,7 +29,6 @@
       "_why": "IBD sometimes counts a stalling day (small gain on heavy volume, close in the lower half of the range) as distribution. Present so the user can switch it on; off by default."
     }
   },
-
   "followThrough": {
     "minDay": 4,
     "minChangePercent": 1.25,
@@ -39,121 +36,371 @@
     "day1UpperHalfClose": true,
     "_day1": "Day 1 of a rally attempt: the first session that closes above the prior close, or a session that sets the correction's new low and still closes in the upper half of its range. A later intraday low below the rally low resets the attempt; after an FTD the same undercut fails it.",
     "_source": "William O'Neil / IBD rules, as used in Mark Minervini's market timing. User chose IBD's current +1.25% on 2026-09-29; scripts/review/backtest.mjs also reports +1.5% and +1.7%.",
-    "backtestThresholds": [1.25, 1.5, 1.7],
+    "backtestThresholds": [
+      1.25,
+      1.5,
+      1.7
+    ],
     "backtestForwardSessions": 25
   },
-
   "status": {
-    "CONFIRMED_UPTREND": {"vi": "Xu hướng tăng xác nhận", "short": "Tăng xác nhận"},
-    "UNDER_PRESSURE": {"vi": "Xu hướng tăng chịu áp lực", "short": "Chịu áp lực"},
-    "CORRECTION": {"vi": "Thị trường điều chỉnh", "short": "Điều chỉnh"},
-    "RALLY_ATTEMPT": {"vi": "Nỗ lực hồi phục", "short": "Hồi phục"},
+    "CONFIRMED_UPTREND": {
+      "vi": "Xu hướng tăng xác nhận",
+      "short": "Tăng xác nhận"
+    },
+    "UNDER_PRESSURE": {
+      "vi": "Xu hướng tăng chịu áp lực",
+      "short": "Chịu áp lực"
+    },
+    "CORRECTION": {
+      "vi": "Thị trường điều chỉnh",
+      "short": "Điều chỉnh"
+    },
+    "RALLY_ATTEMPT": {
+      "vi": "Nỗ lực hồi phục",
+      "short": "Hồi phục"
+    },
     "_status": "On-screen words for the four states, in the order the machine moves through them. 'theo quy tắc' goes with them on screen or in the narration: this is a mechanical version of calls IBD makes partly by judgment."
   },
-
   "screener": {
     "endpoint": "/api/stocks/filter",
     "_endpoint": "The ONE non-GET call this skill makes (user approved 2026-09-29). It only reads. Never POST/PUT /api/config, /api/stocks/recompute or anything else that writes; scripts/review/lib/common.mjs refuses them and shoot.mjs --allow-post blocks them in the browser.",
     "freshAfter": "15:00",
     "_fresh": "cached_at from GET /api/stocks/cache-info must be at or after the session's 15:00 ICT. On 2026-09-29 the cache was stamped 12:00 and then 15:04.",
-    "universeBody": {"match": "and"},
+    "universeBody": {
+      "match": "and"
+    },
     "scenes": {
-      "spike": {"filters": ["Volume spike"], "photo": "Volume spike", "sortBy": "volumeRatio", "top": 3},
-      "leaders": {"filters": ["RS Strong", "Uptrend"], "photo": "Uptrend", "sortBy": "rs_1m", "top": 3}
+      "spike": {
+        "filters": [
+          "Volume spike"
+        ],
+        "photo": "Volume spike",
+        "sortBy": "volumeRatio",
+        "top": 3
+      },
+      "leaders": {
+        "filters": [
+          "RS Strong",
+          "Uptrend"
+        ],
+        "photo": "Uptrend",
+        "sortBy": "rs_1m",
+        "top": 3
+      }
     },
     "_leaders": "Uptrend's liquidity floor (volume_sma20 >= 1.2M) is stricter than RS Strong's (>= 1M), so RS Strong AND Uptrend = Uptrend rows with rs_1m >= 60. Sorted by RS 1M, those rows come first in the Uptrend table, which is the photo.",
     "dropZeroMa": true,
     "_dropZeroMa": "The server sends 0 for a moving average it cannot compute yet (new listings), so 'ema_50 > sma_200' passes for them. Rows with ema_50 or sma_200 at 0 are dropped."
   },
-
   "formats": {
     "daily": {
       "composition": "DailyReview",
       "content": "content/review-daily.json",
       "brief": "brief/review-daily.md",
       "idPrefix": "rd",
-      "roles": ["hook", "market", "spike", "leaders", "leader", "leader", "leader", "outro"],
-      "totalSeconds": [55, 80],
-      "_why": "User picked a chart for each of the top 3 leaders on 2026-09-29. The distribution and FTD scenes share one FireAnt photo and became one `market` scene so the reel stays at 8 scenes, about 70 s."
+      "roles": [
+        "hook",
+        "market",
+        "breadth",
+        "spike",
+        "leaders",
+        "leader",
+        "leader",
+        "leader",
+        "watch",
+        "outro"
+      ],
+      "totalSeconds": [
+        60,
+        90
+      ],
+      "_why": "User picked a chart for each of the top 3 leaders (2026-09-29). Restructured the same day for retention (vox-director hook_payoff + a listicle countdown): breadth = the paradox after the count, watch = the payoff before the outro. About 80 s."
     },
     "weekly": {
       "composition": "WeeklyReview",
       "content": "content/review-weekly.json",
       "brief": "brief/review-weekly.md",
       "idPrefix": "rw",
-      "roles": ["hook", "week", "market", "spike", "leaders", "leader", "leader", "leader", "outro"],
-      "totalSeconds": [70, 100]
+      "roles": [
+        "hook",
+        "week",
+        "market",
+        "breadth",
+        "spike",
+        "leaders",
+        "leader",
+        "leader",
+        "leader",
+        "watch",
+        "outro"
+      ],
+      "totalSeconds": [
+        70,
+        105
+      ]
     }
   },
-
   "shots": {
     "_shots": "Photo recipes. Sizes, crops, masks and calibration panes are measured on the first run and written here; scripts/review/shots.mjs reads them.",
     "fireantDaily": {
-      "size": "1080x900", "range": null, "interval": "D", "resetView": true, "crop": "full",
-      "cropRect": {"x": 0.0574, "y": 0.1592, "w": 0.9102, "h": 0.7982},
+      "size": "1080x900",
+      "range": null,
+      "interval": "D",
+      "resetView": true,
+      "crop": "full",
+      "cropRect": {
+        "x": 0.0574,
+        "y": 0.1592,
+        "w": 0.9102,
+        "h": 0.7982
+      },
       "masks": [
-        {"x": 0.0574, "y": 0.1546, "w": 0.8454, "h": 0.0254},
-        {"x": 0.0574, "y": 0.1811, "w": 0.1944, "h": 0.0254},
-        {"x": 0.0611, "y": 0.2088, "w": 0.037, "h": 0.03},
-        {"x": 0.0574, "y": 0.6701, "w": 0.7222, "h": 0.0144},
-        {"x": 0.0574, "y": 0.684, "w": 0.7222, "h": 0.009},
-        {"x": 0.0648, "y": 0.8593, "w": 0.0407, "h": 0.0507},
-        {"x": 0.9287, "y": 0.9181, "w": 0.0278, "h": 0.03}
+        {
+          "x": 0.0574,
+          "y": 0.1546,
+          "w": 0.8454,
+          "h": 0.0254
+        },
+        {
+          "x": 0.0574,
+          "y": 0.1811,
+          "w": 0.1944,
+          "h": 0.0254
+        },
+        {
+          "x": 0.0611,
+          "y": 0.2088,
+          "w": 0.037,
+          "h": 0.03
+        },
+        {
+          "x": 0.0574,
+          "y": 0.6701,
+          "w": 0.7222,
+          "h": 0.0144
+        },
+        {
+          "x": 0.0574,
+          "y": 0.684,
+          "w": 0.7222,
+          "h": 0.009
+        },
+        {
+          "x": 0.0648,
+          "y": 0.8593,
+          "w": 0.0407,
+          "h": 0.0507
+        },
+        {
+          "x": 0.9287,
+          "y": 0.9181,
+          "w": 0.0278,
+          "h": 0.03
+        }
       ],
-      "calib": {"paneFrac": [0.058, 0.21, 0.896, 0.66]},
+      "calib": {
+        "paneFrac": [
+          0.058,
+          0.21,
+          0.896,
+          0.66
+        ]
+      },
       "_measured": "2026-09-29 on the user's VNINDEX 1D tab (1080x867 page): price + volume pane y 130..572, MACD pane below, price axis from x 0.9. Candles (239,58,66)/(15,141,118); volume bars are muted (27,86,80)/(121,49,58); the OHLC header and the MACD histogram share the candle colours, hence the explicit pane. Range buttons pick their own bar size and a later interval click keeps the bar count: '3p' then 'D' gave 15 months of daily candles, '6p' alone gave 2-hour bars (and left the user's tab on 2h). So: interval D, then reset view (⌥R). crop and masks are the ones measured for Channel's 1080x900 FireAnt photos (content/channel.json)."
     },
-    "fireantWeekly": {"size": "1080x900", "range": "1y", "interval": "W", "crop": "full"},
+    "fireantWeekly": {
+      "size": "1080x900",
+      "range": "1y",
+      "interval": "W",
+      "crop": "full"
+    },
     "terminalAnalyze": {
-      "viewport": "1800x1000", "clip": "canvases", "colors": [[16, 185, 129], [239, 68, 68]],
-      "calib": {"paneFrac": [0.015, 0.0, 0.955, 0.54]},
-      "crop": {"x": 0.4, "y": 0.0, "w": 0.555, "h": 0.697},
+      "viewport": "1800x1000",
+      "clip": "canvases",
+      "colors": [
+        [
+          16,
+          185,
+          129
+        ],
+        [
+          239,
+          68,
+          68
+        ]
+      ],
+      "calib": {
+        "paneFrac": [
+          0.015,
+          0.0,
+          0.955,
+          0.54
+        ]
+      },
+      "crop": {
+        "x": 0.4,
+        "y": 0.0,
+        "w": 0.555,
+        "h": 0.697
+      },
       "_measured": "2026-09-29 on BSR (2712x1520 photo of a 1356x760 chart): the price pane ends above the volume bars at y 0.553 and the price axis starts at x 0.956, both carrying candle-coloured tags; crop = the last ~7.5 months of price + volume, 1.42 wide, ending before the price axis (its trendline price tags crowd a close-up; market-video crops the terminal's axis too)."
     },
     "screener": {
-      "viewport": "1200x1000", "scale": 2, "zoom": 1.5, "rows": 8,
-      "sortColumn": {"volumeRatio": "VOL/SMA", "rs_1m": "RS 1M"},
-      "keep": {"spike": ["SYMBOL", "RS 1M", "VOL/SMA", "PRICE", "CHG%"], "leaders": ["SYMBOL", "RS 1M", "RS 52W", "PRICE", "CHG%"]},
+      "viewport": "1200x1000",
+      "scale": 2,
+      "zoom": 1.5,
+      "rows": 8,
+      "sortColumn": {
+        "volumeRatio": "VOL/SMA",
+        "rs_1m": "RS 1M"
+      },
+      "keep": {
+        "spike": [
+          "SYMBOL",
+          "RS 1M",
+          "VOL/SMA",
+          "PRICE",
+          "CHG%"
+        ],
+        "leaders": [
+          "SYMBOL",
+          "RS 1M",
+          "RS 52W",
+          "PRICE",
+          "CHG%"
+        ]
+      },
       "_measured": "2026-09-29: the header labels are buttons inside the cells; VOL/SMA shows (volume − SMA20)/SMA20 in %, the same unit the server filters on. zoom 1.5 at 1200 px wide makes a row ~96 px of the 2x photo."
     },
-    "fireantColors": [[15, 141, 118], [239, 58, 66]],
+    "fireantColors": [
+      [
+        15,
+        141,
+        118
+      ],
+      [
+        239,
+        58,
+        66
+      ]
+    ],
     "maskColor": "#161921"
   },
-
   "footer": "Nguồn: SSI · zionle.io.vn · FireAnt",
   "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
   "brand": "Kênh của bạn",
-
   "narration": {
     "language": "vi",
     "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
     "minWordsPerScene": 18,
     "maxWordsPerScene": 58,
-    "warnWordsPerScene": [20, 50],
+    "warnWordsPerScene": [
+      20,
+      50
+    ],
     "minSentencesPerScene": 2,
     "maxSentencesPerScene": 5,
     "wordsPerSecond": 4.81,
     "_wordsPerSecond": "the same voice as market-video, measured 2026-09-22 (content-rules.json narration._measuredFrom).",
-    "syllableRateWarn": [4.5, 6.0],
-    "syllableRateFail": [3.5, 6.5],
+    "syllableRateWarn": [
+      4.5,
+      6.0
+    ],
+    "syllableRateFail": [
+      3.5,
+      6.5
+    ],
     "digitsInNarration": false,
     "_digitsWhy": "Vietnamese TTS reads bare digits unpredictably. Spell them: 'một phẩy tám sáu phần trăm'. On-screen labels keep digits."
   },
-
   "arc": {
     "minScenes": 7,
-    "maxScenes": 10,
-    "totalSecondsWarn": [55, 100],
+    "maxScenes": 12,
+    "totalSecondsWarn": [
+      55,
+      110
+    ],
     "roles": {
-      "hook": {"job": "Kết luận của phiên (hoặc của tuần) trong ba giây: trạng thái thị trường theo quy tắc và điều vừa làm nó đổi — không dựng bối cảnh trước.", "act": "blue", "pace": "short", "shots": ["push_in"]},
-      "week": {"job": "Cây nến tuần: tuần tăng hay giảm bao nhiêu, khối lượng so với tuần trước, đóng cửa ở đâu trong biên của tuần.", "act": "blue", "pace": "mid", "shots": ["pull_out"]},
-      "market": {"job": "Trên chart ngày: các phiên phân phối còn hiệu lực (đếm trên 25 phiên) rồi phiên FTD gần nhất và đáy nhịp hồi; kết bằng điều kiện nếu … thì cho phiên hoặc tuần tới.", "act": "blue", "pace": "long", "shots": ["pan", "push_in"], "mustSay": ["nếu"]},
-      "spike": {"job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, ba mã khối lượng đột biến mạnh nhất, tăng hay giảm.", "act": "amber", "pace": "mid", "shots": ["push_in"]},
-      "leaders": {"job": "Bộ lọc Uptrend xếp theo RS 1M: bao nhiêu mã qua cả RS Strong và Uptrend, ba mã dẫn đầu.", "act": "amber", "pace": "mid", "shots": ["tilt"]},
-      "leader": {"job": "Chart của một mã dẫn dắt: vì sao nó qua bộ lọc (sức mạnh giá, trên đường trung bình), và mức giá terminal đang đánh dấu.", "act": "amber", "pace": "mid", "shots": ["push_in"], "minRun": 3},
-      "outro": {"job": "Người làm kênh chào người xem: thả tim · chia sẻ · theo dõi, một câu hứa cập nhật; không số, không thuật ngữ.", "act": "navy", "pace": "short"}
+      "hook": {
+        "job": "Căng thẳng trước, neo sau, trong ba giây: các phiên phân phối rơi xuống nến (beat 1), rồi FTD vẫn đang giữ xu hướng (beat 2); câu cuối HỨA mức phải canh ở cuối video. Không dựng bối cảnh.",
+        "act": "blue",
+        "pace": "short",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ]
+      },
+      "week": {
+        "job": "Cây nến tuần: tuần tăng hay giảm bao nhiêu, khối lượng so với tuần trước, đóng cửa ở đâu trong biên của tuần.",
+        "act": "blue",
+        "pace": "mid",
+        "shots": [
+          "pull_out"
+        ]
+      },
+      "market": {
+        "job": "Bối cảnh trên chart ngày: các phiên phân phối còn hiệu lực, FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn khi nào, thêm mấy phiên là đổi trạng thái). Chưa nói điều kiện — để dành cho watch.",
+        "act": "blue",
+        "pace": "long",
+        "shots": [
+          "pan",
+          "tilt",
+          "push_in"
+        ]
+      },
+      "breadth": {
+        "job": "Nghịch lý độ rộng: chỉ số ở trạng thái nào mà bao nhiêu phần trăm mã đứng trên đường trung bình 200 phiên; hôm nay bao nhiêu mã tăng, bao nhiêu giảm. Kết bằng câu dẫn sang bộ lọc.",
+        "act": "maroon",
+        "pace": "short"
+      },
+      "spike": {
+        "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, ba mã khối lượng đột biến mạnh nhất, tăng hay giảm. Gieo móc: một mã có mặt ở cả hai bộ lọc — để cuối.",
+        "act": "amber",
+        "pace": "mid",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ]
+      },
+      "leaders": {
+        "job": "Bộ lọc Uptrend xếp theo RS 1M: bao nhiêu mã qua cả RS Strong và Uptrend, ba mã dẫn đầu.",
+        "act": "amber",
+        "pace": "short",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ]
+      },
+      "leader": {
+        "job": "Một mã dẫn dắt, đếm ngược #3 → #2 → #1: cùng khuôn câu (vì sao qua bộ lọc → chi tiết riêng → mức terminal đánh dấu), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). #1 trả móc 'cả hai bộ lọc'.",
+        "act": "amber",
+        "pace": "mid",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ],
+        "minRun": 3
+      },
+      "watch": {
+        "job": "PAYOFF, máy đứng yên: mức nào thủng là FTD thất bại, mức nào chạm là phiên phân phối hết hạn, thêm mấy phiên là đổi trạng thái — nói như nhánh nếu … thì, không gọi giá.",
+        "act": "amber",
+        "pace": "mid",
+        "shots": [
+          "tilt",
+          "static"
+        ],
+        "mustSay": [
+          "nếu"
+        ]
+      },
+      "outro": {
+        "job": "Người làm kênh chào người xem: thả tim · chia sẻ · theo dõi, một câu hứa cập nhật; không số, không thuật ngữ.",
+        "act": "navy",
+        "pace": "short"
+      }
     },
-    "_roles": "Same shape as content-rules.json arc.roles so scripts/lib/roles.mjs, verify, merge and review-page read it unchanged. market's mustSay keeps the condition an if-then branch, never a call; leader's minRun keeps the three leader charts together.",
+    "_roles": "Same shape as content-rules.json arc.roles so scripts/lib/roles.mjs, verify, merge and review-page read it unchanged. watch's mustSay keeps the condition an if-then branch, never a call (moved from market on 2026-09-29, when the payoff scene was added); leader's minRun keeps the three leader charts together.",
     "firstRole": "hook",
     "lastRole": "outro",
     "severity": {
@@ -168,45 +415,139 @@
     },
     "sceneIdPattern": "^r[dw]-\\d{6}-[a-z]+(-\\d)?$",
     "_sceneIds": "rd-260929-hook: format, session date (yymmdd), role (+ -1..-3 for the leaders). The date keeps each edition's voice files apart in public/voiceover/, so yesterday's wav can never play over today's words.",
-    "acts": ["blue", "maroon", "amber", "navy"]
+    "acts": [
+      "blue",
+      "maroon",
+      "amber",
+      "navy"
+    ]
   },
-
   "claims": {
-    "superlatives": ["cao nhất", "thấp nhất", "mạnh nhất", "yếu nhất", "lớn nhất", "kỷ lục", "duy nhất", "chưa từng"],
-    "recencyMarkers": ["hiện tại", "vừa", "đang", "bây giờ", "hôm nay", "mới nhất"],
+    "superlatives": [
+      "cao nhất",
+      "thấp nhất",
+      "mạnh nhất",
+      "yếu nhất",
+      "lớn nhất",
+      "kỷ lục",
+      "duy nhất",
+      "chưa từng"
+    ],
+    "recencyMarkers": [
+      "hiện tại",
+      "vừa",
+      "đang",
+      "bây giờ",
+      "hôm nay",
+      "mới nhất"
+    ],
     "tolerancePercent": 1.0,
     "factsExemptions": [
-      {"pattern": "\\b\\d{1,2}/\\d{1,2}(?:/\\d{4})?\\b", "why": "ngày trong lịch (11/9, 3/8/2026), không phải số đo"},
-      {"pattern": "tháng\\s*\\d{1,2}", "why": "tên tháng trong lịch"},
-      {"pattern": "\\bRS\\s*\\d{1,2}\\s*[MW]\\b", "why": "khung tính RS của terminal (1M, 52W) là tham số"},
-      {"pattern": "\\b(?:EMA|SMA|MA)\\s*\\d{1,3}\\b", "why": "tham số đường trung bình"}
+      {
+        "pattern": "\\b\\d{1,2}/\\d{1,2}(?:/\\d{4})?\\b",
+        "why": "ngày trong lịch (11/9, 3/8/2026), không phải số đo"
+      },
+      {
+        "pattern": "tháng\\s*\\d{1,2}",
+        "why": "tên tháng trong lịch"
+      },
+      {
+        "pattern": "\\bRS\\s*\\d{1,2}\\s*[MW]\\b",
+        "why": "khung tính RS của terminal (1M, 52W) là tham số"
+      },
+      {
+        "pattern": "\\b(?:EMA|SMA|MA)\\s*\\d{1,3}\\b",
+        "why": "tham số đường trung bình"
+      },
+      {
+        "pattern": "#\\s?\\d\\b",
+        "why": "số thứ tự đếm ngược của các mã dẫn dắt (#3 → #1)"
+      },
+      {
+        "pattern": "\\b52\\s?T\\b",
+        "why": "đỉnh 52 tuần — khung thời gian của mức, không phải số đo"
+      }
     ],
     "_exemptWhy": "A number matching one of these is not a claim about the data, so verify's facts check skips it. Adding a pattern widens the gate: the user's call."
   },
-
   "style": {
     "_comment": "The voice heuristics the user kept from market-video on 2026-09-29 (voice and compliance only), all WARN.",
     "maxSpokenNumbersPerSentence": 1,
     "maxSpokenNumbersPerScene": 2,
-    "spokenNumberWords": ["nghìn", "trăm", "mươi", "phẩy", "phần trăm", "mốt", "lăm", "linh", "lẻ"],
+    "spokenNumberWords": [
+      "nghìn",
+      "trăm",
+      "mươi",
+      "phẩy",
+      "phần trăm",
+      "mốt",
+      "lăm",
+      "linh",
+      "lẻ"
+    ],
     "minSceneWordSpread": 8,
-    "reportWords": {"chỉ số": 1, "ghi nhận": 0, "đạt mức": 0, "theo dữ liệu": 0, "có thể thấy": 0, "các bạn": 0, "nhà đầu tư": 0, "bậc thang": 0, "tiền mỏng": 0, "cái biên": 0, "kiểu dở": 0, "xích lại": 0, "lưng chừng": 0, "chuyện lạ": 0, "năm hai mươi": 0, "khuyến nghị": 0},
+    "reportWords": {
+      "chỉ số": 1,
+      "ghi nhận": 0,
+      "đạt mức": 0,
+      "theo dữ liệu": 0,
+      "có thể thấy": 0,
+      "các bạn": 0,
+      "nhà đầu tư": 0,
+      "bậc thang": 0,
+      "tiền mỏng": 0,
+      "cái biên": 0,
+      "kiểu dở": 0,
+      "xích lại": 0,
+      "lưng chừng": 0,
+      "chuyện lạ": 0,
+      "năm hai mươi": 0,
+      "khuyến nghị": 0
+    },
     "_reportWords": "max occurrences per scene; 0 means never. 'khuyến nghị' is here because the disclaimer lives only under the outro card.",
-    "addressWords": ["bạn", "mình"],
+    "addressWords": [
+      "bạn",
+      "mình"
+    ],
     "maxAddressPerScene": 3,
     "headlineBothLinesNumeric": "warn",
     "openingNumberWarn": true,
-    "tradeWords": ["kháng cự", "hỗ trợ", "tích luỹ", "tích lũy", "phân phối", "phá vỡ", "breakout", "điều chỉnh", "thanh khoản", "khối lượng", "động lượng", "xu hướng", "xác nhận", "hồi phục", "nhịp hồi", "đột biến", "dẫn dắt", "sức mạnh giá", "đường trung bình", "vùng giá", "đỉnh cũ", "đáy", "nến", "phiên"],
+    "tradeWords": [
+      "kháng cự",
+      "hỗ trợ",
+      "tích luỹ",
+      "tích lũy",
+      "phân phối",
+      "phá vỡ",
+      "breakout",
+      "điều chỉnh",
+      "thanh khoản",
+      "khối lượng",
+      "động lượng",
+      "xu hướng",
+      "xác nhận",
+      "hồi phục",
+      "nhịp hồi",
+      "đột biến",
+      "dẫn dắt",
+      "sức mạnh giá",
+      "đường trung bình",
+      "vùng giá",
+      "đỉnh cũ",
+      "đáy",
+      "nến",
+      "phiên"
+    ],
     "minTradeWordScenesPercent": 60,
     "sentenceContrastWords": 5
   },
-
   "voice": {
     "lexicon": {
       "MACD": "em a cê đi"
     },
     "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name)."
   },
-
-  "extraChecks": ["scripts/review/checks.mjs"]
+  "extraChecks": [
+    "scripts/review/checks.mjs"
+  ]
 }

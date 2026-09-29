@@ -8,6 +8,7 @@
  *   review-picks   every ticker on screen is one the fact pack picked; each leader scene shows its own chart
  *   review-outro   the sign-off carries no figures (carried over from market-video's outro rule)
  *   review-index   says out loud when the index chart is the terminal's fallback, not FireAnt
+ *   review-payoff  the watch scene (the hook's promise) shows the level and the count that change the state
  *
  * Each check returns {id, level: pass|warn|fail|skip, message, fix?}.
  */
@@ -129,6 +130,22 @@ export default function reviewChecks(reel, {root, rules: R}) {
       : [];
     if (figures.length) add('review-outro', 'warn', 'the sign-off carries figures', `${figures.join(', ')} — the outro is thả tim · chia sẻ · theo dõi and a promise to update, nothing else`);
     else add('review-outro', 'pass', o ? 'sign-off without figures' : 'no outro scene');
+  }
+
+  // ---------------------------------------------------------------- review-payoff
+  {
+    const w = reel.scenes.find((s) => s.role === 'watch');
+    if (!w) {
+      add('review-payoff', 'warn', 'no watch scene — the hook promises a payoff the reel never gives', 'rules.formats.<format>.roles should end with watch, outro');
+    } else {
+      const text = onScreen(w).join(' ');
+      const bad = [];
+      const level = F.state.rallyLow ?? F.state.correctionLow;
+      if (level != null && !text.includes(Number(level).toFixed(2).replace('.', ','))) bad.push(`the level ${Number(level).toFixed(2)} that changes the state is not on screen`);
+      if (!/phân phối/i.test(text)) bad.push('the distribution-day tripwire is not on screen');
+      if (bad.length) add('review-payoff', 'fail', `${bad.length} payoff problem(s)`, bad.join('; '));
+      else add('review-payoff', 'pass', 'the watch scene shows the level and the count that change the state');
+    }
   }
 
   // ---------------------------------------------------------------- review-index

@@ -38,8 +38,8 @@ TTS, một người viết, miễn trừ chỉ ở outro, outro thả tim · chi
 - Tên trạng thái trên màn hình chỉ lấy từ `rules.status` và phải là trạng thái của `state.status` — tên
   trạng thái khác chỉ xuất hiện trong một điều kiện ("thêm một phiên nữa là chịu áp lực").
 - Mã cổ phiếu trên màn hình chỉ là mã trong `screener.spike.top` / `screener.leaders.top`.
-- Scene `market` phải có chữ **"nếu"**: điều kiện nói như một nhánh nếu … thì, lấy từ `watch`. Không bao
-  giờ gọi giá, không "nên mua", "nên bán", "vào lệnh".
+- Scene `watch` phải có chữ **"nếu"**: điều kiện nói như một nhánh nếu … thì, lấy từ `watch` của fact pack.
+  Không bao giờ gọi giá, không "nên mua", "nên bán", "vào lệnh". Scene `market` chỉ kể bối cảnh.
 - **Không đổi** `id`, `role`, `act`, `visual` — chép `visual` y nguyên từ khung. Mark, nhãn số, crop, máy
   quay là của đạo diễn. Giữ số beat; câu được ghim vào beat 2 phải nói đúng thứ beat 2 đang chiếu.
 
@@ -72,6 +72,32 @@ khó đọc thì nói cách người Việt gọi, và ghi vào `unsupported` n�
 - **Ba scene `leader` cùng một khuôn** (vì sao qua bộ lọc → mức terminal đánh dấu → một chi tiết riêng),
   nhưng mỗi mã một chi tiết riêng — không chép câu.
 - **Hook ≤ 3 giây**: câu đầu ≤ 10 chữ và headline beat đầu đã mang kết luận của phiên.
+
+## Giữ người xem — arc và các móc (người dùng yêu cầu 2026-09-29)
+
+Reel theo arc **hook_payoff** của vox-director, thân là **đếm ngược** cho ba mã dẫn dắt. Người xem quyết định
+trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi scene phải có lý do để xem tiếp.
+
+- **Hook (≤ 3 giây)**: câu đầu ≤ 10 chữ và là CĂNG THẲNG — con số phiên phân phối — trong lúc ba mũi tên đỏ
+  rơi xuống nến. Câu hai là NEO: trạng thái theo quy tắc và FTD đang giữ nó (mũi tên xanh, beat 2). Câu cuối
+  là LỜI HỨA — móc mở 1: "cuối video là mức nào thủng thì gãy" (nói theo cách của bạn). Không dựng bối cảnh.
+- **market** kể bối cảnh: các phiên phân phối, FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn sau
+  bao nhiêu phiên; thêm mấy phiên là đổi trạng thái). KHÔNG nói điều kiện ở đây — để dành cho `watch`.
+  Kết bằng câu dẫn sang độ rộng.
+- **breadth** là nghịch lý (scene vẽ duy nhất, chấm sáng = mã trên đường trung bình 200 phiên): chỉ số ở
+  trạng thái tăng mà phần lớn mã không đi cùng. Một câu kết dẫn: "vậy tiền đang ở đâu?".
+- **spike** gieo móc mở 2: "một mã có mặt ở cả hai bộ lọc — để cuối". Không nói tên mã ở đây.
+- **leaders → leader #3 → #2 → #1**: đếm ngược. Ba scene `leader` CÙNG KHUÔN câu (vì sao qua bộ lọc → chi
+  tiết riêng → mức terminal đánh dấu), mỗi mã MỘT chi tiết riêng: mã còn xa đỉnh 52 tuần, mã sát đỉnh, mã có
+  khối lượng đột biến hôm nay. Eyebrow ghi số đếm ngược (`Dẫn dắt #3 · BSR`). #1 trả móc 2: "đây là mã ở cả
+  hai bộ lọc".
+- **watch** là PAYOFF, máy đứng yên: trả móc 1 bằng ba nhánh nếu … thì từ `watch` của fact pack — thủng
+  đáy nhịp hồi là FTD thất bại, chạm mức hết hạn là một phiên phân phối rơi khỏi đếm, thêm N phiên là đổi
+  trạng thái. Nói chậm hơn, câu ngắn hơn scene khác. Không câu nào là lời khuyên.
+- **Headline là phụ đề**: phần lớn người xem tắt tiếng. Mỗi headline đứng một mình kể được chuyện: dòng 1
+  = điều nhìn thấy (có số), dòng 2 = nghĩa của nó. Mark hiện ra đúng câu gọi tên nó (`atSentence`).
+- Nhịp: mỗi scene 1–3 beat, đổi khung 3–5 giây (đạo diễn đã đặt máy quay). Ngân sách chữ theo `_words`: hook
+  và outro ngắn nhất, market dài nhất, ba scene leader bằng nhau.
 
 ## Outro — người làm kênh chào người xem
 
@@ -107,7 +133,9 @@ Kèm `_script.md`: bài nói liền mạch để đạo diễn đọc như ngư�
 - [ ] Không chữ số trong lời; năm và ngày đọc đúng; mọi câu ≥ 3 chữ và kết bằng dấu câu + khoảng trắng.
 - [ ] Mỗi scene ≤ 2 số đọc ra lời; không scene nào mở bằng con số; câu dài ngắn xen kẽ.
 - [ ] Hook nêu trạng thái theo quy tắc trong câu đầu hoặc headline đầu.
-- [ ] `market` có "nếu … thì" lấy từ `watch`; không câu nào gọi giá hay bảo mua bán.
+- [ ] `watch` có "nếu … thì" lấy từ `watch` của fact pack; `market` không nói điều kiện; không câu nào gọi giá.
+- [ ] Hook: câu đầu ≤ 10 chữ là con số phiên phân phối; câu cuối hứa mức phải canh. `spike` gieo "một mã ở cả hai bộ lọc"; leader #1 trả nó.
+- [ ] Ba scene leader cùng khuôn, mỗi mã một chi tiết riêng; eyebrow đếm ngược #3 → #2 → #1.
 - [ ] Mọi chữ số trên màn hình có trong fact pack đúng độ chính xác; mã trên màn hình là mã trong picks.
 - [ ] Mã cổ phiếu trong lời đọc là tên công ty; FTD/RS/EMA50 nói bằng chữ Việt.
 - [ ] `visual` chép nguyên; số beat giữ nguyên; `atSentence` trỏ đúng câu.

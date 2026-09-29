@@ -88,7 +88,11 @@ node scripts/review/scaffold.mjs --format=daily      # -> content/review-daily.j
 npm run review-page -- DailyReview --out=out/review/draft-daily
 ```
 
-Scene theo `rules.formats.daily.roles`: hook → market → spike → leaders → leader ×3 → outro (~70 giây).
+Scene theo `rules.formats.daily.roles` (người dùng yêu cầu tối ưu giữ người xem 2026-09-29, theo arc
+hook_payoff + đếm ngược của vox-director): hook (căng thẳng → neo → lời hứa) → market (bối cảnh, đồng hồ) →
+breadth (nghịch lý độ rộng, panel `pictogram` chấm) → spike (gieo móc "mã ở cả hai bộ lọc") → leaders → leader
+#3 → #2 → #1 (mỗi mã một chi tiết riêng, #1 trả móc) → watch (payoff, máy đứng yên, câu nếu … thì) → outro —
+10 scene, ~80 giây. Bản tuần thêm `week` sau hook.
 Id mang ngày (`rd-260929-hook`) để file giọng mỗi bản tách nhau. Bản trước được chép vào
 `content/review/archive/` trước khi bị thay. Mark đặt từ số: vline trên từng phiên phân phối, vòng trên nến
 FTD, hline ở đáy nhịp hồi, hộp trên ba dòng được chọn và trên ô VOL/SMA / RS 1M, hline EMA50 và mũi tên ở

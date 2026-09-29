@@ -40,6 +40,13 @@ if (prior) {
   if (prior.edition === date && prior.status !== 'scaffolded' && !flag('force')) {
     die(`${fmt.content} is the ${date} edition and already "${prior.status}" — the writer's work would be lost. --force to rebuild it.`);
   }
+  if (prior.edition === date && prior.status !== 'scaffolded' && flag('force')) {
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
+    const to = `${PATHS.archive}/${date}-${FORMAT}-${stamp}.json`;
+    mkdirSync(dirname(abs(to)), {recursive: true});
+    copyFileSync(abs(fmt.content), abs(to));
+    console.log(`archived the written ${date} edition -> ${to}`);
+  }
   if (prior.edition && prior.edition !== date) {
     const to = `${PATHS.archive}/${prior.edition}-${FORMAT}.json`;
     mkdirSync(dirname(abs(to)), {recursive: true});
@@ -166,99 +173,141 @@ const lab = (x, y, text, accent, beat, anchor) => ({kind: 'label', x: clamp(x), 
 const cropOf = (c) => (c ? {crop: c} : {});
 const maskOf = (m) => (m?.length ? {masks: m, maskColor: R.shots.maskColor} : {});
 
-// hook — the verdict pinned on the chart (user, 2026-09-29): beat 1 circles the FTD that confirmed the
-// trend; beat 2 draws the distribution days since and rings today's candle. Without an FTD in view, one
-// beat with the distribution days.
-const ftdIn = (() => {
-  const f = F.state.ftd ?? F.state.lastFtd;
-  const x = f ? barX(index, daily, f.date) : null;
-  return f && x != null && x > C.x && x < C.x + C.w ? {f, x, y: priceY(index, f.close, indexUnit)} : null;
-})();
-const recentTop = Math.min(...daily.slice(-15).map((b) => priceY(index, b.h, indexUnit)));
-const hookMarks = ftdIn
-  ? [
-      ftdArrow(ftdIn.f, ftdIn.x, 0),
-      lab(ftdIn.x, clamp(ftdBase(ftdIn.f) + 0.03), `FTD ${ftdIn.f.dm} ${fmtPct(ftdIn.f.changePercent)}`, 'green', 0, 'middle'),
-      ...idxMarks(1),
-      ...(ddXs.length ? [lab(Math.min(...ddXs.map((d) => d.x)) - 0.012, clamp(Math.min(ddTop(), recentTop - GAP - ARROW) + 0.01), `${F.distribution.count} phiên phân phối`, 'red', 1, 'end')] : []),
-      {kind: 'circle', x: clamp(lastX), y: clamp(lastY), r: 0.022, accent: 'gold', beat: 1},
-    ]
-  : idxMarks(0);
-push('hook', {
-  beats: todoBeats(ftdIn ? 2 : 1),
-  visual: imageOf(index, indexSource, {
-    ...cropOf(indexCrop), ...maskOf(indexMasks),
-    annotations: hookMarks,
-    shots: ftdIn
-      ? [{beat: 0, x: clamp((ftdIn.x + (lastX ?? 0.9)) / 2), y: clamp((ftdIn.y + lastY) / 2), zoom: 1.5, move: 'push_in'},
-         {beat: 1, x: clamp((lastX ?? 0.8) - 0.08), y: clamp(lastY), zoom: 2.3, move: 'pan'}]
-      : [{beat: 0, x: clamp((lastX ?? 0.8) - 0.07), y: clamp(lastY), zoom: 2.0, move: 'push_in'}],
-  }),
-  brief: [
-    `Kết luận phiên ${F.session.dmy}: ${F.state.label} theo quy tắc${F.state.rallyDay ? `, ngày ${F.state.rallyDay}` : ''}.`,
-    `${F.distribution.count}/${F.distribution.window} phiên phân phối còn hiệu lực.`,
-    `Hôm nay ${fmtPct(F.session.changePercent)}, khối lượng ×${vi(F.session.volumeRatio)} phiên trước — ${F.session.isDistribution ? 'LÀ phiên phân phối' : F.session.isFtd ? 'LÀ phiên FTD' : 'không phải phiên phân phối'}.`,
-    ftdIn ? `Beat 1 = vòng quanh FTD ${ftdIn.f.dm} (mốc của xu hướng); beat 2 = các phiên phân phối từ đó và nến hôm nay.` : '',
-    'Câu đầu ≤ 10 chữ, headline beat đầu đã mang kết luận.',
-  ],
-});
+// ------------------------------------------------------------------ scenes
+//
+// Story (vox-director hook_payoff + a listicle countdown; user 2026-09-29, "optimize all the scenes"):
+//   hook     the distribution days land (tension), then the FTD that still anchors the trend; the
+//            words promise the level to watch at the end (open loop 1)
+//   market   context: the count, the rally low, the clock (when the oldest DD drops out)
+//   breadth  pattern interrupt — the first drawn panel — and the paradox that bridges to the filters
+//   spike    the volume table; the words tease the name on both filters (open loop 2)
+//   leaders  the leaders table
+//   leader   #3 → #2 → #1, one distinct detail each; #1 pays loop 2
+//   watch    the payoff, static camera: the levels and the count that change the state tomorrow
+//   outro    the button
+// The order is rules.formats.<format>.roles; camera moves alternate between neighbouring shots.
 
-// market — beat 1 the distribution days, beat 2 the FTD, its rally low and the condition.
-if (FORMAT === 'weekly') {
-  const W = F.weekly;
-  const wk = photo('vnindex-weekly');
-  if (wk?.calib) {
-    push('week', {
-      beats: todoBeats(2),
-      visual: imageOf(wk, 'fireant.vn', {
-        ...maskOf(R.shots.fireantWeekly.masks),
-        annotations: [lab(0.08, 0.2, `Tuần ${fmtPct(W.changePercent)} · KL ×${vi(W.volumeVsPriorWeek)}`, W.changePercent >= 0 ? 'green' : 'red', 0)],
-        shots: [{beat: 0, x: 0.75, y: 0.5, zoom: 1.6, move: 'push_in'}, {beat: 1, x: 0.5, y: 0.5, zoom: 1.0, move: 'pull_out'}],
-      }),
-      brief: [`Nến tuần ${W.fromDm} → ${F.session.dm}: ${fmtPct(W.changePercent)}, khối lượng/phiên ×${vi(W.volumeVsPriorWeek)} tuần trước.`, `Cao ${vi(W.high)}, thấp ${vi(W.low)}, đóng ${vi(W.close)}.`],
-    });
-  }
-}
 const ftd = F.state.ftd ?? F.state.lastFtd;
 const ftdX = ftd ? barX(index, daily, ftd.date) : null;
-const marketMarks = [
-  ...idxMarks(0),
-  // Toward the right: beat 1's camera frames the distribution days, which are the latest sessions.
-  lab(...inC(0.5, 0.06), `${F.distribution.count}/${F.distribution.window} phiên phân phối`, 'red', 0),
-];
-const biggest = [...ddXs].sort((a, b) => a.changePercent - b.changePercent)[0];
-if (biggest) marketMarks.push(lab(biggest.x - 0.012, clamp(priceY(index, barOf(biggest.date).h, indexUnit) - GAP - ARROW / 2), `${biggest.dm} ${fmtPct(biggest.changePercent)} · KL ×${vi(biggest.volumeRatio)}`, 'red', 0, 'end'));
-if (ftd && ftdX != null && ftdX > C.x && ftdX < C.x + C.w) {
-  marketMarks.push(ftdArrow(ftd, ftdX, 1));
-  marketMarks.push(lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', 1, 'middle'));
-}
+const ftdVisible = !!ftd && ftdX != null && ftdX > C.x && ftdX < C.x + C.w;
+const ftdY = ftdVisible ? priceY(index, ftd.close, indexUnit) : null;
 const holdLow = F.state.rallyLow ?? F.state.correctionLow;
 const holdY = holdLow != null ? priceY(index, holdLow, indexUnit) : null;
-if (holdY != null && holdY > 0.02 && holdY < 0.98) {
-  marketMarks.push({kind: 'hline', y: clamp(holdY), accent: 'gold', beat: 1, label: `${F.state.rallyLow != null ? 'Đáy nhịp hồi' : 'Đáy điều chỉnh'} ${vi(holdLow)}`, labelSide: 'left'});
-}
-push('market', {
-  act: warnAct,
-  beats: todoBeats(2),
-  visual: imageOf(index, indexSource, {
-    ...cropOf(indexCrop), ...maskOf(indexMasks),
-    annotations: marketMarks,
-    shots: [
-      {beat: 0, x: clamp(ddXs.length ? (Math.min(...ddXs.map((d) => d.x)) + (lastX ?? 0.9)) / 2 : inC(0.75, 0)[0]), y: inC(0, 0.45)[1], zoom: 1.35, move: 'push_in'},
-      {beat: 1, x: inC(0.5, 0)[0], y: inC(0, 0.5)[1], zoom: 1.0, move: 'pull_out'},
+const holdVisible = holdY != null && holdY > C.y + 0.02 && holdY < C.y + C.h - 0.02;
+const holdName = F.state.rallyLow != null ? 'Đáy nhịp hồi' : 'Đáy điều chỉnh';
+const recentTop = Math.min(...daily.slice(-15).map((b) => priceY(index, b.h, indexUnit)));
+const ddLeft = ddXs.length ? Math.min(...ddXs.map((d) => d.x)) : null;
+const ddCentre = ddLeft != null ? (ddLeft + (lastX ?? 0.9)) / 2 : inC(0.75, 0)[0];
+const biggest = [...ddXs].sort((a, b) => a.changePercent - b.changePercent)[0];
+const nextExp = F.distribution.nextExpiry;
+const nextExpDd = nextExp ? ddXs.find((d) => d.date === nextExp.date) : null;
+const nextState = F.distribution.toUnderPressure > 0
+  ? {n: F.distribution.toUnderPressure, name: R.status.UNDER_PRESSURE.short}
+  : {n: F.distribution.toCorrection, name: R.status.CORRECTION.short};
+const todayRing = (beat) => ({kind: 'circle', x: clamp(lastX), y: clamp(lastY), r: 0.022, accent: 'gold', beat});
+const indexPhoto = (extra) => imageOf(index, indexSource, {...cropOf(indexCrop), ...maskOf(indexMasks), ...extra});
+const ddLabel = (beat) => (ddLeft != null
+  ? [lab(ddLeft - 0.012, clamp(Math.min(ddTop(), recentTop - GAP - ARROW) + 0.01), `${F.distribution.count} phiên phân phối`, 'red', beat, 'end')]
+  : []);
+const ftdMarks = (beat) => (ftdVisible
+  ? [ftdArrow(ftd, ftdX, beat), lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', beat, 'middle')]
+  : []);
+
+// hook — tension, anchor, promise.
+const buildHook = () => {
+  const two = ftdVisible;
+  push('hook', {
+    beats: todoBeats(two ? 2 : 1),
+    visual: indexPhoto({
+      annotations: [...idxMarks(0), ...ddLabel(0), ...ftdMarks(1), todayRing(two ? 1 : 0)],
+      shots: two
+        ? [{beat: 0, x: clamp(ddCentre), y: clamp(recentTop + 0.1), zoom: 2.0, move: 'push_in'},
+           {beat: 1, x: clamp((ftdX + (lastX ?? 0.9)) / 2), y: clamp((ftdY + lastY) / 2), zoom: 1.35, move: 'pull_out'}]
+        : [{beat: 0, x: clamp(ddCentre), y: clamp(lastY), zoom: 2.0, move: 'push_in'}],
+    }),
+    brief: [
+      `Câu đầu ≤ 10 chữ, là CĂNG THẲNG: ${F.distribution.count} phiên phân phối trên ${F.distribution.window} phiên — beat 1 là ba mũi tên đỏ rơi xuống nến, headline mang con số.`,
+      two
+        ? `Beat 2 là NEO: ${F.state.label} theo quy tắc từ FTD ${ftd.dmy} (mũi tên xanh chỉ lên); vòng vàng ở nến hôm nay: ${fmtPct(F.session.changePercent)}, KL ×${vi(F.session.volumeRatio)} phiên trước — ${F.session.isDistribution ? 'LÀ phiên phân phối' : 'không phải phiên phân phối'}.`
+        : `${F.state.label} theo quy tắc; hôm nay ${fmtPct(F.session.changePercent)}.`,
+      'Câu cuối là LỜI HỨA (móc mở 1): cuối video là mức nào thủng thì gãy — trả ở scene watch.',
     ],
-  }),
-  brief: [
-    `Beat 1 — ${F.distribution.count} phiên phân phối trên ${F.distribution.window} phiên: ${dd.map((d) => `${d.dm} ${fmtPct(d.changePercent)} KL ×${vi(d.volumeRatio)} (còn ${d.sessionsLeft} phiên)`).join('; ') || 'không có'}.`,
-    `Thêm ${F.distribution.toUnderPressure} phiên là "${R.status.UNDER_PRESSURE.vi}", thêm ${F.distribution.toCorrection} phiên là "${R.status.CORRECTION.vi}".`,
-    ftd ? `Beat 2 — FTD ${ftd.dmy}: ngày ${ftd.day} của nỗ lực hồi phục, ${fmtPct(ftd.changePercent)}, KL ×${vi(ftd.volumeRatio)}; đáy nhịp hồi ${vi(ftd.rallyLow)} — thủng là FTD thất bại.` : 'Beat 2 — chưa có FTD trong lịch sử gần.',
-    `Kết bằng điều kiện nếu … thì (${F.watch.map((w) => `nếu ${w.if} → ${w.then}`).join('; ')}). Không gọi giá.`,
-    `Quy tắc: phân phối = giảm từ ${F.rules.ddMaxChangePercent}% với KL cao hơn phiên trước; FTD = từ ngày ${F.rules.ftdMinDay}, tăng từ ${F.rules.ftdMinChangePercent}% với KL cao hơn.`,
-  ],
-});
+  });
+};
+
+// market — the count, the anchor, the clock. No condition here: that is the payoff's job.
+const buildMarket = () => {
+  const marks = [
+    ...idxMarks(0),
+    {...lab(...inC(0.5, 0.06), `${F.distribution.count}/${F.distribution.window} phiên phân phối`, 'red', 0), until: 1},
+  ];
+  if (biggest) marks.push(lab(biggest.x - 0.012, clamp(priceY(index, barOf(biggest.date).h, indexUnit) - GAP - ARROW / 2), `${biggest.dm} ${fmtPct(biggest.changePercent)} · KL ×${vi(biggest.volumeRatio)}`, 'red', 0, 'end'));
+  marks.push(...ftdMarks(1));
+  if (holdVisible) marks.push({kind: 'hline', y: clamp(holdY), accent: 'gold', beat: 1, label: `${holdName} ${vi(holdLow)}`, labelSide: 'left'});
+  if (nextExpDd) marks.push(lab(nextExpDd.x - 0.012, clamp(priceY(index, barOf(nextExpDd.date).h, indexUnit) - GAP - ARROW - 0.04), `${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên`, 'white', 2, 'end'));
+  marks.push(lab(...inC(0.5, 0.06), `${R.distribution.underPressureAt} phiên → ${R.status.UNDER_PRESSURE.short.toLowerCase()} · ${R.distribution.correctionAt} phiên → ${R.status.CORRECTION.short.toLowerCase()}`, 'gold', 2));
+  push('market', {
+    act: warnAct,
+    beats: todoBeats(3),
+    visual: indexPhoto({
+      annotations: marks,
+      shots: [
+        {beat: 0, x: clamp(ddCentre), y: inC(0, 0.42)[1], zoom: 1.5, move: 'pan'},
+        {beat: 1, x: clamp(ftdVisible ? (ftdX + (lastX ?? 0.9)) / 2 : inC(0.5, 0)[0]), y: clamp(holdVisible ? (holdY + lastY) / 2 : inC(0, 0.5)[1]), zoom: 1.15, move: 'tilt'},
+        {beat: 2, x: clamp((nextExpDd?.x ?? lastX ?? 0.85) - 0.02), y: clamp(recentTop + 0.1), zoom: 2.1, move: 'push_in'},
+      ],
+    }),
+    brief: [
+      `Beat 1 — ${F.distribution.count} phiên phân phối còn hiệu lực: ${dd.map((d) => `${d.dm} ${fmtPct(d.changePercent)} KL ×${vi(d.volumeRatio)} (còn ${d.sessionsLeft} phiên)`).join('; ') || 'không có'}. Phân phối = giảm từ ${F.rules.ddMaxChangePercent}% với KL cao hơn phiên trước.`,
+      ftdVisible
+        ? `Beat 2 — neo của xu hướng: FTD ${ftd.dmy} (ngày ${ftd.day}, ${fmtPct(ftd.changePercent)}, KL ×${vi(ftd.volumeRatio)}) và đáy nhịp hồi ${vi(ftd.rallyLow)} (đường vàng).`
+        : `Beat 2 — ${holdName.toLowerCase()} ${holdLow != null ? vi(holdLow) : '—'}.`,
+      `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; ${R.distribution.underPressureAt} phiên là ${R.status.UNDER_PRESSURE.vi.toLowerCase()}, ${R.distribution.correctionAt} phiên là ${R.status.CORRECTION.vi.toLowerCase()}.`,
+      'Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). Kết bằng câu dẫn sang độ rộng thị trường.',
+    ],
+  });
+};
+
+// breadth — the paradox on the only drawn panel.
+const pictogramGrid = (pct) => {
+  // The Pictogram panel (and verify) re-derive the lit count from filledPercent and scatter it with
+  // (k*7+3) % total, which lights the wrong number on a grid whose total shares a factor with 7.
+  // Search the grids the panel has room for and keep the one whose drawn share is nearest the truth.
+  let best = null;
+  for (let rows = 3; rows <= 7; rows++) {
+    for (let columns = 4; columns <= 9; columns++) {
+      const total = rows * columns;
+      const drawnFor = (filled) => { let n = 0; for (let k = 0; k < total; k++) if ((k * 7 + 3) % total >= total - filled) n++; return n; };
+      const drawn = drawnFor(Math.round((pct / 100) * total));
+      const share = round((drawn / total) * 100, 2);
+      if (drawnFor(Math.round((share / 100) * total)) !== drawn) continue;
+      const err = Math.abs(share - pct);
+      // Within half a point of the truth, the fuller grid wins: 25 dots in an 880×560 panel read as empty.
+      const better = !best ? true
+        : err <= 0.5 && best.err <= 0.5 ? total > best.total
+        : err < best.err - 1e-9;
+      if (better) best = {rows, columns, total, drawn, filledPercent: share, err};
+    }
+  }
+  return best;
+};
+const buildBreadth = () => {
+  const B = F.screener.breadth;
+  if (B?.aboveSma200Percent == null) return;
+  const g = pictogramGrid(B.aboveSma200Percent);
+  push('breadth', {
+    beats: todoBeats(1),
+    visual: {type: 'pictogram', glyph: 'dot', rows: g.rows, columns: g.columns, filledPercent: g.filledPercent, accent: 'green'},
+    brief: [
+      `NGHỊCH LÝ (pattern interrupt, panel vẽ duy nhất): chỉ số ${F.state.label.toLowerCase()} mà chỉ ${B.aboveSma200} trên ${B.withSma200 ?? B.universe} mã (${vi(B.aboveSma200Percent, 1)}%) đứng trên đường trung bình 200 phiên; hôm nay ${B.up} mã tăng, ${B.down} mã giảm.`,
+      `Lưới ${g.rows}×${g.columns} chấm, ${g.drawn} chấm sáng = ${vi(g.filledPercent, 1)}%; headline ghi ${Math.round(B.aboveSma200Percent)}% (số nguyên, có trong pack).`,
+      'Kết bằng câu dẫn: vậy tiền đang ở đâu? → bộ lọc.',
+    ],
+  });
+};
 
 // spike and leaders — the terminal's own tables.
-for (const scene of ['spike', 'leaders']) {
+const buildTable = (scene) => {
   const p = need(photo(scene), scene);
   const t = table(p);
   const picks = F.screener[scene].top;
@@ -291,30 +340,49 @@ for (const scene of ['spike', 'leaders']) {
       shots: [{beat: 0, x: clamp(t.crop.x + t.crop.w / 2), y: clamp(t.crop.y + t.crop.h / 2), zoom: 1.0, move: 'push_in'}, {beat: 1, x: clamp(focusX - 0.08), y: clamp(mid), zoom: 1.8, move: 'pull_out'}],
     }),
     brief: scene === 'spike'
-      ? [`Bộ lọc "${S.filter}" của terminal: ${S.count} mã (${S.up} tăng, ${S.down} giảm).`, `Ba mã khối lượng đột biến nhất so với trung bình 20 phiên: ${S.top.map((x) => `${x.symbol} KL ×${vi(x.volumeRatio)} ${fmtPct(x.changePercent)}`).join('; ')}.`, 'Nói rõ mã nào tăng, mã nào giảm — khối lượng lớn khi giảm là bán ra, không phải mua vào.', F.screener.volumeVsSmaUnit === 'percent' ? 'Lưu ý của đạo diễn: bộ lọc đang so KL theo % (volume_vs_sma > 1,2 nghĩa là trên TB20 hơn 1,2%), nên danh sách gồm cả mã chỉ nhỉnh hơn TB20; ba mã được chọn là ba mã mạnh nhất.' : '']
-          .filter(Boolean)
-      : [`Uptrend (giá trên EMA50, EMA50 trên SMA200) có ${S.uptrendCount} mã; RS Strong (RS 1M từ 60) có ${S.rsStrongCount}; qua cả hai: ${S.count} mã.`, `Ba mã dẫn đầu theo RS 1M: ${S.top.map((x) => `${x.symbol} RS 1M ${x.rs1m} ${fmtPct(x.changePercent)}`).join('; ')}.`, S.alsoSpiking.length ? `${S.alsoSpiking.join(', ')} có mặt ở cả Volume spike.` : ''].filter(Boolean),
+      ? [
+          `Bộ lọc "${S.filter}" của terminal: ${S.count} mã (${S.up} tăng, ${S.down} giảm). Ba mã khối lượng đột biến nhất so với trung bình 20 phiên: ${S.top.map((x) => `${x.symbol} KL ×${vi(x.volumeRatio)} ${fmtPct(x.changePercent)}`).join('; ')}.`,
+          'Nói rõ mã nào tăng, mã nào giảm — khối lượng lớn khi giảm là bán ra, không phải mua vào.',
+          `GIEO MÓC 2 (không nói tên): một mã trong bảng này cũng có mặt ở bộ lọc dẫn dắt — để cuối.${F.screener.leaders.alsoSpiking.length ? '' : ' (Hôm nay không có mã nào — bỏ móc này.)'}`,
+        ]
+      : [
+          `Uptrend (giá trên EMA50, EMA50 trên SMA200) có ${S.uptrendCount} mã; RS Strong (RS 1M từ 60) có ${S.rsStrongCount}; qua cả hai: ${S.count} mã. Ba mã dẫn đầu theo RS 1M: ${S.top.map((x) => `${x.symbol} RS 1M ${x.rs1m} ${fmtPct(x.changePercent)}`).join('; ')}.`,
+          'Scene ngắn: cầu nối vào đếm ngược. Câu cuối: "đếm ngược từ ba".',
+        ],
   });
-}
+};
 
-// leader ×3 — each top name on the terminal's own chart.
-for (const L of F.screener.leaders.top) {
-  const p = need(photo(`${L.symbol.toLowerCase()}-terminal`), `${L.symbol.toLowerCase()}-terminal`);
+// leader — the countdown: one template, one distinct detail per name.
+const buildLeader = (L, rank) => {
+  const sym = L.symbol.toLowerCase();
+  const p = need(photo(`${sym}-terminal`), `${sym}-terminal`);
   const crop = R.shots.terminalAnalyze.crop;
+  // The volume detail belongs to a name in the spike scene's TOP rows (the table the viewer saw), not
+  // to every member of the 16-name filter — BSR sits in it at ×1,09 and its story is the 52-week high.
+  const spiking = F.screener.spike.top.some((x) => x.symbol === L.symbol);
   const marks = [lab(crop.x + 0.02, 0.06, `${L.symbol} · RS 1M ${L.rs1m} · ${fmtPct(L.changePercent)}`, 'gold', 0)];
   let closeX = crop.x + crop.w * 0.9;
   let closeY = 0.3;
+  let detail = '';
   if (p.calib) {
     const bars = tryJson(`${PATHS.analyze}/${date}/${L.symbol}.json`)?.price_history ?? [];
     closeX = barX(p, bars, date) ?? closeX;
     closeY = priceY(p, L.price);
     const emaY = priceY(p, L.ema50);
     if (emaY > 0.02 && emaY < crop.y + crop.h - 0.02) marks.push({kind: 'hline', y: clamp(emaY), accent: 'green', beat: 0, label: `EMA50 ${vi(L.ema50)}`, labelSide: 'left'});
-    // The latest candle sits against the crop's right edge (the axis is cropped out), so an arrow
-    // points at it from the open chart on its left instead of a circle the edge would cut.
+    if (spiking && L.volumeRatio != null) {
+      // The terminal's volume pane sits under the price pane (y 0.553..0.697 of the photo).
+      marks.push({kind: 'box', x: clamp(closeX - 0.007), y: 0.556, w: 0.014, h: clamp(crop.y + crop.h - 0.556 - 0.006), accent: 'gold', beat: 0, label: `KL ×${vi(L.volumeRatio)}`});
+      detail = `khối lượng hôm nay ×${vi(L.volumeRatio)} trung bình 20 phiên (hộp vàng trên cột khối lượng) — mã ở CẢ HAI bộ lọc`;
+    } else if (L.high52w != null) {
+      const hy = priceY(p, L.high52w);
+      if (hy > 0.03 && hy < crop.y + crop.h - 0.03) marks.push({kind: 'hline', y: clamp(hy), accent: 'gold', beat: 0, label: `Đỉnh 52T ${vi(L.high52w)} · ${fmtPct(L.fromHigh52wPercent, 1)}`, labelSide: 'left'});
+      detail = `đỉnh 52 tuần ${vi(L.high52w)}, giá đang ${fmtPct(L.fromHigh52wPercent, 1)} so với đỉnh (đường vàng)`;
+    }
     marks.push({kind: 'arrow', from: [clamp(closeX - 0.1), clamp(closeY + 0.1)], to: [clamp(closeX - 0.012), clamp(closeY + 0.012)], accent: 'green', beat: 1, label: `${fmtPct(L.aboveEma50Percent, 1)} trên EMA50`});
   }
   push('leader', {
+    eyebrow: `Dẫn dắt #${rank} · ${L.symbol}`,
     beats: todoBeats(2),
     visual: imageOf(p, 'zionle.io.vn', {
       crop,
@@ -322,21 +390,81 @@ for (const L of F.screener.leaders.top) {
       shots: [{beat: 0, x: clamp(crop.x + crop.w / 2), y: clamp(crop.y + crop.h / 2), zoom: 1.0, move: 'push_in'}, {beat: 1, x: clamp(closeX - 0.05), y: clamp(closeY), zoom: 1.8, move: 'pull_out'}],
     }),
     brief: [
-      `${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}.`,
-      `Trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}; cách đỉnh 52 tuần ${vi(L.high52w)} ${fmtPct(L.fromHigh52wPercent, 1)}.`,
+      `#${rank} — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}; trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}.`,
+      `Chi tiết riêng của mã này: ${detail || 'không có'}.${rank === 1 && spiking ? ' Đây là mã TRẢ MÓC 2: "mã ở cả hai bộ lọc".' : ''}`,
       L.signal ? `Tín hiệu mới nhất trên terminal: ${L.signal.type} ở ${vi(L.signal.price)} ngày ${L.signal.dm} — chỉ nhắc nếu khớp với chart đang chiếu.` : 'Terminal chưa có tín hiệu cho mã này.',
-      'Đọc tên công ty thay cho mã ở lời đọc (TTS đọc mã chữ cái thất thường); mã giữ trên màn hình.',
+      'Cùng khuôn câu với hai scene leader kia; đọc tên công ty thay cho mã (TTS đọc mã chữ cái thất thường); mã giữ trên màn hình.',
     ],
   });
-}
+};
+
+// watch — the payoff: what changes the state, said as if-then. Static camera on beat 2.
+const buildWatch = () => {
+  const marks = [];
+  if (holdVisible) marks.push({kind: 'hline', y: clamp(holdY), accent: 'gold', beat: 0, label: `Thủng ${vi(holdLow)} → ${F.state.rallyLow != null ? 'FTD thất bại' : 'đáy mới'}`, labelSide: 'left'});
+  const expLevel = F.distribution.lowestExpireLevel;
+  const expDd = expLevel != null ? dd.find((d) => d.expireLevel === expLevel) : null;
+  const expY = expLevel != null ? priceY(index, expLevel, indexUnit) : null;
+  const expVisible = expY != null && expY > C.y + 0.02 && expY < C.y + C.h - 0.02;
+  if (expVisible && expDd) marks.push({kind: 'hline', y: clamp(expY), accent: 'green', beat: 0, label: `Chạm ${vi(expLevel)} → phiên ${expDd.dm} hết hạn`, labelSide: 'left'});
+  marks.push(todayRing(1));
+  marks.push(lab(clamp(lastX - 0.03), clamp(lastY - 0.1), `Thêm ${nextState.n} phiên phân phối → ${nextState.name.toLowerCase()}`, 'red', 1, 'end'));
+  if (nextExp) marks.push(lab(clamp(lastX - 0.03), clamp(lastY - 0.06), `${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên`, 'white', 1, 'end'));
+  const midY = ((holdVisible ? holdY : lastY) + (expVisible ? expY : lastY)) / 2;
+  push('watch', {
+    beats: todoBeats(2),
+    visual: indexPhoto({
+      annotations: marks,
+      shots: [
+        {beat: 0, x: inC(0.55, 0)[0], y: clamp(midY), zoom: 1.0, move: 'tilt'},
+        {beat: 1, x: clamp((lastX ?? 0.85) - 0.07), y: clamp(lastY), zoom: 2.2, move: 'static'},
+      ],
+    }),
+    brief: [
+      `PAYOFF — trả lời hứa của hook bằng ba nhánh nếu … thì: nếu thủng ${holdLow != null ? vi(holdLow) : '—'} → ${F.state.rallyLow != null ? 'FTD thất bại, về điều chỉnh' : 'đáy điều chỉnh mới'}; nếu thêm ${nextState.n} phiên phân phối → ${nextState.name.toLowerCase()}; ${expDd ? `nếu chạm ${vi(expLevel)} → phiên ${expDd.dm} hết hạn, số đếm giảm` : ''}${nextExp ? `; qua ${nextExp.sessionsLeft} phiên nữa, phiên ${nextExp.dm} tự hết hạn` : ''}.`,
+      'Máy đứng yên ở beat 2. Câu ngắn, chậm. Không lời khuyên, không gọi giá — chỉ là quy tắc nói gì.',
+      `Toàn bộ số lấy từ watch[] và distribution.* của fact pack (${F.watch.map((w) => `nếu ${w.if} → ${w.then}`).join('; ')}).`,
+    ],
+  });
+};
+
+// week — the weekly edition's candle.
+const buildWeek = () => {
+  const W = F.weekly;
+  const wk = photo('vnindex-weekly');
+  if (!W || !wk?.calib) return;
+  push('week', {
+    beats: todoBeats(2),
+    visual: imageOf(wk, 'fireant.vn', {
+      ...maskOf(R.shots.fireantWeekly.masks),
+      annotations: [lab(0.08, 0.2, `Tuần ${fmtPct(W.changePercent)} · KL ×${vi(W.volumeVsPriorWeek)}`, W.changePercent >= 0 ? 'green' : 'red', 0)],
+      shots: [{beat: 0, x: 0.75, y: 0.5, zoom: 1.6, move: 'push_in'}, {beat: 1, x: 0.5, y: 0.5, zoom: 1.0, move: 'pull_out'}],
+    }),
+    brief: [`Nến tuần ${W.fromDm} → ${F.session.dm}: ${fmtPct(W.changePercent)}, khối lượng/phiên ×${vi(W.volumeVsPriorWeek)} tuần trước.`, `Cao ${vi(W.high)}, thấp ${vi(W.low)}, đóng ${vi(W.close)}.`],
+  });
+};
 
 // outro — the carried-over sign-off.
-push('outro', {
+const buildOutro = () => push('outro', {
   eyebrow: 'Theo dõi tiếp',
   beats: [{atSentence: 0, at: R.audio.leadIn, line1: 'TODO', line2: 'TODO', accent: 'gold'}],
   visual: {type: 'outro', brand: R.brand, kicker: 'Chứng khoán', pill: 'Thả tim · Chia sẻ · Theo dõi', line: FORMAT === 'daily' ? 'Cập nhật sau mỗi phiên' : 'Cập nhật mỗi cuối tuần'},
   brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
 });
+
+const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, spike: () => buildTable('spike'), leaders: () => buildTable('leaders'), watch: buildWatch, week: buildWeek, outro: buildOutro};
+const leaderTotal = fmt.roles.filter((r) => r === 'leader').length;
+let leaderIdx = 0;
+for (const role of fmt.roles) {
+  if (role === 'leader') {
+    const L = F.screener.leaders.top[leaderIdx];
+    if (L) buildLeader(L, leaderTotal - leaderIdx);
+    leaderIdx++;
+    continue;
+  }
+  if (!builders[role]) die(`rules.formats.${FORMAT}.roles names "${role}", which scaffold.mjs cannot build`);
+  builders[role]();
+}
 
 // ------------------------------------------------------------------ write
 

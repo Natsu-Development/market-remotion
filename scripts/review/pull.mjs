@@ -177,10 +177,16 @@ const compact = (s) => ({
   ema_9: s.ema_9, ema_21: s.ema_21, ema_50: s.ema_50, sma_200: s.sma_200,
   signals: Object.fromEntries(Object.entries(s).filter(([k, v]) => k.startsWith('has_') && v)),
 });
+// A moving average of 0 means the server could not compute it (new listing), so the shares are
+// taken among the stocks that have one.
+const withEma50 = universe.filter((s) => s.ema_50 > 0);
+const withSma200 = universe.filter((s) => s.sma_200 > 0);
 const breadth = {
   universe: universe.length,
-  aboveEma50: universe.filter((s) => s.ema_50 > 0 && s.current_price > s.ema_50).length,
-  aboveSma200: universe.filter((s) => s.sma_200 > 0 && s.current_price > s.sma_200).length,
+  withEma50: withEma50.length,
+  aboveEma50: withEma50.filter((s) => s.current_price > s.ema_50).length,
+  withSma200: withSma200.length,
+  aboveSma200: withSma200.filter((s) => s.current_price > s.sma_200).length,
   up: universe.filter((s) => s.price_change_pct > 0).length,
   down: universe.filter((s) => s.price_change_pct < 0).length,
 };

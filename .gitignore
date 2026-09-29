@@ -21,5 +21,7 @@ __pycache__/
 assets/voices/
 # screenshots show the signed-in account; sidecars record the profile and configId
 public/shots/
+# market-review: raw screener responses (every stock, every day) — the snapshots in content/review/ keep what the reels use
+.review-cache/
 .env
 .env.*

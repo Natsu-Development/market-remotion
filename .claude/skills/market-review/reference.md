@@ -1,0 +1,110 @@
+# Tra cứu — market-review
+
+Tài liệu phụ của [SKILL.md](SKILL.md). Mọi ngưỡng nằm ở [rules.json](rules.json); đừng chép số của nó ra đây.
+
+## 1. File — ai ghi, ai đọc
+
+| File | Ghi bởi | Là gì |
+|---|---|---|
+| `content/review/vnindex.daily.json` (+ `.meta.json`) | `pull.mjs` | nến ngày VNINDEX từ SSI, 2013 → phiên cuối đã đóng, `{t,o,h,l,c,v}` mỗi dòng một nến |
+| `content/review/filters.json` | `pull.mjs` | bộ lọc đã lưu của người dùng — CHỈ tên + điều kiện (không token) |
+| `content/review/snapshots/<ngày>.json` | `pull.mjs` | kết quả bộ lọc của phiên: số mã từng bộ lọc, danh sách, picks, breadth, dòng của mã liên quan |
+| `content/review/analyze/<ngày>/<MÃ>.json` | `pull.mjs` | `/analyze` của mã dẫn đầu: nến 1 năm (giá nghìn đồng), signals, trendlines |
+| `content/review-<format>.facts.json` | `facts.mjs` | fact pack của bản — mọi số được lên màn hình |
+| `public/shots/review/<ngày>/*.png` (+ `.json`, `.bars.json`, `.calib.json`) | `shots.mjs` | ảnh, sidecar (nguồn, giờ, request guard, toạ độ bảng), nến dùng hiệu chỉnh, hiệu chỉnh |
+| `content/review-<format>.json` | `scaffold.mjs` → người viết → `merge.mjs` → `voiceover.mjs` | reel; đăng ký ở `src/Root.tsx` |
+| `brief/review-<format>.md` | `scaffold.mjs` | ý đồ từng scene, trang duyệt đọc nó |
+| `content/review/archive/<ngày>-<format>.json` | `scaffold.mjs` | bản trước, chép trước khi bị thay |
+| `.review-cache/` (gitignore) | `pull.mjs`, `shots.mjs`, người viết | toàn bộ 1466 mã của phiên, file tạm của người viết |
+
+`content/review-*.json` nằm phẳng trong `content/` vì `scripts/lib/reels.mjs` chỉ nhận import
+`'../content/<tên>.json'` không có thư mục con.
+
+## 2. Fact pack
+
+| Khoá | Nội dung |
+|---|---|
+| `session` | `date`, `close`, `prevClose`, `changePercent`, `volumeM`, `volumeRatio` (so phiên trước), `volumeVsAvg20`, `isDistribution`, `isFtd` |
+| `distribution` | `count`, `window`, `active[]` (`dm`, `changePercent`, `volumeRatio`, `sessionsLeft`, `expireLevel`), `nextExpiry`, `toUnderPressure`, `toCorrection` |
+| `state` | `status` + `label`/`short` (rules.status), `since`, `rallyDay`, `rallyLow`, `correctionLow`, `ftd`/`lastFtd` (`dm`, `day`, `changePercent`, `volumeRatio`, `close`, `rallyLow`, `ended`) |
+| `watch[]` | `{if, then}` — điều gì sẽ đổi trạng thái; chất liệu duy nhất cho câu nếu … thì |
+| `screener` | `cachedAt`, `universe`, `volumeVsSmaUnit`, `breadth`, `spike` (`count`, `up`, `down`, `top[]`), `leaders` (`uptrendCount`, `rsStrongCount`, `count`, `top[]` kèm `ema50`, `aboveEma50Percent`, `high52w`, `fromHigh52wPercent`, `signal`), `alsoSpiking` |
+| `weekly` | chỉ bản tuần: nến tuần, `changePercent`, `volumeVsPriorWeek`, phiên phân phối trong tuần, chuyển trạng thái, `newLeaders`/`droppedLeaders` so snapshot tuần trước |
+| `backtest` | FTD theo ngưỡng `followThrough.backtestThresholds` trên toàn lịch sử |
+| `anchors[]` | các dòng `{label, value, path}` cho bảng số của trang duyệt |
+
+## 3. Quy tắc phiên phân phối / FTD
+
+Nguồn: William O'Neil (IBD), dùng trong market timing của Mark Minervini. Máy trạng thái:
+`scripts/review/lib/market-state.mjs`; test: `scripts/review/lib/market-state.test.mjs`.
+
+- **Phiên phân phối**: đóng cửa ≤ `distribution.maxChangePercent` so phiên trước VÀ khối lượng cao hơn phiên
+  trước. Tính trong `windowSessions` phiên (kể cả chính nó); hết hạn sớm khi giá cao nhất của một phiên sau
+  chạm đóng cửa của nó × (1 + `expireRallyPercent`%).
+- **Trạng thái trong xu hướng tăng**: `underPressureAt` phiên còn hiệu lực = chịu áp lực, `correctionAt` =
+  điều chỉnh. Thủng đáy nhịp hồi của FTD = FTD thất bại, về điều chỉnh.
+- **Nỗ lực hồi phục**: trong điều chỉnh, ngày 1 là phiên đầu tiên đóng cửa tăng — hoặc phiên lập đáy mới mà
+  đóng cửa ở nửa trên biên độ (`day1UpperHalfClose`). Giá thấp nhất trong phiên thủng đáy nhịp hồi → làm lại.
+- **FTD**: từ ngày `minDay`, tăng ≥ `minChangePercent` với khối lượng cao hơn phiên trước → xu hướng tăng xác
+  nhận; `resetOnFtd` xoá số phiên phân phối.
+- Máy bắt đầu ở "điều chỉnh" tại nến đầu tiên và ổn định sau FTD đầu tiên — luôn chạy trên nhiều năm.
+- Làm tròn: so ngưỡng trên phần trăm chưa làm tròn (như lúc đo 2026-09-29).
+
+Chốt bằng test (dữ liệu SSI, DD −0,5%, FTD +1,25%, 29/9/2026): 3 phiên phân phối còn hiệu lực — 11/9
+(−1,86%, KL ×1,64, còn 12 phiên), 23/9 (−0,84%, ×1,23, còn 20), 24/9 (−1,47%, ×1,07, còn 21); xu hướng tăng
+xác nhận từ FTD 3/8/2026 (ngày 5, +1,56%, KL ×1,07), đáy nhịp hồi 1651,20. Ở −0,2% của IBD thì thêm 14/9,
+18/9, 28/9 → 6 phiên, điều chỉnh từ 28/9.
+
+Backtest 2013 → 29/9/2026 (3404 phiên, cửa sổ 25 phiên, không stop, cửa sổ chồng nhau):
+
+| FTD ≥ | FTD | chấm được | cao hơn sau 25 phiên | trung vị |
+|---|---|---|---|---|
+| +1,25% (rules.json) | 31 | 31 | 65% | +2,6% |
+| +1,5% | 28 | 28 | 75% | +3,7% |
+| +1,7% | 26 | 25 | 72% | +3,7% |
+
+16/31 FTD tới sau ngày 7 — nhịp hồi ở VN thường dài.
+
+## 4. Terminal zionle.io.vn
+
+| Gọi | Ghi chú |
+|---|---|
+| `GET /api/stocks/cache-info` | không cần id; `cached_at` là cửa chặn độ tươi |
+| `GET /api/config/{id}` | chỉ đọc `metrics_filter`; object còn `telegram.bot_token` — không log, không ghi |
+| `POST /api/stocks/filter?config_id=` | NGOẠI LỆ DUY NHẤT (người dùng cho phép 2026-09-29). Body `{match, negate?, conditions, groups?, exchanges?}`; `{match:"and"}` trả mọi mã. Trả `{stocks:[…]}` |
+| `GET /api/analyze/{mã}?interval=1D&config_id=` | nến ~1 năm, signals, trendlines. `1W`/`1M`/`4H` trả 500 |
+
+Dòng Screener: `symbol, name, exchange, rs_1m, rs_3m, rs_6m, rs_9m, rs_52w, current_volume, volume_sma20,
+current_price` (nghìn đồng)`, price_change_pct, ema_9, ema_21, ema_50, sma_200, has_*`. Đường trung bình
+bằng 0 nghĩa là chưa tính được (mã mới niêm yết) — `dropZeroMa` loại chúng.
+
+Bộ lọc đã lưu (29/9/2026): Volume spike (`volume_vs_sma > 1.2`, `volume_sma20 ≥ 1.5M`), RS Strong
+(`rs_1m ≥ 60`, `volume_sma20 ≥ 1M`), Uptrend (`price > ema_50`, `ema_50 > sma_200`, `volume_sma20 ≥ 1.2M`),
+cùng Uptrend Minervini, Momentum breakout/breakdown, Bullish/Bearish RSI (chưa dùng). `volume_vs_sma` là %
+trên trung bình 20 phiên — đối chiếu tại chỗ khớp 100% với cách hiểu %, 44% với cách hiểu bội số.
+
+## 5. Ảnh
+
+| Ảnh | Lệnh (shots.mjs tự gọi) | Ghi chú |
+|---|---|---|
+| FireAnt VNINDEX ngày | `shoot.mjs --site=fireant --symbol=VNINDEX --size=1080x900 --range=3p --interval=D --crop=full` | Chrome thật; crop/mask/pane đo ở lần chụp được đầu tiên rồi ghi vào `rules.shots.fireantDaily` |
+| terminal VNINDEX (dự phòng) | `shoot.mjs --site=zionle --page=analyze --symbol=VNINDEX --viewport=1800x1000 --clip=canvases` | hiệu chỉnh trên giá ÷ 1000 (terminal yết chỉ số theo nghìn) |
+| Screener | `shoot.mjs --site=zionle --page=screener --allow-post=/api/stocks/filter --viewport=1200x1000 --scale=2 --js=scripts/review/js/screener.js --js-args=<json>` | `{filter, sort, keep, rows, zoom}`; sidecar `js` = trang (px CSS), dòng, ô, nút; ảnh = cả trang đã phóng |
+| chart mã | `shoot.mjs --site=zionle --page=analyze --symbol=<MÃ> --viewport=1800x1000 --clip=canvases` | 2712×1520; pane giá `paneFrac` [0,015, 0, 0,955, 0,54]; crop bỏ trục giá |
+
+Hiệu chỉnh: `calib_auto.py` tìm cột nến theo màu trong pane, ước d (px/nến), last_x, N = khoảng cách/d + 1,
+rồi chạy `scripts/calib_chart.py`. Chart terminal có mũi tên tín hiệu, trendline chấm và thẻ giá cùng màu
+nến nên số dư trung vị 4–9 px là do chúng; đo 29/9: đường giá cuối của BSR lệch 4 px (≈2 px trên khung
+hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng khung hình của trang duyệt.
+
+## 6. Mark scaffold đặt
+
+| Scene | Beat 1 | Beat 2 |
+|---|---|---|
+| hook | vline đỏ ở từng phiên phân phối; máy cận phiên cuối | — |
+| market | vline phân phối, nhãn "N/25 phiên phân phối", nhãn phiên phân phối nặng nhất | vòng xanh ở nến FTD + nhãn, hline vàng ở đáy nhịp hồi |
+| spike | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
+| leaders | hộp quanh ba dòng; nhãn "N mã qua RS Strong + Uptrend" | hộp từng ô RS 1M, máy cận |
+| leader | nhãn "MÃ · RS 1M … · ±x%", hline EMA50 | mũi tên vào nến cuối "±x% trên EMA50", máy cận |
+
+Nhãn chỉ mang số của fact pack; check `facts` của verify soi từng số.

@@ -1,0 +1,362 @@
+{
+  "format": "daily",
+  "asOf": "2026-09-29",
+  "source": {
+    "label": "SSI iBoard · zionle.io.vn",
+    "reconstructed": false,
+    "indexFetchedAt": "2026-09-29T11:21:54.179Z",
+    "screenerCachedAt": "2026-09-29T08:04:12.880397792Z",
+    "screenerCachedIct": "2026-09-29 15:04"
+  },
+  "rules": {
+    "ddMaxChangePercent": 0.5,
+    "windowSessions": 25,
+    "expireRallyPercent": 5,
+    "underPressureAt": 4,
+    "correctionAt": 6,
+    "ftdMinDay": 4,
+    "ftdMinChangePercent": 1.25,
+    "topN": 3
+  },
+  "session": {
+    "date": "2026-09-29",
+    "dm": "29/9",
+    "dmy": "29/9/2026",
+    "close": 1777.73,
+    "prevClose": 1780.68,
+    "change": -2.95,
+    "changePercent": -0.17,
+    "high": 1782.65,
+    "low": 1767.58,
+    "volumeM": 335,
+    "volumeRatio": 0.61,
+    "volumeVsAvg20": 0.65,
+    "isDistribution": false,
+    "isFtd": false
+  },
+  "distribution": {
+    "count": 3,
+    "window": 25,
+    "active": [
+      {
+        "date": "2026-09-11",
+        "dm": "11/9",
+        "changePercent": -1.86,
+        "volumeRatio": 1.64,
+        "close": 1795.21,
+        "sessionsLeft": 12,
+        "expireLevel": 1884.97
+      },
+      {
+        "date": "2026-09-23",
+        "dm": "23/9",
+        "changePercent": -0.84,
+        "volumeRatio": 1.23,
+        "close": 1801.65,
+        "sessionsLeft": 20,
+        "expireLevel": 1891.73
+      },
+      {
+        "date": "2026-09-24",
+        "dm": "24/9",
+        "changePercent": -1.47,
+        "volumeRatio": 1.07,
+        "close": 1775.09,
+        "sessionsLeft": 21,
+        "expireLevel": 1863.84
+      }
+    ],
+    "nextExpiry": {
+      "date": "2026-09-11",
+      "dm": "11/9",
+      "changePercent": -1.86,
+      "volumeRatio": 1.64,
+      "close": 1795.21,
+      "sessionsLeft": 12,
+      "expireLevel": 1884.97
+    },
+    "lowestExpireLevel": 1863.84,
+    "toUnderPressure": 1,
+    "toCorrection": 3
+  },
+  "state": {
+    "status": "CONFIRMED_UPTREND",
+    "label": "Xu hướng tăng xác nhận",
+    "short": "Tăng xác nhận",
+    "since": "2026-08-03",
+    "sinceDm": "3/8",
+    "rallyDay": null,
+    "day1": null,
+    "rallyLow": 1651.2,
+    "correctionLow": null,
+    "ftd": {
+      "date": "2026-08-03",
+      "dm": "3/8",
+      "dmy": "3/8/2026",
+      "day": 5,
+      "changePercent": 1.56,
+      "volumeRatio": 1.07,
+      "close": 1762.84,
+      "low": 1737.26,
+      "rallyLow": 1651.2
+    },
+    "lastFtd": {
+      "date": "2026-08-03",
+      "dm": "3/8",
+      "dmy": "3/8/2026",
+      "day": 5,
+      "changePercent": 1.56,
+      "volumeRatio": 1.07,
+      "close": 1762.84,
+      "low": 1737.26,
+      "rallyLow": 1651.2
+    },
+    "distanceToRallyLowPercent": 7.7,
+    "sessionsSinceFtd": 38
+  },
+  "watch": [
+    {
+      "if": "thêm 1 phiên phân phối",
+      "then": "Xu hướng tăng chịu áp lực",
+      "count": 1
+    },
+    {
+      "if": "thêm 3 phiên phân phối",
+      "then": "Thị trường điều chỉnh",
+      "count": 3
+    },
+    {
+      "if": "thủng đáy nhịp hồi 1651.2",
+      "then": "FTD thất bại",
+      "level": 1651.2
+    },
+    {
+      "if": "qua 12 phiên nữa",
+      "then": "phiên 11/9 hết hạn",
+      "sessions": 12
+    }
+  ],
+  "screener": {
+    "cachedAt": "2026-09-29T08:04:12.880397792Z",
+    "universe": 1466,
+    "volumeVsSmaUnit": "percent",
+    "breadth": {
+      "universe": 1466,
+      "aboveEma50": 496,
+      "aboveSma200": 250,
+      "up": 492,
+      "down": 505
+    },
+    "spike": {
+      "filter": "Volume spike",
+      "count": 16,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 24.95,
+          "changePercent": 6.4,
+          "volumeRatio": 2.44,
+          "rs1m": 94,
+          "rs52w": 96
+        },
+        {
+          "rank": 2,
+          "symbol": "PVS",
+          "name": "Tổng CTCP Dịch Vụ Kỹ Thuật Dầu Khí Việt Nam",
+          "exchange": "HNX",
+          "price": 34.1,
+          "changePercent": 2.1,
+          "volumeRatio": 2.05,
+          "rs1m": 82,
+          "rs52w": 92
+        },
+        {
+          "rank": 3,
+          "symbol": "LPB",
+          "name": "Ngân hàng Thương mại cổ phần Lộc Phát Việt Nam",
+          "exchange": "HOSE",
+          "price": 43.5,
+          "changePercent": -4.4,
+          "volumeRatio": 1.7,
+          "rs1m": 20,
+          "rs52w": 67
+        }
+      ],
+      "up": 10,
+      "down": 6
+    },
+    "leaders": {
+      "filters": [
+        "RS Strong",
+        "Uptrend"
+      ],
+      "photo": "Uptrend",
+      "uptrendCount": 14,
+      "rsStrongCount": 26,
+      "count": 10,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "BSR",
+          "name": "Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam",
+          "exchange": "HOSE",
+          "price": 32.5,
+          "changePercent": 0.31,
+          "volumeRatio": 1.09,
+          "rs1m": 94,
+          "rs52w": 98,
+          "ema50": 27.99,
+          "sma200": 25.39,
+          "aboveEma50Percent": 16.1,
+          "aboveSma200Percent": 28,
+          "high52w": 39.16,
+          "fromHigh52wPercent": -17,
+          "signal": {
+            "type": "breakdown_confirmed",
+            "price": 26.3,
+            "date": "2026-09-07",
+            "dm": "7/9"
+          },
+          "chart": {
+            "bars": 254,
+            "from": "2025-09-22",
+            "to": "2026-09-29"
+          }
+        },
+        {
+          "rank": 2,
+          "symbol": "MSR",
+          "name": "Công ty Cổ phần Masan High-Tech Materials",
+          "exchange": "UPCOM",
+          "price": 54.9,
+          "changePercent": 4.37,
+          "volumeRatio": 0.79,
+          "rs1m": 94,
+          "rs52w": 99,
+          "ema50": 45.05,
+          "sma200": 38.63,
+          "aboveEma50Percent": 21.9,
+          "aboveSma200Percent": 42.1,
+          "high52w": 58,
+          "fromHigh52wPercent": -5.3,
+          "signal": {
+            "type": "breakdown_confirmed",
+            "price": 47.1,
+            "date": "2026-09-16",
+            "dm": "16/9"
+          },
+          "chart": {
+            "bars": 254,
+            "from": "2025-09-22",
+            "to": "2026-09-29"
+          }
+        },
+        {
+          "rank": 3,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 24.95,
+          "changePercent": 6.4,
+          "volumeRatio": 2.44,
+          "rs1m": 94,
+          "rs52w": 96,
+          "ema50": 21.11,
+          "sma200": 19.84,
+          "aboveEma50Percent": 18.2,
+          "aboveSma200Percent": 25.8,
+          "high52w": 29.73,
+          "fromHigh52wPercent": -16.1,
+          "signal": {
+            "type": "breakout_confirmed",
+            "price": 20.3,
+            "date": "2026-08-17",
+            "dm": "17/8"
+          },
+          "chart": {
+            "bars": 254,
+            "from": "2025-09-22",
+            "to": "2026-09-29"
+          }
+        }
+      ],
+      "alsoSpiking": [
+        "BSR",
+        "PVT"
+      ]
+    }
+  },
+  "backtest": {
+    "from": "2013-01-02",
+    "sessions": 3404,
+    "forward": 25,
+    "rows": [
+      {
+        "threshold": 1.25,
+        "ftds": 31,
+        "evaluated": 31,
+        "higherPercent": 65,
+        "medianReturnPercent": 2.6
+      },
+      {
+        "threshold": 1.5,
+        "ftds": 28,
+        "evaluated": 28,
+        "higherPercent": 75,
+        "medianReturnPercent": 3.7
+      },
+      {
+        "threshold": 1.7,
+        "ftds": 26,
+        "evaluated": 25,
+        "higherPercent": 72,
+        "medianReturnPercent": 3.7
+      }
+    ]
+  },
+  "anchors": [
+    {
+      "label": "Phiên 29/9/2026",
+      "value": "1777,73 (-0,17%) · KL ×0,61 phiên trước · ×0,65 TB20",
+      "path": "session"
+    },
+    {
+      "label": "Trạng thái theo quy tắc",
+      "value": "Xu hướng tăng xác nhận từ 3/8",
+      "path": "state"
+    },
+    {
+      "label": "Phân phối / 25 phiên",
+      "value": "3: 11/9 -1,86% ×1,64 (còn 12) · 23/9 -0,84% ×1,23 (còn 20) · 24/9 -1,47% ×1,07 (còn 21)",
+      "path": "distribution.active"
+    },
+    {
+      "label": "FTD gần nhất",
+      "value": "3/8/2026 · ngày 5 · +1,56% · KL ×1,07 · đáy nhịp hồi 1651,2",
+      "path": "state.lastFtd"
+    },
+    {
+      "label": "Volume spike (16 mã)",
+      "value": "PVT ×2,44 +6,4% · PVS ×2,05 +2,1% · LPB ×1,7 -4,4%",
+      "path": "screener.spike.top"
+    },
+    {
+      "label": "RS Strong ∩ Uptrend (10 mã)",
+      "value": "BSR RS1M 94 · +0,31% · MSR RS1M 94 · +4,37% · PVT RS1M 94 · +6,4%",
+      "path": "screener.leaders.top"
+    },
+    {
+      "label": "Bộ lọc terminal",
+      "value": "cache 2026-09-29 15:04 ICT · 1466 mã · volume_vs_sma đọc là % trên TB20",
+      "path": "screener"
+    },
+    {
+      "label": "Backtest FTD (3404 phiên)",
+      "value": "+1,25%: 31 FTD, 65% cao hơn sau 25 phiên · +1,5%: 28 FTD, 75% cao hơn sau 25 phiên · +1,7%: 26 FTD, 72% cao hơn sau 25 phiên",
+      "path": "backtest.rows"
+    }
+  ]
+}

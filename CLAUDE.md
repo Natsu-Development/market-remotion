@@ -4,7 +4,8 @@ Repo làm reel dọc 1080×1920 về thị trường chứng khoán Việt Nam b
 dữ liệu ở giữa, headline hai dòng bên dưới dựng dần lên trong khi panel đứng yên.
 
 Quy trình làm một video nằm ở skill `.claude/skills/market-video/` — gọi `/market-video` hoặc cứ
-bảo "làm video về RSI" là nó tự vào. Đừng chép lại quy trình đó ra đây.
+bảo "làm video về RSI" là nó tự vào. Đừng chép lại quy trình đó ra đây. Bản TỔNG KẾT phiên/tuần là
+skill thứ hai, `.claude/skills/market-review/` (`/market-review daily|weekly`) — xem đoạn market-review dưới.
 
 ## Nguồn dữ liệu
 
@@ -33,7 +34,10 @@ Cái 404 trông như sai đường dẫn chứ không như id hỏng. Đặt id 
 
 **Không POST lên dịch vụ của người dùng khi chưa hỏi.** `POST /api/config` là cách frontend tự
 tạo config cho khách mới, nên nó "vô hại" — nhưng vẫn là ghi lên server của họ.
-`scripts/fetch-market.mjs` cố tình chỉ GET.
+`scripts/fetch-market.mjs` cố tình chỉ GET. Ngoại lệ DUY NHẤT đã hỏi (2026-09-29): `POST /api/stocks/filter`
+của market-review — truy vấn chỉ đọc mà Screener tự gửi. `shoot.mjs --site=zionle` giờ chặn mọi non-GET của
+CHÍNH TRANG trong trình duyệt (đo 2026-09-29: /analyze và /screener tự POST `/api/stocks/filter` khi mở, chart
+vẫn vẽ đủ khi bị chặn); `--allow-post=<path>` là ngoại lệ, sidecar ghi request nào bị chặn.
 
 **`content/vnindex-monthly.json` là dữ liệu THẬT từ 2026-09-23** — SSI iBoard, nến ngày
 2013-01-02 → nay gộp tháng, `content/vnindex-monthly.meta.json` ghi nguồn/ngày/số nến, footer đọc
@@ -45,6 +49,16 @@ thoả thuận). `make-series.mjs` là bản DỰNG LẠI cũ, chỉ còn để 
 đáy 2020-03 thật 649 (bản cũ 601). Bốn reel sinh từ bản cũ (`Reel`, `RSI`, `Liquidity`, `MACD`)
 đã bị xoá 2026-09-29 theo yêu cầu người dùng; `Channel` là reel duy nhất còn lại. `series.peakMonths` trong `content-rules.json` là `2026-05` cho đỉnh này;
 `src/lib/series.ts` đọc anchors từ chính file đó, không còn bản sao riêng.
+
+**market-review — skill thứ hai, TÁCH khỏi market-video** (người dùng tạo 2026-09-29). Reel tổng kết
+phiên (`DailyReview`, 8 scene ~70s) và tuần (`WeeklyReview`): trạng thái thị trường theo quy tắc phiên phân
+phối/FTD (O'Neil, dùng trong hệ thống Minervini; người dùng đặt phân phối ≤ −0,5% thay −0,2% của IBD) và hai
+bộ lọc đã lưu trên terminal (Volume spike; RS Strong ∩ Uptrend, top 3 kèm chart từng mã). Luật riêng ở
+`.claude/skills/market-review/rules.json`, prompt người viết riêng `writer.md`, script riêng `scripts/review/`.
+Reel của nó mang trường `rules`; `scripts/lib/rules.mjs` cho verify/review-page/voiceover đọc luật theo reel
+và chỉ cho nó thừa hưởng hằng số của máy (layout, audio, series, clip giọng) — reel không có `rules` (Channel)
+chấm y như cũ (đo: output `verify Channel --json` trùng từng byte trước/sau). Đừng sửa `content-rules.json`
+để chiều market-review, và ngược lại.
 
 ## Quy ước quan trọng
 

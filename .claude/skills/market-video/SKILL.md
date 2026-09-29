@@ -1,12 +1,13 @@
 ---
-description: Làm một reel dọc về thị trường/chứng khoán bằng Remotion, từ MỘT HAI DÒNG chủ đề của người dùng — bạn tự viết brief từ fact pack, sinh khung scene, worker viết lời, chấm điểm bằng script, đăng TRANG DUYỆT (artifact có khung hình từng scene, lời đọc, unsupported) cho người dùng duyệt, rồi mới lồng tiếng và render. Dùng khi người dùng muốn một video mới về VNINDEX, một mã cổ phiếu, hay một chỉ báo kỹ thuật (RSI, MACD, kênh giá, phân kỳ, thanh khoản).
+description: Làm một reel dọc về thị trường/chứng khoán bằng Remotion, từ MỘT HAI DÒNG chủ đề của người dùng — bạn tự viết brief từ fact pack, sinh khung scene, worker viết lời, chấm điểm bằng script, đăng TRANG DUYỆT (artifact có khung hình từng scene, lời đọc, unsupported) cho người dùng duyệt, rồi mới lồng tiếng và render. Dùng khi người dùng muốn một video mới về VNINDEX, một mã cổ phiếu, hay một chỉ báo kỹ thuật (RSI, MACD, kênh giá, phân kỳ, thanh khoản). Không dùng cho bản tổng kết phiên/tuần (phiên phân phối, FTD, bộ lọc terminal) — đó là skill market-review.
 argument-hint: "<chủ đề | mã | brief/*.md | --id=<Composition>> [--retime] [--no-voice]"
 allowed-tools: Read, Write, Edit, Artifact, Bash(node *), Bash(npm run *), Bash(npx remotion *), Bash(npx tsc *), Bash(../video-factory/.venv/bin/python *), Bash(ffmpeg *), Bash(ffprobe *), Bash(ps *), Bash(ls *), Bash(cat *), Bash(open *), Bash(curl -sL https://zionle.io.vn/*)
 ---
 
 Làm một reel thị trường về: `$1`
 
-Đây là skill DUY NHẤT của repo — từ một hai dòng chủ đề đến `out/*.mp4`. Đường đi là
+Đây là skill làm reel theo CHỦ ĐỀ — từ một hai dòng chủ đề đến `out/*.mp4`. Bản tổng kết phiên/tuần là skill riêng
+`market-review` (luật riêng, không đọc `content-rules.json` của skill này). Đường đi là
 **một hai dòng → BẠN viết brief từ số thật → scaffold + fact pack → worker viết lời → CHẤM ĐIỂM →
 NGƯỜI DUYỆT → rồi mới toả ra lồng tiếng và render**.
 

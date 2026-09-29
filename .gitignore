@@ -1,0 +1,25 @@
+node_modules
+out
+.DS_Store
+public/voiceover/*.wav
+public/voiceover/*.aiff
+public/voiceover/*.mp3
+.tts-cache
+.zionle-config
+
+# private copies of Chrome sign-in state used by scripts/shoot.mjs
+.chrome/
+
+# python bytecode from scripts/*.py
+__pycache__/
+*.pyc
+
+# personal or identifying data — keep local, never commit
+# Chrome profile that shoot.mjs drives (the account name)
+.shoot-profile
+# reference voice clip of a real person, and its transcript
+assets/voices/
+# screenshots show the signed-in account; sidecars record the profile and configId
+public/shots/
+.env
+.env.*

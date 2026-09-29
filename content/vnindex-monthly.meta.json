@@ -1,0 +1,15 @@
+{
+  "source": "ssi",
+  "sourceLabel": "SSI iBoard",
+  "symbol": "VNINDEX",
+  "resolution": "monthly",
+  "reconstructed": false,
+  "fetchedAt": "2026-09-28T08:01:31.025Z",
+  "from": "2013-01",
+  "to": "2026-09",
+  "bars": 165,
+  "rawRows": 3403,
+  "scale": 1,
+  "volumeUnit": "matched shares, summed per bar",
+  "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400&to=1790668890"
+}

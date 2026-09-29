@@ -1,0 +1,2072 @@
+{
+  "title": "VNINDEX · kênh giá tháng, chu kỳ bốn năm và MACD",
+  "status": "reviewed",
+  "brief": "brief/channel.md",
+  "facts": "content/channel.facts.json",
+  "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
+  "ticker": {
+    "symbol": "VN-INDEX",
+    "timeframe": "1D",
+    "last": 1780.68,
+    "prev": 1785.11,
+    "asOf": "2026-09-28"
+  },
+  "footer": "Nguồn: SSI · zionle.io.vn · FireAnt",
+  "scenes": [
+    {
+      "id": "channel-hook",
+      "eyebrow": "Kháng cự nối hai đỉnh",
+      "act": "blue",
+      "duration": 6.36,
+      "narration": "VN-Index đã chạm đường kháng cự này lần thứ ba. Hai lần trước, chạm xong là giá đều rơi sâu. Lần này thì sao?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Lần chạm thứ 3 · 1933",
+          "line2": "Hai lần trước: đỉnh chu kỳ",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 2.57,
+          "line1": "−28,9% rồi −43,1%",
+          "line2": "Còn lần thứ ba?",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "NẾN THÁNG · BIÊN TRÊN QUA 1211 (2018), 1536 (2022) · ĐỈNH 1933: +1,1%",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.5051,
+              0.3112
+            ],
+            "to": [
+              0.7394,
+              0.1969
+            ],
+            "dashed": true,
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.7603,
+              0.2342
+            ],
+            "to": [
+              0.7306,
+              0.2032
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7603,
+            "y": 0.24919999999999998,
+            "text": "2026 · 1933",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.5051,
+            "y": 0.3112,
+            "r": 0.028,
+            "label": "2022 · 1536",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.5051,
+              0.3112
+            ],
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3754,
+            "y": 0.3382,
+            "text": "Biên trên",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "circle",
+            "x": 0.3168,
+            "y": 0.4028,
+            "r": 0.028,
+            "label": "2018 · 1211",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.3545,
+              0.5013
+            ],
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3645,
+            "y": 0.4906,
+            "text": "−28,9%",
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.5051,
+              0.3112
+            ],
+            "to": [
+              0.5469,
+              0.4979
+            ],
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.5589000000000001,
+            "y": 0.5103,
+            "text": "−43,1%",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.64,
+            "y": 0.341,
+            "zoom": 2.2,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.5,
+            "y": 0.56,
+            "zoom": 1,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "channel.upper.through[0].high",
+        "channel.upper.through[1].high",
+        "channel.upper.laterPeaks[0].high",
+        "channel.upper.laterPeaks[0].line",
+        "channel.upper.laterPeaks[0].vsLinePercent",
+        "cycle.falls[0].percent",
+        "cycle.falls[1].percent",
+        "cycle.peakSpacing[0].months"
+      ],
+      "audio": "voiceover/01-channel-hook.wav",
+      "sentenceStarts": [
+        0.25,
+        2.57,
+        4.67
+      ]
+    },
+    {
+      "id": "channel-concept",
+      "eyebrow": "Kênh giá song song",
+      "act": "blue",
+      "duration": 7.6,
+      "narration": "Bên dưới, bạn thấy hai đáy lớn cũng nằm trên một đường hỗ trợ. Hai đường dốc gần như nhau, kênh giá song song thật. Kháng cự đã hai lần báo đỉnh.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Hỗ trợ qua 649 và 874",
+          "line2": "Kênh giá tháng thành hình",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.09,
+          "line1": "Song song, không vẽ ép",
+          "line2": "Độ dốc chỉ lệch 2,8%",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "BIÊN DƯỚI QUA 649 (2020), 874 (2022) · DỐC 86,7 / 84,3 ĐIỂM/NĂM",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.7394,
+              0.1969
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.7394,
+              0.1969
+            ],
+            "to": [
+              0.7896,
+              0.1724
+            ],
+            "dashed": true,
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.413,
+              0.5614
+            ],
+            "to": [
+              0.5469,
+              0.4979
+            ],
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.5469,
+              0.4979
+            ],
+            "to": [
+              0.7896,
+              0.3831
+            ],
+            "dashed": true,
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.383,
+            "y": 0.5865,
+            "text": "2020 · 649",
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.5589000000000001,
+            "y": 0.5188,
+            "text": "2022 · 874",
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.075,
+            "y": 0.2141,
+            "text": "Biên trên dốc 86,7 điểm/năm",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.075,
+            "y": 0.2536,
+            "text": "Biên dưới dốc 84,3 điểm/năm",
+            "accent": "green",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.075,
+            "y": 0.2931,
+            "text": "Lệch 2,8%",
+            "accent": "white",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.59,
+            "y": 0.45,
+            "zoom": 2.1,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.5,
+            "y": 0.56,
+            "zoom": 1.02,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "channel.lower.through[0].month",
+        "channel.lower.through[0].low",
+        "channel.lower.through[1].month",
+        "channel.lower.through[1].low",
+        "channel.upper.slopePerYear",
+        "channel.lower.slopePerYear",
+        "channel.slopeDiffPercent",
+        "channel.upper.through[0].high",
+        "channel.upper.through[1].high",
+        "cycle.falls[0].percent",
+        "cycle.falls[1].percent"
+      ],
+      "audio": "voiceover/02-channel-concept.wav",
+      "sentenceStarts": [
+        0.25,
+        3.09,
+        5.47
+      ]
+    },
+    {
+      "id": "channel-evidence-3",
+      "eyebrow": "Lần chạm 1 · 2018",
+      "act": "blue",
+      "duration": 9.02,
+      "narration": "Lần thứ nhất, tháng tư hai không một tám, giá bị từ chối tại kháng cự. Ba tháng sau, MACD tháng cắt xuống. Từ đỉnh, mất gần ba mươi phần trăm. Lần đó còn nhẹ.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Lần 1 · đỉnh 1211",
+          "line2": "Kháng cự giữ vững",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.57,
+          "line1": "MACD tháng xác nhận",
+          "line2": "Đỉnh tới đáy −28,9%",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "ĐỈNH 1211 (4/2018) · MACD CẮT XUỐNG 7/2018 · VỀ 862: −28,9%",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.5051,
+              0.3112
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.3168,
+            "y": 0.4028,
+            "r": 0.028,
+            "label": "4/2018 · 1211",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.3545,
+              0.5013
+            ],
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3645,
+            "y": 0.4821,
+            "text": "−28,9% · 9 tháng",
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.075,
+            "y": 0.7262,
+            "text": "MACD tháng",
+            "accent": "white",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.3234,
+            "y": 0.8151,
+            "w": 0.012,
+            "h": 0.0416,
+            "label": "7/2018 · sau 3 tháng",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.33,
+            "y": 0.42,
+            "zoom": 2.6,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.36,
+            "y": 0.625,
+            "zoom": 1.45,
+            "move": "tilt"
+          }
+        ]
+      },
+      "citedFacts": [
+        "peaks[0].month",
+        "peaks[0].high",
+        "peaks[0].macdCrossDown.month",
+        "peaks[0].macdCrossDown.monthsAfter",
+        "cycle.falls[0].percent",
+        "cycle.falls[0].low",
+        "cycle.falls[0].months"
+      ],
+      "audio": "voiceover/03-channel-evidence-3.wav",
+      "sentenceStarts": [
+        0.25,
+        3.57,
+        5.62,
+        7.34
+      ]
+    },
+    {
+      "id": "channel-evidence-4",
+      "eyebrow": "Lần chạm 2 · 2022",
+      "act": "blue",
+      "duration": 8.59,
+      "narration": "Lần thứ hai, giá lại bị từ chối, đầu hai không hai hai. Bốn tháng sau, MACD tháng cắt xuống. Từ đỉnh, mất hơn bốn mươi phần trăm. Bạn nhớ mốc bốn tháng này.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Lần 2 · đỉnh 1536",
+          "line2": "Kháng cự lại giữ vững",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 2.7,
+          "line1": "Cắt muộn hơn, rơi sâu hơn",
+          "line2": "Đỉnh tới đáy −43,1%",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "ĐỈNH 1536 (1/2022) · MACD CẮT XUỐNG 5/2022 · VỀ 874: −43,1%",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.5051,
+              0.3112
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.5051,
+            "y": 0.3112,
+            "r": 0.028,
+            "label": "1/2022 · 1536",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.5051,
+              0.3112
+            ],
+            "to": [
+              0.5469,
+              0.4979
+            ],
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.5589000000000001,
+            "y": 0.5103,
+            "text": "−43,1% · 10 tháng",
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3754,
+            "y": 0.7262,
+            "text": "MACD tháng",
+            "accent": "white",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.5158,
+            "y": 0.8151,
+            "w": 0.012,
+            "h": 0.0453,
+            "label": "5/2022 · sau 4 tháng",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.51,
+            "y": 0.34,
+            "zoom": 2.6,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.55,
+            "y": 0.6,
+            "zoom": 1.25,
+            "move": "tilt"
+          }
+        ]
+      },
+      "citedFacts": [
+        "peaks[1].month",
+        "peaks[1].high",
+        "peaks[1].macdCrossDown.month",
+        "peaks[1].macdCrossDown.monthsAfter",
+        "peaks[0].macdCrossDown.monthsAfter",
+        "cycle.falls[1].percent",
+        "cycle.falls[0].percent",
+        "cycle.falls[1].low",
+        "cycle.falls[1].months"
+      ],
+      "audio": "voiceover/04-channel-evidence-4.wav",
+      "sentenceStarts": [
+        0.25,
+        2.7,
+        4.69,
+        6.47
+      ]
+    },
+    {
+      "id": "channel-evidence-5",
+      "eyebrow": "Lần chạm 3 · 2026",
+      "act": "blue",
+      "duration": 9.73,
+      "narration": "Lần thứ ba, tháng năm vừa rồi. Bốn tháng sau, tức là bây giờ. MACD tháng cũng đã cắt xuống. Nhưng tháng chín chưa đóng cửa, tín hiệu còn tạm tính. Khung tuần đã đi trước.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Lần 3 · đỉnh 1933",
+          "line2": "Đã tới tháng thứ tư",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 3.61,
+          "line1": "Histogram tháng −1,6",
+          "line2": "Tạm tính tới khi nến đóng",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "MACD THÁNG 140,7 · TÍN HIỆU 142,3 · HISTOGRAM −1,6 · THÁNG 9 CHƯA ĐÓNG",
+        "annotations": [
+          {
+            "kind": "arrow",
+            "from": [
+              0.7603,
+              0.2342
+            ],
+            "to": [
+              0.7306,
+              0.2032
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7603,
+            "y": 0.24919999999999998,
+            "text": "5/2026 · 1933",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.5051,
+              0.3112
+            ],
+            "to": [
+              0.7394,
+              0.1969
+            ],
+            "dashed": true,
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.6557,
+            "y": 0.7507,
+            "text": "Histogram 48,6 → −1,6 · 7 tháng",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.7334,
+            "y": 0.8151,
+            "w": 0.012,
+            "h": 0.0355,
+            "label": "9/2026 · −1,6 · cắt, tạm tính",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7,
+            "y": 0.326,
+            "zoom": 2.4,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.72,
+            "y": 0.815,
+            "zoom": 2.8,
+            "move": "static",
+            "cut": true
+          }
+        ]
+      },
+      "citedFacts": [
+        "peaks[2].month",
+        "peaks[2].high",
+        "peaks[2].macdCrossDown",
+        "cycle.latestPeak.monthsSince",
+        "macd.current",
+        "macd.signalCurrent",
+        "macd.aboveSignal",
+        "macd.histogramCurrent",
+        "macd.histogramFallingMonths",
+        "macd.histogramTrail[1].value",
+        "macd.histogramTrail[8].value",
+        "daily.to",
+        "daily.volume.latestMonth.sessions"
+      ],
+      "audio": "voiceover/05-channel-evidence-5.wav",
+      "sentenceStarts": [
+        0.25,
+        1.88,
+        3.61,
+        5.48,
+        8.01
+      ]
+    },
+    {
+      "id": "channel-evidence-6",
+      "eyebrow": "Khung tuần đi trước",
+      "act": "blue",
+      "duration": 9.63,
+      "narration": "Trên khung tuần, giá giữ vùng cao, khối lượng thì không. Thanh khoản chỉ còn một nửa so với tháng mười năm ngoái. MACD tuần đã cắt xuống, histogram đã âm. Bạn đừng vội kết luận.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Khối lượng còn 52%",
+          "line2": "Phân kỳ giá và khối lượng",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 5.54,
+          "line1": "Khung tuần cắt trước",
+          "line2": "Histogram âm sâu thêm",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "caption": "NẾN TUẦN · KHỐI LƯỢNG 1004 (T10/2025) → 521 TRIỆU/PHIÊN (T9/2026)",
+        "src": "shots/vnindex-fireant-weekly-macd.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.6963,
+            "h": 0.0144
+          },
+          {
+            "x": 0.113,
+            "y": 0.684,
+            "w": 0.6389,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "annotations": [
+          {
+            "kind": "box",
+            "x": 0.0574,
+            "y": 0.5248,
+            "w": 0.0686,
+            "h": 0.1361,
+            "label": "T10/2025 · 1004 tr/phiên",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.6944,
+            "y": 0.5767,
+            "w": 0.0682,
+            "h": 0.0842,
+            "label": "T9/2026 · 521 tr · 52%",
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.45,
+            "y": 0.71,
+            "text": "MACD tuần",
+            "accent": "white",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.8505,
+            "accent": "white",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.586,
+            "y": 0.8385,
+            "w": 0.1766,
+            "h": 0.0528,
+            "label": "Histogram tuần còn âm",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.4,
+            "y": 0.52,
+            "zoom": 1.25,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.66,
+            "y": 0.8,
+            "zoom": 2,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "daily.volume.maxMonth.month",
+        "daily.volume.maxMonth.avgM",
+        "daily.volume.latestMonth.avgM",
+        "daily.months[12].volumeVsMaxMonthPercent",
+        "daily.months[12].sessions"
+      ],
+      "audio": "voiceover/06-channel-evidence-6.wav",
+      "sentenceStarts": [
+        0.25,
+        2.97,
+        5.54,
+        7.82
+      ]
+    },
+    {
+      "id": "channel-counterpoint",
+      "eyebrow": "Phản biện",
+      "act": "blue",
+      "duration": 8.42,
+      "narration": "Đợt điều chỉnh tháng bảy đã hồi, đáy vẫn cao dần. Giá đang kiểm định lại hỗ trợ này. Chu kỳ không lặp y hệt. Nên đây là kịch bản, chưa phải tín hiệu xác nhận.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "−14,6% rồi hồi lại",
+          "line2": "Chưa phải đảo chiều",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 2.52,
+          "line1": "Đóng cửa trên 1777",
+          "line2": "Đóng tuần dưới mới là gãy",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-terminal.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.159,
+          "y": 0,
+          "w": 0.796,
+          "h": 1
+        },
+        "sourceCorner": "bottom-right",
+        "caption": "ĐỈNH 1933 → 1651 (7/2026): −14,6% · ĐÁY CAO DẦN 1651 → 1716 → 1777",
+        "annotations": [
+          {
+            "kind": "arrow",
+            "from": [
+              0.6177,
+              0.0641
+            ],
+            "to": [
+              0.7958999999999999,
+              0.4163
+            ],
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7135,
+            "y": 0.2488,
+            "text": "−14,6%",
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.8019,
+            "y": 0.4283,
+            "r": 0.022,
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.8535,
+            "y": 0.3444,
+            "r": 0.022,
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.9161,
+            "y": 0.2656,
+            "r": 0.022,
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.6767,
+            "y": 0.4942,
+            "text": "Đáy cao dần 1651 → 1716 → 1777",
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.2656,
+            "label": "Hỗ trợ 1777",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.3444,
+            "label": "Hỗ trợ 1716",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "circle",
+            "x": 0.953,
+            "y": 0.2656,
+            "r": 0.03,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.8904,
+            "y": 0.3779,
+            "text": "Đang thử 1777",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7,
+            "y": 0.35,
+            "zoom": 1.45,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.82,
+            "y": 0.33,
+            "zoom": 2,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "peaks[2].drawdownHighToLow.percent",
+        "peaks[2].drawdownHighToLow.low",
+        "terminal.trendlines.lows[5].price",
+        "terminal.trendlines.lows[6].price",
+        "terminal.trendlines.lows[7].price",
+        "daily.latest.closeExact",
+        "cycle.peakSpacing[0].months",
+        "cycle.peakSpacing[1].months",
+        "daily.previous.closeExact"
+      ],
+      "audio": "voiceover/07-channel-counterpoint.wav",
+      "sentenceStarts": [
+        0.25,
+        2.52,
+        4.18,
+        5.52
+      ]
+    },
+    {
+      "id": "channel-principle",
+      "eyebrow": "Rủi ro / phần thưởng",
+      "act": "blue",
+      "duration": 8.09,
+      "narration": "Chưa cần chờ xác nhận, rủi ro bạn đo được ngay. Lên kháng cự, dư địa chỉ chín phần trăm. Về đáy kênh thì mất hơn gấp ba. Còn nếu chu kỳ lặp lại?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Giá ở 78,5% chiều cao kênh",
+          "line2": "Gần kháng cự, xa đáy kênh",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 2.48,
+          "line1": "Lên +9% · xuống −32,8%",
+          "line2": "Rủi ro lớn hơn phần thưởng",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "ĐÓNG CỬA 1781 · BIÊN TRÊN 1941 (+9%) · BIÊN DƯỚI 1197 (−32,8%)",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.7394,
+              0.1969
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.413,
+              0.5614
+            ],
+            "to": [
+              0.7394,
+              0.4068
+            ],
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.3545,
+            "y": 0.2423,
+            "text": "Giá 1781 · 78,5% chiều cao kênh",
+            "accent": "white",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.7477,
+              0.242
+            ],
+            "to": [
+              0.7477,
+              0.2009
+            ],
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.754,
+            "y": 0.2141,
+            "text": "+9%",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.7477,
+              0.242
+            ],
+            "to": [
+              0.7477,
+              0.4028
+            ],
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.754,
+            "y": 0.3439,
+            "text": "−32,8%",
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.242,
+            "accent": "white",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3545,
+            "y": 0.2677,
+            "text": "Biên trên 1941 · biên dưới 1197",
+            "accent": "white",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.62,
+            "y": 0.36,
+            "zoom": 1.82,
+            "move": "tilt"
+          },
+          {
+            "beat": 1,
+            "x": 0.55,
+            "y": 0.52,
+            "zoom": 1.15,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "channel.positionPercent",
+        "channel.latestClose",
+        "channel.upper.riseToUpperPercent",
+        "channel.lower.fallToLowerPercent",
+        "channel.upper.atLatest",
+        "channel.lower.atLatest"
+      ],
+      "audio": "voiceover/08-channel-principle.wav",
+      "sentenceStarts": [
+        0.25,
+        2.48,
+        4.37,
+        6.07
+      ]
+    },
+    {
+      "id": "channel-mechanism",
+      "eyebrow": "Kịch bản · không phải dự báo",
+      "act": "maroon",
+      "duration": 8.16,
+      "narration": "Kịch bản thôi, không phải dự báo. Như lần thứ nhất, giá về tận đây. Như lần thứ hai, giá thủng luôn hỗ trợ của kênh giá. Vậy mình canh ở đâu?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Lặp 2018: về 1374",
+          "line2": "Chỉ là một giả định",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 3.77,
+          "line1": "Lặp 2022: về 1100",
+          "line2": "Rơi khỏi kênh giá",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "NẾU LẶP LẠI: −28,9% → 1374 · −43,1% → 1100 · BIÊN DƯỚI 1197 → 1218",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.5469,
+              0.4979
+            ],
+            "to": [
+              0.7896,
+              0.3831
+            ],
+            "dashed": true,
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.3569,
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.2248,
+            "y": 0.3449,
+            "text": "Lặp 2018 · −28,9% · về 1374",
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.4341,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.2248,
+            "y": 0.4221,
+            "text": "Lặp 2022 · −43,1% · về 1100",
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7435,
+            "y": 0.4518,
+            "text": "Biên dưới · 1197",
+            "accent": "green",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.52,
+            "y": 0.4,
+            "zoom": 1.6,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.5,
+            "y": 0.56,
+            "zoom": 1,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "cycle.ifRepeat[0].percent",
+        "cycle.ifRepeat[0].fromAth",
+        "cycle.ifRepeat[1].percent",
+        "cycle.ifRepeat[1].fromAth",
+        "channel.lower.atLatest",
+        "channel.lower.projection[0].level"
+      ],
+      "audio": "voiceover/09-channel-mechanism.wav",
+      "sentenceStarts": [
+        0.25,
+        2.01,
+        3.77,
+        6.32
+      ]
+    },
+    {
+      "id": "channel-warning",
+      "eyebrow": "Hai mức phải canh",
+      "act": "maroon",
+      "duration": 8.19,
+      "narration": "Phía trên, vượt đỉnh thiếu khối lượng thì dễ là phá vỡ giả. Phía dưới, hai hỗ trợ này bị thủng là gãy chuỗi đáy cao dần. Giữa hai mức, mình làm bốn việc.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Mức trên: 1933",
+          "line2": "Cần khối lượng xác nhận",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.13,
+          "line1": "Mức dưới: 1777 và 1716",
+          "line2": "Mốc sau là đáy năm",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-terminal.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.159,
+          "y": 0,
+          "w": 0.796,
+          "h": 1
+        },
+        "sourceCorner": "bottom-right",
+        "caption": "TÍN HIỆU: THỦNG HỖ TRỢ 1802 ĐÃ XÁC NHẬN · ĐÁY NĂM 1586",
+        "annotations": [
+          {
+            "kind": "hline",
+            "y": 0.0641,
+            "label": "Phá vỡ giả nếu vượt 1933 thiếu khối lượng",
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.2656,
+            "label": "Hỗ trợ 1777",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.3444,
+            "label": "Hỗ trợ 1716",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.5122,
+            "label": "Hỗ trợ năm 1586",
+            "accent": "green",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.72,
+            "y": 0.25,
+            "zoom": 1.6,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.68,
+            "y": 0.35,
+            "zoom": 1.45,
+            "move": "tilt"
+          }
+        ]
+      },
+      "citedFacts": [
+        "daily.ytd.high.value",
+        "daily.volume.latestMonth.avgM",
+        "terminal.trendlines.lows[6].price",
+        "terminal.trendlines.lows[7].price",
+        "daily.ytd.low.value",
+        "terminal.signals.latest[0].type",
+        "terminal.signals.list[9].line"
+      ],
+      "audio": "voiceover/10-channel-warning.wav",
+      "sentenceStarts": [
+        0.25,
+        3.13,
+        5.97
+      ]
+    },
+    {
+      "id": "channel-action",
+      "eyebrow": "Việc mình đang làm",
+      "act": "amber",
+      "duration": 8.22,
+      "narration": "Mình hạ đòn bẩy vì giá còn ở nửa trên kênh. Xác nhận thật phải chờ tháng này đóng cửa. Vượt đỉnh yếu, không mua đuổi. Thủng hỗ trợ, giảm tỷ trọng.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Phòng thủ trước",
+          "line2": "Đợi nến tháng 9 đóng",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 4.31,
+          "line1": "Hai mức, hai phản ứng",
+          "line2": "Không mua đuổi, không gồng",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/vnindex-fireant-monthly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "maskColor": "#161921",
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.6444,
+            "h": 0.0046
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "sourceCorner": "bottom-right",
+        "caption": "BỐN VIỆC: ĐÒN BẨY · NẾN THÁNG ĐÓNG · 1933 · 1777 / 1716",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.3168,
+              0.4028
+            ],
+            "to": [
+              0.7394,
+              0.1969
+            ],
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.413,
+              0.5614
+            ],
+            "to": [
+              0.7394,
+              0.4068
+            ],
+            "accent": "green",
+            "beat": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.6999,
+            "y": 0.1929,
+            "w": 0.0455,
+            "h": 0.105,
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7477,
+            "y": 0.2931,
+            "text": "Nửa trên kênh",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7477,
+            "y": 0.3157,
+            "text": "→ hạ đòn bẩy",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.075,
+            "y": 0.7262,
+            "text": "MACD tháng",
+            "accent": "white",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.7334,
+            "y": 0.8151,
+            "w": 0.012,
+            "h": 0.0355,
+            "accent": "red",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7477,
+            "y": 0.7995,
+            "text": "Histogram âm",
+            "accent": "red",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7477,
+            "y": 0.8202,
+            "text": "→ chờ nến tháng đóng",
+            "accent": "red",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.1992,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3545,
+            "y": 0.22119999999999998,
+            "text": "Vượt 1933 yếu → không mua đuổi",
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2432,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2604,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.3545,
+            "y": 0.2904,
+            "text": "Thủng 1777, 1716 → giảm tỷ trọng",
+            "accent": "gold",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.5,
+            "y": 0.56,
+            "zoom": 1.02,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.58,
+            "y": 0.3,
+            "zoom": 1.9,
+            "move": "tilt"
+          }
+        ]
+      },
+      "citedFacts": [
+        "channel.positionPercent",
+        "macd.histogramCurrent",
+        "daily.ytd.high.value",
+        "terminal.trendlines.lows[6].price",
+        "terminal.trendlines.lows[7].price"
+      ],
+      "sentenceStarts": [
+        0.25,
+        2.27,
+        4.31,
+        5.96
+      ],
+      "audio": "voiceover/11-channel-action.wav"
+    },
+    {
+      "id": "channel-outro",
+      "eyebrow": "Theo dõi tiếp",
+      "act": "navy",
+      "duration": 6.38,
+      "narration": "Thấy hữu ích thì thả tim, chia sẻ cho bạn bè và theo dõi kênh giúp mình nhé. Thị trường có gì mới, mình cập nhật ngay.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Thả tim, chia sẻ, theo dõi",
+          "line2": "Nhịp mới, cập nhật ngay",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "outro",
+        "brand": "Kênh của bạn",
+        "kicker": "Chứng khoán",
+        "pill": "Thả tim · Chia sẻ · Theo dõi",
+        "line": "Cập nhật mỗi khi thị trường đổi nhịp"
+      },
+      "headline": {
+        "line1Baseline": 1338,
+        "line2Baseline": 1418,
+        "maxFontSize": 60,
+        "footnoteY": 1484
+      },
+      "sentenceStarts": [
+        0.25,
+        3.88
+      ],
+      "audio": "voiceover/12-channel-outro.wav"
+    }
+  ],
+  "unsupported": [
+    {
+      "id": "channel-evidence-5",
+      "why": "Nến tháng 9/2026 chưa đóng (đóng cửa 30/9; pack dừng ở daily.to = 2026-09-28, daily.volume.latestMonth.sessions = 18) → tín hiệu tạm tính. Pack KHÔNG đánh dấu tháng đang mở: macd.aboveSignal = false, macd.histogramCurrent = −1,6 và peaks[2].macdCrossDown = {2026-09, 4 tháng} đều tính trên nến tháng 9 chưa đóng, nên lời chỉ nói \"đã cắt xuống\" kèm ngay câu \"nến tháng chưa đóng, tín hiệu còn tạm tính\", và headline beat 1 ghi \"Tạm tính tới khi nến đóng\". Nếu hai phiên cuối tháng kéo histogram về dương, câu \"MACD tháng cũng đã cắt xuống\" sai và phải thu lại. \"Khung tuần đã đi trước\" là đọc ảnh FireAnt khung tuần chụp 28/9 (không có trong pack): MACD tuần nằm dưới đường tín hiệu từ khoảng đầu tháng 6/2026, histogram tuần vẫn âm."
+    },
+    {
+      "id": "channel-evidence-6",
+      "why": "MACD tuần cắt xuống và histogram tuần âm là đọc từ ảnh FireAnt khung tuần chụp 28/9 (pack không có MACD khung tuần, nên lời và chữ trên màn chỉ gọi tên trạng thái, không nêu số nào của nó). Ảnh hiện MACD tuần 4,91 dưới đường tín hiệu 9,18, histogram −4,28; cột cuối đậm màu hơn cột trước, tức là âm sâu thêm so với tuần trước — headline beat 1 đổi từ \"Histogram âm đang thu hẹp\" (đúng với ảnh 23/9, sai với ảnh 28/9) thành \"Histogram âm sâu thêm\". Lưu ý: nến tuần hiện tại mới có một phiên (28/9), nên cột histogram cuối cũng còn tạm. Lời đọc giữ nguyên vì vẫn đúng."
+    },
+    {
+      "id": "channel-counterpoint",
+      "why": "Headline beat 1 \"Đóng cửa trên 1777\" đúng với phiên 28/9: daily.latest.closeExact 1780,68 trên hỗ trợ 1777 (terminal.trendlines.lows[7]). Nhưng giá đóng cửa ĐÃ xuống dưới 1777 một phiên: 24/9 đóng 1775 (content/vnindex-daily.json, không có trong pack), 25/9 lấy lại 1785 (daily.previous.closeExact), 28/9 đóng 1781 (daily.latest.closeExact); mức thấp trong phiên 1764 (daily.months[12].low) không nêu. Vì vậy dòng 2 là \"Đóng tuần dưới mới là gãy\": nến tuần đóng 25/9 ở 1785, vẫn trên 1777. \"chưa phải tín hiệu xác nhận\" nói về kịch bản chu kỳ lặp lại (MACD tháng cắt còn tạm tính, xem channel-evidence-5); nó không phủ nhận breakdown_confirmed 1802 ngày 23/9 của terminal."
+    },
+    {
+      "id": "channel-principle",
+      "why": "\"hơn gấp ba\" là tỉ số 32,8/9 ≈ 3,6 suy từ hai số trong pack (channel.lower.fallToLowerPercent, channel.upper.riseToUpperPercent); chỉ nói bằng lời, không lên màn hình. \"đáy kênh\" (lời và headline) là biên dưới kênh 1197 (channel.lower.atLatest), KHÔNG phải hỗ trợ 1777 mà scene phản biện vừa nói giá đang kiểm định — nói rõ để người nghe không ghép −32,8% vào 1777. \"Chưa cần chờ xác nhận\" nối từ câu cuối scene phản biện và từ tín hiệu MACD tháng còn tạm tính (nến tháng 9 chưa đóng — xem channel-evidence-5)."
+    },
+    {
+      "id": "channel-action",
+      "why": "\"Xác nhận thật phải chờ nến tháng đóng cửa\": histogram tháng đã âm (macd.histogramCurrent −1,6) nhưng tính trên nến tháng 9 chưa đóng (đóng 30/9); pack không đánh dấu tháng đang mở — xem channel-evidence-5."
+    }
+  ]
+}

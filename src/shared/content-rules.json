@@ -1,0 +1,192 @@
+{
+  "$comment": "Budget and terminology contract for this repo. Read by scripts/verify.mjs AND by .claude/skills/market-video/SKILL.md. This file is authoritative: never restate one of these numbers in prose, in a prompt, or in a code comment. Changing a value here changes what verify enforces; that is a human decision.",
+  "subject": "thị trường chứng khoán Việt Nam",
+  "narration": {
+    "language": "vi",
+    "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
+    "minWordsPerScene": 20,
+    "maxWordsPerScene": 58,
+    "warnWordsPerScene": [
+      24,
+      50
+    ],
+    "minSentencesPerScene": 2,
+    "maxSentencesPerScene": 5,
+    "wordsPerSecond": 4.81,
+    "_measuredFrom": "vnindex 393w / 11 scenes + rsi 316w / 9 scenes = 709w over 147.28s of scene time (scene length minus 1.15s lead-in+tail each), 2026-09-22",
+    "sceneSecondsFormula": "words / wordsPerSecond + leadIn + tail",
+    "syllableRateWarn": [
+      4.5,
+      6.0
+    ],
+    "syllableRateFail": [
+      3.5,
+      6.5
+    ],
+    "_rateNote": "measured per scene as words / (audio − leadIn − tail). Pooled across both reels: 4.74.",
+    "digitsInNarration": false,
+    "_digitsWhy": "Vietnamese TTS reads bare digits unpredictably. Spell them: 'chín mươi phẩy năm', not '90.5'. Chart labels keep digits."
+  },
+  "audio": {
+    "leadIn": 0.25,
+    "tail": 0.9,
+    "pause": 0.28,
+    "silenceDb": -40,
+    "loudnessLufs": -18,
+    "sampleRate": 44100,
+    "_note": "leadIn protects the 14-frame scene fade-in; tail stops the next scene clipping the last word. A hand-dropped recording bypasses all three and must arrive at −18 LUFS with its own 0.25s of leading silence."
+  },
+  "layout": {
+    "canvas": [
+      1080,
+      1920
+    ],
+    "fps": 30,
+    "panel": {
+      "x": 100,
+      "y": 640,
+      "w": 880,
+      "h": 560
+    },
+    "headlineMaxWidth": 880,
+    "headlineMaxFontSize": 78,
+    "headlineWarnChars": 26,
+    "_headlineWhy": "fittedSize caps at 78 but has no floor — a long line silently shrinks while its sibling stays at 78, so the two lines stop looking like one block. Be Vietnam Pro 800 uppercase averages ~0.62em, so ~18 characters fill the cap.",
+    "monoAdvanceEm": 0.6,
+    "_monoNote": "JetBrains Mono is exactly 0.6em per glyph. SVG <text> does not wrap and gets no auto-fit, so chart labels must be budgeted by hand."
+  },
+  "arc": {
+    "minScenes": 6,
+    "maxScenes": 12,
+    "roles": [
+      "hook",
+      "evidence",
+      "concept",
+      "counterpoint",
+      "mechanism",
+      "warning",
+      "action",
+      "principle",
+      "outro"
+    ],
+    "firstRole": "hook",
+    "lastRole": "outro",
+    "sceneIdPattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+    "acts": [
+      "blue",
+      "maroon",
+      "amber",
+      "navy"
+    ],
+    "_actNote": "background follows the argument: analysis → warning → what to do → sign-off. Acts may repeat but must not go backwards."
+  },
+  "claims": {
+    "numericTriggers": [
+      "\\d",
+      "%",
+      "\\blần\\b",
+      "\\bgấp\\b",
+      "cao nhất",
+      "thấp nhất",
+      "mạnh nhất",
+      "kỷ lục",
+      "duy nhất"
+    ],
+    "superlatives": [
+      "cao nhất",
+      "thấp nhất",
+      "mạnh nhất",
+      "yếu nhất",
+      "lớn nhất",
+      "kỷ lục",
+      "duy nhất",
+      "chưa từng"
+    ],
+    "recencyMarkers": [
+      "hiện tại",
+      "vừa",
+      "đang",
+      "bây giờ",
+      "hôm nay",
+      "mới nhất"
+    ],
+    "tolerancePercent": 1.0,
+    "_tolerance": "a number on screen may differ from the series by this much and still count as traced — covers rounding in a label like '1933'.",
+    "factsExemptions": [
+      {
+        "pattern": "tháng\\s*\\d{1,2}",
+        "why": "tên tháng trong lịch, không phải số đo"
+      },
+      {
+        "pattern": "\\d{1,2}\\s*T\\b",
+        "why": "viết tắt số tháng, ví dụ 12T"
+      },
+      {
+        "pattern": "\\d{1,2}\\s*(nhóm|điều|cách|bước|thứ|lý do|sai lầm|lần|nhịp)",
+        "why": "đếm thứ đang vẽ trên màn, không phải số liệu"
+      },
+      {
+        "pattern": "RSI\\s*\\(?\\d{1,2}\\)?",
+        "why": "chu kỳ chỉ báo, đã có ở series.rsiPeriod"
+      },
+      {
+        "pattern": "MACD\\s*\\(?[\\d,\\s]+\\)?",
+        "why": "tham số chỉ báo"
+      }
+    ],
+    "_exemptWhy": "Số khớp một trong các mẫu này không phải là khẳng định về dữ liệu, nên checkFacts bỏ qua. Thêm mẫu là nới cửa chặn — quyết định của người dùng."
+  },
+  "style": {
+    "_comment": "Heuristics for a HUMAN voice, all WARN. Measured on reel channel 2026-09-23: nine scenes at 49-50 words, every sentence carrying a spoken number, 'chỉ số' in most scenes — correct and unlistenable.",
+    "maxSpokenNumbersPerSentence": 1,
+    "maxSpokenNumbersPerScene": 2,
+    "spokenNumberWords": ["nghìn", "trăm", "mươi", "phẩy", "phần trăm", "mốt", "lăm", "linh", "lẻ"],
+    "_spokenNumberWords": "strong number words. A run counts as a spoken number when it holds one of these, or two or more digit words in a row (hai mươi hai). A lone năm/một/hai is a year, an article, a count of things — not a figure. gấp đôi is how a person talks and is not counted.",
+    "minSceneWordSpread": 8,
+    "_spread": "max minus min narration words across scenes; below this every scene sits on the same budget edge, the signature of machine writing",
+    "reportWords": {"chỉ số": 1, "ghi nhận": 0, "đạt mức": 0, "theo dữ liệu": 0, "có thể thấy": 0, "các bạn": 0, "nhà đầu tư": 0, "bậc thang": 0, "tiền mỏng": 0, "cái biên": 0, "kiểu dở": 0, "xích lại": 0, "lưng chừng": 0, "chuyện lạ": 0, "năm hai mươi": 0},
+    "_folksy": "the last eight are everyday words the user rejected on 2026-09-23 in favour of trading terms; 'năm hai mươi' catches a year read as 'năm hai mươi hai'",
+    "_reportWords": "max occurrences per scene; 0 means never",
+    "addressWords": ["bạn", "mình"],
+    "maxAddressPerScene": 3,
+    "headlineBothLinesNumeric": "warn",
+    "openingNumberWarn": true,
+    "tradeWords": ["kháng cự", "hỗ trợ", "tích luỹ", "tích lũy", "phân phối", "phá vỡ", "breakout", "điều chỉnh", "thanh khoản", "khối lượng", "động lượng", "xu hướng", "kiểm định", "phân kỳ", "vùng dao động", "kênh giá", "đường tín hiệu", "histogram", "khung tuần", "khung ngày", "cắt xuống", "cắt lên", "quá mua", "quá bán", "đỉnh cũ", "đáy cũ", "nến"],
+    "minTradeWordScenesPercent": 60,
+    "_tradeWords": "positive side of the vocabulary rule (user 2026-09-23: trading terms, not everyday metaphors). WARN when fewer than this share of narrated scenes use at least one of them.",
+    "sentenceContrastWords": 5,
+    "_contrast": "within a scene of three or more sentences: longest minus shortest sentence, in words. Below this every sentence is the same length; the prompt asks for a short sentence after a long one.",
+    "pace": {"shortRoles": ["hook", "outro"], "longRoles": ["evidence"]},
+    "_pace": "hook and outro sit at or below the reel's median word count, evidence at or above. enrich.mjs uses the same map to set the _words target of each scaffold scene, so the shape is designed, not accidental.",
+    "_opening": "a scene whose first sentence is mostly a spoken number opens like a report, not a person"
+  },
+  "voice": {
+    "engine": "omnivoice",
+    "model": "k2-fsa/OmniVoice",
+    "dtype": "float32",
+    "_dtypeWhy": "fp16 on MPS emits garbage tokens and never reaches a stop condition — it looks like a hang, not an error.",
+    "refAudio": "assets/voices/ref_ThanhBinh_khac_24k.wav",
+    "refTextOverlapWords": 3,
+    "lexicon": {
+      "MACD": "em a cê đi"
+    },
+    "_lexicon": "How the voice SAYS a written term: scripts/voiceover.mjs respells whole words right before synthesis, narration/headlines keep the written form, verify's speaking-rate check counts the spoken form. Measured 2026-09-28 with OmniVoice + Whisper large-v3, 3 sentences × 2 takes each: 'MACD' 0/6 recognised (Macy đi, FCD, Maxi đề), 'em a xê đê' 6/6, 'Em A Xê Đê' 4/6, 'em ây xi đi' 1/6, 'M A C D' 1/6, 'em-a-xê-đê' 0/6 (heard as MACG). 2026-09-28 the user set MACD → 'em a cê đi' (D said 'đi'); Whisper then writes 'MAC đi' in 5/5 re-recorded sentences — that is this reading heard correctly, not a miss (it only writes 'MACD' back for 'em a xê đê').",
+    "_refWhy": "if the reference transcript shares its opening words with a narration sentence, the model treats that run as already spoken and drops it."
+  },
+  "series": {
+    "path": "content/vnindex-monthly.json",
+    "rsiPeriod": 14,
+    "_rsiWarmup": "Wilder's RSI returns null for the first 14 bars and barAt() coerces that to 0, so a mark on an early month is drawn at the bottom of the pane.",
+    "peakMonths": [
+      "2018-04",
+      "2022-01",
+      "2026-05"
+    ],
+    "troughMonths": [
+      "2014-01",
+      "2020-03",
+      "2022-11"
+    ],
+    "_anchorWhy": "src/lib/series.ts resolves these at module scope. A month missing from the series throws during bundle evaluation and kills EVERY composition, including reels with no chart."
+  }
+}

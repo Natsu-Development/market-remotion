@@ -1,0 +1,37 @@
+{
+  "name": "remotion-market",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Data-driven vertical market-analysis reels, rendered with Remotion.",
+  "scripts": {
+    "studio": "remotion studio",
+    "voiceover": "node scripts/voiceover.mjs",
+    "build": "node scripts/render.mjs",
+    "render": "remotion render Channel out/channel.mp4",
+    "still": "remotion still Channel out/still.png",
+    "upgrade": "remotion upgrade",
+    "typecheck": "tsc --noEmit",
+    "verify": "node scripts/verify.mjs",
+    "check": "npm run typecheck && npm run verify",
+    "enrich": "node scripts/enrich.mjs",
+    "approve": "node scripts/approve.mjs",
+    "merge": "node scripts/merge.mjs",
+    "review": "node scripts/review.mjs",
+    "review-page": "node scripts/review-page.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.526",
+    "@remotion/google-fonts": "4.0.526",
+    "@remotion/layout-utils": "4.0.526",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.526"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.0",
+    "typescript": "5.8.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}

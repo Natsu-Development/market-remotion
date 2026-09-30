@@ -80,8 +80,9 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
 
 - **Hook, KHÔNG chữ của hệ thống** (người dùng chốt 30/9: không phiên phân phối, không FTD, không "theo
   quy tắc", không tên trạng thái). Khuôn người dùng đặt: (0) ngày của phiên, một câu ngắn — "Thứ Ba, hai
-  mươi chín tháng chín." (`session.weekday`, `session.dm`); (1) điểm số và % của phiên — "Đóng cửa một nghìn
-  bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm." (đọc điểm tròn, nhãn giữ số lẻ); (2) hai chữ
+  mươi chín tháng chín." (`session.weekday`, `session.dm`); (1) điểm số và % của phiên, gọi tên chỉ số —
+  "VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm." (viết "VN-Index"
+  như reel Channel đã thu; đọc điểm tròn, nhãn giữ số lẻ); (2) hai chữ
   do SỐ quyết định, lấy nguyên từ `session.breadthToday.indexWord` / `breadthWord` — "Chỉ số đi ngang, mã
   giảm nhiều hơn tăng." (không tự viết "phần lớn" khi số không nói vậy); (3) câu hỏi "Tiền đang chảy vào
   đâu?"; (4) LỜI MỜI: "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại", không

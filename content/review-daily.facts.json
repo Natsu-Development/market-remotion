@@ -44,7 +44,33 @@
     "volumeRatio": 0.61,
     "volumeVsAvg20": 0.65,
     "isDistribution": false,
-    "isFtd": false
+    "isFtd": false,
+    "breadthToday": {
+      "exchange": "HOSE",
+      "up": 152,
+      "down": 186,
+      "flat": 65,
+      "total": 403,
+      "source": "zionle.io.vn screener, price_change_pct per stock",
+      "all": {
+        "up": 492,
+        "down": 505,
+        "flat": 469,
+        "total": 1466
+      },
+      "indexWord": "đi ngang",
+      "breadthWord": "mã giảm nhiều hơn mã tăng",
+      "downUpRatio": 1.22,
+      "screener": {
+        "exchange": "HOSE",
+        "up": 152,
+        "down": 186,
+        "flat": 65,
+        "total": 403,
+        "source": "zionle.io.vn screener, price_change_pct per stock"
+      },
+      "fireant": null
+    }
   },
   "distribution": {
     "count": 3,

@@ -22,18 +22,18 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, mã giảm nhiều hơn tăng. Tiền đang chảy vào đâu? Cuối video: ba mã có tiền vào, một mức phải canh.",
+      "narration": "Chỉ số đi ngang, phần lớn cổ phiếu đi xuống. Tiền đang chảy vào đâu? Cuối video: ba mã đang có tiền vào, và một mức phải canh.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "1777,73 điểm · −0,17%",
-          "line2": "Chỉ số đi ngang",
+          "line1": "Chỉ số đi ngang từ tháng 7",
+          "line2": "Phần lớn mã đang đi xuống",
           "accent": "red"
         },
         {
-          "atSentence": 2,
-          "at": 5.5,
+          "atSentence": 1,
+          "at": 3,
           "line1": "Tiền đang chảy vào đâu?",
           "line2": "3 mã dẫn dắt · 1 mức canh",
           "accent": "gold"
@@ -97,35 +97,27 @@
         "maskColor": "#161921",
         "annotations": [
           {
+            "kind": "box",
+            "x": 0.5574,
+            "y": 0.2691,
+            "w": 0.2913,
+            "h": 0.2688,
+            "accent": "gold",
+            "beat": 0,
+            "label": "Vùng 1651 – 1874"
+          },
+          {
             "kind": "circle",
             "x": 0.8407,
             "y": 0.3856,
             "r": 0.022,
             "accent": "gold",
-            "beat": 0
+            "beat": 1
           },
           {
             "kind": "label",
             "x": 0.8107,
-            "y": 0.2756,
-            "text": "Đóng cửa 1777,73 · −0,17%",
-            "accent": "red",
-            "beat": 0,
-            "anchor": "end"
-          },
-          {
-            "kind": "label",
-            "x": 0.8107,
-            "y": 0.3156,
-            "text": "HOSE: 152 tăng · 186 giảm",
-            "accent": "white",
-            "beat": 0,
-            "anchor": "end"
-          },
-          {
-            "kind": "label",
-            "x": 0.8107,
-            "y": 0.4756,
+            "y": 0.2956,
             "text": "Cuối video: mã dẫn dắt · mức canh",
             "accent": "gold",
             "beat": 1,
@@ -135,27 +127,26 @@
         "shots": [
           {
             "beat": 0,
-            "x": 0.7707,
-            "y": 0.3856,
-            "zoom": 2,
-            "move": "push_in"
+            "x": 0.6991,
+            "y": 0.4035,
+            "zoom": 1.1,
+            "move": "pull_out"
           },
           {
             "beat": 1,
-            "x": 0.7407,
-            "y": 0.4056,
-            "zoom": 1.6,
-            "move": "pull_out"
+            "x": 0.7807,
+            "y": 0.3856,
+            "zoom": 2,
+            "move": "push_in"
           }
         ]
       },
       "citedFacts": [
-        "session.close",
-        "session.changePercent",
-        "session.breadthToday.indexWord",
-        "session.breadthToday.breadthWord",
-        "session.breadthToday.up",
-        "session.breadthToday.down"
+        "session.window.from",
+        "session.window.low",
+        "session.window.high",
+        "screener.leaders.top",
+        "state.rallyLow"
       ]
     },
     {
@@ -1583,7 +1574,7 @@
   "unsupported": [
     {
       "id": "rd-260929-hook",
-      "why": "Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; \"mã giảm nhiều hơn tăng\" vì HOSE 186 giảm / 152 tăng / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Không chữ hệ thống ở hook."
+      "why": "Không chữ hệ thống ở hook (người dùng chốt 30/9). \"Chỉ số đi ngang\" = vùng 1651 – 1874 từ 15/7, chỉ số −0,2% qua 52 phiên (session.window); \"phần lớn cổ phiếu đi xuống\" = 24,8% mã trên SMA200 (đọc số ở scene breadth). \"Ba mã\" = leaders.top, \"một mức\" = đáy nhịp hồi 1651,20 (scene watch)."
     },
     {
       "id": "rd-260929-market",

@@ -7,9 +7,9 @@ footer: Nguồn: SSI · zionle.io.vn · FireAnt
 # Trạng thái: Xu hướng tăng xác nhận từ 3/8 · 3/25 phân phối · FTD 3/8/2026 · ảnh chỉ số: fireant.vn.
 
 ## hook · image
-KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market.
-Beat 1 — căng thẳng ai cũng thấy: chỉ số kẹt trong vùng 1651 – 1874 từ 15/7 (52 phiên, −0,2%), trong khi phần lớn mã đi xuống (độ rộng: 24,8% mã trên SMA200 — CHƯA đọc số, scene breadth đọc). Câu đầu ≤ 10 chữ.
-Beat 2 — câu hỏi + LỜI HỨA: tiền đang chảy vào đâu? Cuối video: ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).
+Câu đầu là ĐIỂM SỐ và % của phiên: đóng cửa 1777,73 (đọc tròn 1778), −0,17%. Câu hai là hai chữ mà SỐ quyết định: chỉ số "đi ngang" (|Δ| < 0,3% = đi ngang), mã giảm nhiều hơn mã tăng (HOSE 152 tăng · 186 giảm · 65 đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).
+Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI HỨA: cuối video có ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).
+KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.
 
 ## market · image
 Beat 1 — 3 phiên phân phối còn hiệu lực: 11/9 −1,86% KL ×1,64 (còn 12 phiên); 23/9 −0,84% KL ×1,23 (còn 20 phiên); 24/9 −1,47% KL ×1,07 (còn 21 phiên). Phân phối = giảm từ 0.5% với KL cao hơn phiên trước.

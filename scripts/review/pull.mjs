@@ -18,11 +18,14 @@
  *    The server's result lists are authoritative; a local evaluation of the same conditions on
  *    the universe rows cross-checks them and settles whether volume_vs_sma is a ratio or a %.
  * 5. Ranks the scene picks (rules.screener.scenes) and GETs /api/analyze for each leader.
+ * 6. Reads FireAnt's public market page for the session's advancers/unchanged/decliners per exchange
+ *    (headless shell, no sign-in); kept only when the page shows this session's close. --no-fireant skips.
  *                                            -> content/review/snapshots/<date>.json, analyze/<date>/
  *
  * Exit codes: 0 pulled, 2 stale cache / bad environment.
  */
 import {PATHS, cli, configId, die, finishedBars, ict, ictInstant, round, rules, ssiDaily, writeJson, writeRows, zionle} from './lib/common.mjs';
+import {fetchFireantBreadth, matchesSession} from './lib/fireant.mjs';
 
 const {flag, opt} = cli();
 const R = rules();
@@ -211,6 +214,18 @@ for (const sym of [...new Set(Object.values(picks).flat())]) {
   analyzed[sym] = rel;
 }
 
+// ------------------------------------------------------------------ FireAnt advance/decline
+
+let fireant = null;
+if (!flag('no-fireant')) {
+  const fa = fetchFireantBreadth(`${PATHS.cache}/${session}-fireant-thitruong.png`);
+  fireant = fa ? {...fa, matchesSession: matchesSession(fa, bars[bars.length - 1].c)} : null;
+  const h = fireant?.exchanges?.HSX;
+  log(fireant
+    ? `fireant  HSX ▲${h?.up} ●${h?.flat} ▼${h?.down} at VN-INDEX ${h?.index} — ${fireant.matchesSession ? 'this session' : 'NOT this session (live/later value); the terminal counts are used'}`
+    : 'fireant  market page not readable — the terminal counts are used');
+}
+
 const snapshot = {
   date: session,
   cachedAt: info.cached_at,
@@ -224,6 +239,7 @@ const snapshot = {
   picks,
   breadth,
   analyze: analyzed,
+  fireant,
   rows: Object.fromEntries([...keep].sort().map((sym) => [sym, compact(bySymbol.get(sym))])),
 };
 const snapRel = writeJson(`${PATHS.snapshots}/${session}.json`, snapshot);

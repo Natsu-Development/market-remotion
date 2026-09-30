@@ -63,6 +63,34 @@ const session = {
   high: round(last.h, 2), low: round(last.l, 2),
   volumeM: round(last.v / 1e6, 1), volumeRatio: round(last.v / prev.v, 2), volumeVsAvg20: round(last.v / avg20, 2),
   isDistribution: st.today.isDistribution, isFtd: st.today.isFtd,
+  /** Advancers and decliners of the session, per exchange, from the screener's universe (the hook's opener). */
+  breadthToday: (() => {
+    const uni = tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? [];
+    const per = {};
+    for (const s of uni) {
+      const e = s.exchange || '?';
+      per[e] ??= {up: 0, down: 0, flat: 0, total: 0};
+      per[e].total++;
+      if (s.price_change_pct > 0) per[e].up++; else if (s.price_change_pct < 0) per[e].down++; else per[e].flat++;
+    }
+    const all = Object.values(per).reduce((a, x) => ({up: a.up + x.up, down: a.down + x.down, flat: a.flat + x.flat, total: a.total + x.total}), {up: 0, down: 0, flat: 0, total: 0});
+    const term = per.HOSE ? {exchange: 'HOSE', ...per.HOSE, source: 'zionle.io.vn screener, price_change_pct per stock'} : null;
+    // FireAnt's own count for the session (▲ ● ▼ next to VN-INDEX on fireant.vn/thi-truong) leads
+    // when pull.mjs saw the page showing this session's close; the terminal's count is the fallback.
+    const fa = snap.fireant?.matchesSession ? snap.fireant.exchanges?.HSX : null;
+    const h = fa ? {exchange: 'HSX', up: fa.up, down: fa.down, flat: fa.flat, total: fa.total, source: 'fireant.vn/thi-truong'} : term;
+    // The words the hook may use for the day, decided by the numbers, not by mood.
+    const c = last.c / prev.c - 1;
+    const indexWord = Math.abs(c) < 0.003 ? 'đi ngang' : c > 0.01 ? 'tăng mạnh' : c > 0 ? 'tăng' : c < -0.01 ? 'giảm mạnh' : 'giảm';
+    const ratio = h && h.up ? h.down / h.up : null;
+    const breadthWord = !h ? null
+      : h.down >= h.total * 0.6 ? 'phần lớn cổ phiếu đi xuống'
+      : h.up >= h.total * 0.6 ? 'phần lớn cổ phiếu đi lên'
+      : ratio >= 1.15 ? 'mã giảm nhiều hơn mã tăng'
+      : ratio <= 1 / 1.15 ? 'mã tăng nhiều hơn mã giảm'
+      : 'mã tăng giảm cân bằng';
+    return {...(h ?? {}), all, indexWord, breadthWord, downUpRatio: ratio == null ? null : round(ratio, 2), screener: term, fireant: fa ?? null};
+  })(),
 };
 
 const dd = st.distribution.active.map((d) => ({

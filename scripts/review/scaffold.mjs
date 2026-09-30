@@ -213,31 +213,31 @@ const ftdMarks = (beat) => (ftdVisible
   ? [ftdArrow(ftd, ftdX, beat), lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', beat, 'middle')]
   : []);
 
-// hook — no system words yet (user, 2026-09-30: nothing about distribution days, FTD or IBD in the
-// hook). Beat 1: the range the index has been stuck in, boxed; beat 2: today's candle and the promise.
+// hook — today's close first, then the day's words, the question and the promise (user, 2026-09-30).
+// No system words: distribution days, FTD, the rules and the state wait for the market scene.
+// Beat 1: today's candle ringed, the close and the HOSE advance/decline on plates; beat 2: the promise.
 const buildHook = () => {
-  const Wn = F.session.window;
-  const x0 = barX(index, daily, Wn.from);
-  const boxable = x0 != null && x0 > C.x;
-  const yHi = priceY(index, Wn.high, indexUnit), yLo = priceY(index, Wn.low, indexUnit);
+  const T = F.session.breadthToday;
+  const S = F.session;
   const marks = [
-    ...(boxable ? [{kind: 'box', x: clamp(x0), y: clamp(yHi), w: clamp((lastX ?? 0.9) - x0 + 0.008), h: clamp(yLo - yHi), accent: 'gold', beat: 0, label: `Vùng ${vi(Wn.low, 0)} – ${vi(Wn.high, 0)}`}] : []),
-    todayRing(1),
-    lab(clamp(lastX - 0.03), clamp(lastY - 0.09), 'Cuối video: mã dẫn dắt · mức canh', 'gold', 1, 'end'),
+    todayRing(0),
+    lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `Đóng cửa ${vi(S.close)} · ${fmtPct(S.changePercent)}`, S.changePercent >= 0 ? 'green' : 'red', 0, 'end'),
+    ...(T?.up != null ? [lab(clamp(lastX - 0.03), clamp(lastY - 0.07), `${T.exchange}: ${T.up} tăng · ${T.down} giảm`, 'white', 0, 'end')] : []),
+    lab(clamp(lastX - 0.03), clamp(lastY + 0.09), 'Cuối video: mã dẫn dắt · mức canh', 'gold', 1, 'end'),
   ];
   push('hook', {
     beats: todoBeats(2),
     visual: indexPhoto({
       annotations: marks,
       shots: [
-        {beat: 0, x: clamp(boxable ? (x0 + (lastX ?? 0.9)) / 2 : inC(0.6, 0)[0]), y: clamp((yHi + yLo) / 2), zoom: 1.1, move: 'pull_out'},
-        {beat: 1, x: clamp((lastX ?? 0.85) - 0.06), y: clamp(lastY), zoom: 2.0, move: 'push_in'},
+        {beat: 0, x: clamp((lastX ?? 0.85) - 0.07), y: clamp(lastY), zoom: 2.0, move: 'push_in'},
+        {beat: 1, x: clamp((lastX ?? 0.85) - 0.1), y: clamp(lastY + 0.02), zoom: 1.6, move: 'pull_out'},
       ],
     }),
     brief: [
-      `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market.`,
-      `Beat 1 — căng thẳng ai cũng thấy: chỉ số kẹt trong vùng ${vi(Wn.low, 0)} – ${vi(Wn.high, 0)} từ ${Wn.fromDm} (${Wn.sessions} phiên, ${fmtPct(Wn.changePercent, 1)}), trong khi phần lớn mã đi xuống (độ rộng: ${vi(F.screener.breadth.line?.last ?? F.screener.breadth.aboveSma200Percent, 1)}% mã trên SMA200 — CHƯA đọc số, scene breadth đọc). Câu đầu ≤ 10 chữ.`,
-      'Beat 2 — câu hỏi + LỜI HỨA: tiền đang chảy vào đâu? Cuối video: ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).',
+      `Câu đầu là ĐIỂM SỐ và % của phiên: đóng cửa ${vi(S.close)} (đọc tròn ${vi(Math.round(S.close), 0)}), ${fmtPct(S.changePercent)}. Câu hai là hai chữ mà SỐ quyết định: chỉ số "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang), ${T?.breadthWord ?? '—'} (HOSE ${T?.up ?? '?'} tăng · ${T?.down ?? '?'} giảm · ${T?.flat ?? '?'} đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).`,
+      'Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI HỨA: cuối video có ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).',
+      `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.`,
     ],
   });
 };

@@ -25,7 +25,7 @@ Tài liệu phụ của [SKILL.md](SKILL.md). Mọi ngưỡng nằm ở [rules.j
 
 | Khoá | Nội dung |
 |---|---|
-| `session` | `date`, `close`, `prevClose`, `changePercent`, `volumeM`, `volumeRatio` (so phiên trước), `volumeVsAvg20`, `isDistribution`, `isFtd` |
+| `session` | `date`, `close`, `prevClose`, `changePercent`, `volumeM`, `volumeRatio` (so phiên trước), `volumeVsAvg20`, `isDistribution`, `isFtd`; `window` (vùng giá của cửa sổ reel nhìn: `high`/`low`/`changePercent`); `breadthToday` (mã tăng/giảm/đứng giá của phiên trên HSX — FireAnt khi khớp phiên, không thì Screener; `indexWord`/`breadthWord` là hai chữ hook được dùng, do ngưỡng quyết định: |Δ| < 0,3% = "đi ngang", một phía ≥ 60% = "phần lớn", lệch ≥ 15% = "nhiều hơn") |
 | `distribution` | `count`, `window`, `active[]` (`dm`, `changePercent`, `volumeRatio`, `sessionsLeft`, `expireLevel`), `nextExpiry`, `toUnderPressure`, `toCorrection` |
 | `state` | `status` + `label`/`short` (rules.status), `since`, `rallyDay`, `rallyLow`, `correctionLow`, `ftd`/`lastFtd` (`dm`, `day`, `changePercent`, `volumeRatio`, `close`, `rallyLow`, `ended`) |
 | `watch[]` | `{if, then}` — điều gì sẽ đổi trạng thái; chất liệu duy nhất cho câu nếu … thì |
@@ -74,6 +74,7 @@ Backtest 2013 → 29/9/2026 (3404 phiên, cửa sổ 25 phiên, không stop, c�
 | `GET /api/config/{id}` | chỉ đọc `metrics_filter`; object còn `telegram.bot_token` — không log, không ghi |
 | `POST /api/stocks/filter?config_id=` | NGOẠI LỆ DUY NHẤT (người dùng cho phép 2026-09-29). Body `{match, negate?, conditions, groups?, exchanges?}`; `{match:"and"}` trả mọi mã. Trả `{stocks:[…]}` |
 | `GET /api/analyze/{mã}?interval=1D&config_id=` | nến ~1 năm, signals, trendlines. `1W`/`1M`/`4H` trả 500 |
+| `https://fireant.vn/thi-truong` (headless, không đăng nhập) | cạnh mỗi chỉ số: `▲ tăng ● đứng giá ▼ giảm` của phiên MỚI NHẤT (trong phiên là số đang chạy). `lib/fireant.mjs` đọc; `pull.mjs` chỉ tin khi giá VN-INDEX trên trang = đóng cửa của phiên (`fireant.matchesSession`), không thì dùng đếm từ universe của Screener. Dashboard FireAnt còn tab "Biến động" (Số lượng CP tăng/giảm/không đổi) — chưa chụp làm ảnh |
 
 Dòng Screener: `symbol, name, exchange, rs_1m, rs_3m, rs_6m, rs_9m, rs_52w, current_volume, volume_sma20,
 current_price` (nghìn đồng)`, price_change_pct, ema_9, ema_21, ema_50, sma_200, has_*`. Đường trung bình

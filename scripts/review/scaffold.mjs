@@ -533,7 +533,8 @@ const buildWeek = () => {
 const buildOutro = () => push('outro', {
   eyebrow: 'Theo dõi tiếp',
   beats: [{atSentence: 0, at: R.audio.leadIn, line1: 'TODO', line2: 'TODO', accent: 'gold'}],
-  visual: {type: 'outro', brand: R.brand, kicker: 'Chứng khoán', pill: 'Thả tim · Chia sẻ · Theo dõi', line: FORMAT === 'daily' ? 'Cập nhật sau mỗi phiên' : 'Cập nhật mỗi cuối tuần'},
+  // rules.logo (a path under public/) replaces the generated monogram inside the ring; the name stays.
+  visual: {type: 'outro', ...(R.logo ? {logo: R.logo} : {}), brand: R.brand, kicker: 'Chứng khoán', pill: 'Thả tim · Chia sẻ · Theo dõi', line: FORMAT === 'daily' ? 'Cập nhật sau mỗi phiên' : 'Cập nhật mỗi cuối tuần'},
   brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
 });
 

@@ -600,5 +600,7 @@
   },
   "extraChecks": [
     "scripts/review/checks.mjs"
-  ]
+  ],
+  "logo": "logo/cu-dem-chung-khoan.png",
+  "_logo": "The channel mark on the outro card, a path under public/ (user 2026-09-30: the owl from their stock_image.png, the face cropped to a square and scaled to 512 px; the full 1254 px illustration stays in their Downloads, not in the repo). scaffold copies it into the outro visual.logo; the card still prints the channel name under it."
 }

@@ -16,7 +16,8 @@ type Props = Extract<Visual, {type: 'outro'}> & {
 
 /**
  * Sign-off card. `logo` points at a file under public/ — drop a brand mark
- * there and it replaces the generated monogram.
+ * there and it replaces the generated monogram inside the ring; the channel
+ * name stays printed under it either way.
  */
 export const Outro: React.FC<Props> = ({logo, brand, kicker, pill, line, disclaimer, footnoteY}) => {
   const frame = useCurrentFrame();
@@ -86,23 +87,22 @@ export const Outro: React.FC<Props> = ({logo, brand, kicker, pill, line, disclai
             )}
           </div>
 
-          {/* A supplied mark carries the name already; the monogram does not. */}
-          {logo ? null : (
-            <div
-              style={{
-                marginTop: 24,
-                fontFamily: FONTS.display,
-                fontWeight: 800,
-                fontSize: 34,
-                letterSpacing: 3,
-                color: COLORS.white,
-                textTransform: 'uppercase',
-                ...enter(frame, {delay: 16, duration: 22, rise: 12}),
-              }}
-            >
-              {brand}
-            </div>
-          )}
+          {/* The name always prints under the mark: an avatar-style logo (the user's owl, 2026-09-30)
+              carries no wordmark, and the monogram never did. */}
+          <div
+            style={{
+              marginTop: 24,
+              fontFamily: FONTS.display,
+              fontWeight: 800,
+              fontSize: 34,
+              letterSpacing: 3,
+              color: COLORS.white,
+              textTransform: 'uppercase',
+              ...enter(frame, {delay: 16, duration: 22, rise: 12}),
+            }}
+          >
+            {brand}
+          </div>
 
           <div
             style={{

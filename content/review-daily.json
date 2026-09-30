@@ -7,7 +7,7 @@
   "brief": "brief/review-daily.md",
   "facts": "content/review-daily.facts.json",
   "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
-  "footer": "Radar Chứng Khoán",
+  "footer": "Cú Đêm Chứng Khoán",
   "ticker": {
     "symbol": "VN-INDEX",
     "timeframe": "1D",
@@ -1673,7 +1673,7 @@
       "eyebrow": "Theo dõi tiếp",
       "act": "navy",
       "duration": 7,
-      "narration": "Thấy hữu ích thì thả tim, chia sẻ và theo dõi Radar Chứng Khoán để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây.",
+      "narration": "Thấy hữu ích thì thả tim, chia sẻ và theo dõi Cú Đêm Chứng Khoán để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây.",
       "beats": [
         {
           "atSentence": 0,
@@ -1685,7 +1685,7 @@
       ],
       "visual": {
         "type": "outro",
-        "brand": "Radar Chứng Khoán",
+        "brand": "Cú Đêm Chứng Khoán",
         "kicker": "Chứng khoán",
         "pill": "Thả tim · Chia sẻ · Theo dõi",
         "line": "Cập nhật sau mỗi phiên"
@@ -1713,7 +1713,7 @@
     },
     {
       "id": "rd-260930-outro",
-      "why": "Tên kênh \"Radar Chứng Khoán\" theo CLAUDE.md (người dùng cho tên 2026-09-29); \"Radar\" đọc \"ra đa\" qua voice.lexicon của rules.json — chưa đo ở giọng này."
+      "why": "Tên kênh \"Cú Đêm Chứng Khoán\" (người dùng đổi tên 2026-09-30, trước đó Radar Chứng Khoán). Monogram sinh từ hai chữ đầu: CĐ."
     }
   ]
 }

@@ -257,14 +257,14 @@
       "calib": {
         "paneFrac": [
           0.015,
-          0.0,
+          0,
           0.955,
           0.54
         ]
       },
       "crop": {
         "x": 0.4,
-        "y": 0.0,
+        "y": 0,
         "w": 0.555,
         "h": 0.697
       },
@@ -318,10 +318,10 @@
     ],
     "maskColor": "#161921"
   },
-  "footer": "Radar Chứng Khoán",
-  "_footer": "The line under every scene's headline is the user's channel name, not a source line (user 2026-09-29, CLAUDE.md; until 2026-09-30 this reel still said 'Nguồn: SSI · zionle.io.vn · FireAnt'). The photos keep their own credit stamp (ẢNH · FIREANT.VN / ZIONLE.IO.VN).",
+  "footer": "Cú Đêm Chứng Khoán",
+  "_footer": "The line under every scene's headline is the user's channel name, not a source line (user 2026-09-29, CLAUDE.md; renamed to \"Cú Đêm Chứng Khoán\" 2026-09-30; until 2026-09-30 this reel still said 'Nguồn: SSI · zionle.io.vn · FireAnt'). The photos keep their own credit stamp (ẢNH · FIREANT.VN / ZIONLE.IO.VN).",
   "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
-  "brand": "Radar Chứng Khoán",
+  "brand": "Cú Đêm Chứng Khoán",
   "narration": {
     "language": "vi",
     "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
@@ -337,7 +337,7 @@
     "_wordsPerSecond": "the same voice as market-video, measured 2026-09-22 (content-rules.json narration._measuredFrom).",
     "syllableRateWarn": [
       4.5,
-      6.0
+      6
     ],
     "syllableRateFail": [
       3.5,
@@ -491,7 +491,7 @@
       "hôm nay",
       "mới nhất"
     ],
-    "tolerancePercent": 1.0,
+    "tolerancePercent": 1,
     "factsExemptions": [
       {
         "pattern": "\\b\\d{1,2}/\\d{1,2}(?:/\\d{4})?\\b",
@@ -594,8 +594,7 @@
   "voice": {
     "lexicon": {
       "MACD": "em a cê đi",
-      "FTD": "ép tê đi",
-      "Radar": "ra đa"
+      "FTD": "ép tê đi"
     },
     "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name). FTD → 'ép tê đi' added 2026-09-30 when the user asked the market scene to say 'phiên FTD' — the letter pattern of their MACD choice (Vietnamese letter names, D said 'đi'); NOT yet measured with Whisper: check the first take and change the reading here if it is misheard."
   },

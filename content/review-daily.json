@@ -22,7 +22,7 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Thứ Ba, hai mươi chín tháng chín. VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, một trăm năm mươi hai mã tăng, một trăm tám mươi sáu giảm. Tiền đang chảy vào đâu? Cùng mình điểm lại thị trường và mã đáng chú ý nhé.",
+      "narration": "Thứ Ba, hai mươi chín tháng chín. VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang: mã tăng một trăm năm mươi hai, mã giảm một trăm tám mươi sáu. Tiền chảy vào đâu? Cùng mình điểm lại thị trường và mã đáng chú ý nhé.",
       "beats": [
         {
           "atSentence": 0,
@@ -157,7 +157,7 @@
       "eyebrow": "Trạng thái theo quy tắc",
       "act": "blue",
       "duration": 10.1,
-      "narration": "Hôm nay không phải phiên phân phối, đếm lại còn ba phiên. Theo quy tắc, xu hướng tăng xác nhận vẫn giữ, neo ở phiên FTD ba tháng tám. Phiên cũ nhất hết hạn sau mười hai phiên. Thêm một là chịu áp lực, thêm ba là điều chỉnh. Nhìn rộng ra.",
+      "narration": "Hôm nay không phải phiên phân phối, đếm lại còn ba phiên. Theo quy tắc, xu hướng tăng xác nhận vẫn giữ, neo ở phiên FTD ba tháng tám. Chỉ cần thêm một phiên phân phối nữa là xu hướng bắt đầu chịu áp lực. Nhìn rộng ra thì sao?",
       "beats": [
         {
           "atSentence": 0,
@@ -177,7 +177,7 @@
           "atSentence": 2,
           "at": 7.5,
           "line1": "11/9 hết hạn sau 12 phiên",
-          "line2": "Thêm một là chịu áp lực",
+          "line2": "Một phiên nữa: chịu áp lực",
           "accent": "gold"
         }
       ],
@@ -1580,7 +1580,7 @@
     },
     {
       "id": "rd-260929-market",
-      "why": "Câu đầu nói hôm nay có phải phiên phân phối không (session.isDistribution = false: −0,17%, KL ×0,61) rồi đếm (3/25); không kể phiên nặng nhất (người dùng chốt 30/9). \"Phiên FTD\" viết FTD, lexicon đọc \"ép tê đi\" (chưa đo). Ngưỡng nói kiểu \"thêm một / thêm ba\" (toUnderPressure = 1, toCorrection = 3) để khớp scene watch. Hai số đọc ra lời: ba tháng tám, mười hai phiên (\"ba phiên\", \"một\", \"ba\" là đếm)."
+      "why": "Câu đầu nói hôm nay có phải phiên phân phối không (session.isDistribution = false: −0,17%, KL ×0,61) rồi đếm (3/25); không kể phiên nặng nhất (người dùng chốt 30/9). \"Phiên FTD\" viết FTD, lexicon đọc \"ép tê đi\" (chưa đo). Ngưỡng nói bằng lời người: \"chỉ cần thêm một phiên phân phối nữa là xu hướng bắt đầu chịu áp lực\" (toUnderPressure = 1); ngưỡng điều chỉnh (thêm 3) để scene watch và nhãn trên chart nói. Đồng hồ (11/9 hết hạn sau 12 phiên) chỉ trên màn hình ở scene này, scene watch đọc. Hai số đọc ra lời: ba tháng tám, mười hai phiên (\"ba phiên\", \"một\", \"ba\" là đếm)."
     },
     {
       "id": "rd-260929-breadth",

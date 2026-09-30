@@ -268,7 +268,7 @@ const buildMarket = () => {
       ftdVisible
         ? `Beat 2 — neo của xu hướng: FTD ${ftd.dmy} (ngày ${ftd.day}, ${fmtPct(ftd.changePercent)}, KL ×${vi(ftd.volumeRatio)}) và đáy nhịp hồi ${vi(ftd.rallyLow)} (đường vàng).`
         : `Beat 2 — ${holdName.toLowerCase()} ${holdLow != null ? vi(holdLow) : '—'}.`,
-      `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; nói ngưỡng theo kiểu "thêm ${F.distribution.toUnderPressure} là ${R.status.UNDER_PRESSURE.short.toLowerCase()}, thêm ${F.distribution.toCorrection} là ${R.status.CORRECTION.short.toLowerCase()}" (khớp scene watch). Gọi "phiên FTD" (lexicon đọc "ép tê đi").`,
+      `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; ngưỡng kế nói bằng lời người — "chỉ cần thêm ${F.distribution.toUnderPressure} phiên phân phối nữa là xu hướng bắt đầu ${R.status.UNDER_PRESSURE.short.toLowerCase()}" — KHÔNG kiểu "thêm một là…, thêm ba là…" (người dùng bác 30/9); ngưỡng điều chỉnh để nhãn và scene watch nói. Gọi "phiên FTD" (lexicon đọc "ép tê đi").`,
       'Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). Kết bằng câu dẫn sang độ rộng thị trường.',
     ],
   });

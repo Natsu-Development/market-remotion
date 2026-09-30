@@ -84,15 +84,17 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   "VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm." (viết "VN-Index"
   như reel Channel đã thu; đọc điểm tròn, nhãn giữ số lẻ); (2) hai chữ
   do SỐ quyết định: `indexWord` rồi SỐ MÃ tăng và giảm của `session.breadthToday` đọc thành chữ — "Chỉ số
-  đi ngang, một trăm năm mươi hai mã tăng, một trăm tám mươi sáu mã giảm." (người dùng chốt 30/9; không tự
-  viết "phần lớn" khi số không nói vậy); (3) câu hỏi "Tiền đang chảy vào
+  đi ngang: mã tăng một trăm năm mươi hai, mã giảm một trăm tám mươi sáu." — hai nửa song song (người dùng
+  chốt 30/9; không tự viết "phần lớn" khi số không nói vậy); (3) câu hỏi "Tiền đang chảy vào
   đâu?"; (4) LỜI MỜI: "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại", không
   "review"; "và", không "&". Hook mở bằng con số theo ý người dùng — verify sẽ WARN `style`, chấp nhận.
 - **market** là chỗ chuyện hệ thống BẮT ĐẦU, theo khuôn người dùng chốt 30/9: (1) hôm nay có phải phiên
   phân phối không, rồi ĐẾM — "Hôm nay không phải phiên phân phối, đếm lại còn ba phiên." (không kể phiên
-  nặng nhất); (2) trạng thái "theo quy tắc", neo ở "phiên FTD ba tháng tám" (viết FTD, lexicon đọc); (3) đồng
-  hồ — "Phiên cũ nhất hết hạn sau mười hai phiên."; (4) hai ngưỡng kế, nói kiểu "Thêm một là chịu áp lực,
-  thêm ba là điều chỉnh." (khớp scene watch); (5) câu dẫn sang độ rộng. KHÔNG nói điều kiện nếu … thì ở đây.
+  nặng nhất); (2) trạng thái "theo quy tắc", neo ở "phiên FTD ba tháng tám" (viết FTD, lexicon đọc); (3) ngưỡng
+  kế bằng lời người, KHÔNG kiểu số học "thêm một là…, thêm ba là…" (người dùng bác 30/9): "Chỉ cần thêm một
+  phiên phân phối nữa là xu hướng bắt đầu chịu áp lực."; đồng hồ (phiên cũ nhất hết hạn sau mấy phiên) để
+  nhãn trên chart và scene watch nói; (4) câu dẫn sang độ rộng, dạng câu hỏi: "Nhìn rộng ra thì sao?". KHÔNG
+  nói điều kiện nếu … thì ở đây.
 - **breadth** là nghịch lý (scene vẽ duy nhất, chấm sáng = mã trên đường trung bình 200 phiên): chỉ số ở
   trạng thái tăng mà phần lớn mã không đi cùng. Một câu kết dẫn: "vậy tiền đang ở đâu?".
 - **spike** gieo móc mở 2: "một mã có mặt ở cả hai bộ lọc — để cuối". Không nói tên mã ở đây.

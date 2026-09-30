@@ -340,7 +340,7 @@
         ]
       },
       "market": {
-        "job": "Chuyện hệ thống bắt đầu ở đây: giới thiệu các phiên phân phối còn hiệu lực, gọi tên trạng thái theo quy tắc, FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn khi nào, thêm mấy phiên là đổi trạng thái). Chưa nói điều kiện — để dành cho watch.",
+        "job": "Chuyện hệ thống bắt đầu ở đây: hôm nay có phải phiên phân phối không và đếm lại còn mấy phiên; trạng thái theo quy tắc, neo ở phiên FTD và đáy nhịp hồi; đồng hồ (phiên cũ nhất hết hạn sau mấy phiên) và hai ngưỡng kế (thêm mấy phiên là chịu áp lực, mấy phiên là điều chỉnh). Chưa nói điều kiện nếu … thì — để dành cho watch.",
         "act": "blue",
         "pace": "long",
         "shots": [
@@ -543,9 +543,10 @@
   },
   "voice": {
     "lexicon": {
-      "MACD": "em a cê đi"
+      "MACD": "em a cê đi",
+      "FTD": "ép tê đi"
     },
-    "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name)."
+    "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name). FTD → 'ép tê đi' added 2026-09-30 when the user asked the market scene to say 'phiên FTD' — the letter pattern of their MACD choice (Vietnamese letter names, D said 'đi'); NOT yet measured with Whisper: check the first take and change the reading here if it is misheard."
   },
   "extraChecks": [
     "scripts/review/checks.mjs"

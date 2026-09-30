@@ -22,7 +22,7 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Thứ Ba, hai mươi chín tháng chín. VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, mã giảm nhiều hơn tăng. Tiền đang chảy vào đâu? Cùng mình điểm lại thị trường và những mã đáng chú ý nhé.",
+      "narration": "Thứ Ba, hai mươi chín tháng chín. VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, một trăm năm mươi hai mã tăng, một trăm tám mươi sáu giảm. Tiền đang chảy vào đâu? Cùng mình điểm lại thị trường và mã đáng chú ý nhé.",
       "beats": [
         {
           "atSentence": 0,
@@ -157,13 +157,13 @@
       "eyebrow": "Trạng thái theo quy tắc",
       "act": "blue",
       "duration": 10.1,
-      "narration": "Ba phiên phân phối, giảm mà khối lượng tăng, nặng nhất mười một tháng chín. Theo quy tắc vẫn là xu hướng tăng xác nhận, neo ở phiên ba tháng tám. Phiên cũ nhất còn mười hai phiên; bốn là chịu áp lực, sáu điều chỉnh. Nhìn rộng ra.",
+      "narration": "Hôm nay không phải phiên phân phối, đếm lại còn ba phiên. Theo quy tắc, xu hướng tăng xác nhận vẫn giữ, neo ở phiên FTD ba tháng tám. Phiên cũ nhất hết hạn sau mười hai phiên. Thêm một là chịu áp lực, thêm ba là điều chỉnh. Nhìn rộng ra.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
           "line1": "3/25 phiên phân phối",
-          "line2": "Tổ chức đang bán ra",
+          "line2": "Hôm nay không thêm phiên",
           "accent": "red"
         },
         {
@@ -177,7 +177,7 @@
           "atSentence": 2,
           "at": 7.5,
           "line1": "11/9 hết hạn sau 12 phiên",
-          "line2": "Đủ bốn là chịu áp lực",
+          "line2": "Thêm một là chịu áp lực",
           "accent": "gold"
         }
       ],
@@ -1576,11 +1576,11 @@
   "unsupported": [
     {
       "id": "rd-260929-hook",
-      "why": "Câu đầu là ngày của phiên (session.weekday + session.dm, đọc thành chữ). Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; \"mã giảm nhiều hơn tăng\" vì HOSE 186 giảm / 152 tăng / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Câu cuối là lời mời theo khuôn người dùng (\"review\" → \"điểm lại\" cho TTS, \"&\" → \"và\"), thay lời hứa \"cuối video\". Không chữ hệ thống ở hook."
+      "why": "Câu đầu là ngày của phiên (session.weekday + session.dm, đọc thành chữ). Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; số mã tăng/giảm đọc thẳng: HOSE 152 tăng / 186 giảm / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Câu cuối là lời mời theo khuôn người dùng (\"review\" → \"điểm lại\" cho TTS, \"&\" → \"và\"), thay lời hứa \"cuối video\". Không chữ hệ thống ở hook."
     },
     {
       "id": "rd-260929-market",
-      "why": "Câu đầu giới thiệu ba phiên phân phối (hook không còn nhắc). \"Trong ba tuần\" là cách nói của đạo diễn (11/9, 23/9, 24/9); pack chỉ có cửa sổ 25 phiên. FTD đọc là \"phiên xác nhận\" (TTS chưa đo chữ FTD). \"Tổ chức đang bán ra\" là cách hiểu của quy tắc, không phải số đo. Chỉ hai số đọc ra lời (mười một tháng chín, mười hai phiên)."
+      "why": "Câu đầu nói hôm nay có phải phiên phân phối không (session.isDistribution = false: −0,17%, KL ×0,61) rồi đếm (3/25); không kể phiên nặng nhất (người dùng chốt 30/9). \"Phiên FTD\" viết FTD, lexicon đọc \"ép tê đi\" (chưa đo). Ngưỡng nói kiểu \"thêm một / thêm ba\" (toUnderPressure = 1, toCorrection = 3) để khớp scene watch. Hai số đọc ra lời: ba tháng tám, mười hai phiên (\"ba phiên\", \"một\", \"ba\" là đếm)."
     },
     {
       "id": "rd-260929-breadth",

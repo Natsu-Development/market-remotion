@@ -264,11 +264,11 @@ const buildMarket = () => {
       ],
     }),
     brief: [
-      `Beat 1 — ${F.distribution.count} phiên phân phối còn hiệu lực: ${dd.map((d) => `${d.dm} ${fmtPct(d.changePercent)} KL ×${vi(d.volumeRatio)} (còn ${d.sessionsLeft} phiên)`).join('; ') || 'không có'}. Phân phối = giảm từ ${F.rules.ddMaxChangePercent}% với KL cao hơn phiên trước.`,
+      `Beat 1 — mở bằng HÔM NAY: ${F.session.isDistribution ? 'LÀ phiên phân phối' : 'KHÔNG phải phiên phân phối'} (${fmtPct(F.session.changePercent)}, KL ×${vi(F.session.volumeRatio)}), rồi ĐẾM: còn ${F.distribution.count} phiên trong ${F.distribution.window} phiên (${dd.map((d) => `${d.dm} ${fmtPct(d.changePercent)} KL ×${vi(d.volumeRatio)}`).join('; ') || 'không có'}). Không kể phiên nặng nhất (người dùng chốt 30/9). Phân phối = giảm từ ${F.rules.ddMaxChangePercent}% với KL cao hơn phiên trước.`,
       ftdVisible
         ? `Beat 2 — neo của xu hướng: FTD ${ftd.dmy} (ngày ${ftd.day}, ${fmtPct(ftd.changePercent)}, KL ×${vi(ftd.volumeRatio)}) và đáy nhịp hồi ${vi(ftd.rallyLow)} (đường vàng).`
         : `Beat 2 — ${holdName.toLowerCase()} ${holdLow != null ? vi(holdLow) : '—'}.`,
-      `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; ${R.distribution.underPressureAt} phiên là ${R.status.UNDER_PRESSURE.vi.toLowerCase()}, ${R.distribution.correctionAt} phiên là ${R.status.CORRECTION.vi.toLowerCase()}.`,
+      `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; nói ngưỡng theo kiểu "thêm ${F.distribution.toUnderPressure} là ${R.status.UNDER_PRESSURE.short.toLowerCase()}, thêm ${F.distribution.toCorrection} là ${R.status.CORRECTION.short.toLowerCase()}" (khớp scene watch). Gọi "phiên FTD" (lexicon đọc "ép tê đi").`,
       'Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). Kết bằng câu dẫn sang độ rộng thị trường.',
     ],
   });

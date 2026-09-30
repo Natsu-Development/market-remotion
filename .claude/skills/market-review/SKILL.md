@@ -51,6 +51,7 @@ node scripts/review/pull.mjs            # phiên đã đóng gần nhất
 ## 2. Trạng thái và fact pack
 
 ```bash
+node scripts/review/breadth.mjs                          # đường độ rộng (GET /analyze ~900 mã, ~1 phút, cache theo phiên)
 node scripts/review/facts.mjs --format=daily --print     # -> content/review-daily.facts.json
 node scripts/review/backtest.mjs                         # FTD theo ngưỡng, 13 năm
 node --test scripts/review/lib/market-state.test.mjs     # luật + trạng thái 29/9 đã chốt

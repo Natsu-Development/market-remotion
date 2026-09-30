@@ -175,6 +175,27 @@ const breadth = (() => {
   b.aboveEma50Percent = round((100 * b.aboveEma50) / (b.withEma50 ?? b.universe), 1);
   b.upPercent = round((100 * b.up) / b.universe, 1);
   b.downPercent = round((100 * b.down) / b.universe, 1);
+  // The breadth LINE (scripts/review/breadth.mjs): the share above the 200-session average per
+  // session, recomputed from each stock's closes, with the index close of the same session.
+  const hist = tryJson('content/review/breadth.json');
+  if (hist?.rows?.length && hist.asOf <= date) {
+    const closeOf = new Map(bars.map((x) => [x.t, x.c]));
+    const rows = hist.rows.filter((r) => r.t <= date && closeOf.has(r.t)).slice(-60)
+      .map((r) => ({t: r.t, dm: dm(r.t), percent: r.percent, above: r.above, with: r.with, indexClose: round(closeOf.get(r.t), 2)}));
+    if (rows.length >= 10) {
+      const first = rows[0], last = rows[rows.length - 1];
+      const hiRow = rows.reduce((m, r) => (r.percent > m.percent ? r : m), rows[0]);
+      b.history = rows;
+      b.line = {
+        from: first.t, fromDm: first.dm, to: last.t, sessions: rows.length,
+        first: first.percent, last: last.percent, changePoints: round(last.percent - first.percent, 1),
+        peak: hiRow.percent, peakDm: hiRow.dm,
+        indexFirst: first.indexClose, indexLast: last.indexClose, indexChangePercent: round(pct(last.indexClose, first.indexClose), 1),
+        source: hist.source, symbols: hist.fetched,
+        vsScreener: round(last.percent - b.aboveSma200Percent, 1),
+      };
+    }
+  }
   return b;
 })();
 
@@ -256,7 +277,7 @@ pack.anchors = [
   ...(state.lastFtd ? [{label: 'FTD gần nhất', value: `${state.lastFtd.dmy} · ngày ${state.lastFtd.day} · +${v(state.lastFtd.changePercent)}% · KL ×${v(state.lastFtd.volumeRatio)} · đáy nhịp hồi ${v(state.lastFtd.rallyLow)}${state.lastFtd.ended ? ` · kết thúc ${state.lastFtd.ended.dm} (${state.lastFtd.ended.why})` : ''}`, path: 'state.lastFtd'}] : []),
   {label: `Volume spike (${spike.count} mã)`, value: spike.top.map((s) => `${s.symbol} ×${v(s.volumeRatio)} ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · '), path: 'screener.spike.top'},
   {label: `RS Strong ∩ Uptrend (${leaders.count} mã)`, value: leaders.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · '), path: 'screener.leaders.top'},
-  {label: 'Độ rộng', value: `${breadth.aboveSma200}/${breadth.withSma200 ?? breadth.universe} mã trên SMA200 (${v(breadth.aboveSma200Percent, 1)}%) · ${breadth.up} tăng · ${breadth.down} giảm`, path: 'screener.breadth'},
+  {label: 'Độ rộng', value: `${breadth.aboveSma200}/${breadth.withSma200 ?? breadth.universe} mã trên SMA200 (${v(breadth.aboveSma200Percent, 1)}%) · ${breadth.up} tăng · ${breadth.down} giảm${breadth.line ? ` · đường ${breadth.line.sessions} phiên: ${v(breadth.line.first, 1)}% (${breadth.line.fromDm}) → ${v(breadth.line.last, 1)}% trong khi chỉ số ${breadth.line.indexChangePercent >= 0 ? '+' : ''}${v(breadth.line.indexChangePercent, 1)}%` : ''}`, path: 'screener.breadth'},
   {label: 'Bộ lọc terminal', value: `cache ${pack.source.screenerCachedIct} ICT · ${snap.universe} mã · volume_vs_sma đọc là ${snap.volumeVsSmaUnit === 'percent' ? '% trên TB20' : 'bội số TB20'}`, path: 'screener'},
   {label: `Backtest FTD (${bars.length} phiên)`, value: bt.map((r) => `+${String(r.threshold).replace('.', ',')}%: ${r.ftds} FTD, ${r.higherPercent}% cao hơn sau ${R.followThrough.backtestForwardSessions} phiên`).join(' · '), path: 'backtest.rows'},
   ...(weekly ? [{label: `Tuần ${weekly.fromDm} → ${session.dm}`, value: `${weekly.changePercent >= 0 ? '+' : ''}${v(weekly.changePercent)}% · KL/phiên ×${v(weekly.volumeVsPriorWeek)} tuần trước · ${weekly.distributionDays.length} phiên phân phối`, path: 'weekly'}] : []),

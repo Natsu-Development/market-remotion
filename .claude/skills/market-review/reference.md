@@ -15,6 +15,7 @@ Tài liệu phụ của [SKILL.md](SKILL.md). Mọi ngưỡng nằm ở [rules.j
 | `content/review-<format>.json` | `scaffold.mjs` → người viết → `merge.mjs` → `voiceover.mjs` | reel; đăng ký ở `src/Root.tsx` |
 | `brief/review-<format>.md` | `scaffold.mjs` | ý đồ từng scene, trang duyệt đọc nó |
 | `content/review/archive/<ngày>-<format>.json` | `scaffold.mjs` | bản trước, chép trước khi bị thay |
+| `content/review/breadth.json` | `breadth.mjs` | độ rộng theo phiên: `{t, above, with, percent}` — mã trên SMA200 / mã có SMA200, tính lại từ `/analyze` |
 | `.review-cache/` (gitignore) | `pull.mjs`, `shots.mjs`, người viết | toàn bộ 1466 mã của phiên, file tạm của người viết |
 
 `content/review-*.json` nằm phẳng trong `content/` vì `scripts/lib/reels.mjs` chỉ nhận import
@@ -103,7 +104,7 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 |---|---|---|---|
 | hook | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối + nhãn "N phiên phân phối"; máy cận nhịp cuối | mũi tên XANH LÁ chỉ LÊN đáy nến FTD + nhãn, vòng vàng ở nến hôm nay; máy lùi ra | — |
 | market | mũi tên đỏ, nhãn "N/25 phiên phân phối" (tắt ở beat 3), nhãn phiên nặng nhất | mũi tên xanh lá FTD + nhãn, hline vàng đáy nhịp hồi | nhãn "d/m hết hạn sau N phiên" ở phiên cũ nhất, nhãn "4 phiên → chịu áp lực · 6 phiên → điều chỉnh"; máy cận |
-| breadth | `pictogram` chấm (`glyph: dot`), lưới chọn bằng cách mô phỏng công thức rải của verify, chấm sáng = mã trên SMA200 | — | — |
+| breadth | `lines`: pane trên = VN-INDEX đóng cửa (vẽ ở beat 1), pane dưới = % mã trên SMA200 (vẽ ở beat 2), mốc FTD; lịch sử từ `scripts/review/breadth.mjs` (GET /analyze từng mã có SMA200, cache `.review-cache/analyze-all/<ngày>/`, ~1 phút cho ~900 mã). Không có lịch sử thì rơi về `pictogram` chấm | (đường dưới) | — |
 | spike / leaders | hộp quanh ba dòng; nhãn tóm tắt đè lên nút Columns/Export | hộp từng ô VOL/SMA / RS 1M, máy cận | — |
 | leader #3/#2/#1 | nhãn "MÃ · RS 1M … · ±x%", hline EMA50, và MỘT chi tiết riêng: hline đỉnh 52 tuần "Đỉnh 52T … · −x%" (mã còn xa / sát đỉnh) hoặc hộp trên cột khối lượng hôm nay "KL ×…" (mã cũng ở Volume spike) | mũi tên vào nến cuối "±x% trên EMA50", máy cận | — |
 | watch | hline vàng "Thủng <đáy nhịp hồi> → FTD thất bại", hline xanh "Chạm <mức hết hạn thấp nhất> → phiên d/m hết hạn"; máy tilt từ đáy lên | vòng vàng nến hôm nay, nhãn "Thêm N phiên phân phối → <trạng thái kế>", "d/m hết hạn sau N phiên"; máy ĐỨNG YÊN (payoff) | — |

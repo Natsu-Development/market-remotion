@@ -294,6 +294,28 @@ const pictogramGrid = (pct) => {
 const buildBreadth = () => {
   const B = F.screener.breadth;
   if (B?.aboveSma200Percent == null) return;
+  // With a breadth history (scripts/review/breadth.mjs) the scene is a two-pane line chart — index
+  // above, share above SMA200 below (user, 2026-09-30: "better visual with chart line graph"); the
+  // dot grid stays as the fallback for a session without the history.
+  if (B.line && B.history?.length >= 10) {
+    const L = B.line;
+    const events = ftd && B.history.some((h) => h.t === ftd.date) ? [{t: ftd.date, label: `FTD ${ftd.dm}`, accent: 'green'}] : [];
+    push('breadth', {
+      beats: todoBeats(2),
+      visual: {
+        type: 'lines',
+        top: {label: 'VN-INDEX · ĐÓNG CỬA', points: B.history.map((h) => [h.t, h.indexClose]), unit: 'points'},
+        bottom: {label: '% MÃ TRÊN SMA200', points: B.history.map((h) => [h.t, h.percent]), accent: 'green', unit: 'percent'},
+        events,
+      },
+      brief: [
+        `NGHỊCH LÝ trên hai đường cùng trục thời gian (${L.sessions} phiên, ${L.fromDm} → ${F.session.dm}): chỉ số ${L.indexChangePercent >= 0 ? 'tăng' : 'giảm'} ${fmtPct(L.indexChangePercent, 1)} (${vi(L.indexFirst)} → ${vi(L.indexLast)}), còn tỉ lệ mã trên đường trung bình 200 phiên đi từ ${vi(L.first, 1)}% xuống ${vi(L.last, 1)}% (đỉnh ${vi(L.peak, 1)}% ngày ${L.peakDm}).`,
+        `Beat 1 = đường chỉ số vẽ ra (câu "chỉ số thì đi lên"); beat 2 = đường độ rộng vẽ ra (câu "nhưng …"). Headline ghi ${Math.round(L.last)}% (số nguyên từ pack: breadth.line.last = ${L.last}).`,
+        `Screener hôm nay đếm ${B.aboveSma200}/${B.withSma200 ?? B.universe} = ${vi(B.aboveSma200Percent, 1)}% (lệch ${fmtPct(L.vsScreener, 1)} so với đường — cách tính SMA khác); hôm nay ${B.up} mã tăng, ${B.down} mã giảm. Kết bằng câu dẫn: vậy tiền đang ở đâu?`,
+      ],
+    });
+    return;
+  }
   const g = pictogramGrid(B.aboveSma200Percent);
   push('breadth', {
     beats: todoBeats(1),

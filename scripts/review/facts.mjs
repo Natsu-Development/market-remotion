@@ -81,7 +81,8 @@ const session = {
     // FireAnt's own count for the session (▲ ● ▼ next to VN-INDEX on fireant.vn/thi-truong) leads
     // when pull.mjs saw the page showing this session's close; the terminal's count is the fallback.
     const fa = snap.fireant?.matchesSession ? snap.fireant.exchanges?.HSX : null;
-    const h = fa ? {exchange: 'HSX', up: fa.up, down: fa.down, flat: fa.flat, total: fa.total, source: 'fireant.vn/thi-truong'} : term;
+    // FireAnt labels the exchange HSX; the screen says HOSE (and verify's ticker scan knows HOSE, not HSX).
+    const h = fa ? {exchange: 'HOSE', up: fa.up, down: fa.down, flat: fa.flat, total: fa.total, source: 'fireant.vn/thi-truong'} : term;
     // The words the hook may use for the day, decided by the numbers, not by mood.
     const c = last.c / prev.c - 1;
     const indexWord = Math.abs(c) < 0.003 ? 'đi ngang' : c > 0.01 ? 'tăng mạnh' : c > 0 ? 'tăng' : c < -0.01 ? 'giảm mạnh' : 'giảm';
@@ -219,7 +220,9 @@ const leaders = {
   filters: [...new Set(leaderFrom.flatMap((k) => R.screener.scenes[k]?.filters ?? []))],
   count: (snap.members.leaders ?? []).length,
   top: (snap.picks.leaders ?? []).map((s, i) => leaderDetail(s, i + 1)),
-  alsoSpiking: (snap.picks.leaders ?? []).filter((s) => snap.members.spike.includes(s)),
+  // Every name in both leader filters (not only the three picks) that is also in the spike filter — the
+  // material of loop 2 (spike → leader #1); scaffold's hookTwo picks the branch the day supports.
+  alsoSpiking: (snap.members.leaders ?? snap.picks.leaders ?? []).filter((s) => snap.members.spike.includes(s)),
 };
 if (snap.leaders && [].concat(snap.leaders.from).join() !== leaderFrom.join()) {
   die(`the ${date} snapshot ranked its leaders from ${[].concat(snap.leaders.from).join(' ∩ ')}, rules.screener.leaders.from now says ${leaderFrom.join(' ∩ ')} — run node scripts/review/pull.mjs --rebuild first`);

@@ -91,9 +91,12 @@ npm run review-page -- DailyReview --out=out/review/draft-daily
 
 Scene theo `rules.formats.daily.roles` (người dùng yêu cầu tối ưu giữ người xem 2026-09-29, theo arc
 hook_payoff + đếm ngược của vox-director): hook (ngày, điểm số, mã tăng/giảm, lời mời) → market (bối cảnh, đồng hồ) →
-breadth (nghịch lý độ rộng, chart hai đường) → spike (bảng `movers`, gieo móc "mã đầu bảng cũng dẫn dắt") → rs (bảng
-RS Strong, MỘT MÌNH) → uptrend (bảng Uptrend, MỘT MÌNH, kết bằng số mã qua cả hai) → leader #3 → #2 → #1 (ba mã có
-mặt ở cả RS Strong lẫn Uptrend theo `rules.screener.leaders`, mỗi mã một chi tiết riêng, #1 trả móc) → watch (payoff,
+breadth (nghịch lý độ rộng, chart hai đường) → spike (bảng `movers`, gieo móc nối sang nhóm dẫn dắt — câu chữ theo sự
+thật của phiên: "mã đầu bảng cũng dẫn dắt" khi đúng, hay "mã rơi sâu nhất vẫn trong nhóm dẫn dắt" như 30/9; scaffold ghi
+nhánh đúng vào `_brief`) → rs (bảng RS Strong, MỘT MÌNH) → uptrend (bảng Uptrend, MỘT MÌNH, kết bằng số mã qua cả hai) →
+leader #3 → #2 → #1 (ba mã có mặt ở cả RS Strong lẫn Uptrend theo `rules.screener.leaders`, xếp theo RS 1M — **#1 là RS 1M
+cao nhất và chiếu sau cùng** (sửa 2026-09-30; bản 29/9 đánh số ngược, không lộ vì ba mã cùng 94), mỗi mã một chi tiết
+riêng, #1 trả móc) → watch (payoff,
 máy đứng yên, câu nếu … thì) → outro — 11 scene, ~87 giây. Bản tuần thêm `week` sau hook. Người dùng tách RS Strong và
 Uptrend thành hai scene 2026-09-30 ("not union it first"): mỗi scene bảng là MỘT bộ lọc đã lưu (`rules.screener.scenes`),
 giao của hai bộ lọc chỉ còn là nguồn của đếm ngược, không phải một scene.

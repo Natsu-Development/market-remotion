@@ -318,9 +318,10 @@
     ],
     "maskColor": "#161921"
   },
-  "footer": "Nguồn: SSI · zionle.io.vn · FireAnt",
+  "footer": "Radar Chứng Khoán",
+  "_footer": "The line under every scene's headline is the user's channel name, not a source line (user 2026-09-29, CLAUDE.md; until 2026-09-30 this reel still said 'Nguồn: SSI · zionle.io.vn · FireAnt'). The photos keep their own credit stamp (ẢNH · FIREANT.VN / ZIONLE.IO.VN).",
   "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
-  "brand": "Kênh của bạn",
+  "brand": "Radar Chứng Khoán",
   "narration": {
     "language": "vi",
     "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
@@ -386,7 +387,7 @@
         "pace": "short"
       },
       "spike": {
-        "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, mã tăng mạnh nhất và giảm mạnh nhất trên khối lượng đột biến. Gieo móc: một mã đầu bảng này cũng là mã dẫn dắt — để cuối, không nói tên.",
+        "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, mã tăng mạnh nhất và giảm mạnh nhất trên khối lượng đột biến. Gieo móc nối sang nhóm dẫn dắt theo sự thật của phiên (scaffold ghi nhánh đúng vào _brief từ leaders.alsoSpiking): mã đầu bảng cũng là mã dẫn dắt / mã rơi sâu nhất vẫn trong nhóm dẫn dắt / không mã nào — để cuối, không nói tên, không gieo móc giả.",
         "act": "amber",
         "pace": "mid",
         "shots": [
@@ -422,7 +423,7 @@
         ]
       },
       "leader": {
-        "job": "Một mã dẫn dắt (có mặt ở cả RS Strong lẫn Uptrend), đếm ngược #3 → #2 → #1: cùng khuôn câu (vì sao qua bộ lọc → chi tiết riêng → mức terminal đánh dấu), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). #1 trả móc của spike: mã đầu bảng khối lượng cũng là mã dẫn dắt.",
+        "job": "Một mã dẫn dắt (có mặt ở cả RS Strong lẫn Uptrend), đếm ngược #3 → #2 → #1 — #1 là RS 1M cao nhất và chiếu sau cùng: cùng khuôn câu (vì sao qua bộ lọc → chi tiết riêng → mức terminal đánh dấu), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). #1 trả móc của spike theo nhánh scaffold đã ghi (mã đầu bảng khối lượng cũng là mã dẫn dắt, hay chuyện của nhóm dẫn dắt bị bán/giữ đường trung bình).",
         "act": "amber",
         "pace": "mid",
         "shots": [
@@ -593,7 +594,8 @@
   "voice": {
     "lexicon": {
       "MACD": "em a cê đi",
-      "FTD": "ép tê đi"
+      "FTD": "ép tê đi",
+      "Radar": "ra đa"
     },
     "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name). FTD → 'ép tê đi' added 2026-09-30 when the user asked the market scene to say 'phiên FTD' — the letter pattern of their MACD choice (Vietnamese letter names, D said 'đi'); NOT yet measured with Whisper: check the first take and change the reading here if it is misheard."
   },

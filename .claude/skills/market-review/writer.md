@@ -101,8 +101,12 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   nói điều kiện nếu … thì ở đây.
 - **breadth** là nghịch lý (scene vẽ duy nhất, chấm sáng = mã trên đường trung bình 200 phiên): chỉ số ở
   trạng thái tăng mà phần lớn mã không đi cùng. Một câu kết dẫn: "vậy tiền đang ở đâu?".
-- **spike** gieo móc mở 2: "mã đầu bảng này cũng là mã dẫn dắt — để cuối". Không nói tên mã ở đây, và
-  không nói "cả hai bộ lọc" (reel có ba bộ lọc).
+- **spike** gieo móc mở 2 nối bảng khối lượng với nhóm dẫn dắt, CÂU CHỮ THEO SỰ THẬT CỦA PHIÊN (`_brief` của
+  scaffold ghi nhánh đúng): "mã đầu bảng này cũng là mã dẫn dắt — để cuối" khi mã đầu cột tăng qua cả hai bộ
+  lọc dẫn dắt; "mã rơi sâu nhất bảng vẫn nằm trong nhóm dẫn dắt — nhóm ấy hôm nay ra sao, để cuối" khi mã
+  đó ở cột giảm (30/9: PVT); không có mã nào thì nói thẳng, không gieo móc giả. Không nói tên mã ở đây, và
+  không nói "cả hai bộ lọc" về bảng spike (reel có ba bộ lọc). Mỗi dòng của bảng có `filters[]` — đó là
+  nguồn của câu này.
 - **rs** rồi **uptrend**: MỖI BỘ LỌC MỘT SCENE, không gộp (người dùng chốt 2026-09-30: "separate the filter …
   not union it first"). `rs` kể bộ lọc RS Strong đếm được bao nhiêu mã và ba mã đứng đầu theo sức mạnh giá
   (`screener.rs`); `uptrend` kể bộ lọc Uptrend — bao nhiêu mã đang trong xu hướng tăng, ba mã đứng đầu
@@ -130,8 +134,12 @@ dưới thẻ outro). Bản tổng kết phiên có thể hứa "mỗi phiên"/"
 
 | Trường | Chữ gợi ý |
 |---|---|
-| `narration` | Thấy hữu ích thì thả tim, chia sẻ cho bạn bè và theo dõi kênh giúp mình nhé. Mỗi phiên đóng cửa, mình cập nhật ngay. |
+| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Radar Chứng Khoán để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây. |
 | headline | `Thả tim, chia sẻ, theo dõi` / `Cập nhật sau mỗi phiên` |
+
+Tên kênh là **Radar Chứng Khoán** (người dùng cho tên 2026-09-29; `rules.brand`, TTS đọc "Radar" là `ra đa` qua
+`voice.lexicon`). Câu thả tim · chia sẻ · theo dõi + "để cập nhật sớm nhất những biến động của thị trường" là câu người
+dùng đã duyệt ở market-video — giữ nguyên, chỉ đổi câu hứa theo bản (phiên/tuần).
 
 ## Trả về
 
@@ -157,7 +165,7 @@ Kèm `_script.md`: bài nói liền mạch để đạo diễn đọc như ngư�
 - [ ] Mỗi scene ≤ 2 số đọc ra lời; không scene nào mở bằng con số; câu dài ngắn xen kẽ.
 - [ ] Hook nêu trạng thái theo quy tắc trong câu đầu hoặc headline đầu.
 - [ ] `watch` có "nếu … thì" lấy từ `watch` của fact pack; `market` không nói điều kiện; không câu nào gọi giá.
-- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); điểm số + % trước, hai chữ theo `breadthToday`, câu hỏi, lời mời "cùng mình điểm lại…". `market` gọi tên trạng thái. `spike` gieo "mã đầu bảng cũng là mã dẫn dắt"; leader #1 trả nó.
+- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); điểm số + % trước, hai chữ theo `breadthToday`, câu hỏi, lời mời "cùng mình điểm lại…". `market` gọi tên trạng thái. `spike` gieo móc nối sang nhóm dẫn dắt theo nhánh đúng của phiên; leader #1 trả nó.
 - [ ] `rs` và `uptrend` là hai bộ lọc RIÊNG, không câu nào gộp chúng thành một; `uptrend` kết bằng số mã qua cả hai (`screener.leaders.count`) và "đếm ngược từ ba".
 - [ ] Ba scene leader cùng khuôn, mỗi mã một chi tiết riêng; eyebrow đếm ngược #3 → #2 → #1.
 - [ ] Mọi chữ số trên màn hình có trong fact pack đúng độ chính xác; mã trên màn hình là mã trong picks.

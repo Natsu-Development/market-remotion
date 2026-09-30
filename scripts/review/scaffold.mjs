@@ -184,8 +184,8 @@ const maskOf = (m) => (m?.length ? {masks: m, maskColor: R.shots.maskColor} : {}
 //   rs       the RS Strong table on its own — one saved filter per scene (user 2026-09-30: "separate
 //            the filter: Uptrend and RS Strong, not union it first")
 //   uptrend  the Uptrend table on its own; it closes on how many names are in both and opens the countdown
-//   leader   #3 → #2 → #1 — the names in every rules.screener.leaders.from scene, ranked by RS 1M —
-//            one distinct detail each; #1 pays loop 2
+//   leader   #3 → #2 → #1 — the names in every rules.screener.leaders.from scene, ranked by RS 1M; #1 is
+//            the highest RS 1M and comes last — one distinct detail each; #1 pays loop 2
 //   watch    the payoff, static camera: the levels and the count that change the state tomorrow
 //   outro    the button
 // The order is rules.formats.<format>.roles; camera moves alternate between neighbouring shots.
@@ -352,9 +352,25 @@ const buildMovers = () => {
     brief: [
       `Bộ lọc "${S.filter}": ${S.count} mã (${S.up} tăng, ${S.down} giảm${S.flat ? `, ${S.flat} đứng giá` : ''}). Beat 1 = cột TĂNG (giảm dần theo %): ${S.gainers.map((x) => `${x.symbol} ${fmtPct(x.changePercent)} KL ×${vi(x.volumeRatio)}`).join('; ')}.`,
       `Beat 2 = cột GIẢM (tăng dần theo %, mã rơi sâu nhất trên đầu): ${S.losers.map((x) => `${x.symbol} ${fmtPct(x.changePercent)} KL ×${vi(x.volumeRatio)}`).join('; ')}. Khối lượng lớn khi giảm là bán ra.`,
-      `Đọc tên công ty, không đọc mã; tối đa hai số đọc ra lời — bảng gánh phần còn lại. Móc 2: mã đầu cột tăng${F.screener.leaders.alsoSpiking.includes(S.gainers[0]?.symbol) ? ` (${S.gainers[0].symbol})` : ''} cũng là mã dẫn dắt — để cuối, không nói tên.`,
+      `Đọc tên công ty, không đọc mã; tối đa hai số đọc ra lời — bảng gánh phần còn lại. ${hookTwo(S)}`,
     ],
   });
+};
+
+/**
+ * Loop 2 (spike → leader #1) is written from the day's facts, never from a fixed sentence: on 29/9 the top
+ * gainer (PVT) was also a leader, on 30/9 no leader topped the board but the deepest loser (PVT) was still
+ * one of the names in both leader filters. `leaders.alsoSpiking` = leader picks that are in the spike filter.
+ */
+const hookTwo = (S) => {
+  const also = F.screener.leaders.alsoSpiking ?? [];
+  const top3 = (F.screener.leaders.top ?? []).map((x) => x.symbol);
+  const gainer = S.gainers[0]?.symbol;
+  const loser = S.losers[0]?.symbol;
+  if (gainer && also.includes(gainer)) return `Móc 2: mã đầu cột tăng (${gainer}) cũng là mã dẫn dắt${top3.includes(gainer) ? ' — trong ba mã đếm ngược' : ''} — để cuối, không nói tên.`;
+  if (loser && also.includes(loser)) return `Móc 2: mã rơi sâu nhất cột giảm (${loser}) VẪN nằm trong nhóm dẫn dắt (qua cả hai bộ lọc dẫn dắt) — nhóm dẫn dắt bị bán; gieo "nhóm ấy hôm nay ra sao, để cuối", không nói tên. KHÔNG viết "mã đầu bảng cũng là mã dẫn dắt" — sai với phiên này.`;
+  if (also.length) return `Móc 2: ${also.join(', ')} trong bảng này cũng thuộc nhóm dẫn dắt (không đứng đầu cột nào) — gieo nhẹ "có mã dẫn dắt trong bảng, để cuối", không nói tên.`;
+  return 'Móc 2: hôm nay KHÔNG mã nào trong bảng thuộc nhóm dẫn dắt — nói thẳng (khối lượng đột biến không nằm ở nhóm dẫn dắt), không gieo móc giả.';
 };
 
 // spike (photo fallback), rs and uptrend — the terminal's own tables, ONE saved filter per scene
@@ -460,7 +476,7 @@ const buildLeader = (L, rank) => {
     }),
     brief: [
       `#${rank} — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}; trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}. Qua bộ lọc hôm nay: ${(L.filters ?? []).join(' · ') || '—'} (dẫn dắt = có mặt ở cả ${(F.screener.leaders?.filters ?? []).join(' lẫn ')}).`,
-      `Chi tiết riêng của mã này: ${detail || 'không có'}.${rank === 1 && spiking ? ' Đây là mã TRẢ MÓC 2 của scene spike: mã đầu bảng khối lượng cũng là mã dẫn dắt (đừng nói "cả hai bộ lọc" — reel có ba).' : ''}`,
+      `Chi tiết riêng của mã này: ${detail || 'không có'}.${rank === 1 ? (spiking ? ' Đây là mã TRẢ MÓC 2 của scene spike: mã đầu bảng khối lượng cũng là mã dẫn dắt (đừng nói "cả hai bộ lọc" — reel có ba).' : ` TRẢ MÓC 2 ở đây${(F.screener.leaders.alsoSpiking ?? []).length ? ` bằng chuyện của nhóm: ${F.screener.leaders.alsoSpiking.join(', ')} của bảng khối lượng thuộc nhóm dẫn dắt nhưng không trong ba mã đếm ngược — kết bằng nhóm bị bán/giữ được đường trung bình` : ' bằng một câu kết về nhóm dẫn dắt (không mã nào của nhóm đột biến khối lượng hôm nay)'}.`) : ''}`,
       L.signal ? `Tín hiệu mới nhất trên terminal: ${L.signal.type} ở ${vi(L.signal.price)} ngày ${L.signal.dm} — chỉ nhắc nếu khớp với chart đang chiếu.` : 'Terminal chưa có tín hiệu cho mã này.',
       'Cùng khuôn câu với hai scene leader kia; đọc tên công ty thay cho mã (TTS đọc mã chữ cái thất thường); mã giữ trên màn hình.',
     ],
@@ -528,7 +544,9 @@ const leaderTotal = fmt.roles.filter((r) => r === 'leader').length;
 let leaderIdx = 0;
 for (const role of fmt.roles) {
   if (role === 'leader') {
-    const L = F.screener.leaders.top[leaderIdx];
+    // top[] is ranked by RS 1M, strongest first. The countdown shows the weakest of the three first
+    // and the strongest last, so scene k takes top[total - 1 - k] and wears rank total - k.
+    const L = F.screener.leaders.top[leaderTotal - 1 - leaderIdx];
     if (L) buildLeader(L, leaderTotal - leaderIdx);
     leaderIdx++;
     continue;

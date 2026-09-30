@@ -115,8 +115,9 @@ export default function reviewChecks(reel, {root, rules: R}) {
       }
     }
     const leaders = reel.scenes.filter((s) => s.role === 'leader');
+    // The countdown shows the weakest of the picks first and #1 (top[0], the highest RS 1M) last.
     for (const [k, s] of leaders.entries()) {
-      const want = F.screener.leaders?.top?.[k]?.symbol;
+      const want = F.screener.leaders?.top?.[leaders.length - 1 - k]?.symbol;
       if (want && !String(s.visual?.src).includes(`/${want.toLowerCase()}-terminal.png`)) bad.push(`${s.id}: leader ${k + 1} is ${want} but the photo is ${s.visual?.src}`);
     }
     for (const scene of tableScenes) {

@@ -47,7 +47,7 @@
     "isDistribution": false,
     "isFtd": false,
     "breadthToday": {
-      "exchange": "HOSE",
+      "exchange": "HSX",
       "up": 129,
       "down": 178,
       "flat": 58,
@@ -1062,11 +1062,7 @@
           }
         }
       ],
-      "alsoSpiking": [
-        "PVT",
-        "DGW",
-        "MSB"
-      ]
+      "alsoSpiking": []
     }
   },
   "backtest": {

@@ -6,9 +6,9 @@
   "reconstructed": false,
   "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400",
   "from": "2013-01-02",
-  "to": "2026-09-29",
-  "bars": 3404,
-  "fetchedAt": "2026-09-29T11:21:54.179Z",
+  "to": "2026-09-30",
+  "bars": 3405,
+  "fetchedAt": "2026-09-30T08:20:21.425Z",
   "droppedIntraday": null,
   "volumeUnit": "matched shares per session"
 }

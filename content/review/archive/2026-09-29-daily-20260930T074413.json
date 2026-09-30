@@ -864,105 +864,111 @@
       "eyebrow": "Bộ lọc Volume spike",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Bộ lọc khối lượng đột biến có mười sáu mã, mười tăng, sáu giảm. Dẫn đầu là Vận tải Dầu khí; phía giảm, No Va và Lộc Phát rơi sâu nhất trên khối lượng lớn, là bán ra. Mã đầu bảng cũng là mã dẫn dắt, để cuối.",
+      "narration": "Bộ lọc khối lượng đột biến có mười sáu mã. Hai mã dầu khí đứng đầu đều tăng, Lộc Phát giảm, khối lượng ấy là bán ra. Một mã đầu bảng cũng là mã dẫn dắt, để cuối.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
           "line1": "16 mã khối lượng đột biến",
-          "line2": "Mười tăng, sáu giảm",
-          "accent": "gold"
+          "line2": "Dầu khí đứng đầu, đều tăng",
+          "accent": "green"
         },
         {
           "atSentence": 1,
-          "at": 4,
-          "line1": "NVL −6,79% · LPB −4,40%",
-          "line2": "Rơi trên khối lượng lớn",
+          "at": 3.75,
+          "line1": "LPB −4,4%, KL ×1,70",
+          "line2": "Là bán ra, không phải mua",
           "accent": "red"
         }
       ],
       "visual": {
-        "type": "movers",
-        "caption": "KHỐI LƯỢNG ĐỘT BIẾN · 16 MÃ",
-        "left": {
-          "title": "TĂNG MẠNH NHẤT",
-          "accent": "green",
-          "rows": [
-            {
-              "symbol": "PVT",
-              "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
-              "changePercent": 6.4,
-              "volumeRatio": 2.44
-            },
-            {
-              "symbol": "AAS",
-              "name": "Công ty cổ phần Chứng khoán SmartInvest",
-              "changePercent": 4.26,
-              "volumeRatio": 1.15
-            },
-            {
-              "symbol": "GVR",
-              "name": "Tập đoàn Công nghiệp Cao su Việt Nam – Công ty cổ phần",
-              "changePercent": 3.42,
-              "volumeRatio": 1.64
-            },
-            {
-              "symbol": "DIG",
-              "name": "Tổng Công ty Cổ phần Đầu tư Phát triển Xây dựng",
-              "changePercent": 3.25,
-              "volumeRatio": 1.07
-            },
-            {
-              "symbol": "HCM",
-              "name": "Công ty Cổ phần Chứng khoán Thành phố Hồ Chí Minh",
-              "changePercent": 2.3,
-              "volumeRatio": 1.09
-            }
-          ]
+        "type": "image",
+        "src": "shots/review/2026-09-29/spike.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.122,
+          "y": 0.1278,
+          "w": 0.8377,
+          "h": 0.4417
         },
-        "right": {
-          "title": "GIẢM MẠNH NHẤT",
-          "accent": "red",
-          "rows": [
-            {
-              "symbol": "NVL",
-              "name": "Công ty Cổ phần Tập đoàn Đầu tư Địa ốc No Va",
-              "changePercent": -6.79,
-              "volumeRatio": 1.67
-            },
-            {
-              "symbol": "LPB",
-              "name": "Ngân hàng Thương mại cổ phần Lộc Phát Việt Nam",
-              "changePercent": -4.4,
-              "volumeRatio": 1.7
-            },
-            {
-              "symbol": "MBS",
-              "name": "Công ty Cổ phần Chứng khoán MB",
-              "changePercent": -1.27,
-              "volumeRatio": 1.1
-            },
-            {
-              "symbol": "CEO",
-              "name": "Công ty cổ phần Tập đoàn C.E.O",
-              "changePercent": -0.91,
-              "volumeRatio": 1.14
-            },
-            {
-              "symbol": "MSB",
-              "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
-              "changePercent": -0.71,
-              "volumeRatio": 1.2
-            }
-          ]
-        }
+        "annotations": [
+          {
+            "kind": "box",
+            "x": 0.1337,
+            "y": 0.301,
+            "w": 0.8167,
+            "h": 0.1808,
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.6478,
+            "y": 0.303,
+            "w": 0.1274,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.6478,
+            "y": 0.3635,
+            "w": 0.1274,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.6478,
+            "y": 0.4233,
+            "w": 0.1274,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.9369,
+            "y": 0.2242,
+            "text": "Top 3: KL ×2,44 · ×2,05 · ×1,70",
+            "accent": "gold",
+            "beat": 0,
+            "anchor": "end"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.5409,
+            "y": 0.3487,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.6315,
+            "y": 0.3914,
+            "zoom": 1.8,
+            "move": "pull_out"
+          }
+        ]
       },
       "citedFacts": [
         "screener.spike.count",
-        "screener.spike.up",
-        "screener.spike.down",
-        "screener.spike.gainers",
-        "screener.spike.losers"
+        "screener.spike.top[0].symbol",
+        "screener.spike.top[0].changePercent",
+        "screener.spike.top[0].volumeRatio",
+        "screener.spike.top[1].symbol",
+        "screener.spike.top[1].changePercent",
+        "screener.spike.top[1].volumeRatio",
+        "screener.spike.top[2].symbol",
+        "screener.spike.top[2].changePercent",
+        "screener.spike.top[2].volumeRatio",
+        "screener.leaders.alsoSpiking"
       ]
     },
     {
@@ -1582,7 +1588,7 @@
     },
     {
       "id": "rd-260929-spike",
-      "why": "Scene đổi thành bảng hai cột (người dùng 30/9): 5 mã tăng mạnh nhất (giảm dần) và 5 mã giảm mạnh nhất (tăng dần) TRONG bộ lọc Volume spike. Tên đọc: PVT = Vận tải Dầu khí, NVL = No Va (Tập đoàn Đầu tư Địa ốc No Va), LPB = Lộc Phát. Số đọc ra lời: mười sáu (mười, sáu là đếm). Móc 2 giữ: mã đầu cột tăng (PVT) cũng là mã dẫn dắt."
+      "why": "“Hai mã dầu khí” là PVT và PVS, gộp theo tên công ty trong fact pack (Vận tải Dầu khí, Dịch vụ Kỹ thuật Dầu khí) — pack không có trường ngành. LPB đọc là “Lộc Phát”. Móc 2 nói “một mã đầu bảng” chứ không “một mã trong bảng”: alsoSpiking có cả BSR (trong 16 mã, KL ×1,09, không ở top 3), nên chỉ PVT ở đầu bảng vừa là mã dẫn dắt; câu này không nêu tên, leader #1 trả."
     },
     {
       "id": "rd-260929-leaders",

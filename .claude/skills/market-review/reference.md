@@ -106,7 +106,8 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 | hook | mũi tên ĐỎ chỉ XUỐNG đỉnh từng phiên phân phối + nhãn "N phiên phân phối"; máy cận nhịp cuối | mũi tên XANH LÁ chỉ LÊN đáy nến FTD + nhãn, vòng vàng ở nến hôm nay; máy lùi ra | — |
 | market | mũi tên đỏ, nhãn "N/25 phiên phân phối" (tắt ở beat 3), nhãn phiên nặng nhất | mũi tên xanh lá FTD + nhãn, hline vàng đáy nhịp hồi | nhãn "d/m hết hạn sau N phiên" ở phiên cũ nhất, nhãn "4 phiên → chịu áp lực · 6 phiên → điều chỉnh"; máy cận |
 | breadth | `lines`: pane trên = VN-INDEX đóng cửa (vẽ ở beat 1), pane dưới = % mã trên SMA200 (vẽ ở beat 2), mốc FTD; lịch sử từ `scripts/review/breadth.mjs` (GET /analyze từng mã có SMA200, cache `.review-cache/analyze-all/<ngày>/`, ~1 phút cho ~900 mã). Không có lịch sử thì rơi về `pictogram` chấm | (đường dưới) | — |
-| spike / leaders | hộp quanh ba dòng; nhãn tóm tắt đè lên nút Columns/Export | hộp từng ô VOL/SMA / RS 1M, máy cận | — |
+| spike | panel `movers` (vẽ): cột TĂNG MẠNH NHẤT — 5 mã của bộ lọc theo % giảm dần (beat 1) | cột GIẢM MẠNH NHẤT — 5 mã theo % tăng dần, rơi sâu nhất trên đầu (beat 2); mỗi dòng mã · tên · % · KL ×; caption "KHỐI LƯỢNG ĐỘT BIẾN · N MÃ" (người dùng chốt 30/9; `rules.screener.scenes.spike.visual: "photo"` trả về bảng chụp) | — |
+| leaders | hộp quanh ba dòng; nhãn tóm tắt đè lên nút Columns/Export | hộp từng ô RS 1M, máy cận | — |
 | leader #3/#2/#1 | nhãn "MÃ · RS 1M … · ±x%", hline EMA50, và MỘT chi tiết riêng: hline đỉnh 52 tuần "Đỉnh 52T … · −x%" (mã còn xa / sát đỉnh) hoặc hộp trên cột khối lượng hôm nay "KL ×…" (mã cũng ở Volume spike) | mũi tên vào nến cuối "±x% trên EMA50", máy cận | — |
 | watch | hline vàng "Thủng <đáy nhịp hồi> → FTD thất bại", hline xanh "Chạm <mức hết hạn thấp nhất> → phiên d/m hết hạn"; máy tilt từ đáy lên | vòng vàng nến hôm nay, nhãn "Thêm N phiên phân phối → <trạng thái kế>", "d/m hết hạn sau N phiên"; máy ĐỨNG YÊN (payoff) | — |
 

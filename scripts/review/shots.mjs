@@ -132,6 +132,7 @@ if (ONLY.has('index-terminal')) {
 if (ONLY.has('screener')) {
   const sc = R.shots.screener;
   for (const [scene, spec] of Object.entries(R.screener.scenes)) {
+    if (spec.visual === 'movers') { console.log(`\n▸ Screener · ${spec.photo}: drawn as a movers board, no photo`); continue; }
     const rel = `${DIR}/${scene}.png`;
     const args = {filter: spec.photo, sort: sc.sortColumn[spec.sortBy], keep: sc.keep[scene], rows: sc.rows, zoom: sc.zoom};
     shoot(`Screener · ${spec.photo} by ${args.sort}`, [

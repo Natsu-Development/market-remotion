@@ -7,14 +7,14 @@ footer: Nguồn: SSI · zionle.io.vn · FireAnt
 # Trạng thái: Xu hướng tăng xác nhận từ 3/8 · 3/25 phân phối · FTD 3/8/2026 · ảnh chỉ số: fireant.vn.
 
 ## hook · image
-Câu đầu là NGÀY của phiên: "Thứ Ba, 29 tháng 9" đọc thành chữ. Câu hai là ĐIỂM SỐ và % của phiên: đóng cửa 1777,73 (đọc tròn 1778), −0,17%. Câu hai là hai chữ mà SỐ quyết định: chỉ số "đi ngang" (|Δ| < 0,3% = đi ngang), mã giảm nhiều hơn mã tăng (HOSE 152 tăng · 186 giảm · 65 đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).
+Câu đầu là NGÀY của phiên: "Thứ Ba, 29 tháng 9" đọc thành chữ. Câu hai gọi tên chỉ số rồi ĐIỂM SỐ và % của phiên: "VN-Index đóng cửa" 1777,73 (đọc tròn 1778), −0,17%. Câu hai là hai chữ mà SỐ quyết định: chỉ số "đi ngang" (|Δ| < 0,3% = đi ngang), mã giảm nhiều hơn mã tăng (HOSE 152 tăng · 186 giảm · 65 đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).
 Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI (người dùng chốt 30/9, thay lời hứa "cuối video"): "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.
 KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.
 
 ## market · image
-Beat 1 — 3 phiên phân phối còn hiệu lực: 11/9 −1,86% KL ×1,64 (còn 12 phiên); 23/9 −0,84% KL ×1,23 (còn 20 phiên); 24/9 −1,47% KL ×1,07 (còn 21 phiên). Phân phối = giảm từ 0.5% với KL cao hơn phiên trước.
+Beat 1 — mở bằng HÔM NAY: KHÔNG phải phiên phân phối (−0,17%, KL ×0,61), rồi ĐẾM: còn 3 phiên trong 25 phiên (11/9 −1,86% KL ×1,64; 23/9 −0,84% KL ×1,23; 24/9 −1,47% KL ×1,07). Không kể phiên nặng nhất (người dùng chốt 30/9). Phân phối = giảm từ 0.5% với KL cao hơn phiên trước.
 Beat 2 — neo của xu hướng: FTD 3/8/2026 (ngày 5, +1,56%, KL ×1,07) và đáy nhịp hồi 1651,20 (đường vàng).
-Beat 3 — đồng hồ: phiên 11/9 hết hạn sau 12 phiên; 4 phiên là xu hướng tăng chịu áp lực, 6 phiên là thị trường điều chỉnh.
+Beat 3 — đồng hồ: phiên 11/9 hết hạn sau 12 phiên; ngưỡng kế nói bằng lời người — "chỉ cần thêm 1 phiên phân phối nữa là xu hướng bắt đầu chịu áp lực" — KHÔNG kiểu "thêm một là…, thêm ba là…" (người dùng bác 30/9); ngưỡng điều chỉnh để nhãn và scene watch nói. Gọi "phiên FTD" (lexicon đọc "ép tê đi").
 Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). Kết bằng câu dẫn sang độ rộng thị trường.
 
 ## breadth · lines
@@ -22,10 +22,10 @@ NGHỊCH LÝ trên hai đường cùng trục thời gian (52 phiên, 15/7 → 2
 Beat 1 = đường chỉ số vẽ ra (câu "chỉ số thì đi lên"); beat 2 = đường độ rộng vẽ ra (câu "nhưng …"). Headline ghi 25% (số nguyên từ pack: breadth.line.last = 24.8).
 Screener hôm nay đếm 250/895 = 27,9% (lệch −3,1% so với đường — cách tính SMA khác); hôm nay 492 mã tăng, 505 mã giảm. Kết bằng câu dẫn: vậy tiền đang ở đâu?
 
-## spike · image
-Bộ lọc "Volume spike" của terminal: 16 mã (10 tăng, 6 giảm). Ba mã khối lượng đột biến nhất so với trung bình 20 phiên: PVT KL ×2,44 +6,40%; PVS KL ×2,05 +2,10%; LPB KL ×1,70 −4,40%.
-Nói rõ mã nào tăng, mã nào giảm — khối lượng lớn khi giảm là bán ra, không phải mua vào.
-GIEO MÓC 2 (không nói tên): một mã trong bảng này cũng có mặt ở bộ lọc dẫn dắt — để cuối.
+## spike · movers
+Bộ lọc "Volume spike": 16 mã (10 tăng, 6 giảm). Beat 1 = cột TĂNG (giảm dần theo %): PVT +6,40% KL ×2,44; AAS +4,26% KL ×1,15; GVR +3,42% KL ×1,64; DIG +3,25% KL ×1,07; HCM +2,30% KL ×1,09.
+Beat 2 = cột GIẢM (tăng dần theo %, mã rơi sâu nhất trên đầu): NVL −6,79% KL ×1,67; LPB −4,40% KL ×1,70; MBS −1,27% KL ×1,10; CEO −0,91% KL ×1,14; MSB −0,71% KL ×1,20. Khối lượng lớn khi giảm là bán ra.
+Đọc tên công ty, không đọc mã; tối đa hai số đọc ra lời — bảng gánh phần còn lại. Móc 2: mã đầu cột tăng (PVT) cũng là mã dẫn dắt — để cuối, không nói tên.
 
 ## leaders · image
 Uptrend (giá trên EMA50, EMA50 trên SMA200) có 14 mã; RS Strong (RS 1M từ 60) có 26; qua cả hai: 10 mã. Ba mã dẫn đầu theo RS 1M: BSR RS 1M 94 +0,31%; MSR RS 1M 94 +4,37%; PVT RS 1M 94 +6,40%.

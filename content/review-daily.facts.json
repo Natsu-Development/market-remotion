@@ -666,7 +666,122 @@
         }
       ],
       "up": 10,
-      "down": 6
+      "down": 6,
+      "flat": 0,
+      "gainers": [
+        {
+          "rank": 1,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 24.95,
+          "changePercent": 6.4,
+          "volumeRatio": 2.44,
+          "rs1m": 94,
+          "rs52w": 96
+        },
+        {
+          "rank": 2,
+          "symbol": "AAS",
+          "name": "Công ty cổ phần Chứng khoán SmartInvest",
+          "exchange": "UPCOM",
+          "price": 9.8,
+          "changePercent": 4.26,
+          "volumeRatio": 1.15,
+          "rs1m": 95,
+          "rs52w": 54
+        },
+        {
+          "rank": 3,
+          "symbol": "GVR",
+          "name": "Tập đoàn Công nghiệp Cao su Việt Nam – Công ty cổ phần",
+          "exchange": "HOSE",
+          "price": 33.3,
+          "changePercent": 3.42,
+          "volumeRatio": 1.64,
+          "rs1m": 73,
+          "rs52w": 88
+        },
+        {
+          "rank": 4,
+          "symbol": "DIG",
+          "name": "Tổng Công ty Cổ phần Đầu tư Phát triển Xây dựng",
+          "exchange": "HOSE",
+          "price": 9.53,
+          "changePercent": 3.25,
+          "volumeRatio": 1.07,
+          "rs1m": 20,
+          "rs52w": 5
+        },
+        {
+          "rank": 5,
+          "symbol": "HCM",
+          "name": "Công ty Cổ phần Chứng khoán Thành phố Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 24.45,
+          "changePercent": 2.3,
+          "volumeRatio": 1.09,
+          "rs1m": 30,
+          "rs52w": 80
+        }
+      ],
+      "losers": [
+        {
+          "rank": 1,
+          "symbol": "NVL",
+          "name": "Công ty Cổ phần Tập đoàn Đầu tư Địa ốc No Va",
+          "exchange": "HOSE",
+          "price": 10.3,
+          "changePercent": -6.79,
+          "volumeRatio": 1.67,
+          "rs1m": 10,
+          "rs52w": 31
+        },
+        {
+          "rank": 2,
+          "symbol": "LPB",
+          "name": "Ngân hàng Thương mại cổ phần Lộc Phát Việt Nam",
+          "exchange": "HOSE",
+          "price": 43.5,
+          "changePercent": -4.4,
+          "volumeRatio": 1.7,
+          "rs1m": 20,
+          "rs52w": 67
+        },
+        {
+          "rank": 3,
+          "symbol": "MBS",
+          "name": "Công ty Cổ phần Chứng khoán MB",
+          "exchange": "HNX",
+          "price": 15.5,
+          "changePercent": -1.27,
+          "volumeRatio": 1.1,
+          "rs1m": 19,
+          "rs52w": 24
+        },
+        {
+          "rank": 4,
+          "symbol": "CEO",
+          "name": "Công ty cổ phần Tập đoàn C.E.O",
+          "exchange": "HNX",
+          "price": 10.9,
+          "changePercent": -0.91,
+          "volumeRatio": 1.14,
+          "rs1m": 12,
+          "rs52w": 4
+        },
+        {
+          "rank": 5,
+          "symbol": "MSB",
+          "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
+          "exchange": "HOSE",
+          "price": 14.05,
+          "changePercent": -0.71,
+          "volumeRatio": 1.2,
+          "rs1m": 86,
+          "rs52w": 91
+        }
+      ]
     },
     "leaders": {
       "filters": [
@@ -819,9 +934,9 @@
       "path": "state.lastFtd"
     },
     {
-      "label": "Volume spike (16 mã)",
-      "value": "PVT ×2,44 +6,4% · PVS ×2,05 +2,1% · LPB ×1,7 -4,4%",
-      "path": "screener.spike.top"
+      "label": "Volume spike (16 mã · 10 tăng · 6 giảm)",
+      "value": "tăng: PVT +6,4% · AAS +4,26% · GVR +3,42% · DIG +3,25% · HCM +2,3% — giảm: NVL -6,79% · LPB -4,4% · MBS -1,27% · CEO -0,91% · MSB -0,71%",
+      "path": "screener.spike.gainers / losers"
     },
     {
       "label": "RS Strong ∩ Uptrend (10 mã)",

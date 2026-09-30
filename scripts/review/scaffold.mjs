@@ -334,7 +334,27 @@ const buildBreadth = () => {
   });
 };
 
-// spike and leaders — the terminal's own tables.
+// spike — the filter's biggest gainers and losers on one board (user, 2026-09-30).
+const buildMovers = () => {
+  const S = F.screener.spike;
+  const row = (x) => ({symbol: x.symbol, name: x.name ?? undefined, changePercent: x.changePercent, volumeRatio: x.volumeRatio ?? undefined});
+  push('spike', {
+    beats: todoBeats(2),
+    visual: {
+      type: 'movers',
+      caption: `KHỐI LƯỢNG ĐỘT BIẾN · ${S.count} MÃ`,
+      left: {title: 'TĂNG MẠNH NHẤT', accent: 'green', rows: S.gainers.map(row)},
+      right: {title: 'GIẢM MẠNH NHẤT', accent: 'red', rows: S.losers.map(row)},
+    },
+    brief: [
+      `Bộ lọc "${S.filter}": ${S.count} mã (${S.up} tăng, ${S.down} giảm${S.flat ? `, ${S.flat} đứng giá` : ''}). Beat 1 = cột TĂNG (giảm dần theo %): ${S.gainers.map((x) => `${x.symbol} ${fmtPct(x.changePercent)} KL ×${vi(x.volumeRatio)}`).join('; ')}.`,
+      `Beat 2 = cột GIẢM (tăng dần theo %, mã rơi sâu nhất trên đầu): ${S.losers.map((x) => `${x.symbol} ${fmtPct(x.changePercent)} KL ×${vi(x.volumeRatio)}`).join('; ')}. Khối lượng lớn khi giảm là bán ra.`,
+      `Đọc tên công ty, không đọc mã; tối đa hai số đọc ra lời — bảng gánh phần còn lại. Móc 2: mã đầu cột tăng${F.screener.leaders.alsoSpiking.includes(S.gainers[0]?.symbol) ? ` (${S.gainers[0].symbol})` : ''} cũng là mã dẫn dắt — để cuối, không nói tên.`,
+    ],
+  });
+};
+
+// spike (photo fallback) and leaders — the terminal's own tables.
 const buildTable = (scene) => {
   const p = need(photo(scene), scene);
   const t = table(p);
@@ -480,7 +500,7 @@ const buildOutro = () => push('outro', {
   brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
 });
 
-const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, spike: () => buildTable('spike'), leaders: () => buildTable('leaders'), watch: buildWatch, week: buildWeek, outro: buildOutro};
+const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), leaders: () => buildTable('leaders'), watch: buildWatch, week: buildWeek, outro: buildOutro};
 const leaderTotal = fmt.roles.filter((r) => r === 'leader').length;
 let leaderIdx = 0;
 for (const role of fmt.roles) {

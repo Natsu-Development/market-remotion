@@ -158,12 +158,18 @@ const show = (r, rank) => ({
   volumeRatio: r.volumeRatio == null ? null : round(r.volumeRatio, 2),
   rs1m: r.rs_1m, rs52w: r.rs_52w,
 });
+const mv = R.screener.scenes.spike.movers ?? {gainers: 5, losers: 5};
+const spikeRows = snap.members.spike.map(rowOf);
 const spike = {
   filter: R.screener.scenes.spike.photo,
   count: snap.filters[R.screener.scenes.spike.photo].count,
   top: snap.picks.spike.map((s, i) => show(rowOf(s), i + 1)),
-  up: snap.members.spike.filter((s) => snap.rows[s].changePercent > 0).length,
-  down: snap.members.spike.filter((s) => snap.rows[s].changePercent < 0).length,
+  up: spikeRows.filter((r) => r.changePercent > 0).length,
+  down: spikeRows.filter((r) => r.changePercent < 0).length,
+  flat: spikeRows.filter((r) => r.changePercent === 0).length,
+  /** The filter's biggest gainers (descending) and losers (ascending), for the movers board. */
+  gainers: spikeRows.filter((r) => r.changePercent > 0).sort((a, b) => b.changePercent - a.changePercent).slice(0, mv.gainers).map((r, i) => show(r, i + 1)),
+  losers: spikeRows.filter((r) => r.changePercent < 0).sort((a, b) => a.changePercent - b.changePercent).slice(0, mv.losers).map((r, i) => show(r, i + 1)),
 };
 
 const leaderDetail = (sym, rank) => {
@@ -318,7 +324,7 @@ pack.anchors = [
   {label: 'Trạng thái theo quy tắc', value: `${state.label} từ ${state.sinceDm}${state.rallyDay ? ` · ngày ${state.rallyDay}` : ''}`, path: 'state'},
   {label: `Phân phối / ${distribution.window} phiên`, value: `${distribution.count}: ${dd.map((d) => `${d.dm} ${v(d.changePercent)}% ×${v(d.volumeRatio)} (còn ${d.sessionsLeft})`).join(' · ') || '—'}`, path: 'distribution.active'},
   ...(state.lastFtd ? [{label: 'FTD gần nhất', value: `${state.lastFtd.dmy} · ngày ${state.lastFtd.day} · +${v(state.lastFtd.changePercent)}% · KL ×${v(state.lastFtd.volumeRatio)} · đáy nhịp hồi ${v(state.lastFtd.rallyLow)}${state.lastFtd.ended ? ` · kết thúc ${state.lastFtd.ended.dm} (${state.lastFtd.ended.why})` : ''}`, path: 'state.lastFtd'}] : []),
-  {label: `Volume spike (${spike.count} mã)`, value: spike.top.map((s) => `${s.symbol} ×${v(s.volumeRatio)} ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · '), path: 'screener.spike.top'},
+  {label: `Volume spike (${spike.count} mã · ${spike.up} tăng · ${spike.down} giảm)`, value: `tăng: ${spike.gainers.map((s) => `${s.symbol} +${v(s.changePercent)}%`).join(' · ')} — giảm: ${spike.losers.map((s) => `${s.symbol} ${v(s.changePercent)}%`).join(' · ')}`, path: 'screener.spike.gainers / losers'},
   {label: `RS Strong ∩ Uptrend (${leaders.count} mã)`, value: leaders.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · '), path: 'screener.leaders.top'},
   {label: 'Độ rộng', value: `${breadth.aboveSma200}/${breadth.withSma200 ?? breadth.universe} mã trên SMA200 (${v(breadth.aboveSma200Percent, 1)}%) · ${breadth.up} tăng · ${breadth.down} giảm${breadth.line ? ` · đường ${breadth.line.sessions} phiên: ${v(breadth.line.first, 1)}% (${breadth.line.fromDm}) → ${v(breadth.line.last, 1)}% trong khi chỉ số ${breadth.line.indexChangePercent >= 0 ? '+' : ''}${v(breadth.line.indexChangePercent, 1)}%` : ''}`, path: 'screener.breadth'},
   {label: 'Bộ lọc terminal', value: `cache ${pack.source.screenerCachedIct} ICT · ${snap.universe} mã · volume_vs_sma đọc là ${snap.volumeVsSmaUnit === 'percent' ? '% trên TB20' : 'bội số TB20'}`, path: 'screener'},

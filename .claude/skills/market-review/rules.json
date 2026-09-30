@@ -77,7 +77,12 @@
         ],
         "photo": "Volume spike",
         "sortBy": "volumeRatio",
-        "top": 3
+        "top": 3,
+        "visual": "movers",
+        "movers": {
+          "gainers": 5,
+          "losers": 5
+        }
       },
       "leaders": {
         "filters": [
@@ -91,7 +96,8 @@
     },
     "_leaders": "Uptrend's liquidity floor (volume_sma20 >= 1.2M) is stricter than RS Strong's (>= 1M), so RS Strong AND Uptrend = Uptrend rows with rs_1m >= 60. Sorted by RS 1M, those rows come first in the Uptrend table, which is the photo.",
     "dropZeroMa": true,
-    "_dropZeroMa": "The server sends 0 for a moving average it cannot compute yet (new listings), so 'ema_50 > sma_200' passes for them. Rows with ema_50 or sma_200 at 0 are dropped."
+    "_dropZeroMa": "The server sends 0 for a moving average it cannot compute yet (new listings), so 'ema_50 > sma_200' passes for them. Rows with ema_50 or sma_200 at 0 are dropped.",
+    "_spike": "User 2026-09-30: the spike scene is a two-column board — the filter's 5 biggest gainers (by % change, descending) and 5 biggest losers (ascending), each with its volume ratio — drawn with the `movers` panel; `visual: \"photo\"` brings back the boxed Screener table."
   },
   "formats": {
     "daily": {

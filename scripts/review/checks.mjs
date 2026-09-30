@@ -98,7 +98,7 @@ export default function reviewChecks(reel, {root, rules: R}) {
   // ---------------------------------------------------------------- review-picks
   {
     const bad = [];
-    const picked = new Set([...F.screener.spike.top, ...F.screener.leaders.top].map((x) => x.symbol));
+    const picked = new Set([...F.screener.spike.top, ...F.screener.leaders.top, ...(F.screener.spike.gainers ?? []), ...(F.screener.spike.losers ?? [])].map((x) => x.symbol));
     for (const s of reel.scenes) {
       for (const text of onScreen(s)) {
         for (const [tk] of text.matchAll(/\b[A-Z]{3}\b/g)) {
@@ -113,7 +113,7 @@ export default function reviewChecks(reel, {root, rules: R}) {
     }
     for (const scene of ['spike', 'leaders']) {
       const s = reel.scenes.find((x) => x.role === scene);
-      if (!s) continue;
+      if (!s || s.visual?.type !== 'image') continue;
       const rows = read(root, `public/${s.visual.src.replace(/\.png$/, '')}.json`)?.js?.rows ?? [];
       const top = F.screener[scene].top.map((x) => x.symbol);
       const got = rows.slice(0, top.length).map((r) => r.symbol);

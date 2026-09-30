@@ -17,10 +17,10 @@ Beat 2 — neo của xu hướng: FTD 3/8/2026 (ngày 5, +1,56%, KL ×1,07) và 
 Beat 3 — đồng hồ: phiên 11/9 hết hạn sau 12 phiên; 4 phiên là xu hướng tăng chịu áp lực, 6 phiên là thị trường điều chỉnh.
 Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). Kết bằng câu dẫn sang độ rộng thị trường.
 
-## breadth · pictogram
-NGHỊCH LÝ (pattern interrupt, panel vẽ duy nhất): chỉ số xu hướng tăng xác nhận mà chỉ 250 trên 895 mã (27,9%) đứng trên đường trung bình 200 phiên; hôm nay 492 mã tăng, 505 mã giảm.
-Lưới 5×5 chấm, 7 chấm sáng = 28,0%; headline ghi 28% (số nguyên, có trong pack).
-Kết bằng câu dẫn: vậy tiền đang ở đâu? → bộ lọc.
+## breadth · lines
+NGHỊCH LÝ trên hai đường cùng trục thời gian (52 phiên, 15/7 → 29/9): chỉ số giảm −0,2% (1782,12 → 1777,73), còn tỉ lệ mã trên đường trung bình 200 phiên đi từ 27,9% xuống 24,8% (đỉnh 29,9% ngày 28/8).
+Beat 1 = đường chỉ số vẽ ra (câu "chỉ số thì đi lên"); beat 2 = đường độ rộng vẽ ra (câu "nhưng …"). Headline ghi 25% (số nguyên từ pack: breadth.line.last = 24.8).
+Screener hôm nay đếm 250/895 = 27,9% (lệch −3,1% so với đường — cách tính SMA khác); hôm nay 492 mã tăng, 505 mã giảm. Kết bằng câu dẫn: vậy tiền đang ở đâu?
 
 ## spike · image
 Bộ lọc "Volume spike" của terminal: 16 mã (10 tăng, 6 giảm). Ba mã khối lượng đột biến nhất so với trung bình 20 phiên: PVT KL ×2,44 +6,40%; PVS KL ×2,05 +2,10%; LPB KL ×1,70 −4,40%.
@@ -33,7 +33,7 @@ Scene ngắn: cầu nối vào đếm ngược. Câu cuối: "đếm ngược t�
 
 ## leader · image
 #3 — BSR (Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam, HOSE): giá 32,50 nghìn đồng, +0,31% hôm nay, RS 1M 94, RS 52W 98; trên EMA50 27,99 +16,1%, trên SMA200 25,39 +28,0%.
-Chi tiết riêng của mã này: khối lượng hôm nay ×1,09 trung bình 20 phiên (hộp vàng trên cột khối lượng) — mã ở CẢ HAI bộ lọc.
+Chi tiết riêng của mã này: đỉnh 52 tuần 39,16, giá đang −17,0% so với đỉnh (đường vàng).
 Tín hiệu mới nhất trên terminal: breakdown_confirmed ở 26,30 ngày 7/9 — chỉ nhắc nếu khớp với chart đang chiếu.
 Cùng khuôn câu với hai scene leader kia; đọc tên công ty thay cho mã (TTS đọc mã chữ cái thất thường); mã giữ trên màn hình.
 

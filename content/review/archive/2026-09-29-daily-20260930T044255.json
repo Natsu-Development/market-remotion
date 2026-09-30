@@ -22,20 +22,20 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Một phiên nữa là thị trường đổi trạng thái. Ba mũi tên đỏ là lý do, nhưng theo quy tắc, xu hướng tăng vẫn được xác nhận. Cuối video: mức thủng là gãy.",
+      "narration": "Ba phiên phân phối trong ba tuần. Theo quy tắc vẫn là xu hướng tăng xác nhận, nhờ phiên xác nhận ba tháng tám. Mức nào thủng thì gãy, để cuối.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "Còn 1 phiên là chịu áp lực",
-          "line2": "Xu hướng tăng đang bị thử",
+          "line1": "3 phiên phân phối",
+          "line2": "Thêm một là chịu áp lực",
           "accent": "red"
         },
         {
           "atSentence": 1,
-          "at": 3.2,
-          "line1": "Xu hướng tăng xác nhận",
-          "line2": "Cuối video: mức gãy",
+          "at": 3.75,
+          "line1": "FTD 3/8 vẫn đang giữ",
+          "line2": "Xu hướng tăng xác nhận",
           "accent": "green"
         }
       ],
@@ -197,10 +197,13 @@
         ]
       },
       "citedFacts": [
-        "distribution.toUnderPressure",
         "distribution.count",
+        "distribution.active",
+        "distribution.toUnderPressure",
         "state.status",
-        "state.ftd.date"
+        "state.label",
+        "state.ftd.dm",
+        "state.ftd.changePercent"
       ]
     },
     {
@@ -446,468 +449,31 @@
       "eyebrow": "Độ rộng thị trường",
       "act": "maroon",
       "duration": 7,
-      "narration": "Theo quy tắc, chỉ số vẫn ở xu hướng tăng. Nhưng chỉ một phần tư số mã đứng trên đường trung bình hai trăm phiên, và đang giảm từ cuối tháng tám. Vậy tiền đang ở đâu?",
+      "narration": "Chỉ số thì tăng, nhưng chưa tới một phần ba mã đứng trên đường trung bình hai trăm phiên. Mã giảm nhiều hơn mã tăng. Vậy tiền đang ở đâu?",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "Chỉ số vẫn xác nhận tăng",
-          "line2": "Bao nhiêu mã đi cùng?",
+          "line1": "28% mã trên SMA200",
+          "line2": "Phần lớn mã không đi cùng",
           "accent": "gold"
-        },
-        {
-          "atSentence": 1,
-          "at": 3,
-          "line1": "25% mã trên SMA200",
-          "line2": "Giảm dần từ cuối tháng Tám",
-          "accent": "red"
         }
       ],
       "visual": {
-        "type": "lines",
-        "top": {
-          "label": "VN-INDEX · ĐÓNG CỬA",
-          "points": [
-            [
-              "2026-07-15",
-              1782.12
-            ],
-            [
-              "2026-07-16",
-              1804.24
-            ],
-            [
-              "2026-07-17",
-              1787.45
-            ],
-            [
-              "2026-07-20",
-              1743.51
-            ],
-            [
-              "2026-07-21",
-              1730.56
-            ],
-            [
-              "2026-07-22",
-              1668.53
-            ],
-            [
-              "2026-07-23",
-              1699.38
-            ],
-            [
-              "2026-07-24",
-              1686.11
-            ],
-            [
-              "2026-07-27",
-              1669.01
-            ],
-            [
-              "2026-07-28",
-              1680.62
-            ],
-            [
-              "2026-07-29",
-              1704.68
-            ],
-            [
-              "2026-07-30",
-              1744.66
-            ],
-            [
-              "2026-07-31",
-              1735.78
-            ],
-            [
-              "2026-08-03",
-              1762.84
-            ],
-            [
-              "2026-08-04",
-              1777.23
-            ],
-            [
-              "2026-08-05",
-              1776.46
-            ],
-            [
-              "2026-08-06",
-              1764.78
-            ],
-            [
-              "2026-08-07",
-              1768.06
-            ],
-            [
-              "2026-08-10",
-              1776.77
-            ],
-            [
-              "2026-08-11",
-              1773.41
-            ],
-            [
-              "2026-08-12",
-              1793.18
-            ],
-            [
-              "2026-08-13",
-              1765.63
-            ],
-            [
-              "2026-08-14",
-              1729.08
-            ],
-            [
-              "2026-08-17",
-              1727.46
-            ],
-            [
-              "2026-08-18",
-              1732.02
-            ],
-            [
-              "2026-08-19",
-              1726.69
-            ],
-            [
-              "2026-08-20",
-              1734.24
-            ],
-            [
-              "2026-08-21",
-              1768.12
-            ],
-            [
-              "2026-08-24",
-              1788.78
-            ],
-            [
-              "2026-08-25",
-              1791.41
-            ],
-            [
-              "2026-08-26",
-              1821.32
-            ],
-            [
-              "2026-08-27",
-              1831.56
-            ],
-            [
-              "2026-08-28",
-              1832.12
-            ],
-            [
-              "2026-09-03",
-              1827.72
-            ],
-            [
-              "2026-09-04",
-              1853.08
-            ],
-            [
-              "2026-09-07",
-              1821.64
-            ],
-            [
-              "2026-09-08",
-              1830.44
-            ],
-            [
-              "2026-09-09",
-              1827.12
-            ],
-            [
-              "2026-09-10",
-              1829.23
-            ],
-            [
-              "2026-09-11",
-              1795.21
-            ],
-            [
-              "2026-09-14",
-              1788.23
-            ],
-            [
-              "2026-09-15",
-              1811.15
-            ],
-            [
-              "2026-09-16",
-              1810.11
-            ],
-            [
-              "2026-09-17",
-              1822.77
-            ],
-            [
-              "2026-09-18",
-              1815.66
-            ],
-            [
-              "2026-09-21",
-              1799.67
-            ],
-            [
-              "2026-09-22",
-              1816.93
-            ],
-            [
-              "2026-09-23",
-              1801.65
-            ],
-            [
-              "2026-09-24",
-              1775.09
-            ],
-            [
-              "2026-09-25",
-              1785.11
-            ],
-            [
-              "2026-09-28",
-              1780.68
-            ],
-            [
-              "2026-09-29",
-              1777.73
-            ]
-          ],
-          "unit": "points"
-        },
-        "bottom": {
-          "label": "% MÃ TRÊN SMA200",
-          "points": [
-            [
-              "2026-07-15",
-              27.9
-            ],
-            [
-              "2026-07-16",
-              27.9
-            ],
-            [
-              "2026-07-17",
-              27.1
-            ],
-            [
-              "2026-07-20",
-              24.7
-            ],
-            [
-              "2026-07-21",
-              24
-            ],
-            [
-              "2026-07-22",
-              22.8
-            ],
-            [
-              "2026-07-23",
-              24
-            ],
-            [
-              "2026-07-24",
-              21.7
-            ],
-            [
-              "2026-07-27",
-              22.5
-            ],
-            [
-              "2026-07-28",
-              21.4
-            ],
-            [
-              "2026-07-29",
-              21.1
-            ],
-            [
-              "2026-07-30",
-              23.4
-            ],
-            [
-              "2026-07-31",
-              23.6
-            ],
-            [
-              "2026-08-03",
-              25.2
-            ],
-            [
-              "2026-08-04",
-              25.3
-            ],
-            [
-              "2026-08-05",
-              25.7
-            ],
-            [
-              "2026-08-06",
-              25.9
-            ],
-            [
-              "2026-08-07",
-              25.6
-            ],
-            [
-              "2026-08-10",
-              27.9
-            ],
-            [
-              "2026-08-11",
-              28.5
-            ],
-            [
-              "2026-08-12",
-              28.6
-            ],
-            [
-              "2026-08-13",
-              27.1
-            ],
-            [
-              "2026-08-14",
-              26.8
-            ],
-            [
-              "2026-08-17",
-              26.9
-            ],
-            [
-              "2026-08-18",
-              27.3
-            ],
-            [
-              "2026-08-19",
-              26.8
-            ],
-            [
-              "2026-08-20",
-              28.3
-            ],
-            [
-              "2026-08-21",
-              29.3
-            ],
-            [
-              "2026-08-24",
-              27.9
-            ],
-            [
-              "2026-08-25",
-              28.4
-            ],
-            [
-              "2026-08-26",
-              28.7
-            ],
-            [
-              "2026-08-27",
-              29.8
-            ],
-            [
-              "2026-08-28",
-              29.9
-            ],
-            [
-              "2026-09-03",
-              28.2
-            ],
-            [
-              "2026-09-04",
-              28.3
-            ],
-            [
-              "2026-09-07",
-              25.6
-            ],
-            [
-              "2026-09-08",
-              27.6
-            ],
-            [
-              "2026-09-09",
-              27.6
-            ],
-            [
-              "2026-09-10",
-              26.7
-            ],
-            [
-              "2026-09-11",
-              24.9
-            ],
-            [
-              "2026-09-14",
-              24.5
-            ],
-            [
-              "2026-09-15",
-              26.6
-            ],
-            [
-              "2026-09-16",
-              26.8
-            ],
-            [
-              "2026-09-17",
-              26.9
-            ],
-            [
-              "2026-09-18",
-              27.3
-            ],
-            [
-              "2026-09-21",
-              26.9
-            ],
-            [
-              "2026-09-22",
-              26.9
-            ],
-            [
-              "2026-09-23",
-              26.3
-            ],
-            [
-              "2026-09-24",
-              24.4
-            ],
-            [
-              "2026-09-25",
-              23.9
-            ],
-            [
-              "2026-09-28",
-              25.1
-            ],
-            [
-              "2026-09-29",
-              24.8
-            ]
-          ],
-          "accent": "green",
-          "unit": "percent"
-        },
-        "events": [
-          {
-            "t": "2026-08-03",
-            "label": "FTD 3/8",
-            "accent": "green"
-          }
-        ]
+        "type": "pictogram",
+        "glyph": "dot",
+        "rows": 6,
+        "columns": 9,
+        "filledPercent": 27.78,
+        "accent": "green"
       },
       "citedFacts": [
-        "state.status",
-        "screener.breadth.line.last",
-        "screener.breadth.line.peakDm",
+        "screener.breadth.aboveSma200",
+        "screener.breadth.withSma200",
+        "screener.breadth.aboveSma200Percent",
         "screener.breadth.up",
-        "screener.breadth.down"
+        "screener.breadth.down",
+        "state.status"
       ]
     },
     {
@@ -1628,7 +1194,7 @@
   "unsupported": [
     {
       "id": "rd-260929-hook",
-      "why": "Câu đầu nói \"một phiên nữa là đổi trạng thái\" = distribution.toUnderPressure (1); \"ba mũi tên đỏ\" chỉ vào mark, không đọc số phiên (scene market đọc). FTD đọc là \"phiên xác nhận\" ở scene market, không ở hook. Beat 2 ghim câu 1 (mũi tên xanh + vòng vàng hiện khi nói \"xu hướng tăng vẫn được xác nhận\")."
+      "why": "“Trong ba tuần” là cách đạo diễn gói ba phiên 11/9, 23/9, 24/9 (ba tuần lịch liên tiếp) — fact pack không có trường tuần, chỉ có cửa sổ 25 phiên. Lời đọc gọi FTD là “phiên xác nhận” (writer.md cho phép “phiên FTD”, nhưng rules.voice ghi TTS chưa đo chữ FTD nên lời tránh đọc chữ đó; màn hình vẫn ghi FTD 3/8). Beat 2 ghim vào câu neo (câu 1), không phải câu 2 như khung mặc định — mũi tên xanh FTD hiện đúng lúc nói “nhờ phiên xác nhận ba tháng tám”."
     },
     {
       "id": "rd-260929-market",
@@ -1636,7 +1202,7 @@
     },
     {
       "id": "rd-260929-breadth",
-      "why": "Đường độ rộng tính lại từ /analyze trên 719 mã có đủ 200 phiên (24,8%), Screener đếm 250/895 = 27,9% trên tập rộng hơn — scene nói theo đường đang vẽ (\"một phần tư\"). \"Đi xuống từ cuối tháng tám\" = đỉnh 29,9% ngày 28/8 → 24,8% hôm nay. Số mã tăng/giảm hôm nay (492/505) không lên scene này — chart chỉ có hai đường."
+      "why": "“Chưa tới một phần ba” = 250/895 mã có SMA200 = 27,9%; headline ghi 28% (làm tròn 0 chữ số, có trong pack). 492 mã tăng / 505 mã giảm chỉ đọc thành “mã giảm nhiều hơn mã tăng”, không lên màn hình để headline khỏi thành hai dòng số."
     },
     {
       "id": "rd-260929-spike",

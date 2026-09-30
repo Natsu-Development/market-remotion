@@ -84,8 +84,8 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   "VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm." (viết "VN-Index"
   như reel Channel đã thu; đọc điểm tròn, nhãn giữ số lẻ); (2) hai chữ
   do SỐ quyết định: `indexWord` rồi SỐ MÃ tăng và giảm của `session.breadthToday` đọc thành chữ — "Chỉ số
-  đi ngang: mã tăng một trăm năm mươi hai, mã giảm một trăm tám mươi sáu." — hai nửa song song (người dùng
-  chốt 30/9; không tự viết "phần lớn" khi số không nói vậy); (3) câu hỏi "Tiền đang chảy vào
+  đi ngang: một trăm năm mươi hai mã tăng, một trăm tám mươi sáu mã giảm." — khuôn "<số> mã tăng, <số> mã
+  giảm", hai nửa song song (người dùng chốt 30/9; không tự viết "phần lớn" khi số không nói vậy); (3) câu hỏi "Tiền đang chảy vào
   đâu?"; (4) LỜI MỜI: "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại", không
   "review"; "và", không "&". Hook mở bằng con số theo ý người dùng — verify sẽ WARN `style`, chấp nhận.
 - **market** là chỗ chuyện hệ thống BẮT ĐẦU, theo khuôn người dùng chốt 30/9: (1) hôm nay có phải phiên

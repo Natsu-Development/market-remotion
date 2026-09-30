@@ -34,7 +34,7 @@
         {
           "atSentence": 3,
           "at": 5.5,
-          "line1": "Tiền đang chảy vào đâu?",
+          "line1": "Tiền chảy vào đâu?",
           "line2": "Cùng mình điểm lại phiên",
           "accent": "gold"
         }
@@ -157,7 +157,7 @@
       "eyebrow": "Trạng thái theo quy tắc",
       "act": "blue",
       "duration": 10.1,
-      "narration": "Hôm nay không phải phiên phân phối, đếm lại còn ba phiên. Theo quy tắc, xu hướng tăng xác nhận vẫn giữ, neo ở phiên FTD ba tháng tám. Chỉ cần thêm một phiên phân phối nữa là xu hướng bắt đầu chịu áp lực. Nhìn rộng ra thì sao?",
+      "narration": "Hôm nay không phải phiên phân phối, đếm lại còn ba phiên. Theo quy tắc, xu hướng tăng xác nhận vẫn giữ, neo ở phiên FTD ba tháng tám. Chỉ cần thêm một phiên phân phối nữa là xu hướng bắt đầu chịu áp lực.",
       "beats": [
         {
           "atSentence": 0,
@@ -394,7 +394,7 @@
       "eyebrow": "Độ rộng thị trường",
       "act": "maroon",
       "duration": 7,
-      "narration": "Chỉ số thì vẫn đứng vững. Nhưng chỉ một phần tư số mã đứng trên đường trung bình hai trăm phiên, và đang giảm từ cuối tháng tám. Câu trả lời nằm ở hai bộ lọc.",
+      "narration": "Chỉ số thì vẫn đứng vững. Nhưng chỉ một phần tư số mã đứng trên đường trung bình hai trăm phiên, và đang giảm từ cuối tháng tám.",
       "beats": [
         {
           "atSentence": 0,
@@ -977,7 +977,7 @@
       "eyebrow": "RS Strong + Uptrend",
       "act": "amber",
       "duration": 7,
-      "narration": "Qua cả hai bộ lọc còn mười mã, đều giữ trên đường trung bình năm mươi phiên. Ba mã đầu cùng sức mạnh giá chín mươi tư. Đếm ngược từ ba.",
+      "narration": "Qua cả hai bộ lọc còn mười mã, đều giữ trên đường trung bình năm mươi phiên. Ba mã đầu cùng sức mạnh giá chín mươi tư, đếm ngược từ số ba.",
       "beats": [
         {
           "atSentence": 0,
@@ -1189,7 +1189,7 @@
       "eyebrow": "Dẫn dắt #2 · MSR",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Số hai, Masan High-Tech: mạnh, và chỉ còn cách đỉnh cũ năm phẩy ba phần trăm. Giá cao hơn đường trung bình hai mươi mốt phẩy chín phần trăm. Số một, bạn gặp rồi.",
+      "narration": "Số hai, Masan High-Tech: mạnh, và chỉ còn cách đỉnh cũ năm phẩy ba phần trăm. Trên đường trung bình hai mươi mốt phẩy chín phần trăm. Số một, bạn gặp rồi.",
       "beats": [
         {
           "atSentence": 0,
@@ -1290,7 +1290,7 @@
       "eyebrow": "Dẫn dắt #1 · PVT",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Số một, Vận tải Dầu khí: mạnh, tăng sáu phẩy bốn phần trăm với khối lượng đột biến. Giá cao hơn đường trung bình mười tám phẩy hai phần trăm. Đây là mã ở cả hai bộ lọc.",
+      "narration": "Số một, Vận tải Dầu khí: mạnh, tăng sáu phẩy bốn phần trăm với khối lượng đột biến. Cao hơn đường trung bình mười tám phẩy hai phần trăm. Đây là mã ở cả hai bộ lọc.",
       "beats": [
         {
           "atSentence": 0,
@@ -1395,7 +1395,7 @@
       "eyebrow": "Mức phải canh",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Thủng đáy nhịp hồi một nghìn sáu trăm năm mươi mốt là gãy. Chạm mức xanh thì một phiên phân phối hết hạn. Còn nếu thêm một phiên phân phối nữa, xu hướng chịu áp lực. Phiên cũ nhất còn mười hai phiên.",
+      "narration": "Mức đầu tiên là đáy nhịp hồi một nghìn sáu trăm năm mươi mốt: thủng là gãy. Chạm mức xanh thì một phiên phân phối hết hạn. Còn nếu thêm một phiên phân phối nữa, xu hướng chịu áp lực. Phiên cũ nhất còn mười hai phiên.",
       "beats": [
         {
           "atSentence": 0,
@@ -1580,11 +1580,11 @@
     },
     {
       "id": "rd-260929-market",
-      "why": "Câu đầu nói hôm nay có phải phiên phân phối không (session.isDistribution = false: −0,17%, KL ×0,61) rồi đếm (3/25); không kể phiên nặng nhất (người dùng chốt 30/9). \"Phiên FTD\" viết FTD, lexicon đọc \"ép tê đi\" (chưa đo). Ngưỡng nói bằng lời người: \"chỉ cần thêm một phiên phân phối nữa là xu hướng bắt đầu chịu áp lực\" (toUnderPressure = 1); ngưỡng điều chỉnh (thêm 3) để scene watch và nhãn trên chart nói. Đồng hồ (11/9 hết hạn sau 12 phiên) chỉ trên màn hình ở scene này, scene watch đọc. Hai số đọc ra lời: ba tháng tám, mười hai phiên (\"ba phiên\", \"một\", \"ba\" là đếm)."
+      "why": "Câu đầu nói hôm nay có phải phiên phân phối không (session.isDistribution = false: −0,17%, KL ×0,61) rồi đếm (3/25); không kể phiên nặng nhất (người dùng chốt 30/9). \"Phiên FTD\" viết FTD, lexicon đọc \"ép tê đi\" (chưa đo). Ngưỡng nói bằng lời người: \"chỉ cần thêm một phiên phân phối nữa là xu hướng bắt đầu chịu áp lực\" (toUnderPressure = 1); ngưỡng điều chỉnh (thêm 3) để scene watch và nhãn trên chart nói. Đồng hồ (11/9 hết hạn sau 12 phiên) chỉ trên màn hình ở scene này, scene watch đọc. Hai số đọc ra lời: ba tháng tám, mười hai phiên (\"ba phiên\", \"một\", \"ba\" là đếm). Humanizer 30/9: \"Nhìn rộng ra thì sao?\" là câu dàn dựng báo trước scene sau (§4) — bỏ; scene kết ở hệ quả cụ thể."
     },
     {
       "id": "rd-260929-breadth",
-      "why": "Đường độ rộng tính lại từ /analyze trên 719 mã có đủ 200 phiên (24,8%), Screener đếm 250/895 = 27,9% trên tập rộng hơn — scene nói theo đường đang vẽ (\"một phần tư\"). \"Đi xuống từ cuối tháng tám\" = đỉnh 29,9% ngày 28/8 → 24,8% hôm nay. Số mã tăng/giảm hôm nay (492/505) không lên scene này — chart chỉ có hai đường."
+      "why": "Đường độ rộng tính lại từ /analyze trên 719 mã có đủ 200 phiên (24,8%), Screener đếm 250/895 = 27,9% trên tập rộng hơn — scene nói theo đường đang vẽ (\"một phần tư\"). \"Đi xuống từ cuối tháng tám\" = đỉnh 29,9% ngày 28/8 → 24,8% hôm nay. Số mã tăng/giảm hôm nay (492/505) không lên scene này — chart chỉ có hai đường. Humanizer 30/9: \"Câu trả lời nằm ở hai bộ lọc.\" là câu báo trước không mang fact (§4/§2) — bỏ; scene kết ở đường độ rộng đang giảm."
     },
     {
       "id": "rd-260929-spike",
@@ -1592,7 +1592,7 @@
     },
     {
       "id": "rd-260929-leaders",
-      "why": "“Đều giữ trên đường trung bình năm mươi phiên” là điều kiện của bộ lọc Uptrend (giá trên EMA50, EMA50 trên SMA200) — nói đủ tên đường trung bình một lần ở đây; ba scene leader chỉ nói “đường trung bình” vì nhãn EMA50 đã ở trên chart và mỗi scene chỉ giữ hai số đọc ra. Thứ tự đọc tên trên headline BSR, MSR, PVT theo thứ tự picks (bảng terminal xếp khác vì cả ba cùng RS 1M 94)."
+      "why": "“Đều giữ trên đường trung bình năm mươi phiên” là điều kiện của bộ lọc Uptrend (giá trên EMA50, EMA50 trên SMA200) — nói đủ tên đường trung bình một lần ở đây; ba scene leader chỉ nói “đường trung bình” vì nhãn EMA50 đã ở trên chart và mỗi scene chỉ giữ hai số đọc ra. Thứ tự đọc tên trên headline BSR, MSR, PVT theo thứ tự picks (bảng terminal xếp khác vì cả ba cùng RS 1M 94). Humanizer 30/9: \"Đếm ngược từ ba.\" là mảnh câu không mang fact (§2) — gộp vào câu trước."
     },
     {
       "id": "rd-260929-leader-1",
@@ -1600,11 +1600,11 @@
     },
     {
       "id": "rd-260929-leader-2",
-      "why": "Tên MSR đọc là “Masan High-Tech” (rút gọn Masan High-Tech Materials; chỉ “Masan” thì lẫn với MSN). TTS chưa được đo cho chữ Anh “High-Tech”: nếu Whisper nghe sai, thêm dạng đọc vào voice.lexicon của .claude/skills/market-review/rules.json sau khi đo (ví dụ “High-Tech” → “hai tếch”) rồi thu lại bằng --force --only cho scene này; không viết phiên âm vào narration. Nhãn của đạo diễn “Đỉnh 52T 58,00 · −5,3%” chép nguyên; số 52 không có trong fact pack nhưng rules.claims.factsExemptions đã có mẫu \\b52\\s?T\\b nên check facts bỏ qua nó. Headline vẫn không dùng “52T” — nói “đỉnh cũ” trong lời, giá đỉnh 58,00 trên headline."
+      "why": "Tên MSR đọc là “Masan High-Tech” (rút gọn Masan High-Tech Materials; chỉ “Masan” thì lẫn với MSN). TTS chưa được đo cho chữ Anh “High-Tech”: nếu Whisper nghe sai, thêm dạng đọc vào voice.lexicon của .claude/skills/market-review/rules.json sau khi đo (ví dụ “High-Tech” → “hai tếch”) rồi thu lại bằng --force --only cho scene này; không viết phiên âm vào narration. Nhãn của đạo diễn “Đỉnh 52T 58,00 · −5,3%” chép nguyên; số 52 không có trong fact pack nhưng rules.claims.factsExemptions đã có mẫu \\b52\\s?T\\b nên check facts bỏ qua nó. Headline vẫn không dùng “52T” — nói “đỉnh cũ” trong lời, giá đỉnh 58,00 trên headline. Humanizer 30/9: câu EMA50 mở khác hai scene kia để ba scene không lặp y một câu (§7); khuôn \"Số N, tên: mạnh, …\" giữ (khuôn chương đã chốt)."
     },
     {
       "id": "rd-260929-leader-3",
-      "why": "Trả móc 2: “mã ở cả hai bộ lọc” = PVT, đứng đầu Volume spike (KL ×2,44) và #1 nhóm dẫn dắt; alsoSpiking còn có BSR (không ở top 3 spike) nên lời spike gieo “một mã đầu bảng”. Khối lượng ×2,44 không đọc ra lời (đã hai số: 6,4% và 18,2%) — hộp vàng và headline gánh. Tín hiệu terminal breakout_confirmed 20,30 ngày 17/8 không nhắc vì không chắc khớp khung chart đang chiếu."
+      "why": "Trả móc 2: “mã ở cả hai bộ lọc” = PVT, đứng đầu Volume spike (KL ×2,44) và #1 nhóm dẫn dắt; alsoSpiking còn có BSR (không ở top 3 spike) nên lời spike gieo “một mã đầu bảng”. Khối lượng ×2,44 không đọc ra lời (đã hai số: 6,4% và 18,2%) — hộp vàng và headline gánh. Tín hiệu terminal breakout_confirmed 20,30 ngày 17/8 không nhắc vì không chắc khớp khung chart đang chiếu. Humanizer 30/9: câu EMA50 mở khác (§7)."
     },
     {
       "id": "rd-260929-watch",

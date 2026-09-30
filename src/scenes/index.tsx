@@ -12,6 +12,7 @@ import {RiskReward} from './RiskReward';
 import {Outro} from './Outro';
 import {ImagePanel} from './ImagePanel';
 import {LineChart} from './LineChart';
+import {Movers} from './Movers';
 
 /**
  * Content picks a visual by name. Adding a new panel type means adding a
@@ -45,6 +46,8 @@ export const renderVisual = (
       return <ImagePanel {...visual} beatIndex={beatIndex} beatFrame={extras.beatFrame ?? 0} beatStarts={extras.beatStarts ?? [0]} />;
     case 'lines':
       return <LineChart {...visual} beatIndex={beatIndex} beatFrame={extras.beatFrame ?? 0} beatStarts={extras.beatStarts ?? [0]} />;
+    case 'movers':
+      return <Movers {...visual} beatIndex={beatIndex} beatFrame={extras.beatFrame ?? 0} beatStarts={extras.beatStarts ?? [0]} />;
     case 'outro':
       return (
         <Outro

@@ -2,7 +2,7 @@
 
 Tài liệu phụ của [SKILL.md](SKILL.md). Mở khi viết scene mới hoặc kéo số.
 
-## 1. Mười hai panel
+## 1. Mười ba panel
 
 `visual.type` chọn component ở `src/scenes/index.tsx`. Trường in đậm là **bắt buộc**.
 
@@ -19,6 +19,7 @@ Tài liệu phụ của [SKILL.md](SKILL.md). Mở khi viết scene mới hoặc
 | `riskReward` | Khoản lời nhỏ đặt cạnh khoản lỗ lớn, vẽ đúng tỉ lệ | **`left`**, **`right`** (mỗi cái `label` + `value`) |
 | `image` | **Mặc định cho nến, chart và mọi scene về xu hướng giá** (người dùng chốt 2026-09-22/23): ảnh chụp terminal hoặc FireAnt trong cùng khung panel, có chip nguồn, caption, **mark vẽ dần theo beat**, quét mở màn và đẩy zoom nhẹ — hoặc **máy quay theo beat** khi có `shots` | **`src`** (dưới `public/`), `caption`, `source`, `fit` (`cover`/`contain`), `focus`, `zoom` (`false` để tắt đẩy), `sourceCorner`, `annotations[]` (`kind` box/circle/arrow/label/**hline**/**vline**, toạ độ PHẦN 0..1 của ảnh, `label`/`text`, `accent`, `beat`), `shots[]` (`beat`, `x`, `y`, `zoom` 1..4, `move`, `cut` — xem dưới), `crop` {x,y,w,h} (phần ảnh hiện, tỉ lệ 1,42 của `LAYOUT.imagePanel`), `masks[]` {x,y,w,h,color} + `maskColor` (che chữ giao diện của trang nguồn), mỗi mark nhận thêm `until` (beat cuối nó hiện) và `label` nhận `anchor` |
 | `lines` | Hai đường cùng trục thời gian, pane trên và pane dưới (chỉ số / độ rộng thị trường — thêm 2026-09-30 cho market-review); đường trên vẽ ở beat 1, đường dưới vẽ khi beat 2 bắt đầu; điểm cuối mang nhãn giá trị | **`top`**, **`bottom`** (mỗi cái `label`, `points[]` = `[YYYY-MM-DD, số]`, `accent`, `unit` points/percent, `ref`, `min`, `max`), `events[]` (`t`, `label`, `accent`), `caption` |
+| `movers` | Hai cột xếp hạng cạnh nhau — tăng mạnh nhất / giảm mạnh nhất (thêm 2026-09-30 cho market-review): mỗi dòng mã, tên, % đổi màu theo chiều, KL ×; cột trái hiện ở beat 1, cột phải khi beat 2 bắt đầu | **`left`**, **`right`** (mỗi cái `title`, `accent`, `rows[]` ≤ 5: `symbol`, `name`, `changePercent`, `volumeRatio`), `caption` |
 | `outro` | Thẻ chào cuối: nhận diện thương hiệu, kicker, pill, một dòng | **`brand`**, **`kicker`**, **`pill`**, **`line`**, `logo` |
 
 Giá trị enum:
@@ -377,13 +378,15 @@ trong lời đọc vẫn phải truy về fact pack như mọi scene khác. Luô
 
 ## 6b. Prompt cho người viết — `prompts/scene-writer.md`
 
-Prompt duy nhất cho khâu viết lời, tiếng Việt, một agent viết cả reel. Bốn phần: luật cứng (verify
+Prompt duy nhất cho khâu viết lời, tiếng Việt, một agent viết cả reel. Năm phần: luật cứng (verify
 FAIL; năm đọc `hai không hai hai`, KHÔNG `năm hai mươi hai`), **giọng người, chữ của nghề** (mở bằng
 quan sát, tối đa hai số đọc ra lời mỗi scene, câu dài ngắn xen kẽ, "bạn/mình" một hai lần, thuật ngữ
 giao dịch thay chữ đời thường theo bảng thay từ — người dùng bác "bậc thang", "tiền mỏng dần", "cái
 biên này" 2026-09-23 — không ẩn dụ, headline là ý không phải bảng số, ngân sách chữ khác nhau giữa các
-scene, kết scene mở đường), **outro** (thả tim · chia sẻ · theo dõi + một câu hứa cập nhật, không số, không
-thuật ngữ, không câu vọng hook — người dùng chốt 2026-09-28), và bảng ba cột bản tin → ví von (bị bác) → trader nói, lấy từ reel `channel`. Muốn đổi giọng kênh thì sửa file đó, không sửa lẻ trong prompt của agent. Ngưỡng máy đo
+scene, kết scene mở đường), **soi dấu vết AI** (skill `humanizer`, người dùng cài 2026-09-30: bảng mẫu cấu trúc áp
+cho lời đọc tiếng Việt, mẫu không áp như dấu trừ và mũi tên trên màn, câu người dùng đã chốt giữ nguyên; đạo diễn soi
+`_script.md` bằng `/humanizer` trước merge), **outro** (một câu thả tim · chia sẻ · theo dõi + lý do theo dõi, không số,
+không thuật ngữ, không câu vọng hook — người dùng chốt 2026-09-28, gộp thành một câu 2026-09-30), và bảng ba cột bản tin → ví von (bị bác) → trader nói, lấy từ reel `channel`. Muốn đổi giọng kênh thì sửa file đó, không sửa lẻ trong prompt của agent. Ngưỡng máy đo
 được nằm ở `content-rules.style`; verify chỉ WARN.
 
 ## 6. Brief — agent viết từ một hai dòng của người dùng

@@ -69,6 +69,13 @@ export type LinePane = {
   max?: number;
 };
 
+/** One ranked column of a `movers` panel: up to five names with their change and volume ratio. */
+export type MoverColumn = {
+  title: string;
+  accent?: AccentName;
+  rows: {symbol: string; name?: string; changePercent: number; volumeRatio?: number; price?: number}[];
+};
+
 export type Visual =
   /** Candlesticks inside a log price channel, with touch markers. */
   | {
@@ -100,6 +107,7 @@ export type Visual =
   /** Grid of person glyphs — n filled out of total. */
   | {type: 'pictogram'; rows: number; columns: number; filledPercent: number; accent: AccentName; glyph?: 'person' | 'dot'}
   | {type: 'lines'; caption?: string; top: LinePane; bottom: LinePane; events?: {t: string; label?: string; accent?: AccentName}[]}
+  | {type: 'movers'; caption?: string; left: MoverColumn; right: MoverColumn}
   /** Two labelled bars that race to their percentage. */
   | {type: 'bars'; bars: {label: string; percent: number; accent: AccentName}[]}
   /** Icon + text rows that reveal in sequence. */

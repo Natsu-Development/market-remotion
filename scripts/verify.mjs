@@ -167,6 +167,7 @@ const VISUAL_REQUIRED = {
   riskReward: ['left', 'right'],
   image: ['src'],
   lines: ['top', 'bottom'],
+  movers: ['left', 'right'],
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
@@ -234,6 +235,16 @@ function checkSchema(t, reel) {
         if (v.crop !== undefined && !rectOk(v.crop)) errs.push(`${at}: crop must be {x,y,w,h} fractions of the photo, inside it`);
         for (const [j, m] of (Array.isArray(v.masks) ? v.masks : v.masks === undefined ? [] : [null]).entries()) {
           if (!rectOk(m)) errs.push(`${at} mask ${j}: must be {x,y,w,h} fractions of the photo`);
+        }
+      }
+      if (v.type === 'movers') {
+        for (const side of ['left', 'right']) {
+          const col = v[side];
+          if (!col?.title) errs.push(`${at}: movers.${side} needs a title`);
+          if (!Array.isArray(col?.rows) || !col.rows.length) errs.push(`${at}: movers.${side}.rows needs at least one row`);
+          else if (col.rows.length > 5) errs.push(`${at}: movers.${side} has ${col.rows.length} rows; the panel fits five`);
+          else if (!col.rows.every((r) => typeof r.symbol === 'string' && Number.isFinite(r.changePercent))) errs.push(`${at}: movers.${side}.rows need symbol and changePercent`);
+          if (col?.accent && !ACCENTS.has(col.accent)) errs.push(`${at}: movers.${side} accent "${col.accent}" invalid`);
         }
       }
       if (v.type === 'lines') {
@@ -763,6 +774,11 @@ function checkFacts(t, reel) {
       ...(sc.visual?.bars ?? []).map((b) => ['visual.bars', `${b.label} ${b.percent}`]),
       ...(sc.visual?.marks ?? []).map((m) => ['visual.marks', String(m.label)]),
       ...(sc.visual?.annotations ?? []).map((a) => ['visual.annotations', a.label ?? a.text ?? '']),
+      // A movers board prints each row's change and volume ratio from its numbers.
+      ...['left', 'right'].flatMap((side) => (sc.visual?.type === 'movers' && sc.visual[side] ? [
+        [`visual.${side}.title`, sc.visual[side].title ?? ''],
+        ...(sc.visual[side].rows ?? []).map((r) => [`visual.${side}.rows`, `${r.symbol} ${Number(r.changePercent).toFixed(2)} ${r.volumeRatio != null ? Number(r.volumeRatio).toFixed(2) : ''}`]),
+      ] : [])),
     ];
     for (const [where, text] of surfaces) {
       const exempt = exemptNumbers(text);

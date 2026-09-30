@@ -172,6 +172,13 @@ const panelText = (vis) => {
     case 'zigzag': p.push(`${esc(vis.topLabel)} → ${esc(vis.endLabel)} (${esc(vis.upLabel)} / ${esc(vis.downLabel)}, ${vis.steps} bước)`); break;
     case 'riskReward': p.push(`${esc(vis.left?.label)} = ${num(vis.left?.value)} · ${esc(vis.right?.label)} = ${num(vis.right?.value)}`); break;
     case 'outro': p.push(`${esc(vis.brand)} · ${esc(vis.pill)} · ${esc(vis.line)}`); break;
+    case 'movers': {
+      for (const side of ['left', 'right']) {
+        const col = vis[side];
+        if (col) p.push(`${esc(col.title)}: ${(col.rows ?? []).map((r) => `${esc(r.symbol)} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%${r.volumeRatio != null ? ` (KL ×${num(r.volumeRatio)})` : ''}`).join(' · ')}`);
+      }
+      break;
+    }
     case 'lines': {
       const last = (pane) => pane?.points?.[pane.points.length - 1];
       const first = (pane) => pane?.points?.[0];

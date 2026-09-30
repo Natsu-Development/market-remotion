@@ -134,11 +134,10 @@ dưới thẻ outro). Bản tổng kết phiên có thể hứa "mỗi phiên"/"
 
 | Trường | Chữ gợi ý |
 |---|---|
-| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Cú Đêm Chứng Khoán để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây. |
+| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây. |
 | headline | `Thả tim, chia sẻ, theo dõi` / `Cập nhật sau mỗi phiên` |
 
-Tên kênh là **Cú Đêm Chứng Khoán** (người dùng đặt 2026-09-30, trước đó "Radar Chứng Khoán"; `rules.brand`, monogram
-sinh từ hai chữ đầu: CĐ). Câu thả tim · chia sẻ · theo dõi + "để cập nhật sớm nhất những biến động của thị trường" là câu người
+Tên kênh là **Chứng Vịt** (người dùng chốt 2026-09-30 sau khi Facebook từ chối "Cú Đêm Chứng Khoán" — "cú" cũng là tiếng lóng; trước đó Radar Chứng Khoán; `rules.brand`, logo ở `rules.logo`). Câu thả tim · chia sẻ · theo dõi + "để cập nhật sớm nhất những biến động của thị trường" là câu người
 dùng đã duyệt ở market-video — giữ nguyên, chỉ đổi câu hứa theo bản (phiên/tuần).
 
 ## Trả về

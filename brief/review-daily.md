@@ -1,7 +1,7 @@
 title: VNINDEX · tổng kết phiên 30/9/2026
 name: review-daily
 symbol: VNINDEX
-footer: Cú Đêm Chứng Khoán
+footer: Chứng Vịt
 
 # Sinh bởi scripts/review/scaffold.mjs từ content/review-daily.facts.json (2026-09-30) — không sửa tay; sửa rules.json hoặc scaffold.mjs.
 # Trạng thái: Xu hướng tăng xác nhận từ 3/8 · 3/25 phân phối · FTD 3/8/2026 · ảnh chỉ số: fireant.vn.

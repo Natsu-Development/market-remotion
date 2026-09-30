@@ -318,10 +318,10 @@
     ],
     "maskColor": "#161921"
   },
-  "footer": "Cú Đêm Chứng Khoán",
-  "_footer": "The line under every scene's headline is the user's channel name, not a source line (user 2026-09-29, CLAUDE.md; renamed to \"Cú Đêm Chứng Khoán\" 2026-09-30; until 2026-09-30 this reel still said 'Nguồn: SSI · zionle.io.vn · FireAnt'). The photos keep their own credit stamp (ẢNH · FIREANT.VN / ZIONLE.IO.VN).",
+  "footer": "Chứng Vịt",
+  "_footer": "The line under every scene's headline is the user's channel name, not a source line (user 2026-09-29, CLAUDE.md). Names so far: Radar Chứng Khoán (29/9) → Cú Đêm Chứng Khoán (30/9, refused by Facebook's Page-name filter: \"cú\" is also slang) → \"Chứng Vịt\" (user's pick, 30/9 evening). Until 2026-09-30 this reel still said 'Nguồn: SSI · zionle.io.vn · FireAnt'; the photos keep their own credit stamp.",
   "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
-  "brand": "Cú Đêm Chứng Khoán",
+  "brand": "Chứng Vịt",
   "narration": {
     "language": "vi",
     "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
@@ -602,5 +602,5 @@
     "scripts/review/checks.mjs"
   ],
   "logo": "logo/cu-dem-chung-khoan.png",
-  "_logo": "The channel mark on the outro card, a path under public/ (user 2026-09-30: the owl from their stock_image.png, the face cropped to a square and scaled to 512 px; the full 1254 px illustration stays in their Downloads, not in the repo). scaffold copies it into the outro visual.logo; the card still prints the channel name under it."
+  "_logo": "The channel mark on the outro card, a path under public/ (user 2026-09-30: the owl from their stock_image.png, the face cropped to a square and scaled to 512 px; the full 1254 px illustration stays in their Downloads, not in the repo). scaffold copies it into the outro visual.logo; the card still prints the channel name under it. The mark is still the owl chosen for \"Cú Đêm\"; the user may swap it for a duck once they have an image — drop the file into public/logo/ and point rules.logo at it."
 }

@@ -109,7 +109,8 @@ thiếu file là verify của MỌI reel báo `registration` FAIL.
 Một agent, prompt = [writer.md](writer.md) + tên reel + thư mục ghi (`.review-cache/writer/<ngày>-<format>/`)
 + **ghi chú giọng của đạo diễn** (kết luận của phiên, số nào là nhân vật chính, scene nào dài). Agent ghi
 `<id>.json` từng scene + `_script.md`. Đọc `_script.md` thành tiếng trước khi merge; nghe như bản tin thì
-trả lại kèm ghi chú.
+trả lại kèm ghi chú. Rồi soi `_script.md` bằng `/humanizer` (`.claude/skills/humanizer/SKILL.md`, 26 mẫu dấu
+vết AI — dùng các mẫu không phụ thuộc ngôn ngữ; số liệu và câu người dùng đã chốt giữ nguyên) trước khi merge.
 
 ```bash
 node scripts/merge.mjs content/review-daily.json --from=.review-cache/writer/<ngày>-daily

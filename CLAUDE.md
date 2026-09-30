@@ -75,9 +75,15 @@ bốn trường kia là sẽ bị ghi đè ở lượt voiceover sau mà không 
 **Lời đọc do MỘT agent viết cho cả reel, theo `prompts/scene-writer.md`.** Người dùng chốt
 2026-09-23 sau bản `channel`: chín agent viết chín scene cho ra bản tin đọc số — đúng mà không giống
 người. Giọng nằm ở prompt đó (phần "Giọng người"); `content-rules.style` + check `style` của verify
-chỉ cảnh báo dấu vết máy. Đạo diễn đọc `_script.md` thành tiếng trước khi merge. Người dùng chốt thêm
+chỉ cảnh báo dấu vết máy. Đạo diễn đọc `_script.md` thành tiếng trước khi merge, và soi nó bằng skill
+`/humanizer` (`.claude/skills/humanizer/`, chép từ blader/humanizer 3.1.0, MIT — người dùng cài 2026-09-30):
+các mẫu AI không phụ thuộc ngôn ngữ (không X mà là Y, câu chốt một dòng, bộ ba ép, mở màn dàn dựng, phủ định
+không ai nói, gạch ngang tràn lan) sửa cho giống người; số liệu, thuật ngữ nghề và câu người dùng đã chốt giữ nguyên. Người dùng chốt thêm
 2026-09-23: từ vựng là của **trader** (kháng cự/hỗ trợ/tích luỹ/phá vỡ/thanh khoản), không ví von đời
-thường ("bậc thang", "tiền mỏng dần" bị bác); năm đọc `hai không hai hai`, không `năm hai mươi hai`;
+thường ("bậc thang", "tiền mỏng dần" bị bác); năm đọc `hai không hai hai`, không `năm hai mươi hai`, và
+2010–2019 là `hai không mười tám`, không `hai không một tám` (người dùng sửa 2026-09-29); mức giá trong kịch
+bản và mức phải canh đọc ra số, mức giảm có trong pack đọc đúng số, không "gần ba mươi phần trăm", và phần trăm
+trên màn hình phải tính lại được từ hai đầu mút đang hiện (`percentExact`/`highExact`/`lowExact`: `1211,34 → 861,85: −28,85%`);
 scene nào về xu hướng giá đều là ảnh chart có mark (`hline`/`box`…) vẽ dần theo beat; mọi scene ảnh
 có chuyển động sẵn trong `ImagePanel`.
 
@@ -161,9 +167,9 @@ giao diện FireAnt (dòng OHLC ở y 0,085–0,125 của ảnh tháng) — soá
 **Hai bộ màu, đừng gộp.** `COLORS.red/green/gold` là màu CHỮ headline. `COLORS.up/down`
 (`#1FA377`/`#EC5F38`) là màu MARK — nến, histogram, mũi tên ticker — chọn bằng validator của
 skill dataviz trên nền plot: cặp xanh/đỏ thường chỉ đạt ΔE mù màu 6,7, cặp này 10,2. Khung hình
-có ticker (trên) và footer (dưới) trên mọi scene, tính từ chuỗi giá; footer mặc định ghi nguồn từ
-`vnindex-monthly.meta.json` (`Nguồn: SSI iBoard · tới T9/2026`), và chỉ ghi "Dữ liệu" khi meta báo
-`reconstructed` — đặt `footer` ở cấp reel khi số đến từ nhiều nguồn (`Channel`: `Nguồn: SSI · zionle.io.vn · FireAnt`).
+có ticker (trên) trên mọi scene, tính từ chuỗi giá. **Footer dưới headline là tên kênh, không phải dòng nguồn**
+(người dùng 2026-09-29: bỏ "Nguồn: …", ghi "Radar Chứng Khoán"): tên nằm ở `channel.name` trong
+`content-rules.json`, enrich chép vào `footer` và `brand` của outro; brief ghi `footer: false` để ẩn.
 
 **Chữ Việt cần subset `vietnamese` của font.** Thiếu nó thì dấu chồng (Ổ, Ữ, Ặ) rơi về font
 khác và lệch khỏi cap height. Icon thì vẽ bằng SVG chứ không gõ ký tự, vì ✓ và ⚠ thiếu ở vài
@@ -175,14 +181,15 @@ liền tới `npm run review-page -- <Id>`, đăng trang đó làm **artifact** 
 người dùng chốt 2026-09-23) rồi mới dừng cho người dùng duyệt. Không dừng
 giữa đường để hỏi; không đưa brief ra duyệt.
 
-**Miễn trừ chỉ nằm ở outro** (người dùng chốt 2026-09-28): footer các scene chỉ ghi nguồn (`Nguồn: SSI ·
-zionle.io.vn · FireAnt`), chữ nhỏ dưới outro là `Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến
+**Miễn trừ chỉ nằm ở outro** (người dùng chốt 2026-09-28): footer các scene là tên kênh (không ghi
+nguồn, từ 2026-09-29), chữ nhỏ dưới outro là `Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến
 nghị đầu tư.` (mặc định của enrich); lời đọc không lặp "không phải khuyến nghị". Outro kêu gọi thả tim ·
 chia sẻ · theo dõi bằng giọng người, không MACD, không số.
 
-**Người dùng chốt 2026-09-22: nhận diện thương hiệu ở scene outro là chỗ trống.** `Kênh của bạn`
-+ monogram sinh sẵn. Logo và tên kênh của người khác không phải thứ để dựng lại; người dùng thả
-file của họ vào `public/` và đặt `visual.logo` thì monogram tự biến mất.
+**Kênh của người dùng là "Radar Chứng Khoán"** (người dùng cho tên 2026-09-29; trước đó outro để chỗ trống
+`Kênh của bạn`). Thẻ outro mang tên đó với monogram `RC` sinh sẵn; lời outro gọi tên kênh (TTS đọc "Radar" là
+`ra đa` qua `voice.lexicon`). Chưa có logo: người dùng thả file vào `public/` và đặt `visual.logo` thì monogram tự
+biến mất. Logo và tên kênh của người khác vẫn không phải thứ để dựng lại.
 
 ## Khi debug
 

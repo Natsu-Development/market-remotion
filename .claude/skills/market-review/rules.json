@@ -323,12 +323,12 @@
     ],
     "roles": {
       "hook": {
-        "job": "Căng thẳng trước, neo sau, trong ba giây: các phiên phân phối rơi xuống nến (beat 1), rồi FTD vẫn đang giữ xu hướng (beat 2); câu cuối HỨA mức phải canh ở cuối video. Không dựng bối cảnh.",
+        "job": "Căng thẳng ai cũng thấy, KHÔNG dùng chữ của hệ thống (không phiên phân phối, FTD, 'theo quy tắc', trạng thái): chỉ số kẹt trong vùng mà phần lớn mã đi xuống; rồi câu hỏi tiền chảy vào đâu và LỜI HỨA cho cuối video. Chuyện hệ thống bắt đầu ở market.",
         "act": "blue",
         "pace": "short",
         "shots": [
-          "push_in",
-          "pull_out"
+          "pull_out",
+          "push_in"
         ]
       },
       "week": {
@@ -340,7 +340,7 @@
         ]
       },
       "market": {
-        "job": "Bối cảnh trên chart ngày: các phiên phân phối còn hiệu lực, FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn khi nào, thêm mấy phiên là đổi trạng thái). Chưa nói điều kiện — để dành cho watch.",
+        "job": "Chuyện hệ thống bắt đầu ở đây: giới thiệu các phiên phân phối còn hiệu lực, gọi tên trạng thái theo quy tắc, FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn khi nào, thêm mấy phiên là đổi trạng thái). Chưa nói điều kiện — để dành cho watch.",
         "act": "blue",
         "pace": "long",
         "shots": [

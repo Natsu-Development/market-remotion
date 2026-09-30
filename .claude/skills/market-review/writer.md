@@ -78,12 +78,14 @@ khó đọc thì nói cách người Việt gọi, và ghi vào `unsupported` n�
 Reel theo arc **hook_payoff** của vox-director, thân là **đếm ngược** cho ba mã dẫn dắt. Người xem quyết định
 trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi scene phải có lý do để xem tiếp.
 
-- **Hook (≤ 3 giây)**: câu đầu ≤ 10 chữ và là CĂNG THẲNG — con số phiên phân phối — trong lúc ba mũi tên đỏ
-  rơi xuống nến. Câu hai là NEO: trạng thái theo quy tắc và FTD đang giữ nó (mũi tên xanh, beat 2). Câu cuối
-  là LỜI HỨA — móc mở 1: "cuối video là mức nào thủng thì gãy" (nói theo cách của bạn). Không dựng bối cảnh.
-- **market** kể bối cảnh: các phiên phân phối, FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn sau
-  bao nhiêu phiên; thêm mấy phiên là đổi trạng thái). KHÔNG nói điều kiện ở đây — để dành cho `watch`.
-  Kết bằng câu dẫn sang độ rộng.
+- **Hook (≤ 3 giây), KHÔNG chữ của hệ thống** (người dùng chốt 30/9: không phiên phân phối, không FTD,
+  không "theo quy tắc", không tên trạng thái): câu đầu ≤ 10 chữ là căng thẳng ai cũng thấy — chỉ số kẹt
+  trong vùng (hộp vàng trên chart) mà phần lớn cổ phiếu đi xuống; câu hai là câu hỏi "tiền đang chảy vào
+  đâu?"; câu cuối là LỜI HỨA — móc mở 1: cuối video có ba mã đang có tiền vào và một mức phải canh. Chưa
+  đọc số độ rộng (scene breadth đọc). Không dựng bối cảnh.
+- **market** là chỗ chuyện hệ thống BẮT ĐẦU: giới thiệu các phiên phân phối (câu đầu), gọi tên trạng thái
+  "theo quy tắc", FTD và đáy nhịp hồi, rồi đồng hồ (phiên cũ nhất hết hạn sau bao nhiêu phiên; thêm mấy
+  phiên là đổi trạng thái). KHÔNG nói điều kiện ở đây — để dành cho `watch`. Kết bằng câu dẫn sang độ rộng.
 - **breadth** là nghịch lý (scene vẽ duy nhất, chấm sáng = mã trên đường trung bình 200 phiên): chỉ số ở
   trạng thái tăng mà phần lớn mã không đi cùng. Một câu kết dẫn: "vậy tiền đang ở đâu?".
 - **spike** gieo móc mở 2: "một mã có mặt ở cả hai bộ lọc — để cuối". Không nói tên mã ở đây.
@@ -134,7 +136,7 @@ Kèm `_script.md`: bài nói liền mạch để đạo diễn đọc như ngư�
 - [ ] Mỗi scene ≤ 2 số đọc ra lời; không scene nào mở bằng con số; câu dài ngắn xen kẽ.
 - [ ] Hook nêu trạng thái theo quy tắc trong câu đầu hoặc headline đầu.
 - [ ] `watch` có "nếu … thì" lấy từ `watch` của fact pack; `market` không nói điều kiện; không câu nào gọi giá.
-- [ ] Hook: câu đầu ≤ 10 chữ là con số phiên phân phối; câu cuối hứa mức phải canh. `spike` gieo "một mã ở cả hai bộ lọc"; leader #1 trả nó.
+- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); câu đầu ≤ 10 chữ; câu cuối hứa ba mã và một mức. `market` gọi tên trạng thái. `spike` gieo "một mã ở cả hai bộ lọc"; leader #1 trả nó.
 - [ ] Ba scene leader cùng khuôn, mỗi mã một chi tiết riêng; eyebrow đếm ngược #3 → #2 → #1.
 - [ ] Mọi chữ số trên màn hình có trong fact pack đúng độ chính xác; mã trên màn hình là mã trong picks.
 - [ ] Mã cổ phiếu trong lời đọc là tên công ty; FTD/RS/EMA50 nói bằng chữ Việt.

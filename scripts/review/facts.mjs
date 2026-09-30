@@ -44,8 +44,20 @@ const label = (s) => R.status[s];
 // ------------------------------------------------------------------ session and distribution
 
 const avg20 = avg(bars.slice(T - 20, T).map((b) => b.v));
+const winFrom = tryJson('content/review/breadth.json')?.rows?.[0]?.t;
+const win = bars.filter((b) => (winFrom ? b.t >= winFrom : true)).slice(-60);
+const winBars = win.length >= 10 ? win : bars.slice(-50);
+const hiBar = winBars.reduce((m, b) => (b.h > m.h ? b : m), winBars[0]);
+const loBar = winBars.reduce((m, b) => (b.l < m.l ? b : m), winBars[0]);
 const session = {
   date, dm: dm(date), dmy: dmy(date),
+  /** The stretch the reel looks at: its range and its net move, for a hook that speaks plainly. */
+  window: {
+    sessions: winBars.length, from: winBars[0].t, fromDm: dm(winBars[0].t),
+    high: round(hiBar.h, 2), highDm: dm(hiBar.t), low: round(loBar.l, 2), lowDm: dm(loBar.t),
+    firstClose: round(winBars[0].c, 2), changePercent: round(pct(last.c, winBars[0].c), 1),
+    positionPercent: round((100 * (last.c - loBar.l)) / (hiBar.h - loBar.l), 0),
+  },
   close: round(last.c, 2), prevClose: round(prev.c, 2),
   change: round(last.c - prev.c, 2), changePercent: round(pct(last.c, prev.c), 2),
   high: round(last.h, 2), low: round(last.l, 2),

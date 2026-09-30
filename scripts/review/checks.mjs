@@ -85,9 +85,11 @@ export default function reviewChecks(reel, {root, rules: R}) {
         }
       }
     }
-    const hook = reel.scenes.find((s) => s.role === 'hook');
-    const said = hook && [hook.narration ?? '', ...onScreen(hook)].some((t) => low(t).includes(low(current.vi)) || low(t).includes(low(current.short)));
-    if (hook && !String(hook.narration).includes('TODO') && !said) warn.push(`${hook.id}: the hook never names the state ("${current.vi}" / "${current.short}")`);
+    // The hook stays free of system words (user, 2026-09-30), so the state must be named by the
+    // end of the market scene.
+    const early = reel.scenes.filter((s) => s.role === 'hook' || s.role === 'market');
+    const said = early.some((s) => [s.narration ?? '', ...onScreen(s)].some((t) => low(t).includes(low(current.vi)) || low(t).includes(low(current.short))));
+    if (early.length && !early.some((s) => String(s.narration).includes('TODO')) && !said) warn.push(`${early.map((s) => s.id).join('/')}: neither the hook nor the market scene names the state ("${current.vi}" / "${current.short}")`);
     if (bad.length) add('review-state', 'fail', `${bad.length} statement(s) disagree with the engine`, bad.join('; '));
     else if (warn.length) add('review-state', 'warn', `${warn.length} note(s)`, warn.join('; '));
     else add('review-state', 'pass', `screen agrees with the engine: ${current.vi}, ${F.distribution.count}/${F.distribution.window} distribution days${F.state.lastFtd ? `, FTD ${F.state.lastFtd.dm}` : ''}`);

@@ -213,24 +213,31 @@ const ftdMarks = (beat) => (ftdVisible
   ? [ftdArrow(ftd, ftdX, beat), lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', beat, 'middle')]
   : []);
 
-// hook — tension, anchor, promise.
+// hook — no system words yet (user, 2026-09-30: nothing about distribution days, FTD or IBD in the
+// hook). Beat 1: the range the index has been stuck in, boxed; beat 2: today's candle and the promise.
 const buildHook = () => {
-  const two = ftdVisible;
+  const Wn = F.session.window;
+  const x0 = barX(index, daily, Wn.from);
+  const boxable = x0 != null && x0 > C.x;
+  const yHi = priceY(index, Wn.high, indexUnit), yLo = priceY(index, Wn.low, indexUnit);
+  const marks = [
+    ...(boxable ? [{kind: 'box', x: clamp(x0), y: clamp(yHi), w: clamp((lastX ?? 0.9) - x0 + 0.008), h: clamp(yLo - yHi), accent: 'gold', beat: 0, label: `Vùng ${vi(Wn.low, 0)} – ${vi(Wn.high, 0)}`}] : []),
+    todayRing(1),
+    lab(clamp(lastX - 0.03), clamp(lastY - 0.09), 'Cuối video: mã dẫn dắt · mức canh', 'gold', 1, 'end'),
+  ];
   push('hook', {
-    beats: todoBeats(two ? 2 : 1),
+    beats: todoBeats(2),
     visual: indexPhoto({
-      annotations: [...idxMarks(0), ...ddLabel(0), ...ftdMarks(1), todayRing(two ? 1 : 0)],
-      shots: two
-        ? [{beat: 0, x: clamp(ddCentre), y: clamp(recentTop + 0.1), zoom: 2.0, move: 'push_in'},
-           {beat: 1, x: clamp((ftdX + (lastX ?? 0.9)) / 2), y: clamp((ftdY + lastY) / 2), zoom: 1.35, move: 'pull_out'}]
-        : [{beat: 0, x: clamp(ddCentre), y: clamp(lastY), zoom: 2.0, move: 'push_in'}],
+      annotations: marks,
+      shots: [
+        {beat: 0, x: clamp(boxable ? (x0 + (lastX ?? 0.9)) / 2 : inC(0.6, 0)[0]), y: clamp((yHi + yLo) / 2), zoom: 1.1, move: 'pull_out'},
+        {beat: 1, x: clamp((lastX ?? 0.85) - 0.06), y: clamp(lastY), zoom: 2.0, move: 'push_in'},
+      ],
     }),
     brief: [
-      `Câu đầu ≤ 10 chữ, là CĂNG THẲNG: ${F.distribution.count} phiên phân phối trên ${F.distribution.window} phiên — beat 1 là ba mũi tên đỏ rơi xuống nến, headline mang con số.`,
-      two
-        ? `Beat 2 là NEO: ${F.state.label} theo quy tắc từ FTD ${ftd.dmy} (mũi tên xanh chỉ lên); vòng vàng ở nến hôm nay: ${fmtPct(F.session.changePercent)}, KL ×${vi(F.session.volumeRatio)} phiên trước — ${F.session.isDistribution ? 'LÀ phiên phân phối' : 'không phải phiên phân phối'}.`
-        : `${F.state.label} theo quy tắc; hôm nay ${fmtPct(F.session.changePercent)}.`,
-      'Câu cuối là LỜI HỨA (móc mở 1): cuối video là mức nào thủng thì gãy — trả ở scene watch.',
+      `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market.`,
+      `Beat 1 — căng thẳng ai cũng thấy: chỉ số kẹt trong vùng ${vi(Wn.low, 0)} – ${vi(Wn.high, 0)} từ ${Wn.fromDm} (${Wn.sessions} phiên, ${fmtPct(Wn.changePercent, 1)}), trong khi phần lớn mã đi xuống (độ rộng: ${vi(F.screener.breadth.line?.last ?? F.screener.breadth.aboveSma200Percent, 1)}% mã trên SMA200 — CHƯA đọc số, scene breadth đọc). Câu đầu ≤ 10 chữ.`,
+      'Beat 2 — câu hỏi + LỜI HỨA: tiền đang chảy vào đâu? Cuối video: ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).',
     ],
   });
 };

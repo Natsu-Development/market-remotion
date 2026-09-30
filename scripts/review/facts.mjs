@@ -152,11 +152,14 @@ if (st.status === 'CONFIRMED_UPTREND' || st.status === 'UNDER_PRESSURE') {
 // ------------------------------------------------------------------ screener
 
 const rowOf = (sym) => ({symbol: sym, ...snap.rows[sym]});
+/** The saved filters a symbol passes today, from the server's own lists — so a scene may say "ở cả ba bộ lọc". */
+const filtersOf = (sym) => Object.entries(snap.filters ?? {}).filter(([, f]) => (f.symbols ?? []).includes(sym)).map(([n]) => n);
 const show = (r, rank) => ({
   rank, symbol: r.symbol, name: r.name, exchange: r.exchange,
   price: r.price, changePercent: round(r.changePercent, 2),
   volumeRatio: r.volumeRatio == null ? null : round(r.volumeRatio, 2),
   rs1m: r.rs_1m, rs52w: r.rs_52w,
+  filters: filtersOf(r.symbol),
 });
 const mv = R.screener.scenes.spike.movers ?? {gainers: 5, losers: 5};
 const spikeRows = snap.members.spike.map(rowOf);
@@ -189,15 +192,38 @@ const leaderDetail = (sym, rank) => {
     chart: a ? {bars: ph.length, from: ph[0]?.t, to: ph[ph.length - 1]?.t} : null,
   };
 };
-const leaders = {
-  filters: R.screener.scenes.leaders.filters,
-  photo: R.screener.scenes.leaders.photo,
-  uptrendCount: snap.filters.Uptrend?.count ?? null,
-  rsStrongCount: snap.filters['RS Strong']?.count ?? null,
-  count: snap.members.leaders.length,
-  top: snap.picks.leaders.map((s, i) => leaderDetail(s, i + 1)),
-  alsoSpiking: snap.picks.leaders.filter((s) => snap.members.spike.includes(s)),
+/**
+ * One table scene of the screener (rules.screener.scenes.<key>, spike aside): its saved filter, the
+ * server's count, and the rows pull.mjs ranked by the scene's own column. The user split RS Strong
+ * and Uptrend into two such scenes on 2026-09-30 — no intersection is shown as a filter of its own.
+ */
+const tableScene = (key) => {
+  const spec = R.screener.scenes[key];
+  const rows = (snap.members[key] ?? []).map(rowOf);
+  return {
+    filter: spec.photo,
+    sortBy: spec.sortBy,
+    count: snap.filters[spec.photo]?.count ?? null,
+    ranked: rows.length,
+    up: rows.filter((r) => r.changePercent > 0).length,
+    down: rows.filter((r) => r.changePercent < 0).length,
+    top: (snap.picks[key] ?? []).map((s, i) => show(rowOf(s), i + 1)),
+  };
 };
+const tables = Object.fromEntries(Object.keys(R.screener.scenes).filter((k) => k !== 'spike').map((k) => [k, tableScene(k)]));
+// The chart countdown: rules.screener.leaders names the scene(s) it draws from; pull.mjs ranked them.
+const LR = R.screener.leaders ?? {from: ['rs', 'uptrend'], top: 3};
+const leaderFrom = [].concat(LR.from);
+const leaders = {
+  from: leaderFrom,
+  filters: [...new Set(leaderFrom.flatMap((k) => R.screener.scenes[k]?.filters ?? []))],
+  count: (snap.members.leaders ?? []).length,
+  top: (snap.picks.leaders ?? []).map((s, i) => leaderDetail(s, i + 1)),
+  alsoSpiking: (snap.picks.leaders ?? []).filter((s) => snap.members.spike.includes(s)),
+};
+if (snap.leaders && [].concat(snap.leaders.from).join() !== leaderFrom.join()) {
+  die(`the ${date} snapshot ranked its leaders from ${[].concat(snap.leaders.from).join(' ∩ ')}, rules.screener.leaders.from now says ${leaderFrom.join(' ∩ ')} — run node scripts/review/pull.mjs --rebuild first`);
+}
 
 // ------------------------------------------------------------------ breadth
 
@@ -299,7 +325,7 @@ const pack = {
     correctionAt: R.distribution.correctionAt,
     ftdMinDay: R.followThrough.minDay,
     ftdMinChangePercent: R.followThrough.minChangePercent,
-    topN: R.screener.scenes.leaders.top,
+    topN: LR.top ?? 3,
   },
   session,
   distribution,
@@ -311,6 +337,7 @@ const pack = {
     volumeVsSmaUnit: snap.volumeVsSmaUnit,
     breadth,
     spike,
+    ...tables,
     leaders,
   },
   ...(weekly ? {weekly} : {}),
@@ -325,7 +352,8 @@ pack.anchors = [
   {label: `Phân phối / ${distribution.window} phiên`, value: `${distribution.count}: ${dd.map((d) => `${d.dm} ${v(d.changePercent)}% ×${v(d.volumeRatio)} (còn ${d.sessionsLeft})`).join(' · ') || '—'}`, path: 'distribution.active'},
   ...(state.lastFtd ? [{label: 'FTD gần nhất', value: `${state.lastFtd.dmy} · ngày ${state.lastFtd.day} · +${v(state.lastFtd.changePercent)}% · KL ×${v(state.lastFtd.volumeRatio)} · đáy nhịp hồi ${v(state.lastFtd.rallyLow)}${state.lastFtd.ended ? ` · kết thúc ${state.lastFtd.ended.dm} (${state.lastFtd.ended.why})` : ''}`, path: 'state.lastFtd'}] : []),
   {label: `Volume spike (${spike.count} mã · ${spike.up} tăng · ${spike.down} giảm)`, value: `tăng: ${spike.gainers.map((s) => `${s.symbol} +${v(s.changePercent)}%`).join(' · ')} — giảm: ${spike.losers.map((s) => `${s.symbol} ${v(s.changePercent)}%`).join(' · ')}`, path: 'screener.spike.gainers / losers'},
-  {label: `RS Strong ∩ Uptrend (${leaders.count} mã)`, value: leaders.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · '), path: 'screener.leaders.top'},
+  ...Object.entries(tables).map(([k, t]) => ({label: `${t.filter} (${t.count} mã · ${t.up} tăng · ${t.down} giảm)`, value: t.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · ') || '—', path: `screener.${k}.top`})),
+  {label: `Dẫn dắt · ${leaders.from.map((k) => R.screener.scenes[k]?.photo ?? k).join(' ∩ ')} (${leaders.count} mã)`, value: leaders.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%${s.filters?.length ? ` (${s.filters.join(', ')})` : ''}`).join(' · ') || '—', path: 'screener.leaders.top'},
   {label: 'Độ rộng', value: `${breadth.aboveSma200}/${breadth.withSma200 ?? breadth.universe} mã trên SMA200 (${v(breadth.aboveSma200Percent, 1)}%) · ${breadth.up} tăng · ${breadth.down} giảm${breadth.line ? ` · đường ${breadth.line.sessions} phiên: ${v(breadth.line.first, 1)}% (${breadth.line.fromDm}) → ${v(breadth.line.last, 1)}% trong khi chỉ số ${breadth.line.indexChangePercent >= 0 ? '+' : ''}${v(breadth.line.indexChangePercent, 1)}%` : ''}`, path: 'screener.breadth'},
   {label: 'Bộ lọc terminal', value: `cache ${pack.source.screenerCachedIct} ICT · ${snap.universe} mã · volume_vs_sma đọc là ${snap.volumeVsSmaUnit === 'percent' ? '% trên TB20' : 'bội số TB20'}`, path: 'screener'},
   {label: `Backtest FTD (${bars.length} phiên)`, value: bt.map((r) => `+${String(r.threshold).replace('.', ',')}%: ${r.ftds} FTD, ${r.higherPercent}% cao hơn sau ${R.followThrough.backtestForwardSessions} phiên`).join(' · '), path: 'backtest.rows'},

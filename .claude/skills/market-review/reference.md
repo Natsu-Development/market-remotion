@@ -29,7 +29,7 @@ Tài liệu phụ của [SKILL.md](SKILL.md). Mọi ngưỡng nằm ở [rules.j
 | `distribution` | `count`, `window`, `active[]` (`dm`, `changePercent`, `volumeRatio`, `sessionsLeft`, `expireLevel`), `nextExpiry`, `toUnderPressure`, `toCorrection` |
 | `state` | `status` + `label`/`short` (rules.status), `since`, `rallyDay`, `rallyLow`, `correctionLow`, `ftd`/`lastFtd` (`dm`, `day`, `changePercent`, `volumeRatio`, `close`, `rallyLow`, `ended`) |
 | `watch[]` | `{if, then}` — điều gì sẽ đổi trạng thái; chất liệu duy nhất cho câu nếu … thì |
-| `screener` | `cachedAt`, `universe`, `volumeVsSmaUnit`, `breadth`, `spike` (`count`, `up`, `down`, `top[]`), `leaders` (`uptrendCount`, `rsStrongCount`, `count`, `top[]` kèm `ema50`, `aboveEma50Percent`, `high52w`, `fromHigh52wPercent`, `signal`), `alsoSpiking` |
+| `screener` | `cachedAt`, `universe`, `volumeVsSmaUnit`, `breadth`, `spike` (`count`, `up`, `down`, `top[]`, `gainers[]`, `losers[]`), `rs` và `uptrend` (mỗi bộ lọc một scene từ 2026-09-30: `filter`, `count`, `ranked`, `up`, `down`, `top[]` — mỗi dòng kèm `filters[]` = các bộ lọc đã lưu mà mã đó qua), `leaders` (đếm ngược: `from[]` = scene nguồn theo `rules.screener.leaders`, `filters[]`, `count` = số mã qua cả hai, `top[]` kèm `ema50`, `aboveEma50Percent`, `high52w`, `fromHigh52wPercent`, `signal`, `alsoSpiking`) |
 | `weekly` | chỉ bản tuần: nến tuần, `changePercent`, `volumeVsPriorWeek`, phiên phân phối trong tuần, chuyển trạng thái, `newLeaders`/`droppedLeaders` so snapshot tuần trước |
 | `backtest` | FTD theo ngưỡng `followThrough.backtestThresholds` trên toàn lịch sử |
 | `anchors[]` | các dòng `{label, value, path}` cho bảng số của trang duyệt |
@@ -107,7 +107,7 @@ hình), bốn vline phiên phân phối/FTD trùng đúng nến. Soát bằng kh
 | market | mũi tên đỏ, nhãn "N/25 phiên phân phối" (tắt ở beat 3), nhãn phiên nặng nhất | mũi tên xanh lá FTD + nhãn, hline vàng đáy nhịp hồi | nhãn "d/m hết hạn sau N phiên" ở phiên cũ nhất, nhãn "4 phiên → chịu áp lực · 6 phiên → điều chỉnh"; máy cận |
 | breadth | `lines`: pane trên = VN-INDEX đóng cửa (vẽ ở beat 1), pane dưới = % mã trên SMA200 (vẽ ở beat 2), mốc FTD; lịch sử từ `scripts/review/breadth.mjs` (GET /analyze từng mã có SMA200, cache `.review-cache/analyze-all/<ngày>/`, ~1 phút cho ~900 mã). Không có lịch sử thì rơi về `pictogram` chấm | (đường dưới) | — |
 | spike | panel `movers` (vẽ): cột TĂNG MẠNH NHẤT — 5 mã của bộ lọc theo % giảm dần (beat 1) | cột GIẢM MẠNH NHẤT — 5 mã theo % tăng dần, rơi sâu nhất trên đầu (beat 2); mỗi dòng mã · tên · % · KL ×; caption "KHỐI LƯỢNG ĐỘT BIẾN · N MÃ" (người dùng chốt 30/9; `rules.screener.scenes.spike.visual: "photo"` trả về bảng chụp) | — |
-| leaders | hộp quanh ba dòng; nhãn tóm tắt đè lên nút Columns/Export | hộp từng ô RS 1M, máy cận | — |
+| rs / uptrend | ảnh bảng Screener của MỘT bộ lọc (RS Strong / Uptrend, xếp theo RS 1M; người dùng tách 2026-09-30): hộp quanh ba dòng được chọn — hoà điểm RS có thể đẩy một dòng xuống dưới hàng 3, `lib/screener-rows.mjs` chấp nhận khi không có dòng lạ đứng trên; nhãn "N mã <bộ lọc>" đè lên nút Columns/Export | hộp từng ô RS 1M, máy cận | — |
 | leader #3/#2/#1 | nhãn "MÃ · RS 1M … · ±x%", hline EMA50, và MỘT chi tiết riêng: hline đỉnh 52 tuần "Đỉnh 52T … · −x%" (mã còn xa / sát đỉnh) hoặc hộp trên cột khối lượng hôm nay "KL ×…" (mã cũng ở Volume spike) | mũi tên vào nến cuối "±x% trên EMA50", máy cận | — |
 | watch | hline vàng "Thủng <đáy nhịp hồi> → FTD thất bại", hline xanh "Chạm <mức hết hạn thấp nhất> → phiên d/m hết hạn"; máy tilt từ đáy lên | vòng vàng nến hôm nay, nhãn "Thêm N phiên phân phối → <trạng thái kế>", "d/m hết hạn sau N phiên"; máy ĐỨNG YÊN (payoff) | — |
 
@@ -118,8 +118,8 @@ chỉ nhận `up`/`down` trên mark ảnh, không trên headline. Kiểu `style:
 NGẮN (~22 px, `ARROW` 0,025) và THẲNG đứng, đầu mũi tên cách đỉnh/đáy nến ~4 px (`GAP`). Hai phiên phân phối sát nhau vẫn
 tách được vì mỗi đầu nằm ở đỉnh nến của chính nó (khác độ cao). Trục thời gian của hiệu chỉnh được khớp
 lại trên chính các cột nến (`calib_auto.py`, `xFit`) — chỉ dùng `calib_chart.py` thì đầu mũi tên lệch ~0,4 nến.
-| spike | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
-| leaders | hộp quanh ba dòng; nhãn "N mã qua RS Strong + Uptrend" | hộp từng ô RS 1M, máy cận |
+| spike (ảnh, khi `visual: "photo"`) | hộp quanh ba dòng; nhãn "Top 3: KL ×…" đè lên nút Columns/Export | hộp từng ô VOL/SMA, máy cận |
+| rs / uptrend | hộp quanh ba dòng của bộ lọc đó; nhãn "N mã RS Strong" / "N mã Uptrend" | hộp từng ô RS 1M, máy cận |
 | leader | nhãn "MÃ · RS 1M … · ±x%", hline EMA50 | mũi tên vào nến cuối "±x% trên EMA50", máy cận |
 
 Nhãn chỉ mang số của fact pack; check `facts` của verify soi từng số.

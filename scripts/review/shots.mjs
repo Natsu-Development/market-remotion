@@ -24,6 +24,7 @@ import {spawnSync} from 'node:child_process';
 import {existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {PATHS, ROOT, abs, cli, die, readJson, rules, tryJson, writeJson, writeRows} from './lib/common.mjs';
+import {topMatches} from './lib/screener-rows.mjs';
 
 const {opt} = cli();
 const R = rules();
@@ -134,19 +135,20 @@ if (ONLY.has('screener')) {
   for (const [scene, spec] of Object.entries(R.screener.scenes)) {
     if (spec.visual === 'movers') { console.log(`\n▸ Screener · ${spec.photo}: drawn as a movers board, no photo`); continue; }
     const rel = `${DIR}/${scene}.png`;
-    const args = {filter: spec.photo, sort: sc.sortColumn[spec.sortBy], keep: sc.keep[scene], rows: sc.rows, zoom: sc.zoom};
+    const keep = sc.keep[scene] ?? die(`rules.shots.screener.keep has no column list for the "${scene}" scene`);
+    const args = {filter: spec.photo, sort: sc.sortColumn[spec.sortBy], keep, rows: sc.rows, zoom: sc.zoom};
     shoot(`Screener · ${spec.photo} by ${args.sort}`, [
       '--site=zionle', '--page=screener', `--allow-post=${R.screener.endpoint}`,
       `--viewport=${sc.viewport}`, `--scale=${sc.scale}`, '--wait=5000',
       '--js=scripts/review/js/screener.js', `--js-args=${JSON.stringify(args)}`, `--out=public/${rel}`,
     ]);
     const side = guardOk(rel);
-    const got = (side?.js?.rows ?? []).slice(0, spec.top).map((r) => r.symbol);
-    const want = facts.screener[scene].top.map((x) => x.symbol);
-    // Ties (three leaders at RS 1M 94 on 29/9) may come back in another order; the set must match.
-    if ([...got].sort().join() !== [...want].sort().join()) {
-      die(`${rel}: the photo's top ${spec.top} (${got.join(', ')}) are not the fact pack's (${want.join(', ')}) — the screener moved since pull.mjs; pull again`, 1);
-    }
+    const want = (facts.screener[scene]?.top ?? []).map((x) => x.symbol);
+    // Ties on the sort column (three names at RS 1M 94 on 29/9) may come back in another order, or
+    // push a pick below row 3 — allowed as long as nothing untied sits above it (lib/screener-rows.mjs).
+    const m = topMatches(side?.js?.rows ?? [], args.sort, want);
+    if (!m.ok) die(`${rel}: the photo's rows are not the fact pack's picks (${want.join(', ')}) — ${m.why}. The screener moved since pull.mjs; pull again`, 1);
+    console.log(`  rows: ${m.why}`);
     made.push(rel);
   }
 }

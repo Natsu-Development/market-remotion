@@ -53,7 +53,9 @@ thoả thuận). `make-series.mjs` là bản DỰNG LẠI cũ, chỉ còn để 
 **market-review — skill thứ hai, TÁCH khỏi market-video** (người dùng tạo 2026-09-29). Reel tổng kết
 phiên (`DailyReview`, 8 scene ~70s) và tuần (`WeeklyReview`): trạng thái thị trường theo quy tắc phiên phân
 phối/FTD (O'Neil, dùng trong hệ thống Minervini; người dùng đặt phân phối ≤ −0,5% thay −0,2% của IBD) và hai
-bộ lọc đã lưu trên terminal (Volume spike; RS Strong ∩ Uptrend, top 3 kèm chart từng mã). Luật riêng ở
+bộ lọc đã lưu trên terminal, MỖI BỘ LỌC MỘT SCENE (Volume spike; RS Strong; Uptrend — người dùng tách RS Strong và
+Uptrend 2026-09-30, "not union it first"), rồi đếm ngược ba mã có mặt ở cả RS Strong lẫn Uptrend kèm chart từng mã
+(`screener.leaders.from` trong rules.json; scene bảng khai ở `screener.scenes` — thêm scene = thêm vai + cột `keep`). Luật riêng ở
 `.claude/skills/market-review/rules.json`, prompt người viết riêng `writer.md`, script riêng `scripts/review/`.
 Reel của nó mang trường `rules`; `scripts/lib/rules.mjs` cho verify/review-page/voiceover đọc luật theo reel
 và chỉ cho nó thừa hưởng hằng số của máy (layout, audio, series, clip giọng) — reel không có `rules` (Channel)

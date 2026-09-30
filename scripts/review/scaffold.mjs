@@ -180,9 +180,12 @@ const maskOf = (m) => (m?.length ? {masks: m, maskColor: R.shots.maskColor} : {}
 //            words promise the level to watch at the end (open loop 1)
 //   market   context: the count, the rally low, the clock (when the oldest DD drops out)
 //   breadth  pattern interrupt — the first drawn panel — and the paradox that bridges to the filters
-//   spike    the volume table; the words tease the name on both filters (open loop 2)
-//   leaders  the leaders table
-//   leader   #3 → #2 → #1, one distinct detail each; #1 pays loop 2
+//   spike    the volume board; the words tease the name at its top that also leads (open loop 2)
+//   rs       the RS Strong table on its own — one saved filter per scene (user 2026-09-30: "separate
+//            the filter: Uptrend and RS Strong, not union it first")
+//   uptrend  the Uptrend table on its own; it closes on how many names are in both and opens the countdown
+//   leader   #3 → #2 → #1 — the names in every rules.screener.leaders.from scene, ranked by RS 1M —
+//            one distinct detail each; #1 pays loop 2
 //   watch    the payoff, static camera: the levels and the count that change the state tomorrow
 //   outro    the button
 // The order is rules.formats.<format>.roles; camera moves alternate between neighbouring shots.
@@ -354,18 +357,29 @@ const buildMovers = () => {
   });
 };
 
-// spike (photo fallback) and leaders — the terminal's own tables.
+// spike (photo fallback), rs and uptrend — the terminal's own tables, ONE saved filter per scene
+// (user, 2026-09-30: "separate the filter: Uptrend and RS Strong, not union it first").
+const savedFilter = (name) => (tryJson(PATHS.filters)?.filters ?? []).find((f) => f.name === name) ?? null;
+const FIELD_VI = {rs_1m: 'RS 1M', rs_3m: 'RS 3M', rs_52w: 'RS 52W', volume_sma20: 'KL TB20', volume_vs_sma: 'KL so TB20', current_price: 'giá', ema_9: 'EMA9', ema_21: 'EMA21', ema_50: 'EMA50', sma_200: 'SMA200'};
+const OP_VI = {'>=': '≥', '<=': '≤'};
+const valVi = (x) => (typeof x === 'number' && Math.abs(x) >= 1e6 ? `${vi(x / 1e6, 1)}M` : String(x));
+/** "RS 1M ≥ 60 · KL TB20 ≥ 1,0M" — the saved filter's conditions, for the brief only (no on-screen number). */
+const describeFilter = (f) => (f?.conditions ?? []).map((c) => `${FIELD_VI[c.field] ?? c.field} ${OP_VI[c.op] ?? c.op} ${c.rhs_field ? FIELD_VI[c.rhs_field] ?? c.rhs_field : valVi(c.value)}`).join(' · ');
 const buildTable = (scene) => {
   const p = need(photo(scene), scene);
   const t = table(p);
-  const picks = F.screener[scene].top;
+  const S = F.screener[scene] ?? die(`${FACTS} has no screener.${scene} — run node scripts/review/facts.mjs --format=${FORMAT} again`);
+  const picks = S.top;
+  if (!picks.length) die(`${FACTS}: screener.${scene}.top is empty — pull.mjs ranked no rows for "${S.filter}"`);
   const rows = picks.map((x) => t.rows.find((r) => r.symbol === x.symbol)).filter(Boolean);
   if (rows.length !== picks.length) die(`public/${p.rel}: rows for ${picks.map((x) => x.symbol).join(', ')} not all in the photo — re-shoot`);
   const top = Math.min(...rows.map((r) => r.y));
   const bottom = Math.max(...rows.map((r) => r.y + r.h));
-  // Beat 1: the three rows. Beat 2: the column the scene is about, boxed cell by cell — the
-  // numbers stay the terminal's own; one summary plate lies over the table's Columns/Export buttons.
-  const focus = R.shots.screener.sortColumn[R.screener.scenes[scene].sortBy];
+  // Beat 1: the picked rows (a tie on the sort column may put one of them below row 3). Beat 2: the
+  // column the scene is about, boxed cell by cell — the numbers stay the terminal's own; one summary
+  // plate lies over the table's Columns/Export buttons.
+  const spec = R.screener.scenes[scene];
+  const focus = R.shots.screener.sortColumn[spec.sortBy];
   const marks = [{kind: 'box', x: t.rows[0].x, y: clamp(top), w: t.rows[0].w, h: clamp(bottom - top), accent: 'gold', beat: 0, until: 0}];
   for (const r of rows) {
     const c = r.cells[focus];
@@ -375,12 +389,17 @@ const buildTable = (scene) => {
   const uiMid = t.ui.length ? t.ui[0].y + t.ui[0].h / 2 : (t.count ? t.count.y + t.count.h / 2 : t.crop.y + 0.05);
   const summary = scene === 'spike'
     ? `Top ${picks.length}: KL ×${picks.map((x) => vi(x.volumeRatio)).join(' · ×')}`
-    : `${F.screener.leaders.count} mã qua RS Strong + Uptrend`;
+    : `${S.count} mã ${S.filter}`;
   marks.push(lab(clamp(uiRight), clamp(uiMid), summary, 'gold', 0, 'end'));
   const cellsMid = rows.map((r) => r.cells[focus]).filter(Boolean);
   const mid = (top + bottom) / 2;
   const focusX = cellsMid.length ? cellsMid[0].x + cellsMid[0].w / 2 : t.crop.x + t.crop.w * 0.42;
-  const S = F.screener[scene];
+  const focusVal = (x) => (spec.sortBy === 'volumeRatio' ? `KL ×${vi(x.volumeRatio)}` : `${focus} ${x.rs1m}`);
+  const also = (x) => (x.filters ?? []).filter((n) => n !== S.filter);
+  // The table right before the countdown closes on the names in every leaders.from scene and opens it.
+  const LD = F.screener.leaders ?? {from: [], filters: [], count: 0, top: []};
+  const feeds = fmt.roles[fmt.roles.indexOf(scene) + 1] === 'leader';
+  const others = Object.entries(R.screener.scenes).filter(([k]) => k !== scene && k !== 'spike').map(([, s]) => s.photo);
   push(scene, {
     beats: todoBeats(2),
     visual: imageOf(p, 'zionle.io.vn', {
@@ -394,8 +413,10 @@ const buildTable = (scene) => {
           `GIEO MÓC 2 (không nói tên): một mã trong bảng này cũng có mặt ở bộ lọc dẫn dắt — để cuối.${F.screener.leaders.alsoSpiking.length ? '' : ' (Hôm nay không có mã nào — bỏ móc này.)'}`,
         ]
       : [
-          `Uptrend (giá trên EMA50, EMA50 trên SMA200) có ${S.uptrendCount} mã; RS Strong (RS 1M từ 60) có ${S.rsStrongCount}; qua cả hai: ${S.count} mã. Ba mã dẫn đầu theo RS 1M: ${S.top.map((x) => `${x.symbol} RS 1M ${x.rs1m} ${fmtPct(x.changePercent)}`).join('; ')}.`,
-          'Scene ngắn: cầu nối vào đếm ngược. Câu cuối: "đếm ngược từ ba".',
+          `Bộ lọc "${S.filter}" của terminal (${describeFilter(savedFilter(S.filter)) || 'điều kiện đã lưu'}): ${S.count} mã, hôm nay ${S.up} tăng, ${S.down} giảm${S.ranked != null && S.ranked !== S.count ? `; ${S.count - S.ranked} mã chưa đủ đường trung bình nên không xếp hạng` : ''}. Ba mã đứng đầu theo ${focus}: ${picks.map((x) => `${x.symbol} ${focusVal(x)} ${fmtPct(x.changePercent)}${also(x).length ? ` (cũng ở ${also(x).join(', ')})` : ''}`).join('; ')}.`,
+          feeds
+            ? `Bảng này MỞ ĐẾM NGƯỢC: ${LD.count} mã có mặt ở cả ${LD.filters.join(' lẫn ') || 'hai bộ lọc'} (số này lên headline được: screener.leaders.count); ba mã dẫn dắt theo RS 1M trong số đó: ${LD.top.map((x) => `${x.symbol} RS 1M ${x.rs1m}`).join(', ') || '—'} — có chart riêng ở ba scene sau (#3 → #1). Câu cuối: "đếm ngược từ ba". KHÔNG gộp hai bộ lọc thành một bảng trong lời: bảng này vẫn là ${S.filter} một mình.`
+            : `Một lát cắt riêng, KHÔNG gộp với ${others.join(' / ') || 'bộ lọc khác'} (người dùng tách mỗi bộ lọc một scene, 2026-09-30): kể bộ lọc này đếm gì và ba mã đầu là ai. Không đếm ngược ở đây.`,
         ],
   });
 };
@@ -421,7 +442,7 @@ const buildLeader = (L, rank) => {
     if (spiking && L.volumeRatio != null) {
       // The terminal's volume pane sits under the price pane (y 0.553..0.697 of the photo).
       marks.push({kind: 'box', x: clamp(closeX - 0.007), y: 0.556, w: 0.014, h: clamp(crop.y + crop.h - 0.556 - 0.006), accent: 'gold', beat: 0, label: `KL ×${vi(L.volumeRatio)}`});
-      detail = `khối lượng hôm nay ×${vi(L.volumeRatio)} trung bình 20 phiên (hộp vàng trên cột khối lượng) — mã ở CẢ HAI bộ lọc`;
+      detail = `khối lượng hôm nay ×${vi(L.volumeRatio)} trung bình 20 phiên (hộp vàng trên cột khối lượng) — mã vừa đột biến khối lượng vừa dẫn dắt`;
     } else if (L.high52w != null) {
       const hy = priceY(p, L.high52w);
       if (hy > 0.03 && hy < crop.y + crop.h - 0.03) marks.push({kind: 'hline', y: clamp(hy), accent: 'gold', beat: 0, label: `Đỉnh 52T ${vi(L.high52w)} · ${fmtPct(L.fromHigh52wPercent, 1)}`, labelSide: 'left'});
@@ -438,8 +459,8 @@ const buildLeader = (L, rank) => {
       shots: [{beat: 0, x: clamp(crop.x + crop.w / 2), y: clamp(crop.y + crop.h / 2), zoom: 1.0, move: 'push_in'}, {beat: 1, x: clamp(closeX - 0.05), y: clamp(closeY), zoom: 1.8, move: 'pull_out'}],
     }),
     brief: [
-      `#${rank} — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}; trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}.`,
-      `Chi tiết riêng của mã này: ${detail || 'không có'}.${rank === 1 && spiking ? ' Đây là mã TRẢ MÓC 2: "mã ở cả hai bộ lọc".' : ''}`,
+      `#${rank} — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}; trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}. Qua bộ lọc hôm nay: ${(L.filters ?? []).join(' · ') || '—'} (dẫn dắt = có mặt ở cả ${(F.screener.leaders?.filters ?? []).join(' lẫn ')}).`,
+      `Chi tiết riêng của mã này: ${detail || 'không có'}.${rank === 1 && spiking ? ' Đây là mã TRẢ MÓC 2 của scene spike: mã đầu bảng khối lượng cũng là mã dẫn dắt (đừng nói "cả hai bộ lọc" — reel có ba).' : ''}`,
       L.signal ? `Tín hiệu mới nhất trên terminal: ${L.signal.type} ở ${vi(L.signal.price)} ngày ${L.signal.dm} — chỉ nhắc nếu khớp với chart đang chiếu.` : 'Terminal chưa có tín hiệu cho mã này.',
       'Cùng khuôn câu với hai scene leader kia; đọc tên công ty thay cho mã (TTS đọc mã chữ cái thất thường); mã giữ trên màn hình.',
     ],
@@ -500,7 +521,9 @@ const buildOutro = () => push('outro', {
   brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
 });
 
-const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), leaders: () => buildTable('leaders'), watch: buildWatch, week: buildWeek, outro: buildOutro};
+const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), watch: buildWatch, week: buildWeek, outro: buildOutro};
+// Every other table scene of the screener (rs, uptrend — one saved filter each) is a boxed photo.
+for (const k of Object.keys(R.screener.scenes)) builders[k] ??= () => buildTable(k);
 const leaderTotal = fmt.roles.filter((r) => r === 'leader').length;
 let leaderIdx = 0;
 for (const role of fmt.roles) {

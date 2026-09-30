@@ -181,12 +181,12 @@
     "volumeVsSmaUnit": "percent",
     "breadth": {
       "universe": 1466,
+      "withEma50": 1455,
       "aboveEma50": 496,
+      "withSma200": 895,
       "aboveSma200": 250,
       "up": 492,
       "down": 505,
-      "withSma200": 895,
-      "withEma50": 1455,
       "aboveSma200Percent": 27.9,
       "aboveEma50Percent": 34.1,
       "upPercent": 33.6,
@@ -640,7 +640,12 @@
           "changePercent": 6.4,
           "volumeRatio": 2.44,
           "rs1m": 94,
-          "rs52w": 96
+          "rs52w": 96,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
         },
         {
           "rank": 2,
@@ -651,7 +656,11 @@
           "changePercent": 2.1,
           "volumeRatio": 2.05,
           "rs1m": 82,
-          "rs52w": 92
+          "rs52w": 92,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
         },
         {
           "rank": 3,
@@ -662,7 +671,10 @@
           "changePercent": -4.4,
           "volumeRatio": 1.7,
           "rs1m": 20,
-          "rs52w": 67
+          "rs52w": 67,
+          "filters": [
+            "Volume spike"
+          ]
         }
       ],
       "up": 10,
@@ -678,7 +690,12 @@
           "changePercent": 6.4,
           "volumeRatio": 2.44,
           "rs1m": 94,
-          "rs52w": 96
+          "rs52w": 96,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
         },
         {
           "rank": 2,
@@ -689,7 +706,11 @@
           "changePercent": 4.26,
           "volumeRatio": 1.15,
           "rs1m": 95,
-          "rs52w": 54
+          "rs52w": 54,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
         },
         {
           "rank": 3,
@@ -700,7 +721,11 @@
           "changePercent": 3.42,
           "volumeRatio": 1.64,
           "rs1m": 73,
-          "rs52w": 88
+          "rs52w": 88,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
         },
         {
           "rank": 4,
@@ -711,7 +736,10 @@
           "changePercent": 3.25,
           "volumeRatio": 1.07,
           "rs1m": 20,
-          "rs52w": 5
+          "rs52w": 5,
+          "filters": [
+            "Volume spike"
+          ]
         },
         {
           "rank": 5,
@@ -722,7 +750,10 @@
           "changePercent": 2.3,
           "volumeRatio": 1.09,
           "rs1m": 30,
-          "rs52w": 80
+          "rs52w": 80,
+          "filters": [
+            "Volume spike"
+          ]
         }
       ],
       "losers": [
@@ -735,7 +766,10 @@
           "changePercent": -6.79,
           "volumeRatio": 1.67,
           "rs1m": 10,
-          "rs52w": 31
+          "rs52w": 31,
+          "filters": [
+            "Volume spike"
+          ]
         },
         {
           "rank": 2,
@@ -746,7 +780,10 @@
           "changePercent": -4.4,
           "volumeRatio": 1.7,
           "rs1m": 20,
-          "rs52w": 67
+          "rs52w": 67,
+          "filters": [
+            "Volume spike"
+          ]
         },
         {
           "rank": 3,
@@ -757,7 +794,10 @@
           "changePercent": -1.27,
           "volumeRatio": 1.1,
           "rs1m": 19,
-          "rs52w": 24
+          "rs52w": 24,
+          "filters": [
+            "Volume spike"
+          ]
         },
         {
           "rank": 4,
@@ -768,7 +808,10 @@
           "changePercent": -0.91,
           "volumeRatio": 1.14,
           "rs1m": 12,
-          "rs52w": 4
+          "rs52w": 4,
+          "filters": [
+            "Volume spike"
+          ]
         },
         {
           "rank": 5,
@@ -779,18 +822,136 @@
           "changePercent": -0.71,
           "volumeRatio": 1.2,
           "rs1m": 86,
-          "rs52w": 91
+          "rs52w": 91,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        }
+      ]
+    },
+    "rs": {
+      "filter": "RS Strong",
+      "sortBy": "rs_1m",
+      "count": 26,
+      "ranked": 26,
+      "up": 17,
+      "down": 8,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "AAS",
+          "name": "Công ty cổ phần Chứng khoán SmartInvest",
+          "exchange": "UPCOM",
+          "price": 9.8,
+          "changePercent": 4.26,
+          "volumeRatio": 1.15,
+          "rs1m": 95,
+          "rs52w": 54,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
+        },
+        {
+          "rank": 2,
+          "symbol": "PVP",
+          "name": "CTCP Vận tải Dầu khí Thái Bình Dương",
+          "exchange": "HOSE",
+          "price": 21.9,
+          "changePercent": 5.04,
+          "volumeRatio": 1.69,
+          "rs1m": 95,
+          "rs52w": 97,
+          "filters": [
+            "RS Strong"
+          ]
+        },
+        {
+          "rank": 3,
+          "symbol": "BSR",
+          "name": "Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam",
+          "exchange": "HOSE",
+          "price": 32.5,
+          "changePercent": 0.31,
+          "volumeRatio": 1.09,
+          "rs1m": 94,
+          "rs52w": 98,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        }
+      ]
+    },
+    "uptrend": {
+      "filter": "Uptrend",
+      "sortBy": "rs_1m",
+      "count": 14,
+      "ranked": 14,
+      "up": 6,
+      "down": 7,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "BSR",
+          "name": "Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam",
+          "exchange": "HOSE",
+          "price": 32.5,
+          "changePercent": 0.31,
+          "volumeRatio": 1.09,
+          "rs1m": 94,
+          "rs52w": 98,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 2,
+          "symbol": "MSR",
+          "name": "Công ty Cổ phần Masan High-Tech Materials",
+          "exchange": "UPCOM",
+          "price": 54.9,
+          "changePercent": 4.37,
+          "volumeRatio": 0.79,
+          "rs1m": 94,
+          "rs52w": 99,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 3,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 24.95,
+          "changePercent": 6.4,
+          "volumeRatio": 2.44,
+          "rs1m": 94,
+          "rs52w": 96,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
         }
       ]
     },
     "leaders": {
+      "from": [
+        "rs",
+        "uptrend"
+      ],
       "filters": [
         "RS Strong",
         "Uptrend"
       ],
-      "photo": "Uptrend",
-      "uptrendCount": 14,
-      "rsStrongCount": 26,
       "count": 10,
       "top": [
         {
@@ -803,6 +964,11 @@
           "volumeRatio": 1.09,
           "rs1m": 94,
           "rs52w": 98,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
           "ema50": 27.99,
           "sma200": 25.39,
           "aboveEma50Percent": 16.1,
@@ -831,6 +997,10 @@
           "volumeRatio": 0.79,
           "rs1m": 94,
           "rs52w": 99,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
           "ema50": 45.05,
           "sma200": 38.63,
           "aboveEma50Percent": 21.9,
@@ -859,6 +1029,11 @@
           "volumeRatio": 2.44,
           "rs1m": 94,
           "rs52w": 96,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
           "ema50": 21.11,
           "sma200": 19.84,
           "aboveEma50Percent": 18.2,
@@ -939,8 +1114,18 @@
       "path": "screener.spike.gainers / losers"
     },
     {
-      "label": "RS Strong ∩ Uptrend (10 mã)",
+      "label": "RS Strong (26 mã · 17 tăng · 8 giảm)",
+      "value": "AAS RS1M 95 · +4,26% · PVP RS1M 95 · +5,04% · BSR RS1M 94 · +0,31%",
+      "path": "screener.rs.top"
+    },
+    {
+      "label": "Uptrend (14 mã · 6 tăng · 7 giảm)",
       "value": "BSR RS1M 94 · +0,31% · MSR RS1M 94 · +4,37% · PVT RS1M 94 · +6,4%",
+      "path": "screener.uptrend.top"
+    },
+    {
+      "label": "Dẫn dắt · RS Strong ∩ Uptrend (10 mã)",
+      "value": "BSR RS1M 94 · +0,31% (Volume spike, RS Strong, Uptrend) · MSR RS1M 94 · +4,37% (RS Strong, Uptrend) · PVT RS1M 94 · +6,4% (Volume spike, RS Strong, Uptrend)",
       "path": "screener.leaders.top"
     },
     {

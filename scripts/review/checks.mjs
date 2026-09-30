@@ -14,6 +14,7 @@
  */
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {topMatches} from './lib/screener-rows.mjs';
 
 const read = (root, rel) => {
   try { return JSON.parse(readFileSync(resolve(root, rel), 'utf8')); } catch { return null; }
@@ -98,7 +99,14 @@ export default function reviewChecks(reel, {root, rules: R}) {
   // ---------------------------------------------------------------- review-picks
   {
     const bad = [];
-    const picked = new Set([...F.screener.spike.top, ...F.screener.leaders.top, ...(F.screener.spike.gainers ?? []), ...(F.screener.spike.losers ?? [])].map((x) => x.symbol));
+    // Every table scene of the screener (spike, rs, uptrend — one saved filter each since 2026-09-30),
+    // the movers board's two columns and the chart countdown.
+    const tableScenes = Object.keys(R.screener?.scenes ?? {});
+    const picked = new Set([
+      ...tableScenes.flatMap((k) => F.screener[k]?.top ?? []),
+      ...(F.screener.leaders?.top ?? []),
+      ...(F.screener.spike?.gainers ?? []), ...(F.screener.spike?.losers ?? []),
+    ].map((x) => x.symbol));
     for (const s of reel.scenes) {
       for (const text of onScreen(s)) {
         for (const [tk] of text.matchAll(/\b[A-Z]{3}\b/g)) {
@@ -108,16 +116,18 @@ export default function reviewChecks(reel, {root, rules: R}) {
     }
     const leaders = reel.scenes.filter((s) => s.role === 'leader');
     for (const [k, s] of leaders.entries()) {
-      const want = F.screener.leaders.top[k]?.symbol;
+      const want = F.screener.leaders?.top?.[k]?.symbol;
       if (want && !String(s.visual?.src).includes(`/${want.toLowerCase()}-terminal.png`)) bad.push(`${s.id}: leader ${k + 1} is ${want} but the photo is ${s.visual?.src}`);
     }
-    for (const scene of ['spike', 'leaders']) {
+    for (const scene of tableScenes) {
       const s = reel.scenes.find((x) => x.role === scene);
       if (!s || s.visual?.type !== 'image') continue;
-      const rows = read(root, `public/${s.visual.src.replace(/\.png$/, '')}.json`)?.js?.rows ?? [];
-      const top = F.screener[scene].top.map((x) => x.symbol);
-      const got = rows.slice(0, top.length).map((r) => r.symbol);
-      if ([...got].sort().join() !== [...top].sort().join()) bad.push(`${s.id}: the photo's top rows are ${got.join(', ') || '?'}, the fact pack's picks ${top.join(', ')}`);
+      const side = read(root, `public/${s.visual.src.replace(/\.png$/, '')}.json`);
+      const top = (F.screener[scene]?.top ?? []).map((x) => x.symbol);
+      const sortColumn = R.shots?.screener?.sortColumn?.[R.screener.scenes[scene].sortBy] ?? side?.js?.sortedBy;
+      if (side?.js?.filter && side.js.filter !== R.screener.scenes[scene].photo) bad.push(`${s.id}: the photo shows the "${side.js.filter}" filter, the scene is "${R.screener.scenes[scene].photo}"`);
+      const m = topMatches(side?.js?.rows ?? [], sortColumn, top);
+      if (!m.ok) bad.push(`${s.id}: the photo's rows are not the fact pack's picks (${top.join(', ')}) — ${m.why}`);
     }
     if (bad.length) add('review-picks', 'fail', `${bad.length} pick problem(s)`, bad.join('; '));
     else add('review-picks', 'pass', `tickers on screen are the fact pack's picks; photos show the same rows`);

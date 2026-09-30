@@ -84,9 +84,16 @@
           "losers": 5
         }
       },
-      "leaders": {
+      "rs": {
         "filters": [
-          "RS Strong",
+          "RS Strong"
+        ],
+        "photo": "RS Strong",
+        "sortBy": "rs_1m",
+        "top": 3
+      },
+      "uptrend": {
+        "filters": [
           "Uptrend"
         ],
         "photo": "Uptrend",
@@ -94,7 +101,16 @@
         "top": 3
       }
     },
-    "_leaders": "Uptrend's liquidity floor (volume_sma20 >= 1.2M) is stricter than RS Strong's (>= 1M), so RS Strong AND Uptrend = Uptrend rows with rs_1m >= 60. Sorted by RS 1M, those rows come first in the Uptrend table, which is the photo.",
+    "_scenes": "One saved filter per table scene (user, 2026-09-30: 'separate the filter: Uptrend and RS Strong, not union it first' — until then one `leaders` scene showed RS Strong ∩ Uptrend). Each scene photographs its own filter's table sorted by `sortBy` and boxes its `top` rows; the key is the scene's role and its id (rd-<date>-rs). Adding a scene here means adding its role to formats.*.roles, arc.roles and shots.screener.keep.",
+    "leaders": {
+      "from": [
+        "rs",
+        "uptrend"
+      ],
+      "sortBy": "rs_1m",
+      "top": 3
+    },
+    "_leaders": "The #3 → #1 chart countdown: the names in EVERY scene listed in `from` (a single scene key = that scene's own ranking), ranked by `sortBy`. [\"rs\", \"uptrend\"] keeps the countdown the user picked on 2026-09-29 — RS Strong ∩ Uptrend, i.e. strong AND in an uptrend — while the two filters are shown as two separate scenes first (2026-09-30). The intersection is no longer a scene of its own; the scene before the countdown says how many names are in both. An Uptrend name is above its EMA50 with EMA50 above SMA200, so the EMA50 line and the '% trên EMA50' arrow on each chart mean what they say. Rows whose moving average is 0 are dropped whichever scenes feed it.",
     "dropZeroMa": true,
     "_dropZeroMa": "The server sends 0 for a moving average it cannot compute yet (new listings), so 'ema_50 > sma_200' passes for them. Rows with ema_50 or sma_200 at 0 are dropped.",
     "_spike": "User 2026-09-30: the spike scene is a two-column board — the filter's 5 biggest gainers (by % change, descending) and 5 biggest losers (ascending), each with its volume ratio — drawn with the `movers` panel; `visual: \"photo\"` brings back the boxed Screener table."
@@ -110,7 +126,8 @@
         "market",
         "breadth",
         "spike",
-        "leaders",
+        "rs",
+        "uptrend",
         "leader",
         "leader",
         "leader",
@@ -119,9 +136,9 @@
       ],
       "totalSeconds": [
         60,
-        90
+        95
       ],
-      "_why": "User picked a chart for each of the top 3 leaders (2026-09-29). Restructured the same day for retention (vox-director hook_payoff + a listicle countdown): breadth = the paradox after the count, watch = the payoff before the outro. About 80 s."
+      "_why": "User picked a chart for each of the top 3 leaders (2026-09-29). Restructured the same day for retention (vox-director hook_payoff + a listicle countdown): breadth = the paradox after the count, watch = the payoff before the outro. 2026-09-30: the RS Strong ∩ Uptrend table became two scenes, rs then uptrend (user: 'separate the filter … not union it first'); the countdown still takes the names in both. 11 scenes, about 87 s."
     },
     "weekly": {
       "composition": "WeeklyReview",
@@ -134,7 +151,8 @@
         "market",
         "breadth",
         "spike",
-        "leaders",
+        "rs",
+        "uptrend",
         "leader",
         "leader",
         "leader",
@@ -143,7 +161,7 @@
       ],
       "totalSeconds": [
         70,
-        105
+        110
       ]
     }
   },
@@ -269,7 +287,14 @@
           "PRICE",
           "CHG%"
         ],
-        "leaders": [
+        "rs": [
+          "SYMBOL",
+          "RS 1M",
+          "RS 52W",
+          "PRICE",
+          "CHG%"
+        ],
+        "uptrend": [
           "SYMBOL",
           "RS 1M",
           "RS 52W",
@@ -361,7 +386,7 @@
         "pace": "short"
       },
       "spike": {
-        "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, ba mã khối lượng đột biến mạnh nhất, tăng hay giảm. Gieo móc: một mã có mặt ở cả hai bộ lọc — để cuối.",
+        "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, mã tăng mạnh nhất và giảm mạnh nhất trên khối lượng đột biến. Gieo móc: một mã đầu bảng này cũng là mã dẫn dắt — để cuối, không nói tên.",
         "act": "amber",
         "pace": "mid",
         "shots": [
@@ -369,8 +394,26 @@
           "pull_out"
         ]
       },
+      "rs": {
+        "job": "Bộ lọc RS Strong của terminal, MỘT MÌNH (không gộp với Uptrend — người dùng tách 2026-09-30): bao nhiêu mã có sức mạnh giá, ba mã đứng đầu theo RS 1M. Một lát cắt riêng, chưa đếm ngược.",
+        "act": "amber",
+        "pace": "short",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ]
+      },
+      "uptrend": {
+        "job": "Bộ lọc Uptrend của terminal, MỘT MÌNH: bao nhiêu mã đang trong xu hướng tăng (giá trên EMA50, EMA50 trên SMA200), ba mã đứng đầu theo RS 1M. Kết bằng số mã có mặt ở cả hai bộ lọc và mở đếm ngược: 'đếm ngược từ ba'.",
+        "act": "amber",
+        "pace": "short",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ]
+      },
       "leaders": {
-        "job": "Bộ lọc Uptrend xếp theo RS 1M: bao nhiêu mã qua cả RS Strong và Uptrend, ba mã dẫn đầu.",
+        "job": "LEGACY (chỉ để bản 29/9/2026 còn verify được): bảng RS Strong ∩ Uptrend gộp làm một — thay bằng hai vai rs + uptrend từ 2026-09-30. scaffold.mjs không dựng vai này nữa; xoá mục này sau khi bản đầu tiên có rs + uptrend được duyệt.",
         "act": "amber",
         "pace": "short",
         "shots": [
@@ -379,7 +422,7 @@
         ]
       },
       "leader": {
-        "job": "Một mã dẫn dắt, đếm ngược #3 → #2 → #1: cùng khuôn câu (vì sao qua bộ lọc → chi tiết riêng → mức terminal đánh dấu), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). #1 trả móc 'cả hai bộ lọc'.",
+        "job": "Một mã dẫn dắt (có mặt ở cả RS Strong lẫn Uptrend), đếm ngược #3 → #2 → #1: cùng khuôn câu (vì sao qua bộ lọc → chi tiết riêng → mức terminal đánh dấu), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). #1 trả móc của spike: mã đầu bảng khối lượng cũng là mã dẫn dắt.",
         "act": "amber",
         "pace": "mid",
         "shots": [

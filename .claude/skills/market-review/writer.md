@@ -15,7 +15,10 @@ TTS, một người viết, miễn trừ chỉ ở outro, outro thả tim · chi
 1. `content/review-<daily|weekly>.facts.json` — MỌI con số bạn được dùng. Không tính, không ước, không nhớ.
    `session` (phiên), `distribution` (phiên phân phối còn hiệu lực), `state` (trạng thái, FTD, đáy nhịp
    hồi), `watch` (điều gì sẽ đổi trạng thái — chất liệu cho câu nếu … thì), `screener.spike` /
-   `screener.leaders` (mã từ bộ lọc, đã xếp hạng), `weekly` (bản tuần). Thiếu số thì ghi `unsupported`.
+   `screener.rs` / `screener.uptrend` (mỗi bộ lọc một scene, đã xếp hạng — người dùng tách RS Strong và
+   Uptrend 2026-09-30, KHÔNG gộp) / `screener.leaders` (ba mã dẫn dắt của đếm ngược: mã có mặt ở CẢ
+   `leaders.filters`, xếp theo RS 1M; `leaders.count` là số mã qua cả hai), `weekly` (bản tuần). Thiếu
+   số thì ghi `unsupported`.
 2. `.claude/skills/market-review/rules.json` — `narration.*` (ngân sách chữ, câu), `status` (tên trạng
    thái được phép hiện), `arc.roles.<vai>.job` (mỗi scene làm gì), `style.*` (verify sẽ cảnh báo gì về
    giọng), `claims.factsExemptions`.
@@ -37,7 +40,8 @@ TTS, một người viết, miễn trừ chỉ ở outro, outro thả tim · chi
   dạng `11/9` và tham số như `RS 1M`, `EMA50` được miễn.
 - Tên trạng thái trên màn hình chỉ lấy từ `rules.status` và phải là trạng thái của `state.status` — tên
   trạng thái khác chỉ xuất hiện trong một điều kiện ("thêm một phiên nữa là chịu áp lực").
-- Mã cổ phiếu trên màn hình chỉ là mã trong `screener.spike.top` / `screener.leaders.top`.
+- Mã cổ phiếu trên màn hình chỉ là mã trong `screener.spike.top` (và `gainers`/`losers`), `screener.rs.top`,
+  `screener.uptrend.top` hay `screener.leaders.top`.
 - Scene `watch` phải có chữ **"nếu"**: điều kiện nói như một nhánh nếu … thì, lấy từ `watch` của fact pack.
   Không bao giờ gọi giá, không "nên mua", "nên bán", "vào lệnh". Scene `market` chỉ kể bối cảnh.
 - **Không đổi** `id`, `role`, `act`, `visual` — chép `visual` y nguyên từ khung. Mark, nhãn số, crop, máy
@@ -97,11 +101,19 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   nói điều kiện nếu … thì ở đây.
 - **breadth** là nghịch lý (scene vẽ duy nhất, chấm sáng = mã trên đường trung bình 200 phiên): chỉ số ở
   trạng thái tăng mà phần lớn mã không đi cùng. Một câu kết dẫn: "vậy tiền đang ở đâu?".
-- **spike** gieo móc mở 2: "một mã có mặt ở cả hai bộ lọc — để cuối". Không nói tên mã ở đây.
-- **leaders → leader #3 → #2 → #1**: đếm ngược. Ba scene `leader` CÙNG KHUÔN câu (vì sao qua bộ lọc → chi
-  tiết riêng → mức terminal đánh dấu), mỗi mã MỘT chi tiết riêng: mã còn xa đỉnh 52 tuần, mã sát đỉnh, mã có
-  khối lượng đột biến hôm nay. Eyebrow ghi số đếm ngược (`Dẫn dắt #3 · BSR`). #1 trả móc 2: "đây là mã ở cả
-  hai bộ lọc".
+- **spike** gieo móc mở 2: "mã đầu bảng này cũng là mã dẫn dắt — để cuối". Không nói tên mã ở đây, và
+  không nói "cả hai bộ lọc" (reel có ba bộ lọc).
+- **rs** rồi **uptrend**: MỖI BỘ LỌC MỘT SCENE, không gộp (người dùng chốt 2026-09-30: "separate the filter …
+  not union it first"). `rs` kể bộ lọc RS Strong đếm được bao nhiêu mã và ba mã đứng đầu theo sức mạnh giá
+  (`screener.rs`); `uptrend` kể bộ lọc Uptrend — bao nhiêu mã đang trong xu hướng tăng, ba mã đứng đầu
+  (`screener.uptrend`) — rồi KẾT bằng số mã có mặt ở cả hai (`screener.leaders.count`) và câu mở đếm
+  ngược "đếm ngược từ ba". Hai scene ngắn, cùng khuôn (bộ lọc → số mã → ba mã đầu), mỗi scene một điểm
+  khác nhau (RS Strong: mã nào chưa ở Uptrend; Uptrend: mã nào mới vào). Tên mã trong lời là tên công ty.
+- **leader #3 → #2 → #1**: đếm ngược ba mã có mặt ở CẢ RS Strong lẫn Uptrend (`screener.leaders.top`,
+  `rules.screener.leaders`). Ba scene `leader` CÙNG KHUÔN câu (vì sao qua bộ lọc → chi tiết riêng → mức
+  terminal đánh dấu), mỗi mã MỘT chi tiết riêng: mã còn xa đỉnh 52 tuần, mã sát đỉnh, mã có khối lượng đột
+  biến hôm nay. Eyebrow ghi số đếm ngược (`Dẫn dắt #3 · BSR`). #1 trả móc 2: "mã đầu bảng khối lượng cũng
+  là mã dẫn dắt" (mỗi dòng của `top[]` có `filters[]` — các bộ lọc mã đó qua hôm nay).
 - **watch** là PAYOFF, máy đứng yên: trả móc 1 bằng ba nhánh nếu … thì từ `watch` của fact pack — thủng
   đáy nhịp hồi là FTD thất bại, chạm mức hết hạn là một phiên phân phối rơi khỏi đếm, thêm N phiên là đổi
   trạng thái. Nói chậm hơn, câu ngắn hơn scene khác. Không câu nào là lời khuyên.
@@ -145,7 +157,8 @@ Kèm `_script.md`: bài nói liền mạch để đạo diễn đọc như ngư�
 - [ ] Mỗi scene ≤ 2 số đọc ra lời; không scene nào mở bằng con số; câu dài ngắn xen kẽ.
 - [ ] Hook nêu trạng thái theo quy tắc trong câu đầu hoặc headline đầu.
 - [ ] `watch` có "nếu … thì" lấy từ `watch` của fact pack; `market` không nói điều kiện; không câu nào gọi giá.
-- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); điểm số + % trước, hai chữ theo `breadthToday`, câu hỏi, lời mời "cùng mình điểm lại…". `market` gọi tên trạng thái. `spike` gieo "một mã ở cả hai bộ lọc"; leader #1 trả nó.
+- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); điểm số + % trước, hai chữ theo `breadthToday`, câu hỏi, lời mời "cùng mình điểm lại…". `market` gọi tên trạng thái. `spike` gieo "mã đầu bảng cũng là mã dẫn dắt"; leader #1 trả nó.
+- [ ] `rs` và `uptrend` là hai bộ lọc RIÊNG, không câu nào gộp chúng thành một; `uptrend` kết bằng số mã qua cả hai (`screener.leaders.count`) và "đếm ngược từ ba".
 - [ ] Ba scene leader cùng khuôn, mỗi mã một chi tiết riêng; eyebrow đếm ngược #3 → #2 → #1.
 - [ ] Mọi chữ số trên màn hình có trong fact pack đúng độ chính xác; mã trên màn hình là mã trong picks.
 - [ ] Mã cổ phiếu trong lời đọc là tên công ty; FTD/RS/EMA50 nói bằng chữ Việt.

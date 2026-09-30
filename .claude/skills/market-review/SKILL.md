@@ -1,5 +1,5 @@
 ---
-description: Làm reel TỔNG KẾT thị trường theo phiên (hằng ngày) hoặc theo tuần cho VNINDEX — trạng thái thị trường theo quy tắc phiên phân phối và FTD (O'Neil, dùng trong hệ thống Minervini) cộng hai bộ lọc đã lưu trên terminal zionle.io.vn (Volume spike; RS Strong ∩ Uptrend) — kéo số, chụp ảnh, dựng khung, một người viết lời, chấm điểm, đăng TRANG DUYỆT (artifact) rồi mới lồng tiếng và render. Dùng khi người dùng muốn bản tổng kết phiên hôm nay, tổng kết tuần, review thị trường, trạng thái thị trường, phiên phân phối, FTD hay cổ phiếu dẫn dắt từ bộ lọc. KHÔNG dùng cho reel theo một chủ đề, một mã hay một chỉ báo — đó là market-video.
+description: Làm reel TỔNG KẾT thị trường theo phiên (hằng ngày) hoặc theo tuần cho VNINDEX — trạng thái thị trường theo quy tắc phiên phân phối và FTD (O'Neil, dùng trong hệ thống Minervini) cộng ba bộ lọc đã lưu trên terminal zionle.io.vn, mỗi bộ lọc một scene (Volume spike; RS Strong; Uptrend) và đếm ngược ba mã có mặt ở cả RS Strong lẫn Uptrend — kéo số, chụp ảnh, dựng khung, một người viết lời, chấm điểm, đăng TRANG DUYỆT (artifact) rồi mới lồng tiếng và render. Dùng khi người dùng muốn bản tổng kết phiên hôm nay, tổng kết tuần, review thị trường, trạng thái thị trường, phiên phân phối, FTD hay cổ phiếu dẫn dắt từ bộ lọc. KHÔNG dùng cho reel theo một chủ đề, một mã hay một chỉ báo — đó là market-video.
 argument-hint: "daily | weekly [--date=YYYY-MM-DD]"
 allowed-tools: Read, Write, Edit, Artifact, Agent, Bash(node *), Bash(npm run *), Bash(npx remotion *), Bash(npx tsc *), Bash(../video-factory/.venv/bin/python *), Bash(ffmpeg *), Bash(ffprobe *), Bash(ps *), Bash(ls *), Bash(cat *), Bash(open *)
 ---
@@ -90,10 +90,13 @@ npm run review-page -- DailyReview --out=out/review/draft-daily
 ```
 
 Scene theo `rules.formats.daily.roles` (người dùng yêu cầu tối ưu giữ người xem 2026-09-29, theo arc
-hook_payoff + đếm ngược của vox-director): hook (căng thẳng → neo → lời hứa) → market (bối cảnh, đồng hồ) →
-breadth (nghịch lý độ rộng, panel `pictogram` chấm) → spike (gieo móc "mã ở cả hai bộ lọc") → leaders → leader
-#3 → #2 → #1 (mỗi mã một chi tiết riêng, #1 trả móc) → watch (payoff, máy đứng yên, câu nếu … thì) → outro —
-10 scene, ~80 giây. Bản tuần thêm `week` sau hook.
+hook_payoff + đếm ngược của vox-director): hook (ngày, điểm số, mã tăng/giảm, lời mời) → market (bối cảnh, đồng hồ) →
+breadth (nghịch lý độ rộng, chart hai đường) → spike (bảng `movers`, gieo móc "mã đầu bảng cũng dẫn dắt") → rs (bảng
+RS Strong, MỘT MÌNH) → uptrend (bảng Uptrend, MỘT MÌNH, kết bằng số mã qua cả hai) → leader #3 → #2 → #1 (ba mã có
+mặt ở cả RS Strong lẫn Uptrend theo `rules.screener.leaders`, mỗi mã một chi tiết riêng, #1 trả móc) → watch (payoff,
+máy đứng yên, câu nếu … thì) → outro — 11 scene, ~87 giây. Bản tuần thêm `week` sau hook. Người dùng tách RS Strong và
+Uptrend thành hai scene 2026-09-30 ("not union it first"): mỗi scene bảng là MỘT bộ lọc đã lưu (`rules.screener.scenes`),
+giao của hai bộ lọc chỉ còn là nguồn của đếm ngược, không phải một scene.
 Id mang ngày (`rd-260929-hook`) để file giọng mỗi bản tách nhau. Bản trước được chép vào
 `content/review/archive/` trước khi bị thay. Mark đặt từ số: vline trên từng phiên phân phối, vòng trên nến
 FTD, hline ở đáy nhịp hồi, hộp trên ba dòng được chọn và trên ô VOL/SMA / RS 1M, hline EMA50 và mũi tên ở
@@ -162,7 +165,13 @@ khoảng lặng, khung hai bên mốc beat). Không lồng tiếng hai reel cùn
 - Trang /analyze và /screener tự `POST /api/stocks/filter` khi mở; /analyze vẫn vẽ chart đủ khi bị chặn, và
   trang nào cũng gửi beacon `POST /cdn-cgi/rum` (chặn, vô hại).
 - `/analyze` với `1W`/`1M`/`4H` trả 500 — nến tuần gộp từ SSI.
-- Ba mã hoà RS 1M 94 (BSR, MSR, PVT ngày 29/9): thứ tự trong ảnh có thể khác, tập hợp phải trùng.
+- Ba mã hoà RS 1M 94 (BSR, MSR, PVT ngày 29/9): thứ tự trong ảnh có thể khác, và khi hoà điểm vắt qua hàng 3 (RS Strong
+  29/9: AAS 95, PVP 95, rồi BSR/MSR/PVT cùng 94) một mã được chọn có thể nằm ở hàng 4–5 — `lib/screener-rows.mjs`
+  (shots.mjs và check `review-picks`) chấp nhận miễn không có dòng LẠ điểm cao hơn đứng trên mã được chọn.
+- Từ 2026-09-30: `rules.screener.scenes` có `rs` và `uptrend` (mỗi scene MỘT bộ lọc), `rules.screener.leaders.from`
+  = `["rs","uptrend"]` là nguồn đếm ngược. Đổi luật xếp hạng cho phiên đã qua: `node scripts/review/pull.mjs --rebuild`
+  (không mạng, xếp lại từ universe đã cache) rồi `facts.mjs`; terminal không có lịch sử nên ảnh bảng của phiên cũ không
+  chụp lại được.
 - Chart terminal: pane giá là y 0–0,54, trục giá từ x 0,956 (thẻ giá trendline cùng màu nến) — crop bỏ trục.
 - FireAnt 29/9: "no new Chrome app window … appeared" = màn hình NGỦ, không phải Chrome hỏng (người dùng nhìn
   thấy màn hình sáng — đó là màn khoá/hình nền). Space đánh thức, chụp ngay được.

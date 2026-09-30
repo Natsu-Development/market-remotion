@@ -1395,7 +1395,7 @@
       "eyebrow": "Mức phải canh",
       "act": "amber",
       "duration": 8.4,
-      "narration": "Nếu thủng đáy nhịp hồi một nghìn sáu trăm năm mươi mốt là gãy. Nếu chạm mức xanh, một phiên phân phối hết hạn. Nếu thêm một phiên phân phối, chịu áp lực. Phiên cũ nhất còn mười hai phiên.",
+      "narration": "Thủng đáy nhịp hồi một nghìn sáu trăm năm mươi mốt là gãy. Chạm mức xanh thì một phiên phân phối hết hạn. Còn nếu thêm một phiên phân phối nữa, xu hướng chịu áp lực. Phiên cũ nhất còn mười hai phiên.",
       "beats": [
         {
           "atSentence": 0,
@@ -1608,7 +1608,7 @@
     },
     {
       "id": "rd-260929-watch",
-      "why": "“Là gãy” trả đúng chữ của lời hứa ở hook (“mức nào thủng thì gãy”); tên quy tắc “FTD thất bại” nằm trên nhãn và headline, và “thị trường về điều chỉnh” sau FTD thất bại là theo ghi chú đạo diễn — watch[] của pack chỉ ghi “FTD thất bại”. “Mức xanh” là đường 1863,84 (expireLevel của phiên 24/9, thấp nhất trong ba mức hết hạn); lời không đọc số này để giữ hai số đọc ra (1651 và 12 phiên). Đáy 1651,20 đọc gọn “một nghìn sáu trăm năm mươi mốt”, nhãn giữ hai số lẻ."
+      "why": "“Là gãy” trả đúng chữ của lời hứa ở hook (“mức nào thủng thì gãy”); tên quy tắc “FTD thất bại” nằm trên nhãn và headline, và “thị trường về điều chỉnh” sau FTD thất bại là theo ghi chú đạo diễn — watch[] của pack chỉ ghi “FTD thất bại”. “Mức xanh” là đường 1863,84 (expireLevel của phiên 24/9, thấp nhất trong ba mức hết hạn); lời không đọc số này để giữ hai số đọc ra (1651 và 12 phiên). Đáy 1651,20 đọc gọn “một nghìn sáu trăm năm mươi mốt”, nhãn giữ hai số lẻ. Humanizer (30/9): ba câu mở bằng \"Nếu\" liên tiếp là bộ ba ép — đổi cách mở, giữ một \"nếu\" cho mustSay; số liệu giữ nguyên."
     }
   ]
 }

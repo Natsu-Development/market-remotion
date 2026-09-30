@@ -323,7 +323,7 @@
     ],
     "roles": {
       "hook": {
-        "job": "Căng thẳng ai cũng thấy, KHÔNG dùng chữ của hệ thống (không phiên phân phối, FTD, 'theo quy tắc', trạng thái): chỉ số kẹt trong vùng mà phần lớn mã đi xuống; rồi câu hỏi tiền chảy vào đâu và LỜI HỨA cho cuối video. Chuyện hệ thống bắt đầu ở market.",
+        "job": "Điểm số và % của phiên trước, rồi hai chữ do số quyết định (chỉ số đi ngang/tăng/giảm; mã tăng giảm thế nào), câu hỏi tiền chảy vào đâu, và LỜI MỜI cùng điểm lại thị trường và các mã đáng chú ý. KHÔNG dùng chữ của hệ thống (phiên phân phối, FTD, 'theo quy tắc', trạng thái) — chuyện hệ thống bắt đầu ở market.",
         "act": "blue",
         "pace": "short",
         "shots": [

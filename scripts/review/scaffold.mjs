@@ -223,7 +223,6 @@ const buildHook = () => {
     todayRing(0),
     lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `Đóng cửa ${vi(S.close)} · ${fmtPct(S.changePercent)}`, S.changePercent >= 0 ? 'green' : 'red', 0, 'end'),
     ...(T?.up != null ? [lab(clamp(lastX - 0.03), clamp(lastY - 0.07), `${T.exchange}: ${T.up} tăng · ${T.down} giảm`, 'white', 0, 'end')] : []),
-    lab(clamp(lastX - 0.03), clamp(lastY + 0.09), 'Cuối video: mã dẫn dắt · mức canh', 'gold', 1, 'end'),
   ];
   push('hook', {
     beats: todoBeats(2),
@@ -236,7 +235,7 @@ const buildHook = () => {
     }),
     brief: [
       `Câu đầu là ĐIỂM SỐ và % của phiên: đóng cửa ${vi(S.close)} (đọc tròn ${vi(Math.round(S.close), 0)}), ${fmtPct(S.changePercent)}. Câu hai là hai chữ mà SỐ quyết định: chỉ số "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang), ${T?.breadthWord ?? '—'} (HOSE ${T?.up ?? '?'} tăng · ${T?.down ?? '?'} giảm · ${T?.flat ?? '?'} đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).`,
-      'Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI HỨA: cuối video có ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).',
+      'Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI (người dùng chốt 30/9, thay lời hứa "cuối video"): "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.',
       `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.`,
     ],
   });

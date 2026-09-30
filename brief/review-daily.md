@@ -8,7 +8,7 @@ footer: Nguồn: SSI · zionle.io.vn · FireAnt
 
 ## hook · image
 Câu đầu là ĐIỂM SỐ và % của phiên: đóng cửa 1777,73 (đọc tròn 1778), −0,17%. Câu hai là hai chữ mà SỐ quyết định: chỉ số "đi ngang" (|Δ| < 0,3% = đi ngang), mã giảm nhiều hơn mã tăng (HOSE 152 tăng · 186 giảm · 65 đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).
-Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI HỨA: cuối video có ba mã đang có tiền vào và một mức phải canh (trả ở leaders/leader và watch).
+Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI (người dùng chốt 30/9, thay lời hứa "cuối video"): "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.
 KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.
 
 ## market · image

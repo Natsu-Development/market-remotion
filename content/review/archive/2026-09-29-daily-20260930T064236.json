@@ -22,7 +22,7 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, mã giảm nhiều hơn tăng. Tiền đang chảy vào đâu? Cùng mình điểm lại thị trường và những mã đáng chú ý nhé.",
+      "narration": "Đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, mã giảm nhiều hơn tăng. Tiền đang chảy vào đâu? Cuối video: ba mã có tiền vào, một mức phải canh.",
       "beats": [
         {
           "atSentence": 0,
@@ -35,7 +35,7 @@
           "atSentence": 2,
           "at": 5.5,
           "line1": "Tiền đang chảy vào đâu?",
-          "line2": "Cùng mình điểm lại phiên",
+          "line2": "3 mã dẫn dắt · 1 mức canh",
           "accent": "gold"
         }
       ],
@@ -120,6 +120,15 @@
             "text": "HOSE: 152 tăng · 186 giảm",
             "accent": "white",
             "beat": 0,
+            "anchor": "end"
+          },
+          {
+            "kind": "label",
+            "x": 0.8107,
+            "y": 0.4756,
+            "text": "Cuối video: mã dẫn dắt · mức canh",
+            "accent": "gold",
+            "beat": 1,
             "anchor": "end"
           }
         ],
@@ -1574,7 +1583,7 @@
   "unsupported": [
     {
       "id": "rd-260929-hook",
-      "why": "Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; \"mã giảm nhiều hơn tăng\" vì HOSE 186 giảm / 152 tăng / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Câu cuối là lời mời theo khuôn người dùng (\"review\" → \"điểm lại\" cho TTS, \"&\" → \"và\"), thay lời hứa \"cuối video\". Không chữ hệ thống ở hook."
+      "why": "Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; \"mã giảm nhiều hơn tăng\" vì HOSE 186 giảm / 152 tăng / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Không chữ hệ thống ở hook."
     },
     {
       "id": "rd-260929-market",

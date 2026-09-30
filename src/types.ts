@@ -57,6 +57,18 @@ export type ImageShot = {
   cut?: boolean;
 };
 
+/** One series of a `lines` panel: dated points, drawn on its own pane. */
+export type LinePane = {
+  label: string;
+  points: [string, number][];
+  accent?: AccentName;
+  unit?: 'points' | 'percent';
+  /** A dashed reference level, drawn when inside the fitted range. */
+  ref?: number;
+  min?: number;
+  max?: number;
+};
+
 export type Visual =
   /** Candlesticks inside a log price channel, with touch markers. */
   | {
@@ -87,6 +99,7 @@ export type Visual =
     }
   /** Grid of person glyphs — n filled out of total. */
   | {type: 'pictogram'; rows: number; columns: number; filledPercent: number; accent: AccentName; glyph?: 'person' | 'dot'}
+  | {type: 'lines'; caption?: string; top: LinePane; bottom: LinePane; events?: {t: string; label?: string; accent?: AccentName}[]}
   /** Two labelled bars that race to their percentage. */
   | {type: 'bars'; bars: {label: string; percent: number; accent: AccentName}[]}
   /** Icon + text rows that reveal in sequence. */

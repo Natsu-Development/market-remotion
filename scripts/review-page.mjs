@@ -11,7 +11,8 @@
  *   npm run review-page -- Channel --no-stills             reuse the stills already in the folder
  *   npm run review-page -- Channel --out=<dir>
  *
- * Stills come from `npx remotion still <Id>` for every beat — the last one 1.5s in as
+ * Stills come from `npx remotion still <Id>` for every beat — the last one 1.5s in (later when its marks
+ * need longer to finish drawing) as
  * <scene>.jpg, earlier ones just before the next beat as <scene>-b<N>.jpg — marks drawn,
  * the camera settled on that beat's shot — at 50% scale. About ten seconds per still; `--no-stills` when
  * only the words changed.
@@ -95,7 +96,13 @@ let cursor = 0;
 for (const s of reel.scenes) {
   const n = Math.round((s.duration ?? 4) * fps);
   const lastAt = Math.max(0, ...s.beats.map((b) => b.at ?? 0));
-  const inScene = Math.max(0, Math.min(n - 15, Math.round((lastAt + 1.5) * fps)));
+  // The last beat's still waits for its marks: ImagePanel draws a later beat's marks 4 frames in and 5 frames
+  // apart, each settling in ~15 frames, so nine marks take about two seconds — at +1.5s the last one was
+  // still half drawn (scene 10's 1586 circle, 2026-09-29).
+  const lastBeat = s.beats.length - 1;
+  const marks = s.visual?.type === 'image' ? (s.visual.annotations ?? []).filter((a) => (a.beat ?? 0) === lastBeat).length : 0;
+  const settle = lastBeat > 0 && marks ? (4 + (marks - 1) * 5 + 15) / fps : 0;
+  const inScene = Math.max(0, Math.min(n - 15, Math.round((lastAt + Math.max(1.5, settle)) * fps)));
   // One still per beat: a photo scene with a shot list reframes on every beat, and the last
   // frame alone hides the wide that opened it. Earlier beats: just before the next beat, when
   // that beat's marks have all drawn and its shot has settled.
@@ -165,6 +172,16 @@ const panelText = (vis) => {
     case 'zigzag': p.push(`${esc(vis.topLabel)} → ${esc(vis.endLabel)} (${esc(vis.upLabel)} / ${esc(vis.downLabel)}, ${vis.steps} bước)`); break;
     case 'riskReward': p.push(`${esc(vis.left?.label)} = ${num(vis.left?.value)} · ${esc(vis.right?.label)} = ${num(vis.right?.value)}`); break;
     case 'outro': p.push(`${esc(vis.brand)} · ${esc(vis.pill)} · ${esc(vis.line)}`); break;
+    case 'lines': {
+      const last = (pane) => pane?.points?.[pane.points.length - 1];
+      const first = (pane) => pane?.points?.[0];
+      for (const pane of [vis.top, vis.bottom]) {
+        if (!pane) continue;
+        p.push(`${esc(pane.label)}: ${pane.points.length} phiên, ${esc(first(pane)?.[0])} ${num(first(pane)?.[1])} → ${esc(last(pane)?.[0])} ${num(last(pane)?.[1])}${pane.unit === 'percent' ? '%' : ''}`);
+      }
+      for (const e of vis.events ?? []) p.push(`mốc ${esc(e.t)}: ${esc(e.label ?? '')}`);
+      break;
+    }
     case 'candles':
       for (const b of vis.bands ?? []) p.push(`band ${esc(b.year)}: ${esc(b.label)}${b.drop ? ' ↓' : ''}`);
       if (vis.touches?.length) p.push(`touches ${vis.touches.map(esc).join(', ')}`);
@@ -429,7 +446,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
     </table></div>
   </section>` : ''}
 
-  <p class="foot">Sinh ${esc(now.toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}))} từ <code>${esc(path)}</code>${facts ? `, <code>content/${esc(name)}.facts.json</code> (${esc(srcLabel)}${facts.source?.fetchedAt ? `, tải ${esc(facts.source.fetchedAt.slice(0, 16).replace('T', ' '))} UTC` : ''})` : ''}${brief ? ` và <code>brief/${esc(name)}.md</code>` : ''}. Khung hình: <code>npx remotion still ${esc(id)}</code> cuối mỗi beat (beat cuối: +1,5s), thu nhỏ 50%. Không phải khuyến nghị đầu tư.</p>
+  <p class="foot">Sinh ${esc(now.toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}))} từ <code>${esc(path)}</code>${facts ? `, <code>content/${esc(name)}.facts.json</code> (${esc(srcLabel)}${facts.source?.fetchedAt ? `, tải ${esc(facts.source.fetchedAt.slice(0, 16).replace('T', ' '))} UTC` : ''})` : ''}${brief ? ` và <code>brief/${esc(name)}.md</code>` : ''}. Khung hình: <code>npx remotion still ${esc(id)}</code> cuối mỗi beat (beat cuối: +1,5s, hoặc tới khi mark cuối vẽ xong), thu nhỏ 50%. Không phải khuyến nghị đầu tư.</p>
 </div>
 `;
 

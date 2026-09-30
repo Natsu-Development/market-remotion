@@ -2,7 +2,7 @@
 
 Tài liệu phụ của [SKILL.md](SKILL.md). Mở khi viết scene mới hoặc kéo số.
 
-## 1. Mười một panel
+## 1. Mười hai panel
 
 `visual.type` chọn component ở `src/scenes/index.tsx`. Trường in đậm là **bắt buộc**.
 
@@ -18,6 +18,7 @@ Tài liệu phụ của [SKILL.md](SKILL.md). Mở khi viết scene mới hoặc
 | `zigzag` | Bậc thang đi xuống, có chú thích "hy vọng / chần chừ" | **`topLabel`**, **`endLabel`**, **`upLabel`**, **`downLabel`**, **`steps`** |
 | `riskReward` | Khoản lời nhỏ đặt cạnh khoản lỗ lớn, vẽ đúng tỉ lệ | **`left`**, **`right`** (mỗi cái `label` + `value`) |
 | `image` | **Mặc định cho nến, chart và mọi scene về xu hướng giá** (người dùng chốt 2026-09-22/23): ảnh chụp terminal hoặc FireAnt trong cùng khung panel, có chip nguồn, caption, **mark vẽ dần theo beat**, quét mở màn và đẩy zoom nhẹ — hoặc **máy quay theo beat** khi có `shots` | **`src`** (dưới `public/`), `caption`, `source`, `fit` (`cover`/`contain`), `focus`, `zoom` (`false` để tắt đẩy), `sourceCorner`, `annotations[]` (`kind` box/circle/arrow/label/**hline**/**vline**, toạ độ PHẦN 0..1 của ảnh, `label`/`text`, `accent`, `beat`), `shots[]` (`beat`, `x`, `y`, `zoom` 1..4, `move`, `cut` — xem dưới), `crop` {x,y,w,h} (phần ảnh hiện, tỉ lệ 1,42 của `LAYOUT.imagePanel`), `masks[]` {x,y,w,h,color} + `maskColor` (che chữ giao diện của trang nguồn), mỗi mark nhận thêm `until` (beat cuối nó hiện) và `label` nhận `anchor` |
+| `lines` | Hai đường cùng trục thời gian, pane trên và pane dưới (chỉ số / độ rộng thị trường — thêm 2026-09-30 cho market-review); đường trên vẽ ở beat 1, đường dưới vẽ khi beat 2 bắt đầu; điểm cuối mang nhãn giá trị | **`top`**, **`bottom`** (mỗi cái `label`, `points[]` = `[YYYY-MM-DD, số]`, `accent`, `unit` points/percent, `ref`, `min`, `max`), `events[]` (`t`, `label`, `accent`), `caption` |
 | `outro` | Thẻ chào cuối: nhận diện thương hiệu, kicker, pill, một dòng | **`brand`**, **`kicker`**, **`pill`**, **`line`**, `logo` |
 
 Giá trị enum:
@@ -39,7 +40,7 @@ chart là ảnh chụp (`image`, SKILL.md mục 1 và 1d); số suy ra đi vào 
 
 **"Vẽ lên ảnh" làm trong Remotion, không làm trong FireAnt.** `annotations` của `image` là hộp
 (`box`), vòng (`circle`), mũi tên (`arrow`), đoạn thẳng (`line` — trendline, hai biên kênh giá; `from`/`to`,
-`dashed` cho đoạn chiếu, nhãn ở đầu `labelAt`), mức ngang (`hline`), mốc dọc (`vline`) và nhãn (`label`),
+`dashed` cho đoạn chiếu — nhưng không cho biên kênh: người dùng muốn hai biên nét liền suốt, 2026-09-29 —, nhãn ở đầu `labelAt`), mức ngang (`hline`), mốc dọc (`vline`) và nhãn (`label`),
 đặt theo phần (0..1) của vùng ảnh; `beat` là beat đầu tiên nó hiện, và nó
 "vẽ" ra ngay khi beat đó bắt đầu (`beatFrame`). Đạo diễn NHÌN ảnh (Read) rồi đặt toạ độ; ảnh có
 chú thích thì không đẩy zoom để mark không trượt. `verify` soát toạ độ trong 0..1, `beat` không vượt
@@ -143,7 +144,7 @@ Beat:  at*  line1*  line2  accent  atSentence
 | `unsupported` | merge gom từ worker | mảng `{id, why}` ở CẤP REEL, không phải trong scene — người duyệt phải đọc hết |
 | `headline` | người, hiếm | ghi đè baseline/cỡ chữ; chỉ `outro` dùng, vì nó còn disclaimer bên dưới |
 | `ticker` | người, hoặc `enrich` khi brief có `ticker: daily` | cấp reel: `{symbol, timeframe, asOf, last, prev}` hoặc `false`; mặc định tính từ chuỗi giá (xem mục 3). `last`/`prev` ghi đè close; `verify` soi chúng với fact pack |
-| `footer` | người | cấp reel: chuỗi thay dòng nguồn/miễn trừ, hoặc `false`; mặc định không nêu tên nguồn |
+| `footer` | `enrich` đặt `false`; người khi cần | cấp reel: `false` (mặc định từ 2026-09-29, không có dòng dưới headline) hoặc một chuỗi |
 
 ## 3. Bố cục — `src/theme.ts`
 
@@ -161,13 +162,13 @@ footer      baseline 1628    (outro: disclaimer ở footnoteY thay footer)
 Vùng an toàn dọc là `SAFE` trong `src/theme.ts` (288..1632): player vẽ UI của họ lên ~15% trên và
 dưới, nên ticker và footer nằm sát mép trong của vùng đó, không nằm ngoài.
 
-**Ticker và footer là khung của kênh tài chính, không phải của scene.** `SceneShell` vẽ chúng
-trên mọi scene: ticker = `VN-INDEX · 1M · <close cuối> ▲/▼ <% đổi so tháng trước> · T9/2026`, tính
-thẳng từ `content/vnindex-monthly.json`; footer = `Dữ liệu tới T9/2026 · Không phải khuyến nghị
-đầu tư`. Ghi đè ở cấp reel: `ticker: {symbol, timeframe, asOf}` hoặc `ticker: false`;
-`footer: "Nguồn: zionle.io.vn · ..."` hoặc `footer: false`. Chỉ ghi tên nguồn khi chuỗi giá THẬT
-đến từ đó — chuỗi tháng hiện tại là bản dựng lại, nên footer mặc định không nêu nguồn. Scene
-`outro` không có footer vì đã có disclaimer đầy đủ.
+**Ticker là khung của kênh tài chính, không phải của scene.** `SceneShell` vẽ nó trên mọi scene:
+`VN-INDEX · 1M · <close cuối> ▲/▼ <% đổi so tháng trước> · T9/2026`, tính thẳng từ
+`content/vnindex-monthly.json`; ghi đè ở cấp reel bằng `ticker: {symbol, timeframe, asOf, last, prev}` hoặc
+`ticker: false`. **Footer dưới headline là tên kênh** (người dùng 2026-09-29: không ghi nguồn): enrich chép
+`channel.name` của content-rules (`Radar Chứng Khoán`) vào `footer`; `footer: false` trong brief để ẩn. Reel không
+đặt `footer` thì `SceneShell` vẫn tự ghi `Nguồn: <nguồn chuỗi> · tới <tháng>` (reel cũ). Scene `outro` không bao
+giờ có footer vì đã có disclaimer.
 
 Màu chữ: vàng `#F3C019` · đỏ `#E5333A` · xanh lá `#2ECC71` · chữ phụ `#93A1AF`. Màu **mark**
 (nến, histogram, mũi tên ticker) là cặp riêng `up #1FA377` / `down #EC5F38` — chọn bằng
@@ -397,8 +398,8 @@ title: VNINDEX · thanh khoản cạn dần # tuỳ chọn, mặc định = name
 symbol: VNINDEX                      # tuỳ chọn; có content/<symbol>-analysis.json thì fact pack thêm `terminal.*`,
                                      # có content/<symbol>-daily.json thì thêm `daily.*` (nến ngày thật)
 ticker: daily                        # tuỳ chọn; ticker in phiên thật cuối cùng từ `daily` thay vì close tháng dựng lại
-footer: Nguồn: zionle.io.vn · …      # tuỳ chọn; chỉ khi số thật đến từ nguồn đó
-brand: Kênh của bạn                  # tuỳ chọn, rót vào scene outro
+footer: Radar Chứng Khoán            # mặc định = channel.name của content-rules; false để ẩn
+brand: Radar Chứng Khoán             # mặc định = channel.name, rót vào thẻ outro (monogram RC)
 act: blue                            # tuỳ chọn, ép act cho mọi scene trừ cuối
 disclaimer: ...                      # tuỳ chọn, mặc định là câu miễn trừ sẵn có
 
@@ -480,8 +481,8 @@ npm run review-page -- Channel --out=<thư mục>
 ```
 
 Script: (1) `verify.mjs <Id> --json` — tile verify, tile `facts`, tile `style`, bảng mọi check với dòng
-sửa; (2) `npx remotion still <Id>` cho TỪNG beat: beat cuối ở `start + min(n − 15, (beat cuối + 1,5s) × fps)`
-(`<scene>.jpg`), các beat trước ở 8 khung hình trước beat kế (`<scene>-b<N>.jpg` — mark của beat đã vẽ
+sửa; (2) `npx remotion still <Id>` cho TỪNG beat: beat cuối ở `start + min(n − 15, (beat cuối + max(1,5s, lúc mark cuối của beat vẽ xong)) × fps)`
+(`<scene>.jpg`; mark beat sau vẽ từ khung 4, cách nhau 5 khung, mỗi cái ~15 khung — chín mark cần ~2 giây), các beat trước ở 8 khung hình trước beat kế (`<scene>-b<N>.jpg` — mark của beat đã vẽ
 xong, máy đã tới khung của beat), `--scale=0.5 --image-format=jpeg --jpeg-quality=82` — vài giây một ảnh,
 reel 12 scene 23 ảnh ~40 giây; tile "Nhịp đổi khung" = tổng thời lượng / số khung (shot trên ảnh, beat ở
 panel khác), xanh khi ≤ 5 giây theo vox-director; (3) dựng trang từ `content/<tên>.json`, `content/<tên>.facts.json`, `brief/<tên>.md` (ý đồ

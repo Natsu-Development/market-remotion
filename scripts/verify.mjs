@@ -166,6 +166,7 @@ const VISUAL_REQUIRED = {
   zigzag: ['topLabel', 'endLabel', 'upLabel', 'downLabel', 'steps'],
   riskReward: ['left', 'right'],
   image: ['src'],
+  lines: ['top', 'bottom'],
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
@@ -233,6 +234,19 @@ function checkSchema(t, reel) {
         if (v.crop !== undefined && !rectOk(v.crop)) errs.push(`${at}: crop must be {x,y,w,h} fractions of the photo, inside it`);
         for (const [j, m] of (Array.isArray(v.masks) ? v.masks : v.masks === undefined ? [] : [null]).entries()) {
           if (!rectOk(m)) errs.push(`${at} mask ${j}: must be {x,y,w,h} fractions of the photo`);
+        }
+      }
+      if (v.type === 'lines') {
+        for (const side of ['top', 'bottom']) {
+          const pane = v[side];
+          const pts = pane?.points;
+          if (!pane?.label) errs.push(`${at}: lines.${side} needs a label`);
+          if (!Array.isArray(pts) || pts.length < 2) errs.push(`${at}: lines.${side}.points needs at least two [date, value] points`);
+          else if (!pts.every((p) => Array.isArray(p) && /^\d{4}-\d{2}-\d{2}$/.test(p[0]) && Number.isFinite(p[1]))) errs.push(`${at}: lines.${side}.points must be [YYYY-MM-DD, number] pairs`);
+          if (pane?.accent && !ACCENTS.has(pane.accent)) errs.push(`${at}: lines.${side} accent "${pane.accent}" invalid`);
+        }
+        for (const [j, e] of (v.events ?? []).entries()) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(e?.t ?? '')) errs.push(`${at} event ${j}: t must be YYYY-MM-DD`);
         }
       }
       if (v.type === 'image' && v.shots !== undefined) {

@@ -22,21 +22,21 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Chỉ số đi ngang, phần lớn cổ phiếu đi xuống. Tiền đang chảy vào đâu? Cuối video: ba mã đang có tiền vào, và một mức phải canh.",
+      "narration": "Một phiên nữa là thị trường đổi trạng thái. Ba mũi tên đỏ là lý do, nhưng theo quy tắc, xu hướng tăng vẫn được xác nhận. Cuối video: mức thủng là gãy.",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "Chỉ số đi ngang từ tháng 7",
-          "line2": "Phần lớn mã đang đi xuống",
+          "line1": "Còn 1 phiên là chịu áp lực",
+          "line2": "Xu hướng tăng đang bị thử",
           "accent": "red"
         },
         {
           "atSentence": 1,
-          "at": 3,
-          "line1": "Tiền đang chảy vào đâu?",
-          "line2": "3 mã dẫn dắt · 1 mức canh",
-          "accent": "gold"
+          "at": 3.2,
+          "line1": "Xu hướng tăng xác nhận",
+          "line2": "Cuối video: mức gãy",
+          "accent": "green"
         }
       ],
       "visual": {
@@ -97,14 +97,78 @@
         "maskColor": "#161921",
         "annotations": [
           {
-            "kind": "box",
-            "x": 0.5574,
-            "y": 0.2691,
-            "w": 0.2913,
-            "h": 0.2688,
-            "accent": "gold",
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7741,
+              0.3023
+            ],
+            "to": [
+              0.7741,
+              0.3273
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8185,
+              0.302
+            ],
+            "to": [
+              0.8185,
+              0.327
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8241,
+              0.328
+            ],
+            "to": [
+              0.8241,
+              0.353
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7621,
+            "y": 0.2813,
+            "text": "3 phiên phân phối",
+            "accent": "red",
             "beat": 0,
-            "label": "Vùng 1651 – 1874"
+            "anchor": "end"
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.6296,
+              0.4638
+            ],
+            "to": [
+              0.6296,
+              0.4388
+            ],
+            "accent": "up",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.6296,
+            "y": 0.4938,
+            "text": "FTD 3/8 +1,56%",
+            "accent": "green",
+            "beat": 1,
+            "anchor": "middle"
           },
           {
             "kind": "circle",
@@ -113,40 +177,30 @@
             "r": 0.022,
             "accent": "gold",
             "beat": 1
-          },
-          {
-            "kind": "label",
-            "x": 0.8107,
-            "y": 0.2956,
-            "text": "Cuối video: mã dẫn dắt · mức canh",
-            "accent": "gold",
-            "beat": 1,
-            "anchor": "end"
           }
         ],
         "shots": [
           {
             "beat": 0,
-            "x": 0.6991,
-            "y": 0.4035,
-            "zoom": 1.1,
-            "move": "pull_out"
+            "x": 0.8074,
+            "y": 0.4008,
+            "zoom": 2,
+            "move": "push_in"
           },
           {
             "beat": 1,
-            "x": 0.7807,
-            "y": 0.3856,
-            "zoom": 2,
-            "move": "push_in"
+            "x": 0.7352,
+            "y": 0.3946,
+            "zoom": 1.35,
+            "move": "pull_out"
           }
         ]
       },
       "citedFacts": [
-        "session.window.from",
-        "session.window.low",
-        "session.window.high",
-        "screener.leaders.top",
-        "state.rallyLow"
+        "distribution.toUnderPressure",
+        "distribution.count",
+        "state.status",
+        "state.ftd.date"
       ]
     },
     {
@@ -155,7 +209,7 @@
       "eyebrow": "Trạng thái theo quy tắc",
       "act": "blue",
       "duration": 10.1,
-      "narration": "Ba phiên phân phối, giảm mà khối lượng tăng, nặng nhất mười một tháng chín. Theo quy tắc vẫn là xu hướng tăng xác nhận, neo ở phiên ba tháng tám. Phiên cũ nhất còn mười hai phiên; bốn là chịu áp lực, sáu điều chỉnh. Nhìn rộng ra.",
+      "narration": "Cả ba giảm mà khối lượng tăng, nặng nhất mười một tháng chín. Neo là phiên xác nhận ba tháng tám và đáy nhịp hồi. Phiên cũ nhất hết hạn sau mười hai phiên. Bốn là chịu áp lực, sáu là điều chỉnh. Nhìn rộng ra thì khác.",
       "beats": [
         {
           "atSentence": 0,
@@ -166,14 +220,14 @@
         },
         {
           "atSentence": 1,
-          "at": 4,
+          "at": 3.75,
           "line1": "FTD 3/8 · đáy 1651,20",
           "line2": "Neo của xu hướng tăng",
-          "accent": "green"
+          "accent": "gold"
         },
         {
           "atSentence": 2,
-          "at": 7.5,
+          "at": 7.25,
           "line1": "11/9 hết hạn sau 12 phiên",
           "line2": "Đủ bốn là chịu áp lực",
           "accent": "gold"
@@ -392,12 +446,12 @@
       "eyebrow": "Độ rộng thị trường",
       "act": "maroon",
       "duration": 7,
-      "narration": "Chỉ số thì vẫn đứng vững. Nhưng chỉ một phần tư số mã đứng trên đường trung bình hai trăm phiên, và đang giảm từ cuối tháng tám. Câu trả lời nằm ở hai bộ lọc.",
+      "narration": "Theo quy tắc, chỉ số vẫn ở xu hướng tăng. Nhưng chỉ một phần tư số mã đứng trên đường trung bình hai trăm phiên, và đang giảm từ cuối tháng tám. Vậy tiền đang ở đâu?",
       "beats": [
         {
           "atSentence": 0,
           "at": 0.25,
-          "line1": "Chỉ số vẫn đứng vững",
+          "line1": "Chỉ số vẫn xác nhận tăng",
           "line2": "Bao nhiêu mã đi cùng?",
           "accent": "gold"
         },
@@ -1574,11 +1628,11 @@
   "unsupported": [
     {
       "id": "rd-260929-hook",
-      "why": "Không chữ hệ thống ở hook (người dùng chốt 30/9). \"Chỉ số đi ngang\" = vùng 1651 – 1874 từ 15/7, chỉ số −0,2% qua 52 phiên (session.window); \"phần lớn cổ phiếu đi xuống\" = 24,8% mã trên SMA200 (đọc số ở scene breadth). \"Ba mã\" = leaders.top, \"một mức\" = đáy nhịp hồi 1651,20 (scene watch)."
+      "why": "Câu đầu nói \"một phiên nữa là đổi trạng thái\" = distribution.toUnderPressure (1); \"ba mũi tên đỏ\" chỉ vào mark, không đọc số phiên (scene market đọc). FTD đọc là \"phiên xác nhận\" ở scene market, không ở hook. Beat 2 ghim câu 1 (mũi tên xanh + vòng vàng hiện khi nói \"xu hướng tăng vẫn được xác nhận\")."
     },
     {
       "id": "rd-260929-market",
-      "why": "Câu đầu giới thiệu ba phiên phân phối (hook không còn nhắc). \"Trong ba tuần\" là cách nói của đạo diễn (11/9, 23/9, 24/9); pack chỉ có cửa sổ 25 phiên. FTD đọc là \"phiên xác nhận\" (TTS chưa đo chữ FTD). \"Tổ chức đang bán ra\" là cách hiểu của quy tắc, không phải số đo. Chỉ hai số đọc ra lời (mười một tháng chín, mười hai phiên)."
+      "why": "Lời chỉ đọc hai số (ngày 11/9 và 12 phiên); −1,86%, ×1,64 và đáy 1651,20 nằm trên nhãn chart và headline. “Giảm mà khối lượng tăng” là định nghĩa phiên phân phối của rules (giảm từ 0,5% với khối lượng cao hơn phiên trước); “tổ chức đang bán ra” trên headline là cách đọc của quy tắc, không phải số đo. Ba beat ghim vào câu 0, 1, 2 (khung mặc định 0, 2, 3) để mũi tên FTD hiện đúng câu neo và đồng hồ hiện đúng câu “phiên cũ nhất hết hạn”."
     },
     {
       "id": "rd-260929-breadth",

@@ -323,7 +323,7 @@
     ],
     "roles": {
       "hook": {
-        "job": "Điểm số và % của phiên trước, rồi hai chữ do số quyết định (chỉ số đi ngang/tăng/giảm; mã tăng giảm thế nào), câu hỏi tiền chảy vào đâu, và LỜI MỜI cùng điểm lại thị trường và các mã đáng chú ý. KHÔNG dùng chữ của hệ thống (phiên phân phối, FTD, 'theo quy tắc', trạng thái) — chuyện hệ thống bắt đầu ở market.",
+        "job": "Ngày của phiên (thứ, ngày tháng), điểm số và % của phiên, rồi hai chữ do số quyết định (chỉ số đi ngang/tăng/giảm; mã tăng giảm thế nào), câu hỏi tiền chảy vào đâu, và LỜI MỜI cùng điểm lại thị trường và các mã đáng chú ý. KHÔNG dùng chữ của hệ thống (phiên phân phối, FTD, 'theo quy tắc', trạng thái) — chuyện hệ thống bắt đầu ở market.",
         "act": "blue",
         "pace": "short",
         "shots": [

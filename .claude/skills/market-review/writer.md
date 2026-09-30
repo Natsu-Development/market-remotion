@@ -79,7 +79,8 @@ Reel theo arc **hook_payoff** của vox-director, thân là **đếm ngược** 
 trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi scene phải có lý do để xem tiếp.
 
 - **Hook, KHÔNG chữ của hệ thống** (người dùng chốt 30/9: không phiên phân phối, không FTD, không "theo
-  quy tắc", không tên trạng thái). Khuôn người dùng đặt: (1) điểm số và % của phiên — "Đóng cửa một nghìn
+  quy tắc", không tên trạng thái). Khuôn người dùng đặt: (0) ngày của phiên, một câu ngắn — "Thứ Ba, hai
+  mươi chín tháng chín." (`session.weekday`, `session.dm`); (1) điểm số và % của phiên — "Đóng cửa một nghìn
   bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm." (đọc điểm tròn, nhãn giữ số lẻ); (2) hai chữ
   do SỐ quyết định, lấy nguyên từ `session.breadthToday.indexWord` / `breadthWord` — "Chỉ số đi ngang, mã
   giảm nhiều hơn tăng." (không tự viết "phần lớn" khi số không nói vậy); (3) câu hỏi "Tiền đang chảy vào

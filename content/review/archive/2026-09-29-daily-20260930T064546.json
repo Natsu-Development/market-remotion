@@ -22,7 +22,7 @@
       "eyebrow": "Tổng kết phiên 29/9",
       "act": "blue",
       "duration": 7,
-      "narration": "Thứ Ba, hai mươi chín tháng chín. Đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, mã giảm nhiều hơn tăng. Tiền đang chảy vào đâu? Cùng mình điểm lại thị trường và những mã đáng chú ý nhé.",
+      "narration": "Đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm. Chỉ số đi ngang, mã giảm nhiều hơn tăng. Tiền đang chảy vào đâu? Cùng mình điểm lại thị trường và những mã đáng chú ý nhé.",
       "beats": [
         {
           "atSentence": 0,
@@ -32,7 +32,7 @@
           "accent": "red"
         },
         {
-          "atSentence": 3,
+          "atSentence": 2,
           "at": 5.5,
           "line1": "Tiền đang chảy vào đâu?",
           "line2": "Cùng mình điểm lại phiên",
@@ -141,8 +141,6 @@
         ]
       },
       "citedFacts": [
-        "session.weekday",
-        "session.date",
         "session.close",
         "session.changePercent",
         "session.breadthToday.indexWord",
@@ -1576,7 +1574,7 @@
   "unsupported": [
     {
       "id": "rd-260929-hook",
-      "why": "Câu đầu là ngày của phiên (session.weekday + session.dm, đọc thành chữ). Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; \"mã giảm nhiều hơn tăng\" vì HOSE 186 giảm / 152 tăng / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Câu cuối là lời mời theo khuôn người dùng (\"review\" → \"điểm lại\" cho TTS, \"&\" → \"và\"), thay lời hứa \"cuối video\". Không chữ hệ thống ở hook."
+      "why": "Mở bằng điểm số và % của phiên theo yêu cầu (đọc tròn 1778; nhãn giữ 1777,73). \"Chỉ số đi ngang\" vì |−0,17%| < 0,3%; \"mã giảm nhiều hơn tăng\" vì HOSE 186 giảm / 152 tăng / 65 đứng giá (breadthToday, từ universe của Screener — FireAnt \"Biến động thị trường\" chưa lấy được headless). Không \"phần lớn\" vì không phía nào ≥ 60%. Câu cuối là lời mời theo khuôn người dùng (\"review\" → \"điểm lại\" cho TTS, \"&\" → \"và\"), thay lời hứa \"cuối video\". Không chữ hệ thống ở hook."
     },
     {
       "id": "rd-260929-market",

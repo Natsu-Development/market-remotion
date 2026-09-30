@@ -49,8 +49,11 @@ const win = bars.filter((b) => (winFrom ? b.t >= winFrom : true)).slice(-60);
 const winBars = win.length >= 10 ? win : bars.slice(-50);
 const hiBar = winBars.reduce((m, b) => (b.h > m.h ? b : m), winBars[0]);
 const loBar = winBars.reduce((m, b) => (b.l < m.l ? b : m), winBars[0]);
+const WEEKDAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 const session = {
   date, dm: dm(date), dmy: dmy(date),
+  /** "Thứ Ba" — the hook opens on the session's day (user, 2026-09-30). */
+  weekday: WEEKDAYS[new Date(`${date}T00:00:00Z`).getUTCDay()],
   /** The stretch the reel looks at: its range and its net move, for a hook that speaks plainly. */
   window: {
     sessions: winBars.length, from: winBars[0].t, fromDm: dm(winBars[0].t),

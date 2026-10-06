@@ -1,0 +1,213 @@
+{
+  "fetchedAt": "2026-10-05T09:40:52.187Z",
+  "_note": "names and conditions only, taken from GET /api/config/{id}.metrics_filter",
+  "filters": [
+    {
+      "name": "Momentum breakout",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "rs_1m",
+          "op": ">=",
+          "value": 80
+        },
+        {
+          "field": "rs_3m",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "rs_52w",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1000000
+        }
+      ],
+      "groups": [
+        {
+          "match": "or",
+          "conditions": [
+            {
+              "field": "has_breakout_confirmed",
+              "op": "=",
+              "value": 1
+            },
+            {
+              "field": "has_breakout_potential",
+              "op": "=",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Momentum breakdown",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "rs_1m",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "rs_3m",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "rs_52w",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1000000
+        }
+      ],
+      "groups": [
+        {
+          "match": "or",
+          "conditions": [
+            {
+              "field": "has_breakdown_potential",
+              "op": "=",
+              "value": 1
+            },
+            {
+              "field": "has_breakdown_confirmed",
+              "op": "=",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bullish RSI",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "has_bullish_rsi",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1000000
+        }
+      ]
+    },
+    {
+      "name": "Bearish RSI",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "has_bearish_rsi",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1000000
+        }
+      ]
+    },
+    {
+      "name": "Uptrend",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "current_price",
+          "op": ">",
+          "rhs_field": "ema_50"
+        },
+        {
+          "field": "ema_50",
+          "op": ">",
+          "rhs_field": "sma_200"
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1200000
+        }
+      ]
+    },
+    {
+      "name": "Volume spike",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "volume_vs_sma",
+          "op": ">",
+          "value": 1.2
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1500000
+        }
+      ]
+    },
+    {
+      "name": "RS Strong",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "rs_1m",
+          "op": ">=",
+          "value": 60
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 2000000
+        }
+      ]
+    },
+    {
+      "name": "Uptrend Minervini",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "ema_21",
+          "op": ">",
+          "rhs_field": "ema_50"
+        },
+        {
+          "field": "ema_50",
+          "op": ">",
+          "rhs_field": "sma_200"
+        },
+        {
+          "field": "current_price",
+          "op": ">",
+          "rhs_field": "ema_50"
+        },
+        {
+          "field": "current_price",
+          "op": ">",
+          "rhs_field": "sma_200"
+        },
+        {
+          "field": "rs_52w",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1500000
+        }
+      ]
+    }
+  ]
+}

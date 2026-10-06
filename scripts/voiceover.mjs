@@ -9,6 +9,10 @@
  *   node scripts/voiceover.mjs --force --only=channel-evidence-4
  *                                              ...but only that scene (comma-separated ids);
  *                                              the others keep their track and are re-pinned
+ *   node scripts/voiceover.mjs --reassemble --only=channel-evidence-4
+ *                                              rebuild that scene's track from the sentence takes
+ *                                              already in .tts-cache/ (after scripts/tts_takes.py
+ *                                              swapped a better take in); nothing is re-synthesized
  *   node scripts/voiceover.mjs --engine=say    macOS `say` instead of OmniVoice
  *   node scripts/voiceover.mjs --speed=1.05 --pause=0.3
  *   node scripts/voiceover.mjs --content=content/other.json
@@ -25,6 +29,11 @@
  * A final track that already exists is never overwritten without --force, so
  * dropping a real recording at public/voiceover/03-momentum.wav wins over both.
  *
+ * Pace: `voice.pace` in the rules sets a native OmniVoice speed per sentence and the silence after it —
+ * slower on a sentence that carries a figure or turns the headline, a longer hold after a question and
+ * before the payoff — so the read is not one flat rate (the user, 2026-10-01: "the voice doesn't have any
+ * pace or highlight"). The speed is part of the sentence's cache key; the pauses are applied at assembly.
+ *
  * Pronunciation: `voice.lexicon` in src/shared/content-rules.json respells a written term for
  * the TTS only ("MACD" → how a Vietnamese trader says it). Narration, headlines and the review
  * page keep the written form; the spoken form is in the cache key, so editing the lexicon
@@ -36,6 +45,7 @@ import {existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:f
 import {createHash} from 'node:crypto';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {lexiconOf, loadRules, spellerOf, TICKER_RE} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = resolve(ROOT, 'public/voiceover');
@@ -53,6 +63,8 @@ const CONTENT = resolve(ROOT, opt('content', 'content/channel.json'));
 const ENGINE = opt('engine', 'omnivoice');
 const RETIME = flag('retime');
 const FORCE = flag('force');
+/** Rebuild the final track from the cached sentence takes without re-synthesizing them. */
+const REASSEMBLE = flag('reassemble');
 /** With --force, restrict the re-synthesis to these scene ids (others keep their track). */
 const ONLY = opt('only') ? new Set(opt('only').split(',').map((s) => s.trim()).filter(Boolean)) : null;
 
@@ -61,28 +73,53 @@ const REF_AUDIO = resolve(ROOT, opt('ref', 'assets/voices/ref_ThanhBinh_khac_24k
 const REF_TEXT_FILE = REF_AUDIO.replace(/_24k\.wav$|\.wav$/, '.txt');
 const MODEL = opt('model', 'k2-fsa/OmniVoice');
 const DEVICE = opt('device', 'mps');
-/** OmniVoice has no speed parameter; this drives ffmpeg atempo. Past 1.15 it sounds synthetic. */
+/** Base speaking speed, OmniVoice's own `speed` factor (per sentence on top of it: voice.pace). */
 const SPEED = Number(opt('speed', '1.0'));
 /**
  * Written term → spoken form, whole-word, applied per sentence right before synthesis. A term at
- * the start of a sentence gets its spoken form capitalised, like any first word.
+ * the start of a sentence gets its spoken form capitalised, like any first word. It is the
+ * lexicon of the rules that grade the reel (scripts/lib/rules.mjs), set once the reel is read.
  */
-const LEXICON = (() => {
-  try {
-    const lex = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8')).voice?.lexicon ?? {};
-    return Object.entries(lex).filter(([k, v]) => !k.startsWith('_') && typeof v === 'string');
-  } catch {
-    return [];
-  }
-})();
+let LEXICON = [];
+/** voice.letters of the same rules: spells a ticker the lexicon left alone (null for reels without a table). */
+let SPELL = null;
+/** voice.pace of the rules: {speed: {default, <role>, key}, pauseAfter: {default, <role>, question, beforeKey}}. */
+let PACE = null;
+/** A sentence that speaks a figure — the one the ear needs time for. */
+const FIGURE_RE = /\b(phẩy|phần trăm|nghìn|mươi|trăm)\b/i;
+/**
+ * Speed and trailing pause for each sentence of a scene. "Key" sentences carry a figure or are the
+ * sentence a later headline beat is pinned to; a question gets a longer hold after it; the sentence
+ * before a key one holds a beat longer so the figure lands on its own.
+ */
+const paceOf = (scene, lines) => {
+  const sp = PACE?.speed ?? {}, pa = PACE?.pauseAfter ?? {};
+  const role = scene.role ?? '';
+  const pinned = new Set(
+    (scene.beats ?? []).filter((b) => b.atSentence != null && b.atSentence > 0).map((b) => Math.min(b.atSentence, lines.length - 1)),
+  );
+  // A spelled ticker needs the same care as a figure: slower, and worth several takes.
+  const isKey = (k) => pinned.has(k) || FIGURE_RE.test(lines[k]) || (SPELL != null && TICKER_RE.test(lines[k]));
+  return lines.map((line, k) => {
+    let speed = sp[role] ?? sp.default ?? 1;
+    if (isKey(k) && sp.key != null) speed = sp.key;
+    let pauseAfter = pa[role] ?? pa.default ?? PAUSE;
+    if (/\?\s*$/.test(line) && pa.question != null) pauseAfter = pa.question;
+    if (k + 1 < lines.length && isKey(k + 1) && pa.beforeKey != null) pauseAfter = Math.max(pauseAfter, pa.beforeKey);
+    // key: worth several takes (scripts/tts_takes.py) — the hook's lines included.
+    return {speed: Math.round(speed * 100) / 100, pauseAfter: Math.round(pauseAfter * 100) / 100, key: isKey(k) || role === 'hook'};
+  });
+};
 const escapeRe = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const sayAs = (text) => LEXICON.reduce(
+const respell = (text) => LEXICON.reduce(
   (t, [word, say]) => t.replace(
     new RegExp(`(?<![\\p{L}\\p{N}])${escapeRe(word)}(?![\\p{L}\\p{N}])`, 'gu'),
     (_, at) => (at === 0 ? say.charAt(0).toUpperCase() + say.slice(1) : say),
   ),
   text,
 );
+/** Lexicon first (FTD, MACD), then any ticker still written in capitals is spelled letter by letter. */
+const sayAs = (text) => (SPELL ? SPELL(respell(text)) : respell(text));
 
 /** Gap inserted between sentences of the same scene. */
 const PAUSE = Number(opt('pause', '0.28'));
@@ -175,9 +212,9 @@ const sentences = (text) => {
   return merged;
 };
 
-const cacheKey = (text) =>
+const cacheKey = (text, speed = 1) =>
   createHash('sha1')
-    .update(`${ENGINE}|${REF_AUDIO}|${REF_TEXT}|${MODEL}|${SPEED}|${text.trim()}`)
+    .update(`${ENGINE}|${REF_AUDIO}|${REF_TEXT}|${MODEL}|${SPEED}|${text.trim()}` + (speed !== 1 ? `|speed=${speed}` : ''))
     .digest('hex')
     .slice(0, 12);
 
@@ -207,10 +244,11 @@ const trimPart = (src) => {
  * begins so the headline beats can be pinned to it.
  */
 const assembleScene = (parts, dest) => {
-  const trimmed = parts.map(trimPart);
+  const trimmed = parts.map((p) => trimPart(p.file));
+  const pauses = parts.map((p) => p.pauseAfter ?? PAUSE);
   const inputs = trimmed.flatMap((p) => ['-i', p]);
   const perPart = trimmed
-    .map((_, k) => (k < trimmed.length - 1 ? `[${k}:a]apad=pad_dur=${PAUSE}[s${k}]` : `[${k}:a]anull[s${k}]`))
+    .map((_, k) => (k < trimmed.length - 1 ? `[${k}:a]apad=pad_dur=${pauses[k]}[s${k}]` : `[${k}:a]anull[s${k}]`))
     .join(';');
   const joined = trimmed.map((_, k) => `[s${k}]`).join('');
   const filter =
@@ -229,10 +267,10 @@ const assembleScene = (parts, dest) => {
   // Sentence k starts after the lead-in plus every earlier sentence and its pause.
   const starts = [];
   let cursor = LEAD_IN;
-  for (const t of trimmed) {
+  trimmed.forEach((t, k) => {
     starts.push(Math.round(cursor * 100) / 100);
-    cursor += durationOf(t) + PAUSE;
-  }
+    cursor += durationOf(t) + pauses[k];
+  });
   return starts;
 };
 
@@ -275,6 +313,14 @@ if (ENGINE === 'say') {
 mkdirSync(OUT_DIR, {recursive: true});
 mkdirSync(CACHE_DIR, {recursive: true});
 const reel = JSON.parse(readFileSync(CONTENT, 'utf8'));
+try {
+  const R = loadRules(ROOT, {reel});
+  LEXICON = lexiconOf(R);
+  SPELL = spellerOf(R);
+  PACE = R.voice?.pace ?? null;
+} catch (e) {
+  console.warn(`no pronunciation lexicon (${e.message}) — terms are read as written`);
+}
 if (ONLY) {
   const known = new Set(reel.scenes.map((s) => s.id));
   const bad = [...ONLY].filter((id) => !known.has(id));
@@ -282,7 +328,7 @@ if (ONLY) {
     console.error(`--only names scene(s) not in ${CONTENT}: ${bad.join(', ')}`);
     process.exit(1);
   }
-  if (!FORCE) console.warn('--only has no effect without --force (nothing is re-synthesized)');
+  if (!FORCE && !REASSEMBLE) console.warn('--only has no effect without --force or --reassemble (nothing is rebuilt)');
 }
 
 /** Scenes that need a new final track, with their per-sentence cache targets. */
@@ -295,17 +341,42 @@ for (const [i, scene] of reel.scenes.entries()) {
     plan.push({scene, stem, wav, rel, skip: 'no narration'});
     continue;
   }
-  const force = FORCE && (!ONLY || ONLY.has(scene.id));
-  if (existsSync(wav) && !force) {
-    plan.push({scene, stem, wav, rel, skip: 'kept existing file'});
+  const picked = !ONLY || ONLY.has(scene.id);
+  const force = FORCE && picked;
+  const lines = ENGINE === 'omnivoice' ? sentences(scene.narration) : [scene.narration];
+  const paced = ENGINE === 'omnivoice' ? paceOf(scene, lines) : lines.map(() => ({speed: 1, pauseAfter: PAUSE}));
+  const parts = lines.map((line, k) => {
+    const text = ENGINE === 'omnivoice' ? sayAs(line) : line;
+    const {speed, pauseAfter, key} = paced[k];
+    return {text, speed, pauseAfter, key, force, file: resolve(CACHE_DIR, `${cacheKey(text, speed)}.wav`)};
+  });
+  if (existsSync(wav) && !force && !(REASSEMBLE && picked)) {
+    plan.push({scene, stem, wav, rel, skip: 'kept existing file', lines, parts});
     continue;
   }
-  const lines = ENGINE === 'omnivoice' ? sentences(scene.narration) : [scene.narration];
-  const parts = lines.map((line) => {
-    const text = ENGINE === 'omnivoice' ? sayAs(line) : line;
-    return {text, force, file: resolve(CACHE_DIR, `${cacheKey(text)}.wav`)};
-  });
   plan.push({scene, stem, wav, rel, lines, parts});
+}
+
+/**
+ * Every sentence of every scene with the cache file it is read from — what scripts/tts_takes.py
+ * reads to re-take a sentence and put a clearer take at the same path. Written before synthesis
+ * so it is there even when the TTS job fails.
+ */
+if (ENGINE === 'omnivoice') {
+  writeFileSync(
+    resolve(CACHE_DIR, '_sentences.json'),
+    JSON.stringify(
+      {
+        content: CONTENT.replace(ROOT + '/', ''),
+        model: MODEL, device: DEVICE, ref_audio: REF_AUDIO, ref_text: REF_TEXT, speed: SPEED,
+        scenes: plan
+          .filter((p) => p.parts)
+          .map((p) => ({id: p.scene.id, wav: p.wav, sentences: p.parts.map(({text, file, speed, pauseAfter, key}) => ({text, file, speed, pauseAfter, key}))})),
+      },
+      null,
+      1,
+    ),
+  );
 }
 
 // ---------------------------------------------------------------- synthesize
@@ -314,7 +385,7 @@ if (ENGINE === 'omnivoice') {
   // Every missing sentence across every scene goes in ONE call: loading the
   // model costs seconds and ~4GB, so the job pays for it once.
   const missing = plan
-    .filter((p) => p.parts)
+    .filter((p) => p.parts && !p.skip)
     .flatMap((p) => p.parts)
     .filter((part) => part.force || !existsSync(part.file));
   const unique = [...new Map(missing.map((m) => [m.file, m])).values()];
@@ -331,7 +402,7 @@ if (ENGINE === 'omnivoice') {
           ref_audio: REF_AUDIO,
           ref_text: REF_TEXT,
           speed: SPEED,
-          items: unique.map((m) => ({text: m.text, out: m.file})),
+          items: unique.map((m) => ({text: m.text, out: m.file, speed: m.speed})),
         },
         null,
         1,
@@ -373,7 +444,7 @@ for (const item of plan) {
   if (item.skip) {
     console.log(`= ${stem.padEnd(20)} ${item.skip}`);
   } else if (ENGINE === 'omnivoice') {
-    const starts = assembleScene(item.parts.map((p) => p.file), wav);
+    const starts = assembleScene(item.parts, wav);
     if (JSON.stringify(scene.sentenceStarts) !== JSON.stringify(starts)) {
       scene.sentenceStarts = starts;
       changed = true;

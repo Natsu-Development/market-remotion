@@ -4,11 +4,11 @@
   "symbol": "VNINDEX",
   "resolution": "daily",
   "reconstructed": false,
-  "fetchedAt": "2026-09-28T08:12:56.931Z",
-  "from": "2025-09-19",
-  "to": "2026-09-28",
-  "bars": 254,
-  "rawRows": 254,
+  "fetchedAt": "2026-09-30T08:39:11.665Z",
+  "from": "2025-09-22",
+  "to": "2026-09-30",
+  "bars": 255,
+  "rawRows": 255,
   "scale": 1000,
   "volumeUnit": "shares, summed per bar"
 }

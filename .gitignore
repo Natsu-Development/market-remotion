@@ -17,9 +17,13 @@ __pycache__/
 # personal or identifying data — keep local, never commit
 # Chrome profile that shoot.mjs drives (the account name)
 .shoot-profile
+# Google account whose Chrome profile publish-video drives (Facebook Page drafts)
+.publish-profile
 # reference voice clip of a real person, and its transcript
 assets/voices/
 # screenshots show the signed-in account; sidecars record the profile and configId
 public/shots/
+# market-review: raw screener responses (every stock, every day) — the snapshots in content/review/ keep what the reels use
+.review-cache/
 .env
 .env.*

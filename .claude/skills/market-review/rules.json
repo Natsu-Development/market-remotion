@@ -1,0 +1,862 @@
+{
+ "$comment": "Contract of the market-review skill (daily and weekly market-review reels). It is separate from src/shared/content-rules.json, which belongs to market-video: nothing here is read by that skill, and nothing there governs this one except the ENGINE constants that scripts/lib/rules.mjs inherits (layout, audio, series, the voice clip), because the renderer and the TTS hard-code the same values. Read by scripts/review/*.mjs, by verify / review-page / voiceover for every reel whose `rules` field points here, and by .claude/skills/market-review/SKILL.md. Changing a number here changes what the reels say and what verify enforces: that is the user's decision.",
+ "market": {
+  "index": "VNINDEX",
+  "tickerSymbol": "VN-INDEX",
+  "source": "ssi",
+  "sourceLabel": "SSI iBoard",
+  "historyFrom": "2013-01-01",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "utcOffsetHours": 7,
+  "sessionClose": "15:00",
+  "_sessionClose": "HOSE's ATC ends 14:45 and put-through trading at 15:00. A bar fetched before 15:00 ICT on its own day is still moving and is dropped.",
+  "_volume": "SSI reports matched volume (khớp lệnh, FireAnt's 'KL khớp'); the terminal's daily volume is within 0.2% of it, Entrade's is 25-35% higher because it adds put-through deals (measured 2026-09-29). Distribution days compare volume session to session, so the whole engine uses one source."
+ },
+ "distribution": {
+  "maxChangePercent": -0.5,
+  "_threshold": "User set -0.5% on 2026-09-29. IBD itself uses -0.2%; at -0.2% the VNINDEX sessions of 14/9, 18/9 and 28/9/2026 would also count (6 active DDs, correction since 28/9) instead of 3.",
+  "volumeAbovePrior": true,
+  "windowSessions": 25,
+  "expireRallyPercent": 5,
+  "_expire": "A DD counts for 25 sessions, itself included, and drops out early once a later session's intraday HIGH reaches its close x 1.05.",
+  "underPressureAt": 4,
+  "correctionAt": 6,
+  "dangerAt": 5,
+  "danger": {
+   "short": "Nguy hiểm",
+   "vi": "Mức nguy hiểm",
+   "action": "rà lại từng mã và rủi ro",
+   "say": "Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa."
+  },
+  "_say": "User 2026-10-05: 'Set the sentence: \"Thêm một phiên nữa là điều chỉnh\" to something like: \"Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa\"'. At the danger level the market scene says this line (the user's words and spelling, 'khỏe') INSTEAD of a countdown to the correction ('thêm một phiên phân phối nữa là điều chỉnh' — the 2/10 edition's 'Thêm một phiên nữa là điều chỉnh.'). 'Something like': the writer may fit it to the scene, but both ideas stay — a real chance of big swings or a big correction, and the market is no longer healthy. The correction threshold itself stays on the market's beat-3 plate and in the watch scene's nếu … thì branch. scripts/review/scaffold.mjs quotes `say` in the market brief; scripts/review/checks.mjs review-state WARNs (never FAILs) when a market scene at the danger level still counts down to the correction or lacks 'không còn khỏe'.",
+  "_danger": "User 2026-10-01: 'With my system, have 5 day DD is dangerous and must warning and re-check the symbol and risk.' The user's own warning tier inside 'Xu hướng tăng chịu áp lực': the state machine is unchanged (underPressureAt 4, correctionAt 6) and `status` keeps its four names. From `dangerAt` active distribution days while the uptrend stands (CONFIRMED_UPTREND / UNDER_PRESSURE), the reel WARNS: the market scene says 'mức nguy hiểm' and that every name held or watched and its risk get re-checked (`danger.action` — a risk-management step of the channel's own system, never a buy/sell call), the watch scene keeps the warning and each leader scene carries one caution line. Below it, the danger level is the next threshold the market and watch scenes name ('Chỉ cần thêm một phiên nữa là mức nguy hiểm, …'). scripts/review/facts.mjs exposes distribution.dangerAt / toDanger / danger and a watch[] branch; scripts/review/checks.mjs review-state FAILs a reel at the danger level whose market scene never says 'nguy hiểm'. `danger` holds the on-screen words, like `status` does for the states.",
+  "resetOnFtd": true,
+  "stalling": {
+   "enabled": false,
+   "maxChangePercent": 0.4,
+   "minVolumeVsPrior": 0.95,
+   "_why": "IBD sometimes counts a stalling day (small gain on heavy volume, close in the lower half of the range) as distribution. Present so the user can switch it on; off by default."
+  }
+ },
+ "followThrough": {
+  "minDay": 4,
+  "minChangePercent": 1.25,
+  "volumeAbovePrior": true,
+  "day1UpperHalfClose": true,
+  "_day1": "Day 1 of a rally attempt: the first session that closes above the prior close, or a session that sets the correction's new low and still closes in the upper half of its range. A later intraday low below the rally low resets the attempt; after an FTD the same undercut fails it.",
+  "_source": "William O'Neil / IBD rules, as used in Mark Minervini's market timing. User chose IBD's current +1.25% on 2026-09-29; scripts/review/backtest.mjs also reports +1.5% and +1.7%.",
+  "backtestThresholds": [
+   1.25,
+   1.5,
+   1.7
+  ],
+  "backtestForwardSessions": 25
+ },
+ "status": {
+  "CONFIRMED_UPTREND": {
+   "vi": "Xu hướng tăng xác nhận",
+   "short": "Tăng xác nhận"
+  },
+  "UNDER_PRESSURE": {
+   "vi": "Xu hướng tăng chịu áp lực",
+   "short": "Chịu áp lực",
+   "headline": "Sức khỏe thị trường đang yếu"
+  },
+  "CORRECTION": {
+   "vi": "Thị trường điều chỉnh",
+   "short": "Điều chỉnh"
+  },
+  "RALLY_ATTEMPT": {
+   "vi": "Nỗ lực hồi phục",
+   "short": "Hồi phục"
+  },
+  "_status": "On-screen words for the four states, in the order the machine moves through them. 'theo quy tắc' goes with them on screen or in the narration: this is a mechanical version of calls IBD makes partly by judgment.",
+  "_headline": "User 2026-10-05: 'change the text on the scene 02 - beat 2 - Xu hướng tăng chịu áp lực to something like Sức khỏe thị trường đang yếu'. A state's `headline`, when present, is what the market scene's beat-2 headline shows in place of the state's name (the beat that anchors the trend on the FTD). The narration still names the state 'theo quy tắc' (review-state wants it named by the end of the market scene); only the on-screen words change. 'Something like': the writer may fit the words, the idea stays — the market's health is weak. scripts/review/scaffold.mjs quotes it in the market brief; scripts/review/checks.mjs review-state WARNs (never FAILs) when the market's headlines lack it."
+ },
+ "screener": {
+  "endpoint": "/api/stocks/filter",
+  "_endpoint": "The ONE non-GET call this skill makes (user approved 2026-09-29). It only reads. Never POST/PUT /api/config, /api/stocks/recompute or anything else that writes; scripts/review/lib/common.mjs refuses them and shoot.mjs --allow-post blocks them in the browser.",
+  "freshAfter": "15:00",
+  "_fresh": "cached_at from GET /api/stocks/cache-info must be at or after the session's 15:00 ICT. On 2026-09-29 the cache was stamped 12:00 and then 15:04.",
+  "universeBody": {
+   "match": "and"
+  },
+  "scenes": {
+   "spike": {
+    "filters": [
+     "Volume spike"
+    ],
+    "photo": "Volume spike",
+    "sortBy": "rs_1m",
+    "top": 3,
+    "visual": "movers",
+    "movers": {
+     "gainers": 10,
+     "losers": 10,
+     "sortBy": "changePercent",
+     "order": {
+      "gainers": "desc",
+      "losers": "asc"
+     },
+     "volume": "percentVsSma20",
+     "_sortBy": "User 2026-10-01 evening: 'With volume spike, sort by the price change percent: DESC and ASC for both column. The volumn must be the percent with its volumn avg 20.' The gainers column runs from the biggest gain down, the losers column from the deepest fall up (scripts/review/facts.mjs; sortBy \"rs_1m\" brings back the RS 1M board of earlier that day). volume \"percentVsSma20\" prints each row's volume as the terminal's VOL/SMA, (volume − SMA20) / SMA20 × 100 in whole percent ('KL +92%' where the ratio is ×1,92); the leader chart's volume box and any spike headline use the same unit. The RS Strong and Uptrend boards keep RS 1M descending."
+    }
+   },
+   "rs": {
+    "filters": [
+     "RS Strong"
+    ],
+    "photo": "RS Strong",
+    "sortBy": "rs_1m",
+    "top": 10,
+    "visual": "board",
+    "board": {
+     "columns": [
+      "price",
+      "change",
+      "rs1m",
+      "rs52w",
+      "volume"
+     ]
+    }
+   },
+   "uptrend": {
+    "filters": [
+     "Uptrend"
+    ],
+    "photo": "Uptrend",
+    "sortBy": "rs_1m",
+    "top": 10,
+    "visual": "board",
+    "board": {
+     "columns": [
+      "price",
+      "change",
+      "rs1m",
+      "aboveEma50",
+      "aboveSma200"
+     ]
+    }
+   }
+  },
+  "board": {
+   "picksLabel": "Xem kỹ"
+  },
+  "_board": "The rs/uptrend table (src/scenes/FilterBoard.tsx via scripts/review/lib/board.mjs; user 2026-10-01 evening: 'Make the RS strong scene more attractive, must have the RS1M column, price change & more info', 'If the symbol have both on RS strong and Uptrend highlight it', Uptrend 'more info and attractive like … RS strong'). `scenes.<key>.board.columns`: price, change and rs1m (figure + 0–99 bar) are fixed in that order; up to two of rs52w, volume (VOL/SMA in whole %, the spike board's unit), aboveEma50, aboveSma200 (% above the terminal's EMA50/SMA200, 1 dp). Since 2026-10-05 no board marks a name as shared with another filter (user: 'Not need mentioned the stock on specific filter existed on other filter' — the gold band, the bolt and their legend are gone); beat 2 of BOTH boards decorates and animates the names the reel reviews next that the board shows (rows `focus`: the leaders in the order their scenes play, then the requested names; plate '<picksLabel>: MSR · DGW'; user: 'decoration and animation with the symbol need focused', 'uptrend … behavior like the RS strong') and dims the rest. checks.mjs review-picks checks the focus rows, review-overlap the words.",
+  "_scenes": "One saved filter per scene (user, 2026-09-30: 'separate the filter: Uptrend and RS Strong, not union it first' — until then one `leaders` scene showed RS Strong ∩ Uptrend). The key is the scene's role and its id (rd-<date>-rs). `visual`: \"board\" = the drawn table of the scene's `top` rows (see _board; 2026-10-01 evening); \"columns\" = that afternoon's two-column board (1–5 left, 6–10 right, RS 1M as the big figure, the day's change under it); \"movers\" = the gainers/losers board (spike); \"photo\" (or no `visual`) = the Screener photographed, sorted by `sortBy`, its `top` rows boxed. User 2026-10-01: RS Strong lists 10 symbols, Uptrend at most 10, Volume spike the whole filter as two columns of up to 10, and EVERY list is sorted by RS 1M descending (`sortBy: rs_1m` everywhere) — except the two spike columns since that evening: `movers.sortBy: changePercent`, gainers by the biggest gain, losers by the deepest fall (movers._sortBy). Adding a scene here means adding its role to formats.*.roles and arc.roles (and shots.screener.keep for a photo).",
+  "leaders": {
+   "from": [
+    [
+     "spike",
+     "rs",
+     "uptrend"
+    ],
+    [
+     "rs",
+     "uptrend"
+    ]
+   ],
+   "sortBy": "rs_1m",
+   "top": 2
+  },
+  "_leaders": "The chart countdown (#2 → #1). `from` is a list of TIERS, each a list of scene keys a name must be in; names are taken tier by tier, ranked by `sortBy` inside a tier, until `top` is reached. User 2026-10-01: 'analyze the symbol existed on 3 filters, if don't have continue in 2 filter: uptrend and RS strong (sort by RS1M), maximum 2 symbols' — tier 1 = Volume spike ∩ RS Strong ∩ Uptrend, tier 2 = RS Strong ∩ Uptrend (the countdown the user picked on 2026-09-29, strong AND in an uptrend). The tiers are the director's selection rule, never spoken (user 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'); the fact pack says which tier each pick came from. A flat list or a single key is one tier. An Uptrend name is above its EMA50 with EMA50 above SMA200, so the EMA50 line and the '% trên EMA50' arrow on each chart mean what they say. Rows whose moving average is 0 are dropped whichever tier feeds them.",
+  "dropZeroMa": true,
+  "_dropZeroMa": "The server sends 0 for a moving average it cannot compute yet (new listings), so 'ema_50 > sma_200' passes for them. Rows with ema_50 or sma_200 at 0 are dropped.",
+  "_spike": "User 2026-09-30: the spike scene is a two-column board — the filter's 5 biggest gainers (by % change, descending) and 5 biggest losers (ascending), each with its volume ratio — drawn with the `movers` panel; `visual: \"photo\"` brings back the boxed Screener table. 2026-10-01: each row carries only the ticker — scaffold no longer passes the company name (user: list the symbol, not the company name). 2026-10-05: the scene talks about its own board only — no 'a leader is on this board, kept for the end' (the old loop 2; user: 'Not need mentioned the stock on specific filter existed on other filter').",
+  "impact": {
+   "minShare": 50,
+   "sessions": 85,
+   "_impact": "User 2026-10-05, first: 'with VIC symbol since it affect to the market so much, so need a sentence and something like view VIC behavior price action change beside the VNIndex? Only with VIC symbol'; then, on seeing a separate 'VIC · VN-Index' scene: 'Not need the scene: VIC · VN-Index since i want it combine into the VIC symbol review scene not separate scene, the purpose is warning the trader monitor the behavior of VIC, not compare it with the market VNIndex'. So there is NO extra scene (role `impact` is out of formats.*.roles; buildImpact / lib/impact-compare.mjs stay dormant). When flow.impact.lead is a name the reel reviews (leader or requested pick) and |leadShare| ≥ minShare, that name's OWN review scene (scaffold buildLeaderFireant) asks the writer for one closing warning sentence, monitor this stock's price action because it is carrying the index ('VIC gánh chỉ số, cần theo dõi sát.'), never a comparison with VN-Index and never a call, and for its points in the beat-1 headline (flow.impact.lead.points). `sessions` is the dormant composite's window."
+  },
+  "requested": {
+   "max": 3,
+   "listMinFilters": 2,
+   "_listMinFilters": "User 2026-10-05: the review page's 'Soi thêm mã' box lists every stock in at least this many of the three saved filters (Volume spike, RS Strong, Uptrend), each row naming the filters it is in — 'Option 2, listing it existed on what filter for me' (5/10: DGW in all three; MWG, TCB, NAB, MSR, PVT, BSR, VPB, MSB, HDB in two). The owner types the ones to review; scripts/review-page.mjs reads the full members from content/review/snapshots/<edition>.json."
+  },
+  "_requested": "User 2026-10-05: 'With this skill, edit for me i can choosen and fill the symbol on the artifact to review beside existed symbol on 3 filter'. The review page saves the tickers the user types in its artifact db (doc requests/<edition>); the director reads it (ArtifactData get) into content/review/requests/<date>.json (scripts/review/lib/requested.mjs). At most `max` names; one already among screener.leaders.top is ignored (it has its scene), one missing from the session's universe is skipped. Each becomes a `pick` scene after the leader scenes, photographed (FireAnt, shots.mjs --only=requested) and reviewed (symbol-reviewer) like a leader."
+ },
+ "formats": {
+  "daily": {
+   "composition": "DailyReview",
+   "content": "content/review-daily.json",
+   "brief": "brief/review-daily.md",
+   "idPrefix": "rd",
+   "roles": [
+    "hook",
+    "flow",
+    "market",
+    "spike",
+    "rs",
+    "uptrend",
+    "leader",
+    "leader",
+    "watch",
+    "outro"
+   ],
+   "totalSeconds": [
+    60,
+    90
+   ],
+   "_why": "User picked a chart for each of the top 3 leaders (2026-09-29). Restructured the same day for retention (vox-director hook_payoff + a listicle countdown): breadth = the paradox after the count, watch = the payoff before the outro. 2026-09-30: the RS Strong ∩ Uptrend table became two scenes, rs then uptrend (user: 'separate the filter … not union it first'). 2026-10-01: at most TWO leader charts, the names in all three filters first (screener.leaders tiers). 2026-10-05: the old breadth scene (share above SMA200) left the daily for the weekly, and FireAnt's 'Biến động thị trường' (the session's advancers/decliners + money flow, role `flow`) took its place right after market — the user's answer that afternoon: 'Daily; old chart → weekly' (a first reading had put FireAnt in the weekly). 10 scenes, about 80 s. Later that afternoon the user moved it to scene 02, right after the hook ('move it into the scene 02'), and the hook stopped reading the advancers/decliners ('optimize scene 1 by removing \"Chỉ số tăng: … mã giảm\" since it be mentioned on the updated scene 02'): hook, flow, market, …"
+  },
+  "weekly": {
+   "composition": "WeeklyReview",
+   "content": "content/review-weekly.json",
+   "brief": "brief/review-weekly.md",
+   "idPrefix": "rw",
+   "roles": [
+    "hook",
+    "week",
+    "market",
+    "breadth",
+    "spike",
+    "rs",
+    "uptrend",
+    "leader",
+    "leader",
+    "watch",
+    "outro"
+   ],
+   "totalSeconds": [
+    70,
+    110
+   ],
+   "skill": ".claude/skills/weekly-review/SKILL.md",
+   "_why": "The weekly edition is its own skill since 2026-10-05 (user: 'init this weekly skill … after remove it entirely from the daily market'); it shares these rules, writer.md and scripts/review/ with the daily. `week` (the week's candle) follows the hook; `breadth` is weekly only — the old 'Độ rộng thị trường' line (share of stocks above SMA200 under the index line, scripts/review/breadth.mjs); FireAnt's 'Biến động thị trường' is the daily's `flow` (user 2026-10-05: 'Daily; old chart → weekly'). 11 scenes."
+  }
+ },
+ "shots": {
+  "_shots": "Photo recipes. Sizes, crops, masks and calibration panes are measured on the first run and written here; scripts/review/shots.mjs reads them.",
+  "fireantDaily": {
+   "size": "1080x900",
+   "range": null,
+   "interval": "D",
+   "resetView": true,
+   "volumeBand": 0.3,
+   "_volumeBand": "Share of the calibration pane height (calib.pane) that the FireAnt volume overlay can fill at its bottom: TradingView keeps a 0.7 top margin on it; measured 2026-10-03 on the 1/10 photo, tallest bar at 0.287. scaffold keeps label plates out of it (lib/plate-room.mjs).",
+   "crop": "full",
+   "cropRect": {
+    "x": 0.0574,
+    "y": 0.1592,
+    "w": 0.9102,
+    "h": 0.7982
+   },
+   "masks": [
+    {
+     "x": 0.0574,
+     "y": 0.1546,
+     "w": 0.8454,
+     "h": 0.0254
+    },
+    {
+     "x": 0.0574,
+     "y": 0.1811,
+     "w": 0.1944,
+     "h": 0.0254
+    },
+    {
+     "x": 0.0574,
+     "y": 0.2128,
+     "w": 0.43,
+     "h": 0.0196
+    },
+    {
+     "x": 0.0611,
+     "y": 0.2353,
+     "w": 0.037,
+     "h": 0.031
+    },
+    {
+     "x": 0.0574,
+     "y": 0.6701,
+     "w": 0.7222,
+     "h": 0.0144
+    },
+    {
+     "x": 0.0574,
+     "y": 0.684,
+     "w": 0.7222,
+     "h": 0.009
+    },
+    {
+     "x": 0.0648,
+     "y": 0.8593,
+     "w": 0.0407,
+     "h": 0.0507
+    },
+    {
+     "x": 0.9287,
+     "y": 0.9181,
+     "w": 0.0278,
+     "h": 0.03
+    }
+   ],
+   "calib": {
+    "paneFrac": [
+     0.058,
+     0.21,
+     0.896,
+     0.66
+    ]
+   },
+   "_measured": "2026-09-29 on the user's VNINDEX 1D tab (1080x867 page): price + volume pane y 130..572, MACD pane below, price axis from x 0.9. Candles (239,58,66)/(15,141,118); volume bars are muted (27,86,80)/(121,49,58); the OHLC header and the MACD histogram share the candle colours, hence the explicit pane. Range buttons pick their own bar size and a later interval click keeps the bar count: '3p' then 'D' gave 15 months of daily candles, '6p' alone gave 2-hour bars (and left the user's tab on 2h). So: interval D, then reset view (⌥R). crop and masks are the ones measured for Channel's 1080x900 FireAnt photos (content/channel.json).",
+   "fixedMasks": [
+    {
+     "x": 0.0574,
+     "y": 0.6701,
+     "w": 0.7222,
+     "h": 0.0144
+    },
+    {
+     "x": 0.0574,
+     "y": 0.684,
+     "w": 0.7222,
+     "h": 0.009
+    },
+    {
+     "x": 0.0648,
+     "y": 0.8593,
+     "w": 0.0407,
+     "h": 0.0507
+    },
+    {
+     "x": 0.9287,
+     "y": 0.9181,
+     "w": 0.0278,
+     "h": 0.03
+    }
+   ],
+   "volumeFloor": 0.657,
+   "_masks": "2026-10-03: the user put MA 50/MA 200 (TradingView MA Cross) on this tab, so the legend has a third row (\"MA Cross … 50 200 <MA50> <MA200>\", y 0.217-0.228) and the collapse button moved down to y 0.236-0.266. `masks` is that stack measured on vnindex-daily.png of 2/10; when shots.mjs wrote vnindex-daily.ma.json, scaffold masks the legend rows it measured on THAT photo (their width follows the values) plus `fixedMasks` (MACD legend, TradingView logo, axis gear). The MA lines stay on the chart; only the legend text is masked."
+  },
+  "fireantWeekly": {
+   "size": "1080x900",
+   "range": null,
+   "interval": "W",
+   "resetView": true,
+   "crop": "full",
+   "calib": {
+    "paneFrac": [
+     0.058,
+     0.18,
+     0.896,
+     0.655
+    ]
+   },
+   "blankLegend": true,
+   "volumeFloor": 0.657,
+   "_measured": "2026-10-05, first weekly photo (vnindex-weekly.png of the 28/9–2/10 test week, 1080x867 page area): the user's VNINDEX tab at W + reset view shows ~125 weeks (2024-05 → 2026-10), last week at the right edge, in the same layout as the daily photo of that tab — legend rows OHLC y 0.165, Volume 0.194, MA Cross 0.22 (the WEEKLY MA50/MA200), price pane to ~0.655 with the volume overlay at its base, MACD pane below — so it is calibrated like a leader photo of that tab (pane above the volume floor, legend rows blanked). `range: 1y` is gone: a range preset resets the resolution and an interval click after it keeps the bar count anchored left (shoot_real.py --reset-view note), and the recipe had no reset view. scaffold's buildWeek crops price + volume at the panel's ratio, right edge kept: ~75 weeks. A run leaves the tab on 1W; the next daily or leader shot clicks D again."
+  },
+  "fireantFlow": {
+   "url": "https://fireant.vn/thi-truong/thong-ke-san",
+   "exchange": "HSX",
+   "viewport": "880x1200",
+   "scale": 2,
+   "wait": 8000,
+   "aspect": 1.42,
+   "pieShare": 0.57,
+   "matchTolerance": 0.02,
+   "_why": "User 2026-10-05: the flow scene (daily edition, right after market — 'Daily; old chart → weekly'; first built for the weekly's breadth slot the same afternoon) is FireAnt's own chart of how many stocks rose/fell/stood still and where the money went — section 'Biến động theo sàn' of the public 'Thống kê sàn' page: the pie 'Số lượng CP Tăng, Giảm, Không đổi' and the bars 'Phân bổ dòng tiền' (tỷ đồng). Public, so the HEADLESS shell takes it (shoot.mjs --profile=none), never the user's Chrome. scripts/review/js/fireant-flow.js picks the exchange tab, reads both ECharts options from their React props (the canvas holds no text), grows the two chart containers until the card is `aspect` wide per unit of height (ECharts redraws; the option is untouched), gives the pie `pieShare` of the card's width (at 50/50 ECharts truncated the 'Tăng (162)' label to 'Tăng (...', measured 2026-10-05) and returns each bar's box from its colour. 880 px is the narrowest viewport that keeps the two cards side by side (md: ≥ 768) with the pie labels whole; 2× scale keeps FireAnt's 12 px chart text sharp under the camera. The page shows only its LATEST session (live during trading hours), so a photo counts only when its HSX tile equals the edition's close within `matchTolerance`.",
+   "_impact": "User 2026-10-05 evening: beat 2 of the flow scene is FireAnt's 'Top cổ phiếu tác động' (the points each stock added to / took from the index, top five each way — the user calls it 'Tác động đến Index'). js/fireant-flow.js stacks it under the money card in one wrapper, each card at `aspect`, so the photo is one card wide and two tall (1664×2344 at 2×); its numbers come from the chart component's React hook state (betarest /symbols/contribute-to-index), not its option prop, and each bar's box from the canvas colours. The scene fits the photo whole (contain) and holds zoom 2: one card per beat, the camera tilting from the money card to the impact card."
+  },
+  "fireantStock": {
+   "size": "1080x900",
+   "interval": "D",
+   "resetView": true,
+   "crop": "full",
+   "tab": "VNINDEX",
+   "restoreSymbol": "VNINDEX",
+   "restoreTab": null,
+   "cropRect": {
+    "x": 0.0574,
+    "y": 0.1592,
+    "w": 0.9102,
+    "h": 0.7982
+   },
+   "fixedMasks": [
+    {
+     "x": 0.0574,
+     "y": 0.6701,
+     "w": 0.7222,
+     "h": 0.0144
+    },
+    {
+     "x": 0.0574,
+     "y": 0.684,
+     "w": 0.7222,
+     "h": 0.009
+    },
+    {
+     "x": 0.0648,
+     "y": 0.8593,
+     "w": 0.0407,
+     "h": 0.0507
+    },
+    {
+     "x": 0.9287,
+     "y": 0.9181,
+     "w": 0.0278,
+     "h": 0.03
+    }
+   ],
+   "scaleX": 0.9037,
+   "floorY": 0.63,
+   "maskAfterEdition": true,
+   "calib": {
+    "paneFrac": [
+     0.058,
+     0.18,
+     0.896,
+     0.655
+    ]
+   },
+   "periods": [
+    50,
+    200
+   ],
+   "_measured": "2026-10-03 on msr-/pvt-fireant.png of 2/10 (1080x867 page area). The user keeps MA 50/MA 200 (one TradingView \"MA Cross\" indicator, MA50 green, MA200 orange) on their VNINDEX (1D) tab, not on a stock tab (user: \"open with same VNINDEX symbol to have MA50/MA200 configed indicator\"), so each leader is pasted INTO the VNINDEX tab and VNINDEX pasted back after the capture (shoot_real --tab=VNINDEX --restore-symbol=VNINDEX, OCR read-back; the Return before the result list refreshes needed the one retry on every run). Layout of that tab: legend rows OHLC y 0.158, Volume 0.189, MA Cross 0.217 (values right of \"50 200\"), collapse button 0.236-0.266; price pane to y 0.659 with the volume bars at its base (volumeFloor 0.657), F/D event markers just above it (floorY 0.63 keeps plates clear), MACD pane below with its legend masked (fixedMasks). Calibration: pane [0.058, 0.18, 0.896, 0.655] with the legend rows blanked (they print values in the candle colours); 144 candles at d 6.0 px. cropRect is the VNINDEX daily frame. A photo newer than its edition is calibrated on bars extended with SSI, its legend read with the pointer on the edition's candle (--hover-back) and maskAfterEdition hides the later sessions.",
+   "volumeFloor": 0.657
+  },
+  "terminalAnalyze": {
+   "viewport": "1800x1000",
+   "clip": "canvases",
+   "colors": [
+    [
+     16,
+     185,
+     129
+    ],
+    [
+     239,
+     68,
+     68
+    ]
+   ],
+   "calib": {
+    "paneFrac": [
+     0.015,
+     0,
+     0.955,
+     0.54
+    ]
+   },
+   "crop": {
+    "x": 0.4,
+    "y": 0,
+    "w": 0.555,
+    "h": 0.697
+   },
+   "_measured": "2026-09-29 on BSR (2712x1520 photo of a 1356x760 chart): the price pane ends above the volume bars at y 0.553 and the price axis starts at x 0.956, both carrying candle-coloured tags; crop = the last ~7.5 months of price + volume, 1.42 wide, ending before the price axis (its trendline price tags crowd a close-up; market-video crops the terminal's axis too)."
+  },
+  "screener": {
+   "viewport": "1200x1000",
+   "scale": 2,
+   "zoom": 1.5,
+   "rows": 8,
+   "sortColumn": {
+    "volumeRatio": "VOL/SMA",
+    "rs_1m": "RS 1M"
+   },
+   "keep": {
+    "spike": [
+     "SYMBOL",
+     "RS 1M",
+     "VOL/SMA",
+     "PRICE",
+     "CHG%"
+    ],
+    "rs": [
+     "SYMBOL",
+     "RS 1M",
+     "RS 52W",
+     "PRICE",
+     "CHG%"
+    ],
+    "uptrend": [
+     "SYMBOL",
+     "RS 1M",
+     "RS 52W",
+     "PRICE",
+     "CHG%"
+    ]
+   },
+   "_measured": "2026-09-29: the header labels are buttons inside the cells; VOL/SMA shows (volume − SMA20)/SMA20 in %, the same unit the server filters on. zoom 1.5 at 1200 px wide makes a row ~96 px of the 2x photo.",
+   "rowColor": "#101016",
+   "headerColor": "#16161e",
+   "tickerLabelSize": 1.6,
+   "_tickerView": "User 2026-10-01: the table scenes list the ticker, not the company name. The terminal's SYMBOL cell is a badge plus the company name, so scaffold's tickerView crops to the right of that block, masks each row's name tail in the table's own colours (measured on the 30/9 photos: rows and the results line #101016, thead #16161e, separators #1e1e28, page #06060a) and sets a plate with the row's ticker — from the photo's sidecar — at the left of every row, tickerLabelSize × the 20 px label. checks.mjs review-picks accepts those tickers because they are the photo's own rows."
+  },
+  "fireantColors": [
+   [
+    15,
+    141,
+    118
+   ],
+   [
+    239,
+    58,
+    66
+   ]
+  ],
+  "maskColor": "#161921"
+ },
+ "footer": "Chứng Vịt",
+ "_footer": "The line under every scene's headline is the user's channel name, not a source line (user 2026-09-29, CLAUDE.md). Names so far: Radar Chứng Khoán (29/9) → Cú Đêm Chứng Khoán (30/9, refused by Facebook's Page-name filter: \"cú\" is also slang) → \"Chứng Vịt\" (user's pick, 30/9 evening). Until 2026-09-30 this reel still said 'Nguồn: SSI · zionle.io.vn · FireAnt'; the photos keep their own credit stamp.",
+ "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
+ "brand": "Chứng Vịt",
+ "narration": {
+  "language": "vi",
+  "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
+  "minWordsPerScene": 18,
+  "maxWordsPerScene": 58,
+  "warnWordsPerScene": [
+   20,
+   50
+  ],
+  "minSentencesPerScene": 2,
+  "maxSentencesPerScene": 5,
+  "wordsPerSecond": 4.81,
+  "_wordsPerSecond": "the same voice as market-video, measured 2026-09-22 (content-rules.json narration._measuredFrom).",
+  "syllableRateWarn": [
+   4.5,
+   6
+  ],
+  "syllableRateFail": [
+   3.5,
+   6.5
+  ],
+  "digitsInNarration": false,
+  "_digitsWhy": "Vietnamese TTS reads bare digits unpredictably. Spell them: 'một phẩy tám sáu phần trăm'. On-screen labels keep digits."
+ },
+ "arc": {
+  "minScenes": 7,
+  "maxScenes": 12,
+  "totalSecondsWarn": [
+   55,
+   110
+  ],
+  "roles": {
+   "hook": {
+    "job": "Ngày của phiên (thứ, rồi chữ 'ngày' và ngày tháng: 'Thứ Năm, ngày một tháng mười' — người dùng 2026-10-01), điểm số và % của phiên, rồi chữ do số quyết định (chỉ số đi ngang/tăng/giảm; mã tăng giảm thế nào — bản phiên từ 2026-10-05 KHÔNG đọc số mã tăng/giảm khi scene 02 là ảnh FireAnt 'Biến động thị trường', người dùng: 'optimize scene 1 by removing …'), câu hỏi tiền chảy vào đâu, và LỜI MỜI cùng điểm lại thị trường và các mã đáng chú ý. KHÔNG dùng chữ của hệ thống (phiên phân phối, FTD, 'theo quy tắc', trạng thái) — chuyện hệ thống bắt đầu ở market.",
+    "act": "blue",
+    "pace": "short",
+    "shots": [
+     "pull_out",
+     "push_in"
+    ]
+   },
+   "week": {
+    "job": "Cây nến tuần: tuần tăng hay giảm bao nhiêu, khối lượng so với tuần trước, đóng cửa ở đâu trong biên của tuần.",
+    "act": "blue",
+    "pace": "mid",
+    "shots": [
+     "pull_out"
+    ]
+   },
+   "market": {
+    "job": "Chuyện hệ thống bắt đầu ở đây: hôm nay có phải phiên phân phối không, rồi 'hiện tại đang có <n> phiên phân phối' (người dùng 2026-10-01, thay 'đếm lại còn …'); trạng thái theo quy tắc, neo ở phiên FTD và đáy nhịp hồi; đồng hồ (phiên cũ nhất hết hạn sau mấy phiên) và các ngưỡng kế (thêm mấy phiên là chịu áp lực, mấy phiên là MỨC NGUY HIỂM của hệ thống người dùng — năm phiên, rà lại từng mã và rủi ro, người dùng 2026-10-01 — mấy phiên là điều chỉnh). Đang ở mức nguy hiểm thì scene phải CẢNH BÁO: nói 'mức nguy hiểm' và rà lại từng mã và rủi ro, rồi câu người dùng chốt 2026-10-05 (`distribution.danger.say`: 'Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa.') THAY câu đếm tới điều chỉnh ('Thêm một phiên nữa là điều chỉnh' — ngưỡng điều chỉnh để nhãn beat 3 và scene watch nói). Chưa nói điều kiện nếu … thì — để dành cho watch.",
+    "act": "blue",
+    "pace": "long",
+    "shots": [
+     "pan",
+     "tilt",
+     "push_in"
+    ]
+   },
+   "breadth": {
+    "job": "Nghịch lý độ rộng (chỉ bản tuần — người dùng 2026-10-05: 'Daily; old chart → weekly'): chỉ số ở trạng thái nào mà bao nhiêu phần trăm mã đứng trên MA200 (gọi đúng tên chỉ báo, không 'đường trung bình hai trăm phiên' — người dùng 2026-10-01); hôm nay bao nhiêu mã tăng, bao nhiêu giảm. Kết bằng câu dẫn sang bộ lọc.",
+    "act": "maroon",
+    "pace": "short"
+   },
+   "flow": {
+    "job": "Biến động thị trường của PHIÊN trên ảnh FireAnt 'Thống kê sàn' (sàn HOSE) — bản phiên, SCENE 02 ngay sau hook (người dùng 2026-10-05: 'Daily; old chart → weekly', rồi 'move it into the scene 02'). Trả lời câu hỏi tiền chảy vào đâu của hook. Ảnh là HAI THẺ xếp chồng (người dùng 2026-10-05: 'add the image of Tác động đến Index on scene 02 - on beat 2, beat 1 include the flow money circle and phân bổ dòng tiền'). Beat 1, thẻ dòng tiền: biểu đồ tròn số mã tăng/giảm/đứng giá (ĐỌC số mã thành chữ — hook không đọc nữa) và cột phân bổ dòng tiền — bao nhiêu tỷ đồng vào mã tăng, vào mã giảm, có cùng chiều với số mã không. Beat 2, máy lia xuống thẻ 'Top cổ phiếu tác động' của FireAnt: mã nào kéo / đẩy chỉ số bao nhiêu điểm — một mã gánh phần lớn nhịp của chỉ số thì nói đúng như số (flow.impact). Ảnh là của phiên hôm nay (FireAnt chỉ hiện phiên mới nhất; ảnh lệch phiên thì scene bị bỏ). Kết bằng câu dẫn sang market (chuyện hệ thống).",
+    "act": "maroon",
+    "pace": "short",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "spike": {
+    "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, mã tăng mạnh nhất và giảm sâu nhất trên khối lượng đột biến — cột tăng xếp % giảm dần, cột giảm xếp % tăng dần. Chỉ kể bảng NÀY: không nói mã nào có ở bộ lọc khác, không gieo 'mã dẫn dắt ở bảng này — để cuối' (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter').",
+    "act": "amber",
+    "pace": "mid",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "rs": {
+    "job": "Bộ lọc RS Strong của terminal, MỘT MÌNH (không gộp với Uptrend — người dùng tách 2026-09-30), gọi đúng tên 'bộ lọc RS Strong' (người dùng 2026-10-01: 'keep the RS strong verb', không 'RS mạnh'): MỘT bảng một cột xếp theo RS 1M, bao nhiêu mã, một nhận xét từ cột % (bao nhiêu mã tăng hay giữ giá khi thị trường rơi), một hai mã đầu bảng; beat 2 tô và tạo hiệu ứng cho mã sẽ soi ngay sau (người dùng 2026-10-05: 'decoration and animation with the symbol need focused') và câu ghim beat 2 nói về chúng TRÊN BẢNG NÀY. Không nói mã nào có ở bộ lọc khác (người dùng 2026-10-05). Kết bằng câu cầu không mang mã sang Uptrend. Chưa soi mã.",
+    "act": "amber",
+    "pace": "short",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "uptrend": {
+    "job": "Bộ lọc Uptrend của terminal, MỘT MÌNH, gọi đúng tên 'bộ lọc Uptrend', bảng y như RS Strong (người dùng 2026-10-05: 'uptrend … behavior like the RS strong'): nghĩa của bộ lọc (giá trên EMA50, EMA50 trên SMA200 — lời nói MA200), bao nhiêu mã, mã đứng đầu bảng này; beat 2 tô và tạo hiệu ứng cho mã sẽ soi ngay sau. Không nói mã nào có ở bộ lọc khác, không kể lại điều scene rs đã nói. Câu cuối là lời mời gọi tên các mã sẽ soi ('Cùng mình xem kỹ MSR và DGW.' — người dùng 2026-10-01: \"Remove 'Đếm ngược từ hai' => 'Let's review …'\"): không 'đếm ngược', không chữ 'review', không 'dẫn đầu'.",
+    "act": "amber",
+    "pace": "short",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "leaders": {
+    "job": "LEGACY (chỉ để bản 29/9/2026 còn verify được): bảng RS Strong ∩ Uptrend gộp làm một — thay bằng hai vai rs + uptrend từ 2026-09-30. scaffold.mjs không dựng vai này nữa; xoá mục này sau khi bản đầu tiên có rs + uptrend được duyệt.",
+    "act": "amber",
+    "pace": "short",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "leader": {
+    "job": "Soi một mã dẫn dắt — TỐI ĐA HAI scene, không còn đếm ngược (người dùng 2026-10-01: \"Remove 'Đếm ngược từ hai' => 'Let's review …'\"): đạo diễn chọn mã có mặt ở cả BA bộ lọc (Volume spike, RS Strong, Uptrend) trước, không đủ thì tới mã ở cả RS Strong lẫn Uptrend, trong một tầng xếp theo RS 1M — mã RS thấp hơn chiếu trước, mã RS 1M cao nhất chiếu sau cùng; lời KHÔNG nói mã ở bộ lọc nào (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'). Eyebrow 'Soi mã · <MÃ>'; câu đầu 'Mã đầu tiên là …' / 'Mã thứ hai là …' (không 'Số hai là', không '#'). Cùng khuôn câu (price action → chi tiết riêng → mức phải canh), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). Thị trường đang ở mức nguy hiểm (từ distribution.dangerAt phiên phân phối) thì thêm MỘT câu nhắc rủi ro của chính mã đó (mức nó đang giữ), không gọi mua bán.",
+    "act": "amber",
+    "pace": "mid",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ],
+    "minRun": 2
+   },
+   "impact": {
+    "job": "Mã kéo VN-Index nhiều nhất hôm nay (flow.impact.lead), đặt cạnh chỉ số trên CÙNG một trục ngày (người dùng 2026-10-05: 'with VIC symbol since it affect to the market so much, so need a sentence and something like view VIC behavior price action change beside the VNIndex? Only with VIC symbol'). Chỉ có khi mã đó là mã reel đang soi (leader hoặc mã người dùng chọn) và gánh từ screener.impact.minShare % mức thay đổi của chỉ số; ngay sau scene soi mã của nó. Ảnh ghép hai chart FireAnt nến ngày, mã ở trên, VN-Index ở dưới, mỗi phiên một cột thẳng hàng (lib/impact-compare.mjs). Câu đầu nói vì sao mã đó quan trọng với chỉ số hôm nay (số điểm, nói một lần, khác câu của scene 02); rồi price action của mã cạnh chỉ số trên hai chart: các phiên phân phối mã cũng giảm, phiên hai chart tách nhau, nhịp hồi hôm nay. Không gọi giá, không nói mã ở bộ lọc nào. Eyebrow '<MÃ> · VN-Index'.",
+    "act": "amber",
+    "pace": "mid",
+    "shots": [
+     "push_in",
+     "pan"
+    ]
+   },
+   "pick": {
+    "job": "Soi thêm mã người dùng chọn trên trang duyệt (người dùng 2026-10-05: '… i can choose and fill the symbol on the artifact to review beside existed symbol on 3 filter') — sau các scene soi mã của bộ lọc, cùng phương pháp soi mã: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá. Không nói mã có hay không có ở bộ lọc nào (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'); KHÔNG nói 'bạn chọn' / 'theo yêu cầu' trong lời. Eyebrow 'Soi mã · <MÃ>'; câu đầu 'Thêm một mã đáng chú ý là <MÃ>, …'.",
+    "act": "amber",
+    "pace": "mid",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "watch": {
+    "job": "KỊCH BẢN VN-INDEX — PAYOFF, máy đứng yên ở beat 2 (người dùng 2026-10-05: 'also include the scene relate to the scenario of the market VN-Index', chọn nâng cấp scene cuối). Beat 1, kịch bản tích cực: nếu VN-Index vượt mốc gần nhất phía trên (MA50/MA200 của FireAnt, kháng cự price action — fact pack `scenario.up`) thì mốc kế là gì. Beat 2, kịch bản tiêu cực: nếu thủng hỗ trợ gần nhất (`scenario.down`) thì về đâu; thủng đáy nhịp hồi là FTD thất bại; thêm mấy phiên phân phối là đổi trạng thái / mức nguy hiểm của hệ thống (năm phiên: rà lại từng mã và rủi ro). Nói như nhánh nếu … thì, không gọi giá. Đang ở mức nguy hiểm thì scene giữ lời cảnh báo.",
+    "act": "amber",
+    "pace": "mid",
+    "shots": [
+     "tilt",
+     "static"
+    ],
+    "mustSay": [
+     "nếu"
+    ],
+    "_scenario": "User 2026-10-05: the closing scene became 'Kịch bản VN-Index' (eyebrow) instead of a second scene — 'Upgrade the closing scene (Recommended)'. Levels come from facts.mjs `scenario`: the index's own price action over the last 142 sessions (the FireAnt photo's window; lib/symbol-review.mjs swingsOf/levelsOf, the reading the leader reviews use) and FireAnt's MA50/MA200 off the index photo, merged into zones within 0.5%; the nearest two zones each side. The id stays `watch` (voice file names)."
+   },
+   "outro": {
+    "job": "Người làm kênh chào người xem: thả tim · chia sẻ · theo dõi, một câu hứa cập nhật; không số, không thuật ngữ.",
+    "act": "navy",
+    "pace": "short"
+   }
+  },
+  "_roles": "Same shape as content-rules.json arc.roles so scripts/lib/roles.mjs, verify, merge and review-page read it unchanged. watch's mustSay keeps the condition an if-then branch, never a call (moved from market on 2026-09-29, when the payoff scene was added); leader's minRun keeps the leader charts together (two at most since 2026-10-01).",
+  "firstRole": "hook",
+  "lastRole": "outro",
+  "severity": {
+   "sceneCount": "warn",
+   "actOrder": "warn",
+   "outroPanel": "warn",
+   "totalSeconds": "warn",
+   "roleOrder": "fail",
+   "mustSay": "fail",
+   "minRun": "warn",
+   "shots": "warn"
+  },
+  "sceneIdPattern": "^r[dw]-\\d{6}-[a-z]+(-\\d)?$",
+  "_sceneIds": "rd-260929-hook: format, session date (yymmdd), role (+ -1..-3 for the leaders). The date keeps each edition's voice files apart in public/voiceover/, so yesterday's wav can never play over today's words.",
+  "acts": [
+   "blue",
+   "maroon",
+   "amber",
+   "navy"
+  ]
+ },
+ "claims": {
+  "superlatives": [
+   "cao nhất",
+   "thấp nhất",
+   "mạnh nhất",
+   "yếu nhất",
+   "lớn nhất",
+   "kỷ lục",
+   "duy nhất",
+   "chưa từng"
+  ],
+  "recencyMarkers": [
+   "hiện tại",
+   "vừa",
+   "đang",
+   "bây giờ",
+   "hôm nay",
+   "mới nhất"
+  ],
+  "tolerancePercent": 1,
+  "factsExemptions": [
+   {
+    "pattern": "\\b\\d{1,2}/\\d{1,2}(?:/\\d{4})?\\b",
+    "why": "ngày trong lịch (11/9, 3/8/2026), không phải số đo"
+   },
+   {
+    "pattern": "tháng\\s*\\d{1,2}",
+    "why": "tên tháng trong lịch"
+   },
+   {
+    "pattern": "\\bRS\\s*\\d{1,2}\\s*[MW]\\b",
+    "why": "khung tính RS của terminal (1M, 52W) là tham số"
+   },
+   {
+    "pattern": "\\b(?:EMA|SMA|MA)\\s*\\d{1,3}\\b",
+    "why": "tham số đường trung bình"
+   },
+   {
+    "pattern": "#\\s?\\d{1,2}(?:[–-]\\d{1,2})?\\b",
+    "why": "số thứ tự đếm ngược của các mã dẫn dắt (#3 → #1) và dải dòng trên bảng (#1–5, #6–10)"
+   },
+   {
+    "pattern": "\\b52\\s?T\\b",
+    "why": "đỉnh 52 tuần — khung thời gian của mức, không phải số đo"
+   }
+  ],
+  "_exemptWhy": "A number matching one of these is not a claim about the data, so verify's facts check skips it. Adding a pattern widens the gate: the user's call."
+ },
+ "style": {
+  "_comment": "The voice heuristics the user kept from market-video on 2026-09-29 (voice and compliance only), all WARN.",
+  "maxSpokenNumbersPerSentence": 1,
+  "maxSpokenNumbersPerScene": 2,
+  "spokenNumberWords": [
+   "nghìn",
+   "trăm",
+   "mươi",
+   "phẩy",
+   "phần trăm",
+   "mốt",
+   "lăm",
+   "linh",
+   "lẻ"
+  ],
+  "minSceneWordSpread": 8,
+  "reportWords": {
+   "chỉ số": 1,
+   "ghi nhận": 0,
+   "đạt mức": 0,
+   "theo dữ liệu": 0,
+   "có thể thấy": 0,
+   "các bạn": 0,
+   "nhà đầu tư": 0,
+   "bậc thang": 0,
+   "tiền mỏng": 0,
+   "cái biên": 0,
+   "kiểu dở": 0,
+   "xích lại": 0,
+   "lưng chừng": 0,
+   "chuyện lạ": 0,
+   "năm hai mươi": 0,
+   "khuyến nghị": 0
+  },
+  "_reportWords": "max occurrences per scene; 0 means never. 'khuyến nghị' is here because the disclaimer lives only under the outro card.",
+  "addressWords": [
+   "bạn",
+   "mình"
+  ],
+  "maxAddressPerScene": 3,
+  "headlineBothLinesNumeric": "warn",
+  "openingNumberWarn": true,
+  "tradeWords": [
+   "kháng cự",
+   "hỗ trợ",
+   "tích luỹ",
+   "tích lũy",
+   "phân phối",
+   "phá vỡ",
+   "breakout",
+   "điều chỉnh",
+   "thanh khoản",
+   "khối lượng",
+   "động lượng",
+   "xu hướng",
+   "xác nhận",
+   "hồi phục",
+   "nhịp hồi",
+   "đột biến",
+   "dẫn dắt",
+   "sức mạnh giá",
+   "đường trung bình",
+   "ma200",
+   "ema50",
+   "rs mạnh",
+   "rs strong",
+   "uptrend",
+   "vùng giá",
+   "đỉnh cũ",
+   "đáy",
+   "nến",
+   "phiên"
+  ],
+  "minTradeWordScenesPercent": 60,
+  "sentenceContrastWords": 5
+ },
+ "voice": {
+  "lexicon": {
+   "MACD": "em ây xê đê",
+   "FTD": "ép tê đi",
+   "MA200": "em ây hai trăm",
+   "MA50": "em ây năm mươi",
+   "SMA200": "ét em ây hai trăm",
+   "EMA50": "e em ây năm mươi",
+   "RS": "rờ ét",
+   "phẩy": "chấm",
+   "Strong": "xờ trong",
+   "Uptrend": "áp tren",
+   "một nghìn": "một ngàn,",
+   "nghìn": "ngàn",
+   "trăm linh": "trăm lẻ"
+  },
+  "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name). FTD → 'ép tê đi' added 2026-09-30 when the user asked the market scene to say 'phiên FTD' — the letter pattern of their MACD choice (Vietnamese letter names, D said 'đi'); NOT yet measured with Whisper: check the first take and change the reading here if it is misheard. 2026-09-30 evening: commas added between the letters of both terms after the Channel measurement (content-rules.json `_lexicon`): OmniVoice glues space-separated letters into one short word ('a' held 0.06–0.10 s), while 'em, a, cê, đi' held 'a' 0.06–0.18 s and 'em, a, xê, đê' 0.12–0.18 s, with no audible gap between the letters — the user's letters are kept here, only the commas are new. FTD's comma form is by analogy, still unmeasured. Whisper writing 'MACD' back proves nothing (it infers the acronym); after voicing, run scripts/tts_takes.py, which listens letter by letter and keeps the clearest take. 2026-10-01: tickers are no longer kept off the narration — the user wants the ticker said, not the company name; `letters` below spells every three-capital token the lexicon did not catch (scripts/lib/rules.mjs spellerOf), unmeasured until the first take. 2026-10-01: 'phẩy' → 'chấm' for the same reason as content-rules.json (OmniVoice drops 'phẩy' after a number word in ~90% of takes; 'chấm' survives 6/6). 2026-10-01 evening, user: 'Not change the verb or the indicator of trading pattern, hai trăm phiên => MA200' — the narration now writes the indicator as the trader says it (MA200, EMA50, RS; the written form keeps its digits and verify's digit rule runs on the spoken form), and these entries read them: letter names as the user's MACD entry says them (A = 'ây', the Channel's choice; M 'em', E 'e', S 'ét'), then the number in words. Written WITHOUT commas, as the user chose for MACD in content-rules.json on 2026-10-01 afternoon (commas held each letter twice as long; they wanted the quicker read) — and the same evening the user asked for MACD here to drop its commas too and follow the Channel's lexicon ('refer lexicon of channel video'): MACD is now 'em ây xê đê', byte-identical to src/shared/content-rules.json, and FTD 'ép tê đi' for the same pace reason (its comma form was only by analogy). Ticker spelling (`letters` + `letterJoin` below) dropped its commas the same evening too (user: \"solid and clearly not separate\"). SMA200 is here only so a stray written SMA200 is still read; the narration says MA200. None of the four is measured yet: after voicing, scripts/tts_takes.py listens for each spoken form and keeps the clearest take. 2026-10-01 night, user: 'keep the RS strong verb not change it since it's trading verb' — the two filters are said by their terminal names ('bộ lọc RS Strong', 'bộ lọc Uptrend', no longer 'RS mạnh' / 'xu hướng tăng'). 'Strong' → 'xờ trong' and 'Uptrend' → 'áp tren' are first guesses (alternatives: 'sờ trông' / 'ắp tren', or no entry so OmniVoice reads the English word), UNMEASURED: after voicing run scripts/tts_takes.py --only=<the rs and uptrend ids> and keep the reading whose takes are heard whole. 2026-10-03: MA50 → 'em ây năm mươi' for FireAnt's MA50 in the leader scenes (the user: 'The FireAnt also have the MA50 and MA200 … refer it'), the pattern of MA200, unmeasured. 2026-10-03: \"một nghìn\" → \"một nghìn,\" (TTS only): OmniVoice slurred every VN-Index price — 2/10 hook \"một nghìn bảy trăm ba mươi tám\" spoken in 0,42 s and watch \"một nghìn sáu trăm năm mươi mốt\" in 0,74 s (plain Whisper word timings), strict transcripts \"một bảy ba tám\" / \"mốt sáu năm mươi mốt\" in 7 of 7 takes. The comma gives the voice a breath after \"nghìn\" so the hundreds and tens are said; measured with tts_takes.py on the same two sentences before keeping it. 2026-10-05 (user: 'Some voice relate to the number and symbol not correctly'): the reference voice (ThanhBinh) is southern and slurs the northern number words — flow's 'năm nghìn tám trăm linh hai tỷ' came back 'năm tám không hai tỷ' with 'nghìn' gone in 3 of 3 takes, the hook's 'một nghìn, bảy trăm năm mươi ba' as 'một nghìn, bảy năm ba' in every readable take; spoken 'ngàn' and 'lẻ' gave 5.802 / 3.982 tỷ heard whole 3 of 3 and 'một ngàn, bảy trăm năm mươi ba' 2 of 3 strict (.review-cache/staging/voice-fix/num_test.py). So the voice says 'ngàn' for 'nghìn' and 'trăm lẻ' for 'trăm linh' (TTS only; the narration and headlines keep 'nghìn', 'linh'); 'một nghìn' keeps its comma and comes first so the generic entry does not pre-empt it.",
+  "letters": {
+   "A": "a",
+   "B": "bê",
+   "C": "xê",
+   "D": "đê",
+   "E": "e",
+   "F": "ép",
+   "G": "giê",
+   "H": "hát",
+   "I": "y",
+   "J": "gi",
+   "K": "ca",
+   "L": "lờ",
+   "M": "em",
+   "N": "en",
+   "O": "o",
+   "P": "pê",
+   "Q": "quy",
+   "R": "rờ",
+   "S": "ét",
+   "T": "tê",
+   "U": "u",
+   "V": "vê",
+   "W": "vê kép",
+   "X": "ích",
+   "Y": "i dài",
+   "Z": "dét"
+  },
+  "letterJoin": " ",
+  "_letters": "How the voice spells a TICKER (user 2026-10-01: the filter scenes and the countdown say the ticker, never the company name). scripts/lib/rules.mjs spellerOf joins the letter names with `letterJoin` for every three-capital token the lexicon did not already respell, so FTD keeps its own entry. Vietnamese letter names as traders read a ticker (bê ét rờ for BSR). 2026-10-01 evening, user: 'Pronounce of symbol must be solid and clearly not separate' — `letterJoin` is a single space, so MSR is said 'em ét rờ' as one unit, the move the user made for MACD ('em ây xê đê'); the earlier comma form ('em, ét, rờ', from the Channel measurement that commas hold each letter longer) made the voice stop on every letter and is gone. A rules file with `letters` but no `letterJoin` keeps the comma form. Unmeasured until the first take: scripts/tts_takes.py treats every spelled ticker as a required term — each letter heard, the shortest letter held as long as possible, no long gap inside the ticker — and keeps the clearest take. In the narration two tickers must still be separated by WORDS ('GEE và POW', 'AAS và HID, rồi tới DRI'): without commas two spelled tickers in a row would run into one string of six letters; and a count must not touch the first letter ('Số ba là BSR', not 'Số ba, BSR'). D is 'đê' here and in MACD, 'đi' in FTD — settle on one once a take is measured. 2026-10-05 (user: 'Some voice relate to the number and symbol not correctly'): I is written 'y' — the same /i/ sound, but OmniVoice says a bare 'i' so that Whisper heard VIC as 'V1C'/'VMC' and DRI as 'DZ1'/'DR1' in 3 of 3 takes each, while 'vê y xê' came back 'VIC' 3 of 3 and 'đê rờ y' 'DZI'/'DGI' (the R is the voice's southern 'rờ'), measured with .review-cache/staging/voice-fix/letter_i.py."
+ },
+ "extraChecks": [
+  "scripts/review/checks.mjs"
+ ],
+ "logo": "logo/chung-vit.png",
+ "_logo": "The channel mark, a path under public/: since 2026-10-01 the duck of \"Chứng Vịt\" (the face cropped square and scaled to 512 px from the user's chung vit.png, the same recipe as the 30/9 owl; public/logo/chung-vit-wordmark.png holds the lettering with the crown for the outro later). scaffold copies it into the outro visual.logo AND the reel's top-level logo, which the footer badge of every scene reads; the card still prints the channel name under the mark. The owl (cu-dem-chung-khoan.png, 2026-09-30) is no longer referenced."
+}

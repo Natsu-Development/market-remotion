@@ -1,0 +1,954 @@
+{
+  "title": "VNINDEX · tổng kết phiên 29/9/2026",
+  "edition": "2026-09-29",
+  "format": "daily",
+  "status": "enriched",
+  "rules": ".claude/skills/market-review/rules.json",
+  "brief": "brief/review-daily.md",
+  "facts": "content/review-daily.facts.json",
+  "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
+  "footer": "Nguồn: SSI · zionle.io.vn · FireAnt",
+  "ticker": {
+    "symbol": "VN-INDEX",
+    "timeframe": "1D",
+    "last": 1777.73,
+    "prev": 1780.68,
+    "asOf": "2026-09-29"
+  },
+  "_indexPhoto": "terminal (FireAnt capture unavailable)",
+  "scenes": [
+    {
+      "id": "rd-260929-hook",
+      "role": "hook",
+      "eyebrow": "Tổng kết phiên 29/9",
+      "act": "blue",
+      "duration": 7,
+      "narration": "Theo quy tắc, xu hướng tăng vẫn được xác nhận. Mốc là phiên FTD ba tháng tám. Sau đó có ba phiên phân phối, hôm nay không thêm phiên nào.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Vẫn xu hướng tăng xác nhận",
+          "line2": "Mốc: phiên FTD 3/8",
+          "accent": "green"
+        },
+        {
+          "atSentence": 2,
+          "at": 4.2,
+          "line1": "3 phiên phân phối",
+          "line2": "Hôm nay không thêm phiên",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.6296,
+              0.4638
+            ],
+            "to": [
+              0.6296,
+              0.4388
+            ],
+            "accent": "up",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.6296,
+            "y": 0.4938,
+            "text": "FTD 3/8 +1,56%",
+            "accent": "green",
+            "beat": 0,
+            "anchor": "middle"
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7741,
+              0.3023
+            ],
+            "to": [
+              0.7741,
+              0.3273
+            ],
+            "accent": "down",
+            "beat": 1
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8185,
+              0.302
+            ],
+            "to": [
+              0.8185,
+              0.327
+            ],
+            "accent": "down",
+            "beat": 1
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8241,
+              0.328
+            ],
+            "to": [
+              0.8241,
+              0.353
+            ],
+            "accent": "down",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7621,
+            "y": 0.2813,
+            "text": "3 phiên phân phối",
+            "accent": "red",
+            "beat": 1,
+            "anchor": "end"
+          },
+          {
+            "kind": "circle",
+            "x": 0.8407,
+            "y": 0.3856,
+            "r": 0.022,
+            "accent": "gold",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7352,
+            "y": 0.3946,
+            "zoom": 1.5,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.7607,
+            "y": 0.3856,
+            "zoom": 2.3,
+            "move": "pan"
+          }
+        ]
+      },
+      "citedFacts": [
+        "state.status",
+        "state.ftd.date",
+        "state.ftd.changePercent",
+        "distribution.count",
+        "session.isDistribution"
+      ]
+    },
+    {
+      "id": "rd-260929-market",
+      "role": "market",
+      "eyebrow": "Trạng thái theo quy tắc",
+      "act": "blue",
+      "duration": 10.1,
+      "narration": "Ba phiên ấy vẫn còn hiệu lực, phiên cũ nhất hết hạn sau mười hai phiên. Thêm một là chịu áp lực, thêm ba là điều chỉnh. Nếu thủng đáy nhịp hồi, phiên xác nhận xu hướng ngày ba tháng tám thất bại. Vậy tiền vào đâu?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "3/25 phiên phân phối",
+          "line2": "Thêm một là chịu áp lực",
+          "accent": "red"
+        },
+        {
+          "atSentence": 2,
+          "at": 3.75,
+          "line1": "FTD 3/8 · đáy 1651,20",
+          "line2": "Thủng đáy là FTD thất bại",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.1546,
+            "w": 0.8454,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1811,
+            "w": 0.1944,
+            "h": 0.0254
+          },
+          {
+            "x": 0.0611,
+            "y": 0.2088,
+            "w": 0.037,
+            "h": 0.03
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7741,
+              0.3023
+            ],
+            "to": [
+              0.7741,
+              0.3273
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8185,
+              0.302
+            ],
+            "to": [
+              0.8185,
+              0.327
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8241,
+              0.328
+            ],
+            "to": [
+              0.8241,
+              0.353
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.5125,
+            "y": 0.2071,
+            "text": "3/25 phiên phân phối",
+            "accent": "red",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7621,
+            "y": 0.3148,
+            "text": "11/9 −1,86% · KL ×1,64",
+            "accent": "red",
+            "beat": 0,
+            "anchor": "end"
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.6296,
+              0.4638
+            ],
+            "to": [
+              0.6296,
+              0.4388
+            ],
+            "accent": "up",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.6296,
+            "y": 0.4938,
+            "text": "FTD 3/8 +1,56%",
+            "accent": "green",
+            "beat": 1,
+            "anchor": "middle"
+          },
+          {
+            "kind": "hline",
+            "y": 0.5379,
+            "accent": "gold",
+            "beat": 1,
+            "label": "Đáy nhịp hồi 1651,20",
+            "labelSide": "left"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.8074,
+            "y": 0.51839,
+            "zoom": 1.35,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.5125,
+            "y": 0.5583,
+            "zoom": 1,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "distribution.count",
+        "distribution.window",
+        "distribution.nextExpiry.dm",
+        "distribution.nextExpiry.sessionsLeft",
+        "distribution.toUnderPressure",
+        "distribution.toCorrection",
+        "state.ftd.dm",
+        "state.ftd.rallyLow",
+        "watch[0]",
+        "watch[1]",
+        "watch[2]",
+        "watch[3]"
+      ]
+    },
+    {
+      "id": "rd-260929-spike",
+      "role": "spike",
+      "eyebrow": "Bộ lọc Volume spike",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Bộ lọc khối lượng đột biến có mười sáu mã. Hai mã dầu khí đứng đầu, đều tăng. Lộc Phát giảm, khối lượng ấy là bán ra, không phải mua vào. Vậy mã nào dẫn dắt?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "16 mã khối lượng đột biến",
+          "line2": "Dầu khí đứng đầu, đều tăng",
+          "accent": "green"
+        },
+        {
+          "atSentence": 2,
+          "at": 3.75,
+          "line1": "LPB −4,4%, KL ×1,70",
+          "line2": "Là bán ra, không phải mua",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/spike.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.122,
+          "y": 0.1278,
+          "w": 0.8377,
+          "h": 0.4417
+        },
+        "annotations": [
+          {
+            "kind": "box",
+            "x": 0.1337,
+            "y": 0.301,
+            "w": 0.8167,
+            "h": 0.1808,
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.6478,
+            "y": 0.303,
+            "w": 0.1274,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.6478,
+            "y": 0.3635,
+            "w": 0.1274,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.6478,
+            "y": 0.4233,
+            "w": 0.1274,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.9369,
+            "y": 0.2242,
+            "text": "Top 3: KL ×2,44 · ×2,05 · ×1,70",
+            "accent": "gold",
+            "beat": 0,
+            "anchor": "end"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.5409,
+            "y": 0.3487,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.6315,
+            "y": 0.3914,
+            "zoom": 1.8,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.spike.count",
+        "screener.spike.top[0].name",
+        "screener.spike.top[0].changePercent",
+        "screener.spike.top[1].name",
+        "screener.spike.top[1].changePercent",
+        "screener.spike.top[2].name",
+        "screener.spike.top[2].changePercent",
+        "screener.spike.top[2].volumeRatio"
+      ]
+    },
+    {
+      "id": "rd-260929-leaders",
+      "role": "leaders",
+      "eyebrow": "RS Strong + Uptrend",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Lọc cả xu hướng tăng lẫn sức mạnh giá: mười mã. Ba mã đầu cùng sức mạnh giá chín mươi tư. Lọc hoá dầu Bình Sơn, Masan High-Tech, Vận tải Dầu khí. Mình xem từng mã.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "10 mã qua cả hai bộ lọc",
+          "line2": "Nhóm cổ phiếu dẫn dắt",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "BSR, MSR, PVT: RS 1M 94",
+          "line2": "Cùng dẫn đầu sức mạnh giá",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/leaders.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.122,
+          "y": 0.0913,
+          "w": 0.8377,
+          "h": 0.4417
+        },
+        "annotations": [
+          {
+            "kind": "box",
+            "x": 0.1337,
+            "y": 0.301,
+            "w": 0.8167,
+            "h": 0.1738,
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.5898,
+            "y": 0.3635,
+            "w": 0.0913,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.5898,
+            "y": 0.303,
+            "w": 0.0913,
+            "h": 0.0565,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.5898,
+            "y": 0.4233,
+            "w": 0.0913,
+            "h": 0.0495,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.9369,
+            "y": 0.2242,
+            "text": "10 mã qua RS Strong + Uptrend",
+            "accent": "gold",
+            "beat": 0,
+            "anchor": "end"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.5409,
+            "y": 0.3122,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.5555,
+            "y": 0.3879,
+            "zoom": 1.8,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.leaders.filters",
+        "screener.leaders.count",
+        "screener.leaders.top[0].rs1m",
+        "screener.leaders.top[1].rs1m",
+        "screener.leaders.top[2].rs1m",
+        "screener.leaders.top[0].name",
+        "screener.leaders.top[1].name",
+        "screener.leaders.top[2].name"
+      ]
+    },
+    {
+      "id": "rd-260929-leader-1",
+      "role": "leader",
+      "eyebrow": "Dẫn dắt · BSR",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Lọc hoá dầu Bình Sơn chưa lấy lại đỉnh cũ, nhưng vẫn nằm trên đường trung bình năm mươi phiên. Giá cao hơn đường ấy mười sáu phẩy một phần trăm. Mã sau sát đỉnh hơn.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "BSR còn cách đỉnh 17%",
+          "line2": "Vẫn trên đường trung bình",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "+16,1% trên EMA50",
+          "line2": "Đà tăng chưa gãy",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/bsr-terminal.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.4,
+          "y": 0,
+          "w": 0.555,
+          "h": 0.697
+        },
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.42,
+            "y": 0.06,
+            "text": "BSR · RS 1M 94 · +0,31%",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.2647,
+            "accent": "green",
+            "beat": 0,
+            "label": "EMA50 27,99",
+            "labelSide": "left"
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.853,
+              0.2847
+            ],
+            "to": [
+              0.941,
+              0.1967
+            ],
+            "accent": "green",
+            "beat": 1,
+            "label": "+16,1% trên EMA50"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.6775,
+            "y": 0.3485,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.903,
+            "y": 0.1847,
+            "zoom": 1.8,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.leaders.top[0].name",
+        "screener.leaders.top[0].high52w",
+        "screener.leaders.top[0].fromHigh52wPercent",
+        "screener.leaders.top[0].ema50",
+        "screener.leaders.top[0].aboveEma50Percent",
+        "screener.leaders.top[1].fromHigh52wPercent"
+      ]
+    },
+    {
+      "id": "rd-260929-leader-2",
+      "role": "leader",
+      "eyebrow": "Dẫn dắt · MSR",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Masan High-Tech tăng mạnh, giá cũng đứng trên đường trung bình. Khoảng cách là hai mươi mốt phẩy chín phần trăm. Và chỉ còn cách đỉnh năm phẩy ba phần trăm. Mã cuối có khối lượng.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "MSR tăng 4,37% hôm nay",
+          "line2": "Cũng trên đường trung bình",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Cách đỉnh chỉ 5,3%",
+          "line2": "Mạnh và sát đỉnh",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/msr-terminal.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.4,
+          "y": 0,
+          "w": 0.555,
+          "h": 0.697
+        },
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.42,
+            "y": 0.06,
+            "text": "MSR · RS 1M 94 · +4,37%",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.2246,
+            "accent": "green",
+            "beat": 0,
+            "label": "EMA50 45,05",
+            "labelSide": "left"
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.8529,
+              0.2038
+            ],
+            "to": [
+              0.9409,
+              0.1158
+            ],
+            "accent": "green",
+            "beat": 1,
+            "label": "+21,9% trên EMA50"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.6775,
+            "y": 0.3485,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.9029,
+            "y": 0.1038,
+            "zoom": 1.8,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.leaders.top[1].name",
+        "screener.leaders.top[1].changePercent",
+        "screener.leaders.top[1].ema50",
+        "screener.leaders.top[1].aboveEma50Percent",
+        "screener.leaders.top[1].high52w",
+        "screener.leaders.top[1].fromHigh52wPercent",
+        "screener.leaders.top[2].volumeRatio"
+      ]
+    },
+    {
+      "id": "rd-260929-leader-3",
+      "role": "leader",
+      "eyebrow": "Dẫn dắt · PVT",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Vận tải Dầu khí thì bạn gặp rồi: đứng đầu khối lượng đột biến, tăng sáu phẩy bốn phần trăm. Giá vượt đường trung bình mười tám phẩy hai phần trăm. Phiên hôm nay là vậy.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "PVT +6,4%, KL ×2,44",
+          "line2": "Tăng kèm khối lượng lớn",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "+18,2% trên EMA50",
+          "line2": "Có mặt ở cả hai bộ lọc",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-09-29/pvt-terminal.png",
+        "source": "zionle.io.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.4,
+          "y": 0,
+          "w": 0.555,
+          "h": 0.697
+        },
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.42,
+            "y": 0.06,
+            "text": "PVT · RS 1M 94 · +6,40%",
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.3359,
+            "accent": "green",
+            "beat": 0,
+            "label": "EMA50 21,11",
+            "labelSide": "left"
+          },
+          {
+            "kind": "arrow",
+            "from": [
+              0.8538,
+              0.3189
+            ],
+            "to": [
+              0.9418,
+              0.2309
+            ],
+            "accent": "green",
+            "beat": 1,
+            "label": "+18,2% trên EMA50"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.6775,
+            "y": 0.3485,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.9038,
+            "y": 0.2189,
+            "zoom": 1.8,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.spike.top[0].symbol",
+        "screener.spike.top[0].volumeRatio",
+        "screener.leaders.top[2].name",
+        "screener.leaders.top[2].changePercent",
+        "screener.leaders.top[2].ema50",
+        "screener.leaders.top[2].aboveEma50Percent",
+        "screener.leaders.alsoSpiking"
+      ]
+    },
+    {
+      "id": "rd-260929-outro",
+      "role": "outro",
+      "eyebrow": "Theo dõi tiếp",
+      "act": "navy",
+      "duration": 7,
+      "narration": "Thấy hữu ích thì thả tim, chia sẻ cho bạn bè và theo dõi kênh giúp mình nhé. Mỗi phiên đóng cửa, mình cập nhật ngay.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Thả tim, chia sẻ, theo dõi",
+          "line2": "Cập nhật sau mỗi phiên",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "outro",
+        "brand": "Kênh của bạn",
+        "kicker": "Chứng khoán",
+        "pill": "Thả tim · Chia sẻ · Theo dõi",
+        "line": "Cập nhật sau mỗi phiên"
+      },
+      "headline": {
+        "line1Baseline": 1338,
+        "line2Baseline": 1418,
+        "maxFontSize": 60,
+        "footnoteY": 1484
+      }
+    }
+  ],
+  "unsupported": [
+    {
+      "id": "rd-260929-spike",
+      "why": "“Hai mã dầu khí” là PVT và PVS, gộp theo tên công ty trong fact pack (Vận tải Dầu khí, Dịch vụ Kỹ thuật Dầu khí) — fact pack không có trường ngành. LPB đọc là “Lộc Phát”, không có chữ Anh."
+    },
+    {
+      "id": "rd-260929-leaders",
+      "why": "MSR đọc là “Masan High-Tech” — TTS chưa được đo cho chữ Anh này; xem ghi chú ở rd-260929-leader-2."
+    },
+    {
+      "id": "rd-260929-leader-2",
+      "why": "Tên MSR đọc là “Masan High-Tech” (rút gọn Masan High-Tech Materials; chỉ “Masan” thì lẫn với MSN). TTS chưa được đo cho chữ Anh “High-Tech”. Nếu Whisper nghe sai, thêm dạng đọc vào voice.lexicon của .claude/skills/market-review/rules.json sau khi đo (ví dụ “High-Tech” → “hai tếch”), rồi thu lại bằng --force --only cho scene này và rd-260929-leaders; không viết phiên âm vào narration."
+    }
+  ]
+}

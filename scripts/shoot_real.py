@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import struct
 import subprocess
 import sys
@@ -217,6 +218,131 @@ def capture(rect: tuple[int, int, int, int], out: Path) -> tuple[int, int]:
     return pw, ph
 
 
+TESSERACT = shutil.which("tesseract") or "/opt/homebrew/bin/tesseract"
+
+
+def ocr_words(page: tuple[int, int, int, int], region: tuple[int, int, int, int], tmp: Path) -> list[dict]:
+    """Words tesseract reads inside `region` (x0, y0, x1, y1 in page-area points) of a fresh capture
+    of the page area, as dicts {text, x, y, w, h, conf} in page-area points. FireAnt's UI is light
+    text on dark, so the crop is inverted and upscaled 3x first (measured 2026-10-01: the tab strip
+    reads "AAA(1D)", "VNM(1D)", "VNINDEX", "(1D)", "x" at 47-97% confidence)."""
+    from PIL import Image, ImageOps
+    pw_px, _ = capture(page, tmp)
+    scale = pw_px / page[2]
+    img = Image.open(tmp).convert("L")
+    x0, y0, x1, y1 = region
+    crop = ImageOps.invert(img.crop((int(x0 * scale), int(y0 * scale), int(x1 * scale), int(y1 * scale))))
+    crop = crop.resize(((x1 - x0) * 3, (y1 - y0) * 3), Image.LANCZOS)
+    crop.save(tmp)
+    tsv = subprocess.run([TESSERACT, str(tmp), "-", "--psm", "6", "tsv"], capture_output=True, text=True).stdout
+    tmp.unlink(missing_ok=True)
+    words = []
+    for line in tsv.splitlines()[1:]:
+        p = line.split("\t")
+        if len(p) == 12 and p[11].strip():
+            words.append({"text": p[11].strip(), "x": x0 + int(p[6]) / 3, "y": y0 + int(p[7]) / 3,
+                          "w": int(p[8]) / 3, "h": int(p[9]) / 3, "conf": float(p[10])})
+    return words
+
+
+# FireAnt's chart-tab strip and the TradingView symbol box, in page-area points at 1080 wide
+# (header 0-48, tab strip 48-87; symbol box text at y ~104 right of the 🔍), measured 2026-10-01.
+TAB_STRIP = (0, 50, 990, 88)
+SYMBOL_BOX = (28, 94, 200, 116)
+
+
+def tab_label(text: str) -> str:
+    """'VNM(1D)' -> 'VNM'; 'VNINDEX' -> 'VNINDEX'."""
+    return text.upper().split("(")[0].strip(" .,:;|‘’'\"!")
+
+
+def find_tab(page, label: str, tmp: Path):
+    """(x, y, label) — the centre in page points of the first chart tab whose label is one of the
+    comma-separated `label` candidates, in the order given — or None. Never the tab's own close "x"
+    (a separate word right of the label). Candidates let a caller name the tab by its own symbol AND
+    by the tickers a failed restore could have left on it."""
+    words = ocr_words(page, TAB_STRIP, tmp)
+    for want in [s.strip().upper() for s in label.split(",") if s.strip()]:
+        for w in words:
+            if tab_label(w["text"]) == want:
+                return int(w["x"] + w["w"] / 2), int(w["y"] + w["h"] / 2), want
+    return None
+
+
+def symbol_shown(page, tmp: Path) -> str:
+    """The ticker the chart's symbol box shows right now (OCR), '' when unreadable."""
+    for w in ocr_words(page, SYMBOL_BOX, tmp):
+        t = "".join(ch for ch in w["text"].upper() if ch.isalnum())
+        if len(t) >= 3:
+            return t
+    return ""
+
+
+# FireAnt's candle colours and its price pane in page-area fractions (1080 wide; rules.shots.fireantStock).
+FIREANT_CANDLES = ((15, 141, 118), (239, 58, 66))
+PANE_FRAC = (0.058, 0.18, 0.896, 0.88)
+
+
+def candle_columns(png: Path) -> tuple[float, float] | None:
+    """(rightmost candle centre in image px, median px per candle) of a FireAnt page capture, or None."""
+    import numpy as np
+    from PIL import Image
+    im = np.asarray(Image.open(png).convert("RGB")).astype(int)
+    H, W = im.shape[:2]
+    x0, y0, x1, y1 = (int(PANE_FRAC[0] * W), int(PANE_FRAC[1] * H), int(PANE_FRAC[2] * W), int(PANE_FRAC[3] * H))
+    sub = im[y0:y1, x0:x1]
+    m = np.zeros(sub.shape[:2], bool)
+    for c in FIREANT_CANDLES:
+        m |= np.abs(sub - np.array(c)).sum(axis=2) < 45
+    def run(col):
+        best = r = 0
+        for v in col:
+            r = r + 1 if v else 0
+            best = max(best, r)
+        return best
+    has = [run(m[:, x]) >= 3 for x in range(m.shape[1])]
+    centres, start = [], None
+    for x in range(len(has) + 1):
+        on = x < len(has) and has[x]
+        if on and start is None:
+            start = x
+        if not on and start is not None:
+            centres.append(x0 + (start + x - 1) / 2)
+            start = None
+    if len(centres) < 10:
+        return None
+    return centres[-1], float(np.median(np.diff(centres)))
+
+
+def hover_capture(a, page, out: Path, ours) -> dict:
+    """Hover the candle a.hover_back bars before the last and capture the page area to <out>.hover.png: the legend then
+    prints THAT bar's OHLC and indicator values — FireAnt's own MA50/MA200 on the edition's date, nothing computed."""
+    px, py, pw, ph = page
+    found = candle_columns(out)
+    if not found:
+        print("hover: no candle columns found in the capture — skipped", file=sys.stderr)
+        return {"back": a.hover_back, "ok": False}
+    last, d = found
+    scale = Image_size(out)[0] / pw
+    hx = (last - a.hover_back * d) / scale
+    hy = ph * 0.5
+    ours()
+    sc.move(int(round(px + hx)), int(round(py + hy)))
+    time.sleep(1.6)
+    hover = out.with_name(f"{out.stem}.hover.png")
+    ours()
+    capture(page, hover)
+    sc.move(int(px + pw // 2), int(py - 20))             # park on the title bar again
+    time.sleep(0.6)
+    print(f"hover: {a.hover_back} bar(s) before the last (x {hx:.0f}pt of the page) → {hover.name}", file=sys.stderr)
+    return {"back": a.hover_back, "ok": True, "xPage": round(hx, 1), "lastPx": round(last, 1), "dPx": round(d, 2), "file": hover.name}
+
+
+def Image_size(png: Path) -> tuple[int, int]:
+    data = png.read_bytes()
+    return struct.unpack(">II", data[16:24])
+
+
 def page_top_offset(window_rect: tuple[int, int, int, int], tmp: Path) -> int:
     """Points from the window's top edge to the first row of the PAGE (a dark page under a
     light title bar). Falls back to 40, the app-window title bar measured 2026-09-22."""
@@ -267,6 +393,17 @@ def main() -> None:
                     help="FireAnt time-range button to press (5y..1n = 5 năm .. 1 ngày); positions measured at 1080x640")
     ap.add_argument("--crop", default=None,
                     help="what to capture, in page-area points: x,y,w,h — 'chart' for FireAnt's chart frame — 'full' for the page area")
+    ap.add_argument("--tab", default=None,
+                    help="FireAnt: click the chart tab with this label first (e.g. VNM), found by OCR on the tab strip; "
+                         "the symbol box must then show that label, or nothing is pasted")
+    ap.add_argument("--restore-symbol", default=None,
+                    help="FireAnt: after the capture, paste this ticker back into the tab (the tab's own symbol before --symbol changed it)")
+    ap.add_argument("--restore-tab", default=None,
+                    help="FireAnt: after the capture (and --restore-symbol), click this tab so the one that was active stays active")
+    ap.add_argument("--hover-back", type=int, default=None,
+                    help="FireAnt: after the clean capture, hover the candle N bars before the last one and capture the "
+                         "page again to <out>.hover.png — TradingView's legend then prints that bar's values (OHLC, MAs). "
+                         "For an edition older than the chart's last bar (2026-10-03: the 1/10 reel, a chart ending 2/10)")
     ap.add_argument("--keep-open", action="store_true")
     ap.add_argument("--debug", action="store_true", help="save a frame of the page area after every input step")
     a = ap.parse_args()
@@ -295,17 +432,27 @@ def main() -> None:
                  f"*{a.profile_title}*) appeared in 25s. Is Google Chrome running with profile {a.profile_dir!r}?")
     pid, idx = hit
     ref = win_ref(pid, idx)
+    a._restore = None
     try:
         run(a, hit, ref, W, H, out)
     except WrongWindow as e:
         mine = our_window(a.title_contains, a.profile_title, a.url) or hit
         if not a.keep_open:
             close_window(win_ref(*mine))
-        sys.exit(f"shoot_real: ABORTED before any input — {e}. Nothing was typed. "
+        # Never type into a window that is not ours — so a tab changed before the abort stays changed.
+        left = f" The chart tab {a.tab or ''} may still show {a.symbol}: put {a.restore_symbol} back by hand." if a._restore and a.restore_symbol else ""
+        sys.exit(f"shoot_real: ABORTED before any input — {e}. Nothing was typed.{left} "
                  "Leave Chrome alone for ~25s and run again.")
-    except BaseException:
+    except BaseException as e:
+        try:
+            if a._restore:
+                a._restore()
+        except WrongWindow as w:
+            print(f"WARNING: could not restore the user's tab ({w}) — put {a.restore_symbol or a.restore_tab} back by hand", file=sys.stderr)
         if not a.keep_open:
-            close_window(ref)
+            close_window(win_ref(*(our_window(a.title_contains, a.profile_title, a.url) or hit)))
+        if isinstance(e, RuntimeError):
+            sys.exit(f"shoot_real: {e}")
         raise
 
 
@@ -343,31 +490,93 @@ def run(a, hit, ref, W, H, out: Path) -> None:
     px, py, pw, ph = page
     print(f"window {ww}x{wh} at ({wx},{wy}); page starts {top}pt down → page area {pw}x{ph}", file=sys.stderr)
 
-    if a.fullscreen_chart:
-        ours()
-        click(px + pw // 2, py + ph // 2, delay=0.6)        # focus the chart frame
-        sc.key(3, shift=True, delay=1.8)                     # 3 = F → Shift+F, TradingView fullscreen
-    if a.symbol:
-        ours()
-        # The chart's symbol box ("🔍 FPT") sits under FireAnt's header and chart-tab strip; its
-        # position is left-anchored, so it only depends on the vertical layout, not the width.
+    dbg = (lambda tag: capture(page, out.with_name(f"{out.stem}.dbg-{tag}.png"))) if a.debug else (lambda tag: None)
+    tmp = out.with_suffix(".ocr.png")
+
+    def paste_symbol(symbol: str, tag: str, settle: float = 2.8) -> None:
+        """Click the chart's symbol box, paste `symbol`, Return. The chart lives in a cross-origin
+        iframe: the FIRST click into it only gives the frame focus (measured 2026-09-22: the symbol
+        box showed its tooltip, no dialog), so the chart body is clicked first. `settle` is the wait
+        for the result list after the paste: Return before the list refreshed picks the OLD first row
+        (measured 2026-10-01: restoring VNM after MSR left the tab on MSR)."""
+        # The symbol box ("🔍 FPT") sits under FireAnt's header and chart-tab strip; its position is
+        # left-anchored, so it only depends on the vertical layout, not the width.
         sx, sy = (int(v) for v in a.symbol_box.split(","))
         bx, by = (px + 44, py + 20) if a.fullscreen_chart else (px + sx, py + sy)
-        dbg = (lambda tag: capture(page, out.with_name(f"{out.stem}.dbg-{tag}.png"))) if a.debug else (lambda tag: None)
-        # The chart lives in a cross-origin iframe. The FIRST click into it only gives the frame
-        # focus (measured 2026-09-22: the symbol box showed its tooltip, no dialog); the click
-        # that opens the dialog has to be the second one. So click the chart body first.
+        ours()
         click(px + pw // 3, py + ph // 2, delay=0.8)
         ours()
         print(f"symbol box click at screen ({bx},{by})", file=sys.stderr)
         click(bx, by, delay=1.4)                             # search dialog opens, current symbol selected
-        dbg("1-click")
+        dbg(f"{tag}-1-click")
         ours()                                               # the paste and Return go ONLY into our window
-        sc.paste(a.symbol.upper(), delay=2.8)                # replaces the selection; list refreshes
-        dbg("2-paste")
+        sc.paste(symbol.upper(), delay=settle)               # replaces the selection; list refreshes
+        dbg(f"{tag}-2-paste")
         ours()
         sc.key(36, delay=4.0)                                # Return → first result
-        dbg("3-return")
+        dbg(f"{tag}-3-return")
+
+    def paste_verified(symbol: str, tag: str) -> str:
+        """paste_symbol, then read the symbol box back (OCR); one retry with a longer wait for the
+        result list. Returns what the box shows at the end."""
+        paste_symbol(symbol, tag)
+        shown = symbol_shown(page, tmp)
+        if shown != symbol.upper():
+            print(f"symbol box shows {shown!r} after pasting {symbol.upper()} — retrying with a longer wait", file=sys.stderr)
+            paste_symbol(symbol, f"{tag}r", settle=5.5)
+            shown = symbol_shown(page, tmp)
+        return shown
+
+    def click_tab(label: str, tag: str) -> str:
+        """Make the chart tab `label` (comma-separated candidates) the active one; the symbol box must
+        then show the label that matched. Returns that label."""
+        ours()
+        hit_tab = find_tab(page, label, tmp)
+        if not hit_tab:
+            raise RuntimeError(f"no chart tab labelled {label!r} on FireAnt's tab strip (OCR) — nothing clicked")
+        tx, ty, found = hit_tab
+        ours()
+        click(px + tx, py + ty, delay=3.0)
+        dbg(f"{tag}-tab")
+        shown = symbol_shown(page, tmp)
+        print(f"tab {found}: clicked at page ({tx},{ty}); symbol box shows {shown!r}", file=sys.stderr)
+        if shown != found:
+            raise RuntimeError(f"after clicking tab {found!r} the symbol box shows {shown!r} — stopping before any paste")
+        return found
+
+    if a.fullscreen_chart:
+        ours()
+        click(px + pw // 2, py + ph // 2, delay=0.6)        # focus the chart frame
+        sc.key(3, shift=True, delay=1.8)                     # 3 = F → Shift+F, TradingView fullscreen
+    state = {"pasted": False, "tabbed": False}
+
+    def restore() -> None:
+        """Put the user's tabs back as they were: the tab's own symbol (--restore-symbol), then the
+        tab that was active (--restore-tab). main() also calls this when a later step fails."""
+        a._restore = None
+        if a.restore_symbol and state["pasted"]:
+            shown = paste_verified(a.restore_symbol, "8")
+            print(f"restored the tab's symbol: symbol box shows {shown!r}", file=sys.stderr)
+            if shown != a.restore_symbol.upper():
+                print(f"WARNING: the tab still shows {shown!r}, not {a.restore_symbol.upper()} — put it back by hand", file=sys.stderr)
+        if a.restore_tab and state["tabbed"] and a.restore_tab.upper() != (a.tab or "").upper():
+            click_tab(a.restore_tab, "9")
+
+    a._restore = restore
+    if a.tab:
+        state["tabbed"] = True
+        state["tabFound"] = click_tab(a.tab, "0")
+    if a.symbol:
+        state["pasted"] = True
+        if a.tab or a.restore_symbol:
+            # On a tab of the user's we change the symbol, so make sure it took (a ticker the search
+            # matches loosely — first result not the ticker — would photograph the wrong stock).
+            shown = paste_verified(a.symbol, "1")
+            print(f"symbol box shows {shown!r} after pasting {a.symbol.upper()}", file=sys.stderr)
+            if shown != a.symbol.upper():
+                raise RuntimeError(f"the chart shows {shown!r}, not {a.symbol.upper()} — no capture")
+        else:
+            paste_symbol(a.symbol, "1")
     if a.range:
         # Range goes BEFORE interval: TradingView's range presets also reset the resolution
         # (5y -> 1W, measured 2026-09-23), so an interval clicked first is silently undone.
@@ -451,10 +660,14 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         "pixels": [pw_px, ph_px], "scale": round(pw_px / shot_rect[2], 2), "fullscreenChart": a.fullscreen_chart,
         "range": a.range, "interval": a.interval, "resetView": bool(a.reset_view), "pan": a.pan, "indicator": a.indicator, "zoomOut": a.zoom_out, "crop": a.crop or "full",
         "shotRectPoints": list(shot_rect),
+        "tab": state.get("tabFound"), "restoredSymbol": a.restore_symbol, "restoredTab": a.restore_tab,
         "signedIn": None, "note": "sign-in state is whatever the user's Chrome has; check the header in the image",
     }
+    if a.hover_back is not None and a.crop in (None, "full"):
+        meta["hover"] = hover_capture(a, page, out, ours)
     out.with_suffix(".json").write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
     print(f"{out.relative_to(ROOT) if out.is_relative_to(ROOT) else out}  {pw_px}×{ph_px}px  ← {a.url}")
+    restore()
 
     if not a.keep_open:
         if a.fullscreen_chart:

@@ -4,12 +4,12 @@
   "symbol": "VNINDEX",
   "resolution": "monthly",
   "reconstructed": false,
-  "fetchedAt": "2026-09-28T08:01:31.025Z",
+  "fetchedAt": "2026-09-30T08:39:10.507Z",
   "from": "2013-01",
   "to": "2026-09",
   "bars": 165,
-  "rawRows": 3403,
+  "rawRows": 3405,
   "scale": 1,
   "volumeUnit": "matched shares, summed per bar",
-  "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400&to=1790668890"
+  "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400&to=1790843950"
 }

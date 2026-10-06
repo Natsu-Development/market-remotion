@@ -2,7 +2,7 @@
 /**
  * Prints the review sheet a person reads before approving a reel.
  *
- *   npm run review -- MACD                 by composition id (src/Root.tsx)
+ *   npm run review -- Channel              by composition id (src/Root.tsx)
  *   node scripts/review.mjs content/channel.json
  *
  * Markdown, so it can be pasted straight into the reply: one row per scene
@@ -15,9 +15,10 @@ import {readFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {reels} from './lib/reels.mjs';
+import {roleOf as roleIn} from './lib/roles.mjs';
+import {loadRules} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
 const arg = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
 if (!arg) {
@@ -31,14 +32,12 @@ if (!path) {
   process.exit(2);
 }
 const reel = JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));
+const R = loadRules(ROOT, {reel});
 const id = arg.endsWith('.json') ? [...REG].find(([, p]) => p === arg)?.[0] ?? '(unregistered)' : arg;
 
 const words = (s) => String(s ?? '').trim().split(/\s+/).filter(Boolean).length;
-/** `<name>-<role>[-n]` (current scaffold) or `<role>-<n>` / `outro` (older scaffolds). */
-const roleOf = (scene) => {
-  const parts = scene.id.split('-').filter((p) => !/^\d+$/.test(p));
-  return [...parts].reverse().find((p) => R.arc.roles.includes(p)) ?? '';
-};
+/** The scene's `role`, or for older scaffolds the role named in its id (scripts/lib/roles.mjs). */
+const roleOf = (scene) => roleIn(R, scene);
 const headline = (b) => [b.line1, b.line2].filter(Boolean).join(' / ');
 const cell = (s) => String(s).replace(/\|/g, '\\|');
 

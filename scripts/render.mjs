@@ -2,9 +2,9 @@
 /**
  * One-command build: make sure the data and the voice exist, then render.
  *
- *   npm run build                      full reel -> out/reel.mp4
+ *   npm run build                      Channel -> out/channel.mp4
  *   npm run build -- --force           render even if status is not "reviewed"
- *   npm run build -- --id=RSI          a different composition + its content file
+ *   npm run build -- --id=<Id>         another registered composition + its content file
  *   npm run build -- --retime          refit scene lengths to the narration first
  *   npm run build -- --no-voice        skip TTS (silent render)
  *   npm run build -- --revoice         re-synthesize every scene first (narration changed);

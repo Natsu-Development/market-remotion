@@ -20,28 +20,34 @@
  * the precision it is displayed with.
  *
  * Brief format — one H2 per scene, `## <role> · <panel>`, then 1-2 lines of
- * intent. Front matter is `key: value` lines before the first H2 (`name`, `title`,
- * `brand`, `act`, `disclaimer`, `symbol`). Inside a scene, `src:` / `source:` /
- * `caption:` / `fit:` / `focus:` lines fill the panel (for `image`, the photo the
- * director already took with scripts/shoot.mjs). When
+ * intent. Roles are the keys of content-rules `arc.roles`. Front matter is
+ * `key: value` lines before the first H2 (`name`, `title`, `brand`, `act`,
+ * `disclaimer`, `symbol`). Inside a scene, `src:` / `source:` / `caption:` /
+ * `fit:` / `focus:` lines fill the panel (for `image`, the photo the director
+ * already took with scripts/shoot.mjs), and `act:` sets that scene's background
+ * when its role's default would mislead (a bullish scenario is not a warning). When
  * content/<symbol>-analysis.json exists (fetch-market.mjs --signals), its
  * divergences, trendlines and signals join the fact pack as `terminal`; when
  * content/<symbol>-daily.json exists (--resample=none), the REAL last-year bars join
  * as `daily`. Front matter `ticker: daily` puts that latest session in the ticker
- * strip; `footer: <text>` names the source when the numbers really came from it.
+ * strip. The footer under every headline is the channel name from content-rules `channel.name` (the user,
+ * 2026-09-29: no source line); `footer: <text>` replaces it, `footer: false` hides it.
  *
  *     title: VNINDEX · thanh khoản cạn dần
- *     act: blue
+ *     name: liquidity
  *
- *     ## hook · candles
- *     Thanh khoản tháng 9 thấp nhất 14 tháng nhưng giá vẫn sát đỉnh.
+ *     ## hook · image
+ *     src: public/shots/vnindex-fireant-weekly-macd.png
+ *     source: fireant.vn
+ *     Giá vẫn sát đỉnh kênh nhưng khối lượng tuần đã thu hẹp rõ.
  *
  *     ## outro · outro
- *     Mời vào cộng đồng.
+ *     Thả tim · chia sẻ · theo dõi, hứa cập nhật khi thị trường đổi nhịp.
  */
 import {existsSync, mkdirSync, readFileSync, statSync, writeFileSync} from 'node:fs';
 import {basename, dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {roleNames, roleSpec, targetWords} from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
@@ -88,6 +94,9 @@ const parseBrief = (src) => {
       if (m) meta[m[1]] = m[2];
       continue;
     }
+    // "act: blue" belongs to the scene, not the panel: it overrides the role's background.
+    const a = line.match(/^act:\s*(\S+)$/);
+    if (a) { cur.act = a[1]; continue; }
     // Inside a scene, "src: public/shots/x.png" style lines are panel fields, not intent:
     // the director shoots the photo first and points the scene at it here.
     const f = line.match(/^(src|source|caption|fit|focus|zoom):\s*(.+)$/);
@@ -106,6 +115,54 @@ if (BRIEF && !briefScenes.length) {
 }
 
 const name = meta.name ?? opt('name') ?? basename(BRIEF).replace(/\.(md|brief\.md)$/, '');
+
+/** A panel's required props, stubbed so verify's schema check can run at once. */
+const STUB = {
+  candles: () => ({type: 'candles', caption: 'VNINDEX · 1M · THANG LOG'}),
+  macd: () => ({type: 'macd', caption: 'TODO', note: 'TODO'}),
+  rsi: () => ({type: 'rsi', caption: 'TODO'}),
+  pictogram: () => ({type: 'pictogram', rows: 6, columns: 8, filledPercent: 50, accent: 'green'}),
+  bars: () => ({type: 'bars', bars: [{label: 'TODO', percent: 50, accent: 'gold'},
+                                     {label: 'TODO', percent: 50, accent: 'red'}]}),
+  list: () => ({type: 'list', accent: 'gold', chipShape: 'square',
+                items: [{icon: 'up', text: 'TODO'}, {icon: 'warning', text: 'TODO'}, {icon: 'cross', text: 'TODO'}]}),
+  cards: () => ({type: 'cards', accent: 'red',
+                 cards: [{title: 'TODO', body: 'TODO'}, {title: 'TODO', body: 'TODO'}]}),
+  zigzag: () => ({type: 'zigzag', topLabel: 'vùng đỉnh', endLabel: 'TODO',
+                  upLabel: 'hy vọng', downLabel: 'chần chừ', steps: 5}),
+  riskReward: () => ({type: 'riskReward', left: {label: 'Đúng', value: 20}, right: {label: 'Sai', value: 55}}),
+  image: () => ({type: 'image', src: 'TODO', caption: 'TODO', source: 'TODO'}),
+  // The call to action the user approved for Channel (2026-09-28): like · share · follow, no numbers.
+  outro: () => ({type: 'outro', brand: meta.brand ?? R.channel?.name ?? 'Kênh của bạn', kicker: 'Phân tích',
+                 pill: 'Thả tim · Chia sẻ · Theo dõi', line: 'Cập nhật mỗi khi thị trường biến động',
+                 // brief `logo: logo/x.png` (a file under public/) takes the monogram's place inside the ring
+                 ...(meta.logo ? {logo: meta.logo} : {})}),
+};
+
+// A brief with an unknown role, act or panel stops here, before the fact pack or the scaffold
+// is written — a typo must not regenerate content/<name>.facts.json on its way out.
+for (const [i, b] of briefScenes.entries()) {
+  if (!STUB[b.panel]) {
+    console.error(`Scene ${i + 1}: panel "${b.panel}" is not one of ${Object.keys(STUB).join('|')}`);
+    process.exit(2);
+  }
+  if (!roleSpec(R, b.role)) {
+    console.error(`Scene ${i + 1}: role "${b.role}" is not one of ${roleNames(R).join('|')}`);
+    process.exit(2);
+  }
+  if (b.act && !R.arc.acts.includes(b.act)) {
+    console.error(`Scene ${i + 1}: act "${b.act}" is not one of ${R.arc.acts.join('|')}`);
+    process.exit(2);
+  }
+}
+// So does a scaffold that would be refused: before 2026-09-29 the fact pack was rewritten first and
+// the refusal came after, so a plain re-run silently replaced the pack an approved reel cites.
+const scaffoldOut = resolve(ROOT, `content/${name}.json`);
+if (BRIEF && !flag('facts-only') && existsSync(scaffoldOut) && !flag('force')) {
+  console.error(`content/${name}.json already exists. Pass --force to overwrite the draft (the fact pack is left as it is).`);
+  process.exit(2);
+}
+
 
 // ---------------------------------------------------------------- facts
 
@@ -145,6 +202,7 @@ const hist = macdLine.map((x, i) => x - signal[i]);
 
 const r1 = (x) => (x == null ? null : Math.round(x * 10) / 10);
 const r0 = (x) => (x == null ? null : Math.round(x));
+const r2 = (x) => (x == null ? null : Math.round(x * 100) / 100);
 
 const byYear = new Map();
 for (const c of SERIES) {
@@ -180,7 +238,9 @@ const drawdownFrom = (t) => {
   return {
     from: t, to: trough.t, percent: r1(((trough.c - SERIES[i].c) / SERIES[i].c) * 100),
     highToLow: {high: r0(SERIES[i].h), low: r0(lowest.l), lowMonth: lowest.t,
-                percent: r1(((lowest.l - SERIES[i].h) / SERIES[i].h) * 100)},
+                percent: r1(((lowest.l - SERIES[i].h) / SERIES[i].h) * 100),
+                highExact: r2(SERIES[i].h), lowExact: r2(lowest.l),
+                percentExact: r2(((lowest.l - SERIES[i].h) / SERIES[i].h) * 100)},
   };
 };
 
@@ -196,7 +256,11 @@ const drawdownHighToLow = (t) => {
   if (!after.length) return null;
   const trough = after.reduce((m, c) => (c.l < m.l ? c : m));
   return {from: t, to: trough.t, high: r0(SERIES[i].h), low: r0(trough.l),
-          percent: r1(((trough.l - SERIES[i].h) / SERIES[i].h) * 100)};
+          percent: r1(((trough.l - SERIES[i].h) / SERIES[i].h) * 100),
+          // 2018 is −28.852%: one decimal says −28,9 while 1211 → 862 on screen says −28,8. The exact
+          // endpoints and a two-decimal percent let a label be checked from what it shows.
+          highExact: r2(SERIES[i].h), lowExact: r2(trough.l),
+          percentExact: r2(((trough.l - SERIES[i].h) / SERIES[i].h) * 100)};
 };
 
 /** First month after `t` where the histogram closes below zero: the MACD/signal cross-down. */
@@ -272,23 +336,30 @@ const cycleFacts = () => {
   const P = R.series.peakMonths.filter((t) => idx.has(t));
   if (P.length < 2) return null;
   const lastPeak = P[P.length - 1];
-  const athHigh = r0(SERIES[idx.get(lastPeak)].h);
+  const athExact = SERIES[idx.get(lastPeak)].h;
+  const athHigh = r0(athExact);
   const close = r0(last.c);
   const spacing = P.slice(1).map((t, k) => ({from: P[k], to: t, months: mnum(t) - mnum(P[k])}));
   const falls = P.slice(0, -1).map((t) => {
     const d = drawdownHighToLow(t);
-    return d && {peak: t, high: d.high, low: d.low, lowMonth: d.to, percent: d.percent, months: mnum(d.to) - mnum(t)};
+    return d && {peak: t, high: d.high, low: d.low, lowMonth: d.to, percent: d.percent, months: mnum(d.to) - mnum(t),
+                 highExact: d.highExact, lowExact: d.lowExact, percentExact: d.percentExact};
   }).filter(Boolean);
   return {
     peakSpacing: spacing,
     falls,
-    latestPeak: {month: lastPeak, high: athHigh, monthsSince: mnum(last.t) - mnum(lastPeak), closeVsHighPercent: r1(((close - athHigh) / athHigh) * 100)},
-    ifRepeat: falls.map((f) => ({
-      like: f.peak, percent: f.percent,
-      fromAth: r0(athHigh * (1 + f.percent / 100)),
-      fromLatestClose: r0(close * (1 + f.percent / 100)),
-      athTargetVsLatestClosePercent: r1(((athHigh * (1 + f.percent / 100) - close) / close) * 100),
-    })),
+    latestPeak: {month: lastPeak, high: athHigh, highExact: r2(athExact), monthsSince: mnum(last.t) - mnum(lastPeak), closeVsHighPercent: r1(((close - athHigh) / athHigh) * 100)},
+    // Targets from the unrounded high and fall (before 2026-09-29 they multiplied the rounded 1933 by
+    // the rounded −28.9%, which put the 2018 repeat at 1374 instead of 1375 and 2022 at 1100, not 1099).
+    ifRepeat: falls.map((f) => {
+      const ratio = (f.lowExact - f.highExact) / f.highExact;   // the series is two-decimal, so this is exact
+      return {
+        like: f.peak, percent: f.percent, percentExact: f.percentExact,
+        fromAth: r0(athExact * (1 + ratio)),
+        fromLatestClose: r0(last.c * (1 + ratio)),
+        athTargetVsLatestClosePercent: r1(((athExact * (1 + ratio) - last.c) / last.c) * 100),
+      };
+    }),
   };
 };
 
@@ -576,26 +647,6 @@ if (flag('facts-only')) {
 
 // ---------------------------------------------------------------- scaffold
 
-/** A panel's required props, stubbed so verify's schema check can run at once. */
-const STUB = {
-  candles: () => ({type: 'candles', caption: 'VNINDEX · 1M · THANG LOG'}),
-  macd: () => ({type: 'macd', caption: 'TODO', note: 'TODO'}),
-  rsi: () => ({type: 'rsi', caption: 'TODO'}),
-  pictogram: () => ({type: 'pictogram', rows: 6, columns: 8, filledPercent: 50, accent: 'green'}),
-  bars: () => ({type: 'bars', bars: [{label: 'TODO', percent: 50, accent: 'gold'},
-                                     {label: 'TODO', percent: 50, accent: 'red'}]}),
-  list: () => ({type: 'list', accent: 'gold', chipShape: 'square',
-                items: [{icon: 'up', text: 'TODO'}, {icon: 'warning', text: 'TODO'}, {icon: 'cross', text: 'TODO'}]}),
-  cards: () => ({type: 'cards', accent: 'red',
-                 cards: [{title: 'TODO', body: 'TODO'}, {title: 'TODO', body: 'TODO'}]}),
-  zigzag: () => ({type: 'zigzag', topLabel: 'vùng đỉnh', endLabel: 'TODO',
-                  upLabel: 'hy vọng', downLabel: 'chần chừ', steps: 5}),
-  riskReward: () => ({type: 'riskReward', left: {label: 'Đúng', value: 20}, right: {label: 'Sai', value: 55}}),
-  image: () => ({type: 'image', src: 'TODO', caption: 'TODO', source: 'TODO'}),
-  outro: () => ({type: 'outro', brand: meta.brand ?? 'Kênh của bạn', kicker: 'Chứng khoán',
-                 pill: 'Nhóm cộng đồng · Miễn phí', line: 'Cần hỗ trợ? Nhắn tin trực tiếp cho mình'}),
-};
-
 /** Brief-declared panel fields override the stub. `src` is made relative to public/. */
 const applyFields = (visual, fields) => {
   const out = {...visual};
@@ -607,27 +658,19 @@ const applyFields = (visual, fields) => {
   return out;
 };
 
-/** Acts follow the argument; a brief may override per scene. */
-const actFor = (role, i, n) => {
-  if (role === 'outro') return 'navy';
-  if (role === 'action') return 'amber';
-  if (role === 'warning' || role === 'mechanism') return 'maroon';
-  return 'blue';
-};
+/**
+ * Acts follow the argument: the scene's own `act:` line, else the brief's `act:` (every scene
+ * but the last), else the default of its role in content-rules `arc.roles`.
+ */
+const actOf = (b, i, n) => b.act ?? (meta.act && i < n - 1 ? meta.act : roleSpec(R, b.role).act);
 
 const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   .replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-const N = R.narration;
-const [loWords, hiWords] = N.warnWordsPerScene;
-const midWords = Math.round((loWords + hiWords) / 2);
-// Pace is designed per role (content-rules.style.pace): hook and outro aim below the middle of
+// Pace is designed per role (arc.roles.<role>.pace): hook and outro aim below the middle of
 // the comfortable band, evidence above it, everything else at the middle. verify's style check
-// reads the same map, so a reel whose hook is longer than its evidence gets a WARN.
-const PACE = R.style?.pace ?? {shortRoles: [], longRoles: []};
-const targetWords = (role) => PACE.shortRoles?.includes(role) ? Math.round((loWords + midWords) / 2)
-  : PACE.longRoles?.includes(role) ? Math.round((midWords + hiWords) / 2)
-  : midWords;
+// reads the same field, so a reel whose hook is longer than its evidence gets a WARN.
+const N = R.narration;
 const estDuration = (w) => Math.round((w / N.wordsPerSecond + R.audio.leadIn + R.audio.tail) * 100) / 100;
 
 // public/voiceover/ is shared by every reel and files are named <NN>-<id>.wav,
@@ -637,23 +680,19 @@ const roleCount = new Map();
 for (const b of briefScenes) roleCount.set(b.role, (roleCount.get(b.role) ?? 0) + 1);
 
 const scenes = briefScenes.map((b, i) => {
-  if (!STUB[b.panel]) {
-    console.error(`Scene ${i + 1}: panel "${b.panel}" is not one of ${Object.keys(STUB).join('|')}`);
-    process.exit(2);
-  }
-  if (!R.arc.roles.includes(b.role)) {
-    console.error(`Scene ${i + 1}: role "${b.role}" is not one of ${R.arc.roles.join('|')}`);
-    process.exit(2);
-  }
   const id = slug(roleCount.get(b.role) > 1 ? `${name}-${b.role}-${i + 1}` : `${name}-${b.role}`);
+  // The role's default camera, one move per beat — a hint for the director, who still
+  // places every shot on the photo (SKILL.md 1d). merge drops it with the other _ fields.
+  const camera = b.panel === 'image' ? roleSpec(R, b.role).shots : undefined;
   return {
     id,
+    role: b.role,
     _brief: b.intent.join(' '),
-    _role: b.role,
-    _words: targetWords(b.role),
+    _words: targetWords(R, b.role),
+    ...(camera ? {_camera: camera} : {}),
     eyebrow: 'TODO',
-    act: meta.act && i < briefScenes.length - 1 ? meta.act : actFor(b.role, i, briefScenes.length),
-    duration: estDuration(targetWords(b.role)),
+    act: actOf(b, i, briefScenes.length),
+    duration: estDuration(targetWords(R, b.role)),
     narration: 'TODO',
     beats: [{atSentence: 0, at: R.audio.leadIn, line1: 'TODO', line2: 'TODO', accent: 'gold'}],
     visual: applyFields(STUB[b.panel](), b.fields),
@@ -680,18 +719,16 @@ const reel = {
   disclaimer: meta.disclaimer
     ?? 'Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.',
   // `ticker: daily` in the brief: the strip shows the latest REAL session from facts.daily
-  // instead of the reconstructed monthly close. `footer:` names the source when it is real.
+  // instead of the reconstructed monthly close.
   ...(meta.ticker === 'daily' ? {ticker: tickerFromDaily()} : {}),
-  ...(meta.footer ? {footer: meta.footer} : {}),
+  // The footer is the channel name, never a source line (user, 2026-09-29); `footer: false` hides it.
+  footer: meta.footer === 'false' ? false : (meta.footer ?? R.channel?.name ?? false),
+  // The mark beside that name on every scene; the outro ring shows the same file (channel.logo in the rules).
+  ...((meta.logo ?? R.channel?.logo) ? {logo: meta.logo ?? R.channel?.logo} : {}),
   scenes,
 };
 
-const out = resolve(ROOT, `content/${name}.json`);
-if (existsSync(out) && !flag('force')) {
-  console.error(`content/${name}.json already exists. Pass --force to overwrite the draft.`);
-  process.exit(2);
-}
-writeFileSync(out, JSON.stringify(reel, null, 2) + '\n');
+writeFileSync(scaffoldOut, JSON.stringify(reel, null, 2) + '\n');
 
 console.log(`${name}: ${scenes.length} scenes scaffolded from ${briefPath}`);
 console.log(`  facts     content/${name}.facts.json  (${SERIES.length} months, RSI ${facts.rsi.current}, ${facts.rsi.monthsAbove70}/${facts.rsi.monthsMeasured} above 70)`);

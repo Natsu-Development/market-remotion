@@ -1,6 +1,12 @@
 {
   "$comment": "Budget and terminology contract for this repo. Read by scripts/verify.mjs AND by .claude/skills/market-video/SKILL.md. This file is authoritative: never restate one of these numbers in prose, in a prompt, or in a code comment. Changing a value here changes what verify enforces; that is a human decision.",
   "subject": "thị trường chứng khoán Việt Nam",
+  "channel": {
+    "name": "Chứng Vịt",
+    "_name": "the user's channel: the footer line under every scene's headline and the brand on the outro card (monogram from the first letters of the first two words). enrich uses it unless a brief sets footer: or brand:. Named 'Radar Chứng Khoán' 2026-09-29, renamed 'Cú đêm chứng khoán' then 'Chứng Vịt' 2026-09-30 (the user's pick).",
+    "logo": "logo/chung-vit.png",
+    "_logo": "the duck mark of Chứng Vịt: the head (cap, sunglasses, beak) cut square 512 px from the illustration the user downloaded 2026-10-01 (Downloads/chung vit.png, 1254×1254, wordmark at the bottom), replacing the owl of 2026-09-30. Shown in the outro ring and in the footer badge of every scene; a brief's logo: overrides it. The same file serves market-review."
+  },
   "narration": {
     "language": "vi",
     "wordCountRule": "whitespace-separated tokens. Vietnamese is monosyllabic per token, so a token is a syllable.",
@@ -17,7 +23,7 @@
     "sceneSecondsFormula": "words / wordsPerSecond + leadIn + tail",
     "syllableRateWarn": [
       4.5,
-      6.0
+      6
     ],
     "syllableRateFail": [
       3.5,
@@ -58,19 +64,129 @@
   "arc": {
     "minScenes": 6,
     "maxScenes": 12,
-    "roles": [
-      "hook",
-      "evidence",
-      "concept",
-      "counterpoint",
-      "mechanism",
-      "warning",
-      "action",
-      "principle",
-      "outro"
+    "totalSecondsWarn": [
+      45,
+      105
     ],
+    "_totalSeconds": "sum of scene durations (estimated at scaffold, measured once voiced). Set by the user 2026-09-29.",
+    "roles": {
+      "hook": {
+        "job": "Mở bằng lời hứa: một nghịch lý hay một con số giữ người xem lại; không dựng bối cảnh trước.",
+        "act": "blue",
+        "pace": "short",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ]
+      },
+      "concept": {
+        "job": "Giải thích chỉ báo, hoặc dựng khung phân tích (kênh giá, trendline, vùng giá) mà các scene sau dùng.",
+        "act": "blue",
+        "pace": "mid",
+        "shots": [
+          "pan",
+          "push_in"
+        ]
+      },
+      "chapter": {
+        "job": "Một lần trong lịch sử, kể cùng khuôn với các chương liền kề (chạm → tín hiệu → kết quả) để người xem tự thấy vần lặp; mỗi chương một chi tiết riêng.",
+        "act": "blue",
+        "pace": "mid",
+        "shots": [
+          "pan",
+          "tilt"
+        ],
+        "minRun": 2
+      },
+      "evidence": {
+        "job": "Xác nhận từ một góc khác: khối lượng, động lượng, phân kỳ, tần suất — thứ các scene trước chưa nói.",
+        "act": "blue",
+        "pace": "long",
+        "shots": [
+          "pan",
+          "push_in"
+        ]
+      },
+      "counterpoint": {
+        "job": "Phản biện thật lòng: điều người xem đang tin, hoặc lý do luận điểm có thể sai.",
+        "act": "blue",
+        "pace": "mid",
+        "shots": [
+          "pan",
+          "push_in"
+        ]
+      },
+      "principle": {
+        "job": "Một nguyên tắc đọng lại, thường là rủi ro so với phần thưởng tính từ chỗ giá đang đứng — hai mũi tên trên chart.",
+        "act": "blue",
+        "pace": "mid",
+        "shots": [
+          "tilt",
+          "pull_out"
+        ]
+      },
+      "mechanism": {
+        "job": "Một quá trình diễn ra theo trình tự nào (pha phân phối, dòng tiền rút) — giải thích, không dự báo.",
+        "act": "maroon",
+        "pace": "mid"
+      },
+      "scenario": {
+        "job": "Kịch bản có điều kiện: nếu … thì giá về đâu; nói rõ là kịch bản, không phải dự báo — nét đứt tới mức đích.",
+        "act": "maroon",
+        "pace": "mid",
+        "shots": [
+          "push_in",
+          "pull_out"
+        ],
+        "mustSay": [
+          "nếu",
+          "kịch bản",
+          "giả định"
+        ]
+      },
+      "levels": {
+        "job": "Các mức phải canh, phía trên và phía dưới, mỗi mức một phản ứng — nhãn gắn đúng mức giá.",
+        "act": "maroon",
+        "pace": "mid",
+        "shots": [
+          "pan",
+          "tilt"
+        ]
+      },
+      "warning": {
+        "job": "Ai hoặc cái gì dễ gãy: nhóm ngành, đòn bẩy, sai lầm hay gặp.",
+        "act": "maroon",
+        "pace": "mid"
+      },
+      "action": {
+        "job": "Việc cần làm, gắn vào đúng mức giá trên chart (nhãn trên hline), không phải danh sách số.",
+        "act": "amber",
+        "pace": "mid",
+        "shots": [
+          "push_in",
+          "tilt"
+        ]
+      },
+      "outro": {
+        "job": "Người làm kênh chào người xem: thả tim · chia sẻ · theo dõi, một câu hứa cập nhật; không số, không thuật ngữ.",
+        "act": "navy",
+        "pace": "short"
+      }
+    },
+    "_roles": "One entry per scene role, in story order; the single definition, read by enrich, verify, merge, review and review-page through scripts/lib/roles.mjs (user 2026-09-29, after the act map lived in enrich.mjs, the pace in style.pace and the jobs in reference.md). job: what the scene does — the writer reads it. act: default background; a brief may set `act:` per scene. pace: short|mid|long picks enrich's _words target inside narration.warnWordsPerScene, and verify's style check holds short roles at or below the reel's median word count and long roles at or above. shots: default camera move per beat of an image scene, taken from Channel's approved shots — enrich writes it as the hint _camera, the director still places every shot. mustSay: the narration must use one of these words. minRun: scenes of that role come in consecutive runs at least this long.",
     "firstRole": "hook",
     "lastRole": "outro",
+    "severity": {
+      "sceneCount": "warn",
+      "actOrder": "warn",
+      "outroPanel": "warn",
+      "totalSeconds": "warn",
+      "roleOrder": "fail",
+      "mustSay": "fail",
+      "minRun": "warn",
+      "shots": "warn"
+    },
+    "_severity": "how verify grades each story rule (checks arc, roles, camera). The user set 2026-09-29: roleOrder and mustSay fail — a reel that does not open on its hook breaks the three-second rule, and an unconditional price call reads as the advice the disclaimer rules out; everything else warns. Changing a level is the user's decision.",
     "sceneIdPattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
     "acts": [
       "blue",
@@ -110,7 +226,7 @@
       "hôm nay",
       "mới nhất"
     ],
-    "tolerancePercent": 1.0,
+    "tolerancePercent": 1,
     "_tolerance": "a number on screen may differ from the series by this much and still count as traced — covers rounding in a label like '1933'.",
     "factsExemptions": [
       {
@@ -140,24 +256,81 @@
     "_comment": "Heuristics for a HUMAN voice, all WARN. Measured on reel channel 2026-09-23: nine scenes at 49-50 words, every sentence carrying a spoken number, 'chỉ số' in most scenes — correct and unlistenable.",
     "maxSpokenNumbersPerSentence": 1,
     "maxSpokenNumbersPerScene": 2,
-    "spokenNumberWords": ["nghìn", "trăm", "mươi", "phẩy", "phần trăm", "mốt", "lăm", "linh", "lẻ"],
+    "spokenNumberWords": [
+      "nghìn",
+      "trăm",
+      "mươi",
+      "phẩy",
+      "phần trăm",
+      "mốt",
+      "lăm",
+      "linh",
+      "lẻ"
+    ],
     "_spokenNumberWords": "strong number words. A run counts as a spoken number when it holds one of these, or two or more digit words in a row (hai mươi hai). A lone năm/một/hai is a year, an article, a count of things — not a figure. gấp đôi is how a person talks and is not counted.",
     "minSceneWordSpread": 8,
     "_spread": "max minus min narration words across scenes; below this every scene sits on the same budget edge, the signature of machine writing",
-    "reportWords": {"chỉ số": 1, "ghi nhận": 0, "đạt mức": 0, "theo dữ liệu": 0, "có thể thấy": 0, "các bạn": 0, "nhà đầu tư": 0, "bậc thang": 0, "tiền mỏng": 0, "cái biên": 0, "kiểu dở": 0, "xích lại": 0, "lưng chừng": 0, "chuyện lạ": 0, "năm hai mươi": 0},
-    "_folksy": "the last eight are everyday words the user rejected on 2026-09-23 in favour of trading terms; 'năm hai mươi' catches a year read as 'năm hai mươi hai'",
+    "reportWords": {
+      "chỉ số": 1,
+      "ghi nhận": 0,
+      "đạt mức": 0,
+      "theo dữ liệu": 0,
+      "có thể thấy": 0,
+      "các bạn": 0,
+      "nhà đầu tư": 0,
+      "bậc thang": 0,
+      "tiền mỏng": 0,
+      "cái biên": 0,
+      "kiểu dở": 0,
+      "xích lại": 0,
+      "lưng chừng": 0,
+      "chuyện lạ": 0,
+      "năm hai mươi": 0,
+      "hai không một": 0
+    },
+    "_folksy": "the last eight are everyday words the user rejected on 2026-09-23 in favour of trading terms; 'năm hai mươi' catches a year read as 'năm hai mươi hai'; 'hai không một' catches 2010–2019 read digit by digit (the user wants 'hai không mười tám', 2026-09-29)",
     "_reportWords": "max occurrences per scene; 0 means never",
-    "addressWords": ["bạn", "mình"],
+    "addressWords": [
+      "bạn",
+      "mình"
+    ],
     "maxAddressPerScene": 3,
     "headlineBothLinesNumeric": "warn",
     "openingNumberWarn": true,
-    "tradeWords": ["kháng cự", "hỗ trợ", "tích luỹ", "tích lũy", "phân phối", "phá vỡ", "breakout", "điều chỉnh", "thanh khoản", "khối lượng", "động lượng", "xu hướng", "kiểm định", "phân kỳ", "vùng dao động", "kênh giá", "đường tín hiệu", "histogram", "khung tuần", "khung ngày", "cắt xuống", "cắt lên", "quá mua", "quá bán", "đỉnh cũ", "đáy cũ", "nến"],
+    "tradeWords": [
+      "kháng cự",
+      "hỗ trợ",
+      "tích luỹ",
+      "tích lũy",
+      "phân phối",
+      "phá vỡ",
+      "breakout",
+      "điều chỉnh",
+      "thanh khoản",
+      "khối lượng",
+      "động lượng",
+      "xu hướng",
+      "kiểm định",
+      "phân kỳ",
+      "vùng dao động",
+      "kênh giá",
+      "đường tín hiệu",
+      "histogram",
+      "khung tuần",
+      "khung ngày",
+      "cắt xuống",
+      "cắt lên",
+      "quá mua",
+      "quá bán",
+      "đỉnh cũ",
+      "đáy cũ",
+      "nến"
+    ],
     "minTradeWordScenesPercent": 60,
     "_tradeWords": "positive side of the vocabulary rule (user 2026-09-23: trading terms, not everyday metaphors). WARN when fewer than this share of narrated scenes use at least one of them.",
     "sentenceContrastWords": 5,
     "_contrast": "within a scene of three or more sentences: longest minus shortest sentence, in words. Below this every sentence is the same length; the prompt asks for a short sentence after a long one.",
-    "pace": {"shortRoles": ["hook", "outro"], "longRoles": ["evidence"]},
-    "_pace": "hook and outro sit at or below the reel's median word count, evidence at or above. enrich.mjs uses the same map to set the _words target of each scaffold scene, so the shape is designed, not accidental.",
+    "_pace": "role pace moved to arc.roles.<role>.pace on 2026-09-29; this check still reads it.",
     "_opening": "a scene whose first sentence is mostly a spoken number opens like a report, not a person"
   },
   "voice": {
@@ -168,9 +341,24 @@
     "refAudio": "assets/voices/ref_ThanhBinh_khac_24k.wav",
     "refTextOverlapWords": 3,
     "lexicon": {
-      "MACD": "em a cê đi"
+      "MACD": "em ây xê đê",
+      "phẩy": "chấm"
     },
-    "_lexicon": "How the voice SAYS a written term: scripts/voiceover.mjs respells whole words right before synthesis, narration/headlines keep the written form, verify's speaking-rate check counts the spoken form. Measured 2026-09-28 with OmniVoice + Whisper large-v3, 3 sentences × 2 takes each: 'MACD' 0/6 recognised (Macy đi, FCD, Maxi đề), 'em a xê đê' 6/6, 'Em A Xê Đê' 4/6, 'em ây xi đi' 1/6, 'M A C D' 1/6, 'em-a-xê-đê' 0/6 (heard as MACG). 2026-09-28 the user set MACD → 'em a cê đi' (D said 'đi'); Whisper then writes 'MAC đi' in 5/5 re-recorded sentences — that is this reading heard correctly, not a miss (it only writes 'MACD' back for 'em a xê đê').",
+    "_lexicon": "How the voice SAYS a written term: scripts/voiceover.mjs respells whole words right before synthesis, narration/headlines keep the written form, verify's speaking-rate check counts the spoken form. Measured 2026-09-28 with OmniVoice + Whisper large-v3, 3 sentences × 2 takes each: 'MACD' 0/6 recognised (Macy đi, FCD, Maxi đề), 'em a xê đê' 6/6, 'Em A Xê Đê' 4/6, 'em ây xi đi' 1/6, 'M A C D' 1/6, 'em-a-xê-đê' 0/6 (heard as MACG). 2026-09-28 the user set MACD → 'em a cê đi' (D said 'đi'); Whisper then writes 'MAC đi' in 5/5 re-recorded sentences — that is this reading heard correctly, not a miss (it only writes 'MACD' back for 'em a xê đê'). 2026-09-29 to 2026-09-30 the list also held 'Radar' → 'ra đa' for the channel name Radar Chứng Khoán; dropped when the channel was renamed Cú đêm chứng khoán, which is plain Vietnamese. 2026-09-30, user: MACD must be clear. OmniVoice + Whisper large-v3, 'Ba tháng sau thì … tháng cắt xuống.': 'em a cê đi' 0/3 (heard 'MAC đi'), 'em, a, cê, đi' 0/1, 'em a xê đê' 0/1 ('MAC đề'), 'em ây xi đi' 0/1, 'em-a-cê-đi' 0/1, 'M A C D' 1/2, 'em. a. xê. đê.' 2/2, 'em mờ a xê đê' 2/2 → 'MACD'. Chosen 'em mờ a xê đê' (Vietnamese letter names, M as em-mờ): it flows inside the sentence, the periods version stops on every letter. 2026-09-30 evening, user: MACD in channel.mp4 still not clear, and 43,13% lost its 'phẩy'. Whisper writing 'MACD' or '43,13%' back is NO evidence the syllables were spoken — it infers both from context (the take in the video said 'bốn mươi ba, mười ba' and Whisper still wrote 43,13%). Measured letter by letter instead (Whisper large-v3 word timestamps, 6 takes per spelling of 'Và … tháng cũng đã cắt xuống.'): 'em mờ a xê đê' glues the letters into one 0.6–0.7 s word, 'a' held 0.06–0.10 s, 'mờ' 0.08–0.12; 'em a xê đê' a 0.06–0.08; 'M A C D' loses the M ('mờ a xê đê', a 0.04); 'em ây xi đi' a 0.04–0.16; 'em, a, xê, đê' a 0.12–0.18 and đê 0.10–0.18 — the commas make the voice say each letter as its own item, with no audible gap; 'em, a, cê, đi' (the user's 2026-09-28 letters, with commas) a 0.06–0.18, đi 0.08–0.12, a close second; 'em, mờ, a, xê, đê' is longest (0.8–0.9 s) but a and mờ stay at 0.06–0.12. Chosen 'em, a, xê, đê'. Whatever the spelling, OmniVoice is stochastic — scripts/tts_takes.py records N takes and keeps the one whose letters (and 'phẩy') are heard and held longest. 2026-10-01: 'phẩy' → 'chấm' (TTS only; narration, headlines and the review page keep 'phẩy'/the comma). Measured on 'Và lần này giá mất tới bốn mươi ba phẩy mười ba phần trăm.' with Whisper large-v3, digit tokens suppressed: 'phẩy' survived in 1 of 8 takes at speed 0.92 and 0 of 8 at 1.0; rewording did not help — 'phẩy, mười ba' 0/6, 'phẩy một ba' 0/6, 'mất bốn mươi ba phẩy' 0/6, '…phần trăm, sâu hơn hẳn' 0/6 — while 'bốn mươi ba chấm mười ba' was heard 6/6. OmniVoice swallows 'phẩy' after a number word (likely merged with the preceding syllable); 'chấm' is the everyday spoken decimal point in Vietnamese and traders say it. Delete this entry to go back to 'phẩy' (then expect 10–20 takes per decimal before scripts/tts_takes.py finds one). 2026-10-01 afternoon, user: 'em, ây, xê, đê — remove the commas for faster pace' → 'em ây xê đê' (the commas held each letter about twice as long; the user prefers the quicker read; scripts/tts_takes.py still keeps the take whose four letters are heard and held longest).",
+    "pace": {
+      "speed": {
+        "default": 1,
+        "hook": 0.95,
+        "key": 0.92
+      },
+      "pauseAfter": {
+        "default": 0.28,
+        "hook": 0.4,
+        "question": 0.55,
+        "beforeKey": 0.45
+      }
+    },
+    "_pace": "Per-sentence pace, applied by scripts/voiceover.mjs (the user, 2026-10-01: 'the voice doesn't have any pace or highlight'). speed is OmniVoice's own factor: a 'key' sentence — one that speaks a figure (phẩy, phần trăm, nghìn, mươi, trăm) or that a later headline beat is pinned to — is read at 0.92, the hook at 0.95, the rest at the model's estimate. pauseAfter is the silence voiceover.mjs leaves after a sentence: 0.28 s by default, 0.55 after a question, 0.4 inside the hook, and at least 0.45 before a key sentence so the figure lands on its own. Measured 2026-10-01 on three Channel sentences, 2 takes each: speed 0.92 → 4.2–5.0 syllables/s against 4.6–5.1 at the default, 0.85 → 4.0–4.6 (too slow, drags), 1.08 → no faster than the default (the model's estimate is already its upper pace). Pitch spread (F0 sd 2.3–7.9 semitones) varies from take to take and does not follow speed; an ellipsis or comma before the figure adds no pause. So emphasis comes from selection, not from the text: scripts/tts_takes.py records several takes of every key sentence and keeps the clearest one with the widest pitch range (10th–90th percentile, credit capped at 12 semitones).",
     "_refWhy": "if the reference transcript shares its opening words with a narration sentence, the model treats that run as already spoken and drops it."
   },
   "series": {

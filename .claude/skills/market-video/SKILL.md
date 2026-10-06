@@ -1,12 +1,13 @@
 ---
-description: Làm một reel dọc về thị trường/chứng khoán bằng Remotion, từ MỘT HAI DÒNG chủ đề của người dùng — bạn tự viết brief từ fact pack, sinh khung scene, worker viết lời, chấm điểm bằng script, đăng TRANG DUYỆT (artifact có khung hình từng scene, lời đọc, unsupported) cho người dùng duyệt, rồi mới lồng tiếng và render. Dùng khi người dùng muốn một video mới về VNINDEX, một mã cổ phiếu, hay một chỉ báo kỹ thuật (RSI, MACD, kênh giá, phân kỳ, thanh khoản).
+description: Làm một reel dọc về thị trường/chứng khoán bằng Remotion, từ MỘT HAI DÒNG chủ đề của người dùng — bạn tự viết brief từ fact pack, sinh khung scene, worker viết lời, chấm điểm bằng script, đăng TRANG DUYỆT (artifact có khung hình từng scene, lời đọc, unsupported) cho người dùng duyệt, rồi mới lồng tiếng và render. Dùng khi người dùng muốn một video mới về VNINDEX, một mã cổ phiếu, hay một chỉ báo kỹ thuật (RSI, MACD, kênh giá, phân kỳ, thanh khoản). Không dùng cho bản tổng kết phiên/tuần (phiên phân phối, FTD, bộ lọc terminal) — đó là skill market-review.
 argument-hint: "<chủ đề | mã | brief/*.md | --id=<Composition>> [--retime] [--no-voice]"
 allowed-tools: Read, Write, Edit, Artifact, Bash(node *), Bash(npm run *), Bash(npx remotion *), Bash(npx tsc *), Bash(../video-factory/.venv/bin/python *), Bash(ffmpeg *), Bash(ffprobe *), Bash(ps *), Bash(ls *), Bash(cat *), Bash(open *), Bash(curl -sL https://zionle.io.vn/*)
 ---
 
 Làm một reel thị trường về: `$1`
 
-Đây là skill DUY NHẤT của repo — từ một hai dòng chủ đề đến `out/*.mp4`. Đường đi là
+Đây là skill làm reel theo CHỦ ĐỀ — từ một hai dòng chủ đề đến `out/*.mp4`. Bản tổng kết phiên/tuần là skill riêng
+`market-review` (luật riêng, không đọc `content-rules.json` của skill này). Đường đi là
 **một hai dòng → BẠN viết brief từ số thật → scaffold + fact pack → worker viết lời → CHẤM ĐIỂM →
 NGƯỜI DUYỆT → rồi mới toả ra lồng tiếng và render**.
 
@@ -65,7 +66,7 @@ chart Remotion vẽ lại.** Với mỗi reel, bạn đi cả hai trang cho đú
    Chuyện 12 tháng gần đây thì trích `daily.*` (nến ngày thật của terminal); chuyện nhiều năm trích
    `series`/`peaks`/`rsi`/`macd` — từ 2026-09-23 chuỗi tháng cũng là dữ liệu THẬT (SSI iBoard, xem
    `facts.source`), không còn là bản dựng lại. Brief đặt `ticker: daily` để dòng ticker in phiên
-   thật; footer tự ghi "Nguồn: SSI iBoard" từ meta của chuỗi, ghi đè bằng `footer:` khi cần. Phiên đang giao dịch (fetch trước 15:00 ICT)
+   thật; không có dòng nguồn dưới headline (người dùng bỏ 2026-09-29), `footer:` trong brief mới hiện lại. Phiên đang giao dịch (fetch trước 15:00 ICT)
    bị loại khỏi `daily` — xem `daily.droppedIntraday`.
    Script KHÔNG ghi đè `content/vnindex-monthly.json` nếu không có `--replace-series` (đã xảy ra
    2026-09-23: `--resample=none` mặc định ghi vào đó; khôi phục bằng `node scripts/make-series.mjs`).
@@ -151,16 +152,18 @@ KHÔNG bịa số từ ảnh — số trên headline và trong lời vẫn truy 
 kỳ/tín hiệu, phần còn lại cho giá/RSI/MACD tháng). `verify` từ chối ảnh thiếu sidecar `.json`.
 **Scene nào nói về xu hướng giá thì panel là ảnh chart có mark** (người dùng chốt 2026-09-23) — không
 list, không thẻ, không hai cột cho chuyện giá đi đâu. Mark là `visual.annotations`: `hline` cho mức
-kháng cự/hỗ trợ/giá hiện tại, `line` (from/to, `dashed` cho đoạn chiếu) cho trendline và hai biên của kênh giá
-song song, `box` cho pha tích luỹ/phá vỡ, `circle` cho đỉnh đáy, `arrow` cho
+kháng cự/hỗ trợ/giá hiện tại, `line` (from/to) cho trendline và hai biên của kênh giá
+song song — biên kênh luôn nét liền, kể cả đoạn kéo dài qua điểm chạm cuối (người dùng 2026-09-29: nét đứt
+trông như hai đường khác nhau), `box` cho pha tích luỹ/phá vỡ, `circle` cho đỉnh đáy, `arrow` cho
 chuỗi đỉnh thấp dần, `vline` cho một mốc ngày — toạ độ phần 0..1 của ẢNH, `beat` là beat nó hiện, do
 ĐẠO DIỄN đặt sau khi nhìn ảnh. Toạ độ y của một mức giá tính từ trục giá trong ảnh (ví dụ ảnh
 terminal 1356×760 chụp 2026-09-23: `y = (31,5 + (1,95 − p/1000)/0,45 × 446)/760`); đặt xong render
 still soát mắt. Mọi scene ảnh đều chuyển động sẵn: quét mở màn, đẩy zoom nhẹ với mark dính theo, mark
 tự vẽ nét khi tới beat. **Từ 2026-09-28 (người dùng yêu cầu làm theo vox-director) mỗi beat của scene
 ảnh là một khung máy — `visual.shots`**: wide định hướng rồi cận vào đúng chi tiết câu đang gọi tên,
-đổi khung mỗi 3–5 giây, hai khung liền nhau không cùng `move`, `static` chỉ cho payoff. Đạo diễn đặt
-`shots` cùng lúc với mark, sau khi nhìn ảnh, rồi render thử (`review-page <Id> --out=<thư mục nháp>` —
+đổi khung mỗi 3–5 giây, hai khung liền nhau không cùng `move`, `static` chỉ cho payoff (check `camera`
+của verify cảnh báo khi phạm). Scaffold ghi `_camera` — máy quay mặc định của vai, một `move` mỗi beat —
+làm điểm xuất phát. Đạo diễn đặt `shots` cùng lúc với mark, sau khi nhìn ảnh, rồi render thử (`review-page <Id> --out=<thư mục nháp>` —
 reel phải đã đăng ký ở `REELS`, cuối mục 1b) soát
 từng khung trước khi toả người viết — cận cảnh phóng luôn giao diện FireAnt, đo ở reference.md mục 1. Lời đọc gọi tên đúng mark theo thứ tự beat — người xem nhìn đường kẻ hiện ra
 trong lúc nghe. Chữ trên nhãn truy về fact pack. Nếu ảnh FireAnt hiện "Đăng nhập" thì người dùng đã đăng xuất
@@ -219,9 +222,13 @@ Người dùng không viết brief. Bạn viết, từ số thật, rồi đi ti
    [prompts/scene-writer.md](../../../prompts/scene-writer.md). Ngân sách chữ từng scene là quyết định
    của đạo diễn — ghi vào `_words` sau enrich nếu khác mặc định theo vai. Ví dụ đã chạy:
    `brief/channel.md` v4.
-4. **Viết `brief/<tên>.md`** theo khuôn ở 1b: `arc.minScenes`–`arc.maxScenes` scene, đầu `hook`,
-   cuối `outro`, act không đi ngược (vai → act ở [reference.md](reference.md) mục 6, nên xếp
-   `warning`/`mechanism` sau các vai blue, `action` sau đó). Mỗi scene một hai dòng ý đồ KÈM con số
+4. **Viết `brief/<tên>.md`** theo khuôn ở 1b: `arc.minScenes`–`arc.maxScenes` scene, tổng thời lượng
+   trong `arc.totalSecondsWarn`, đầu `hook`, cuối `outro` (check `roles` FAIL nếu sai), act không đi
+   ngược. Vai lấy trong `arc.roles` ([reference.md](reference.md) mục 6 — việc, act mặc định, nhịp, máy
+   quay của từng vai). Reel phân tích chart: các lần lịch sử là `chapter` (ít nhất hai, liền nhau, cùng
+   khuôn), kịch bản "nếu … thì" là `scenario` (lời phải nói ra là kịch bản — `mustSay`, FAIL nếu thiếu),
+   mức phải canh là `levels`. Màu mặc định của vai sai nghĩa (kịch bản tăng giá mang màu cảnh báo) thì
+   scene đặt `act:` riêng. Mỗi scene một hai dòng ý đồ KÈM con số
    định dùng — worker đọc chính dòng này qua `_brief`, càng cụ thể càng ít bịa. Đổi kiểu panel
    giữa các scene. `bars` chỉ nhận phần trăm thật (nó in `%`), `macd` và `rsi.divergence` cần
    từ hai beat, `candles.bands` phải bằng số beat.
@@ -245,14 +252,18 @@ src: public/shots/vnindex-fireant-1y.png
 source: fireant.vn
 Giá vẫn sát đỉnh kênh nhưng thanh khoản đã mỏng đi rõ rệt.
 
-## warning · cards
-Hai nhóm dễ tổn thương nhất khi thanh khoản rút.
+## levels · image
+src: public/shots/vnindex-terminal.png
+source: zionle.io.vn
+Hai mức phải canh: kháng cự đỉnh năm phía trên, hỗ trợ gần nhất phía dưới; nhãn gắn đúng mức giá.
 
 ## outro · outro
 Thả tim · chia sẻ · theo dõi, hứa cập nhật khi thị trường đổi nhịp. Không số, không thuật ngữ.
 ```
 
-`vai` lấy trong `arc.roles`, `panel` lấy trong mười loại ở [reference.md](reference.md).
+`vai` là một khoá của `arc.roles` (content-rules; bảng in bằng lệnh ở [reference.md](reference.md) mục 6),
+`panel` lấy trong mười một loại ở reference.md mục 1. Dòng `act:` trong scene đặt màu nền riêng cho scene
+đó. Vai, act và panel sai thì enrich thoát mã `2` trước khi ghi file nào.
 
 ```bash
 npm run enrich -- brief/liquidity.md
@@ -302,6 +313,14 @@ tới, ẩn dụ, scene nào ngắn scene nào dài, điều KHÔNG được nó
 nói liền mạch — để bạn đọc như người xem sẽ nghe TRƯỚC khi merge; đọc thấy "bản tin" thì trả lại
 với ghi chú, đừng merge rồi sửa lẻ.
 
+Đọc xong thì soi `_script.md` bằng `/humanizer` (skill `.claude/skills/humanizer/`, người dùng cài 2026-09-30)
+theo mục **"Soi dấu vết AI"** của prompt: mẫu cấu trúc nào áp cho lời đọc tiếng Việt (không X mà là Y, câu chốt
+lặp ý, mở màn dàn dựng, cãi với người không có mặt, bộ ba ép, thổi phồng), mẫu nào không (chữ trên màn giữ `−`,
+`→`, `·`), và câu người dùng đã chốt thì giữ nguyên. Người viết đã tự soát theo mục đó; lượt của bạn bắt thứ họ
+bỏ sót. Còn dấu vết thì trả lại kèm ghi chú như khi nghe ra "bản tin"; một cụm lẻ thì sửa trong `<id>.json` rồi
+merge, vì `_script.md` chỉ là bản để đọc. Đã vấp 2026-09-30: "Tức là mình có một kênh giá thật, chứ không phải
+cố vẽ cho khớp." (§1) lọt tới trang duyệt và người dùng phải tự bắt ("not like the people talking").
+
 Agent trả về mỗi scene `eyebrow`, `narration`, `beats`, `visual` đã điền, kèm hai trường bắt buộc:
 
 - `citedFacts` — đường dẫn tới từng con số đã dùng (`volume.latestVsTrailingPercent`)
@@ -330,14 +349,15 @@ Hai điều dặn thêm cho worker, có từ 2026-09-22 khi khung hình có tick
 viết dấu phẩy (`165,1`) theo quy ước Việt Nam, ticker cũng in `2,85%` — checker nhận cả hai.
 
 Outro có khuôn riêng ở mục "Outro" của prompt (người dùng chốt 2026-09-28, bốn vòng sửa outro `channel`):
-một câu kêu gọi thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật; không số, không
+một câu kêu gọi thả tim · chia sẻ · theo dõi bằng giọng người, gắn luôn lý do theo dõi (cập nhật sớm những
+biến động của thị trường — người dùng gộp hai câu cũ thành một 2026-09-30); không số, không
 MACD, không câu vọng lại hook, không lặp "không phải khuyến nghị" — chữ miễn trừ nằm dưới thẻ outro
-(`disclaimer`, mặc định của enrich), footer các scene chỉ ghi nguồn. Không script nào gác điều này; soát
+(`disclaimer`, mặc định của enrich), footer các scene là tên kênh `Chứng Vịt` (`channel.name`). Không script nào gác điều này; soát
 ở `_script.md` và trên trang duyệt.
 
 Nhịp và chữ của nghề có script gác từ 2026-09-23 (người dùng hỏi thẳng giọng trader, nhịp đọc và từ vựng
-đã vào enrich và verify chưa): `enrich` đặt `_words` cho từng scene theo vai (`style.pace`: hook/outro
-ngắn, evidence dài) và ước `duration` theo đó; `verify` check `style` (WARN) soi hook/outro so với trung
+đã vào enrich và verify chưa): `enrich` đặt `_words` cho từng scene theo nhịp của vai
+(`arc.roles.<vai>.pace`: hook/outro ngắn, evidence dài) và ước `duration` theo đó; `verify` check `style` (WARN) soi hook/outro so với trung
 vị chữ của reel, evidence không ngắn hơn, câu trong scene không đều nhau (`style.sentenceContrastWords`),
 và phần lớn scene có thuật ngữ giao dịch (`style.tradeWords`). Giọng — thứ script không nghe được — vẫn
 nằm ở `prompts/scene-writer.md` và ở việc bạn đọc `_script.md` thành tiếng.
@@ -354,9 +374,9 @@ cùng lúc được, không cần đăng ký):
 cp content/<tên>.json <dir>/_reel.json && node scripts/merge.mjs <dir>/_reel.json --from=<dir> && node scripts/verify.mjs <dir>/_reel.json
 ```
 
-Script thay `eyebrow`/`narration`/`beats`/`visual`, bỏ `_brief`/`_role`, gom `unsupported` lên cấp
-reel, giữ `citedFacts` để soát, và đặt `status: enriched`. Nó từ chối (mã 1) khi thiếu file của
-scene nào, còn `TODO`, hay worker đổi `id`/`visual.type`.
+Script thay `eyebrow`/`narration`/`beats`/`visual`, giữ `role`, bỏ `_brief`/`_words`/`_camera`, gom
+`unsupported` lên cấp reel, giữ `citedFacts` để soát, và đặt `status: enriched`. Nó từ chối (mã 1) khi
+thiếu file của scene nào, còn `TODO`, hay worker đổi `id`/`role`/`visual.type`.
 
 Reel đã đăng ký từ mục 1b, nên merge xong là sang thẳng mục 2b. Chưa đăng ký thì làm ngay (khuôn ở
 cuối mục 1b) — `verify <Id>` sẽ thoát mã `2`.
@@ -418,7 +438,7 @@ nó. ĐỪNG chép lại một con số nào của nó ra đây hay ra comment.
 
 ```bash
 npm run verify              # mọi reel
-npm run verify -- RSI       # một reel
+npm run verify -- Channel   # một reel
 npm run verify -- --strict  # WARN và SKIP cũng thành lỗi (dùng cho CI)
 ```
 
@@ -443,6 +463,11 @@ Check `style` (WARN, ngưỡng ở `content-rules.style`) bắt dấu vết vi�
 sách chữ, hơn hai con số đọc ra lời một scene, scene mở bằng con số, "chỉ số"/"các bạn"/"nhà đầu tư",
 headline hai dòng cùng là số. Nó không nghe được giọng — đọc `_script.md` thành tiếng là việc của bạn.
 
+Ba check soi mạch kể, mức của từng luật ở `arc.severity` (người dùng chốt 2026-09-29): `roles` — mở bằng
+`hook`, kết bằng `outro`, lời `scenario` nói ra là kịch bản (FAIL), `chapter` đi thành chuỗi liền nhau
+(WARN); `arc` — số scene, act không đi ngược, tổng thời lượng trong `arc.totalSecondsWarn` (WARN);
+`camera` — hai khung máy liền nhau không cùng `move`, `static` chỉ ở khung cuối của scene (WARN).
+
 Những thứ nó bắt mà mắt không bắt được: `sentenceStarts` lệch với `narration` (tức là đã sửa lời
 mà quên `--force`), `atSentence` trỏ ra ngoài, beat trùng mốc, band nhiều hơn beat, panel một
 beat mà lại dùng tính năng gác sau beat 2, lưới pictogram không khớp phần trăm, chữ tràn panel,
@@ -457,9 +482,9 @@ NHÌN từng scene: khung hình đã render, headline, lời đọc, mark trên 
 trong câu trả lời.
 
 ```bash
-npm run review-page -- MACD                 # out/review/macd/index.html + stills/<scene>.jpg (+ files.json)
-npm run review-page -- MACD --no-stills     # chỉ đổi lời: dùng lại khung hình cũ
-npm run review-page -- MACD --before=<bản content trước.json>   # thêm cột lời đọc trước → sau khi viết lại (đổi cấu trúc: bảng scene trước → sau)
+npm run review-page -- Channel              # out/review/channel/index.html + stills/<scene>.jpg (+ files.json)
+npm run review-page -- Channel --no-stills  # chỉ đổi lời: dùng lại khung hình cũ
+npm run review-page -- Channel --before=<bản content trước.json>   # thêm cột lời đọc trước → sau khi viết lại (đổi cấu trúc: bảng scene trước → sau)
 ```
 
 Script chạy `verify --json`, render một khung hình cho TỪNG beat bằng `npx remotion still` (beat cuối
@@ -482,11 +507,11 @@ gì), hay bỏ. Nếu chuỗi giá là bản dựng lại chứ không phải ex
 
 **Câu trả lời KHÔNG thay được artifact.** Đừng dán bảng scene, lời đọc từng scene hay JSON vào câu trả
 lời thay cho link — người dùng duyệt trên trang, nơi có khung hình; chữ trong câu trả lời chỉ là bốn
-điều ngắn ở trên. `npm run review -- MACD` (bảng Markdown) chỉ dùng khi phiên này KHÔNG có tool
+điều ngắn ở trên. `npm run review -- Channel` (bảng Markdown) chỉ dùng khi phiên này KHÔNG có tool
 Artifact; khi đó nói rõ là đang thiếu artifact, và vẫn dừng chờ người dùng như thường.
 
 ```bash
-npm run approve -- Liquidity
+npm run approve -- Channel
 ```
 
 Lệnh này chạy lại `verify` rồi mới đặt `status: reviewed`. Còn lỗi thì nó từ chối — "đã duyệt"
@@ -522,8 +547,14 @@ cắt giữa chữ ở ranh giới scene. Dòng ⚠ đó trôi qua giữa output
 và trang duyệt vẫn giữ chữ viết. Đo 2026-09-28 (OmniVoice + Whisper large-v3, 3 câu × 2 lượt): `MACD`
 đọc trần 0/6 lần nghe ra MACD ("Macy đi", "FCD"), `em a xê đê` 6/6 — ghi số đo của từng cách viết vào
 `_lexicon` trước khi thêm từ mới. Dạng đọc nằm trong khoá cache, nên đổi lexicon rồi chạy
-`--force --only=<các scene có từ đó>` là thu lại đúng những câu đó. Soát: phiên âm từng câu bằng
-Whisper (mục 5.1) — dạng đọc đúng thì Whisper viết lại đúng thuật ngữ.
+`--force --only=<các scene có từ đó>` là thu lại đúng những câu đó. Whisper viết lại đúng thuật ngữ KHÔNG
+chứng minh các âm đã được đọc: nó đoán `MACD` và `43,13%` theo ngữ cảnh (đo 2026-09-30 — lượt trong video đọc
+`bốn mươi ba, mười ba` mà Whisper vẫn viết `43,13%`). Soát bằng `scripts/tts_takes.py` (mục 5.1): thu N lượt,
+nghe với token chữ số và `MAC…` bị chặn, in từng chữ cái kèm thời lượng, giữ lượt rõ nhất. Dạng đọc MACD từ
+2026-09-30 là `em, a, xê, đê` — dấu phẩy giữa các chữ làm mỗi chữ được giữ gấp đôi (`a` 0,12–0,18 s thay vì
+0,06–0,10 s) mà không có khoảng lặng nghe được; số đo của từng cách viết nằm trong `_lexicon`. Từ 2026-10-01 lexicon
+cũng đọc `phẩy` thành `chấm`: OmniVoice nuốt `phẩy` sau một chữ số ở ~90% lượt dù viết cách nào (1/16 lượt thường,
+0/24 ở bốn cách viết khác), `chấm` được nghe 6/6; lời và headline vẫn viết `phẩy`.
 
 **Giọng thật của người dùng và `--force` loại trừ nhau.** Thả file vào
 `public/voiceover/<NN>-<id>.wav` thì script không ghi đè NẾU KHÔNG có `--force`; chạy `--force`
@@ -539,7 +570,7 @@ npx tsc --noEmit                              # cửa chặn: type sai thì đ�
 npx remotion render <Composition> out/<tên>.mp4 --log=error
 ```
 
-Hoặc trọn gói: `npm run build -- --id=RSI --retime`.
+Hoặc trọn gói: `npm run build -- --id=Channel --retime`.
 
 Lỗi hay gặp, và nghĩa của nó:
 
@@ -565,6 +596,15 @@ r = mlx_whisper.transcribe('public/voiceover/02-history.wav',
     path_or_hf_repo='mlx-community/whisper-large-v3-mlx', language='vi')
 print(r['text'])"
 
+# 1a. Nhịp đọc — voice.pace trong content-rules (tốc độ gốc OmniVoice theo câu, khoảng lặng sau câu); đổi rồi:
+node scripts/voiceover.mjs --reassemble --retime      # thu câu có khoá mới, ghép lại mọi scene với khoảng lặng mới
+
+# 1b. Số thập phân và thuật ngữ có được ĐỌC không — phiên âm thường ở trên không bắt được (nó đoán 43,13% và
+#     MACD theo ngữ cảnh). Thu N lượt, nghe với token chữ số bị chặn, giữ lượt rõ nhất, rồi dựng lại track:
+../video-factory/.venv/bin/python scripts/tts_takes.py --dry-run            # xếp hạng, không chép gì
+../video-factory/.venv/bin/python scripts/tts_takes.py --takes=8            # chép lượt tốt nhất vào .tts-cache
+node scripts/voiceover.mjs --reassemble --only=<id in ra ở cuối> --retime   # dựng lại, không thu lại
+
 # 2. Tốc độ đọc — ngưỡng ở narration.syllableRateWarn / syllableRateFail
 node -e "/* số âm tiết / (thời lượng - 1.15) */"
 
@@ -572,8 +612,8 @@ node -e "/* số âm tiết / (thời lượng - 1.15) */"
 ffmpeg -i out/rsi.mp4 -af "silencedetect=noise=-50dB:d=0.3" -f null /dev/null 2>&1 | grep silence_duration
 
 # 4. Headline có rơi đúng câu không — lấy khung hai bên mốc beat
-ffmpeg -v error -ss 12.7 -i out/reel.mp4 -frames:v 1 -vf "crop=1080:400:0:1250" -y /tmp/a.png
-ffmpeg -v error -ss 13.4 -i out/reel.mp4 -frames:v 1 -vf "crop=1080:400:0:1250" -y /tmp/b.png
+ffmpeg -v error -ss 12.7 -i out/channel.mp4 -frames:v 1 -vf "crop=1080:400:0:1250" -y /tmp/a.png
+ffmpeg -v error -ss 13.4 -i out/channel.mp4 -frames:v 1 -vf "crop=1080:400:0:1250" -y /tmp/b.png
 ```
 
 Whisper phiên âm số đọc thành lời trở lại thành chữ số (`hai nghìn mười tám` → `2018`), nên tỉ

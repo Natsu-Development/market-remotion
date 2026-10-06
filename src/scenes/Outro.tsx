@@ -16,7 +16,8 @@ type Props = Extract<Visual, {type: 'outro'}> & {
 
 /**
  * Sign-off card. `logo` points at a file under public/ — drop a brand mark
- * there and it replaces the generated monogram.
+ * there and it replaces the generated monogram inside the ring; the channel
+ * name stays printed under it either way.
  */
 export const Outro: React.FC<Props> = ({logo, brand, kicker, pill, line, disclaimer, footnoteY}) => {
   const frame = useCurrentFrame();
@@ -86,23 +87,22 @@ export const Outro: React.FC<Props> = ({logo, brand, kicker, pill, line, disclai
             )}
           </div>
 
-          {/* A supplied mark carries the name already; the monogram does not. */}
-          {logo ? null : (
-            <div
-              style={{
-                marginTop: 24,
-                fontFamily: FONTS.display,
-                fontWeight: 800,
-                fontSize: 34,
-                letterSpacing: 3,
-                color: COLORS.white,
-                textTransform: 'uppercase',
-                ...enter(frame, {delay: 16, duration: 22, rise: 12}),
-              }}
-            >
-              {brand}
-            </div>
-          )}
+          {/* The name always prints under the mark: an avatar-style logo (the user's owl, 2026-09-30)
+              carries no wordmark, and the monogram never did. */}
+          <div
+            style={{
+              marginTop: 24,
+              fontFamily: FONTS.display,
+              fontWeight: 800,
+              fontSize: 34,
+              letterSpacing: 3,
+              color: COLORS.white,
+              textTransform: 'uppercase',
+              ...enter(frame, {delay: 16, duration: 22, rise: 12}),
+            }}
+          >
+            {brand}
+          </div>
 
           <div
             style={{
@@ -140,21 +140,39 @@ export const Outro: React.FC<Props> = ({logo, brand, kicker, pill, line, disclai
       </Panel>
 
       {disclaimer ? (
+        // Centred fine print under the headline, balanced over two lines, with a short gold rule
+        // above it so it reads as the card's footnote and not as a third headline (the user,
+        // 2026-10-01: "justify center", "optimize its styles").
         <div
           style={{
             position: 'absolute',
-            left: LAYOUT.footnote.x,
+            left: 0,
             top: footnoteY ?? LAYOUT.footnote.y,
-            width: LAYOUT.headline.maxWidth,
-            fontFamily: FONTS.text,
-            fontWeight: 400,
-            fontSize: LAYOUT.footnote.fontSize,
-            lineHeight: LAYOUT.footnote.lineHeight,
-            color: 'rgba(255, 255, 255, 0.62)',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             opacity: ramp(frame, 48, 74),
           }}
         >
-          {disclaimer}
+          <div style={{width: 36, height: 3, borderRadius: 2, backgroundColor: `${COLORS.gold}99`}} />
+          <div
+            style={{
+              marginTop: 18,
+              maxWidth: LAYOUT.footnote.maxWidth,
+              padding: '0 20px',
+              fontFamily: FONTS.text,
+              fontWeight: 500,
+              fontSize: LAYOUT.footnote.fontSize,
+              lineHeight: LAYOUT.footnote.lineHeight,
+              letterSpacing: 0.3,
+              color: 'rgba(255, 255, 255, 0.58)',
+              textAlign: 'center',
+              textWrap: 'balance',
+            } as React.CSSProperties}
+          >
+            {disclaimer}
+          </div>
         </div>
       ) : null}
     </>

@@ -27,7 +27,12 @@
  *   --viewport=1600x1000  --scale=2   CSS viewport and device pixel ratio (2 keeps chart text crisp at 880px)
  *   --wait=<ms>                       settle time after the load event (default 4000)
  *   --wait-for=<css>                  also wait until this selector exists and has size (30s cap)
- *   --js=<file.js>                    run this script in the page before capturing (pick a symbol, click a tab)
+ *   --js=<file.js>                    run this script in the page before capturing (pick a symbol, click a tab);
+ *                                     whatever it returns is stored in the sidecar as `js` (e.g. row rectangles)
+ *   --js-args=<json>                  exposed to that script as window.__SHOOT_ARGS
+ *   --init-js=<file.js>               run before any page script, on every document (e.g. localStorage setup)
+ *   --allow-post=/api/a,/api/b        paths the page may send a non-GET to. For --site=zionle every other
+ *                                     non-GET is FAILED in the browser (CDP Fetch) and logged in the sidecar
  *   --click=x,y  --type=<text>        click a viewport point, then type text and press Enter — real input events,
  *                                     so they reach widgets inside iframes that page scripts cannot see
  *   --clip=<css> | canvases | x,y,w,h | full
@@ -41,6 +46,13 @@
  *   --reset-view                      FireAnt (real mode): ⌥R after the interval (TradingView reset view)
  *   --pan=-330                        FireAnt (real mode): drag the pane left by 330pt so later dates come into view (deterministic)
  *   --indicator=MACD                  FireAnt (real mode): add an indicator via the fx dialog — saved into the user's layout
+ *   --tab=VNM                         FireAnt (real mode): make that chart tab active first (found by OCR on the tab strip)
+ *   --restore-symbol=VNM --restore-tab=VNINDEX
+ *                                     FireAnt (real mode): after the capture, paste the tab's own ticker back and
+ *                                     re-activate the tab that was active — a photo of a stock on the user's stock tab
+ *                                     leaves their layout as it was
+ *   --hover-back=1                    FireAnt (real mode): also capture <out>.hover.png with the pointer on the candle N bars
+ *                                     before the last — the legend then prints that bar's values (an edition older than the chart)
  *   --crop=chart|full|x,y,w,h         real mode: what to capture inside the page area (fireant defaults to chart)
  *   --keep-open                       leave the window open afterwards (profile mode; sign in once, then re-run)
  *   --cookies=<domain>                debug: list the cookie NAMES the browser holds for that domain (never values)
@@ -48,7 +60,10 @@
  *   --profile=none                    force the headless shell for a site that defaults to a profile (fireant)
  *
  * The script only reads. It never POSTs to the site; for zionle it passes the existing
- * config id in the URL so the frontend does not create a new one.
+ * config id in the URL so the frontend does not create a new one, and a request guard fails
+ * any non-GET the PAGE itself tries (its Dashboard and Screener POST /api/stocks/filter on load;
+ * a login with an unknown id POSTs /api/config). --allow-post names the exceptions — the
+ * market-review skill allows /api/stocks/filter, a read-only query (user, 2026-09-29).
  */
 import {spawn} from 'node:child_process';
 import {cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
@@ -217,6 +232,11 @@ const WAIT = Number(opt('wait', '4000'));
 const WAIT_FOR = opt('wait-for');
 const WAIT_TEXT = opt('wait-text');
 const JS = opt('js');
+const JS_ARGS = opt('js-args');
+const INIT_JS = opt('init-js');
+const ALLOW_POST = (opt('allow-post') ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+/** The user's own terminal gets the request guard by default; --allow-post also turns it on elsewhere. */
+const GUARD = site === 'zionle' || ALLOW_POST.length > 0;
 const CLICK = opt('click');
 const TYPE = opt('type');
 const CLIP = opt('clip', 'full');
@@ -379,6 +399,10 @@ if (REAL) {
   if (opt('pan')) args.push('--pan', opt('pan'));
   if (opt('zoom-out')) args.push('--zoom-out', opt('zoom-out'));
   if (opt('indicator')) args.push('--indicator', opt('indicator'));
+  if (opt('tab')) args.push('--tab', opt('tab'));
+  if (opt('restore-symbol')) args.push('--restore-symbol', opt('restore-symbol'));
+  if (opt('restore-tab')) args.push('--restore-tab', opt('restore-tab'));
+  if (opt('hover-back') != null) args.push('--hover-back', opt('hover-back'));
   // FireAnt: the panel wants the chart, not the header and order book around it.
   args.push('--crop', opt('crop', site === 'fireant' ? 'chart' : 'full'));
   if (KEEP) args.push('--keep-open');
@@ -397,10 +421,36 @@ const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()
 let target = targets.find((t) => t.type === 'page');
 if (!target) target = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, {method: 'PUT'})).json();
 const page = await CDP.open(target.webSocketDebuggerUrl);
+const network = {allowed: [], blocked: []};
+let jsResult;
 
 try {
   await page.send('Page.enable');
   await page.send('Runtime.enable');
+  if (GUARD) {
+    // Pause every request to the site at the Request stage; let reads through, fail any other
+    // method unless its path was allowed. Nothing blocked here ever reaches the server.
+    const host = new URL(url).host;
+    page.listeners.add((m) => {
+      if (m.method !== 'Fetch.requestPaused') return;
+      const {requestId, request} = m.params;
+      const method = request.method.toUpperCase();
+      const path = new URL(request.url).pathname;
+      if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+        page.send('Fetch.continueRequest', {requestId}).catch(() => {});
+      } else if (ALLOW_POST.includes(path)) {
+        network.allowed.push(`${method} ${path}`);
+        page.send('Fetch.continueRequest', {requestId}).catch(() => {});
+      } else {
+        network.blocked.push(`${method} ${path}`);
+        console.error(`shoot: BLOCKED ${method} ${path} (not in --allow-post)`);
+        page.send('Fetch.failRequest', {requestId, errorReason: 'BlockedByClient'}).catch(() => {});
+      }
+    });
+    await page.send('Fetch.enable', {patterns: [{urlPattern: `*://${host}/*`, requestStage: 'Request'}]});
+  }
+  if (JS_ARGS) await page.send('Page.addScriptToEvaluateOnNewDocument', {source: `window.__SHOOT_ARGS = ${JS_ARGS};`});
+  if (INIT_JS) await page.send('Page.addScriptToEvaluateOnNewDocument', {source: readFileSync(resolve(ROOT, INIT_JS), 'utf8')});
   await page.send('Emulation.setDeviceMetricsOverride', {width: W, height: H, deviceScaleFactor: SCALE, mobile: false});
   if (flag('dark')) await page.send('Emulation.setEmulatedMedia', {features: [{name: 'prefers-color-scheme', value: 'dark'}]});
 
@@ -443,7 +493,7 @@ try {
   if (WAIT_TEXT) await waitText(page, WAIT_TEXT, 30000);
   if (JS) {
     const src = readFileSync(resolve(ROOT, JS), 'utf8');
-    await page.eval(`(async () => { ${src} })()`, true);
+    jsResult = await page.eval(`(async () => { ${src} })()`, true);
     await sleep(1500);
   }
 
@@ -501,6 +551,8 @@ try {
     url, finalUrl: await page.eval('location.href'), title: await page.eval('document.title'),
     capturedAt: new Date().toISOString(), viewport: {width: W, height: H, scale: SCALE},
     clip: clip ?? 'full', profile: PROFILE ?? null, browser: PROFILE ? 'google-chrome' : 'chrome-headless-shell',
+    ...(GUARD ? {network: {guard: 'non-GET failed unless allowed', allowPost: ALLOW_POST, ...network}} : {}),
+    ...(jsResult !== undefined ? {js: jsResult} : {}),
   };
   writeFileSync(outPath.replace(/\.png$/, '') + '.json', JSON.stringify(meta, null, 2) + '\n');
   const px = clip ? `${Math.round(clip.width * SCALE)}×${Math.round(clip.height * SCALE)}` : `${W * SCALE}×${H * SCALE}`;

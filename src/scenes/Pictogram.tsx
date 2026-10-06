@@ -11,8 +11,11 @@ const ROW_GAP = 34;
 
 type Props = Extract<Visual, {type: 'pictogram'}> & {beatIndex: number};
 
-/** "95 out of 100 people" as a grid you can actually count. */
-export const Pictogram: React.FC<Props> = ({rows, columns, filledPercent, accent}) => {
+/**
+ * "95 out of 100 people" as a grid you can actually count. `glyph: 'dot'` draws plain dots instead of
+ * the person icon — for things that are not people (market-review counts stocks; user 2026-09-29).
+ */
+export const Pictogram: React.FC<Props> = ({rows, columns, filledPercent, accent, glyph = 'person'}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const colour = accentColor(accent);
@@ -39,12 +42,18 @@ export const Pictogram: React.FC<Props> = ({rows, columns, filledPercent, accent
           const cy = top + r * rowPitch;
           return (
             <g key={k} opacity={Math.min(1, s)} transform={`translate(${cx} ${cy}) scale(${Math.min(1, s)})`}>
-              <circle cx={0} cy={GLYPH_W * 0.24} r={GLYPH_W * 0.24} fill={isFilled ? colour : '#39424C'} />
-              <path
-                d={`M ${-GLYPH_W * 0.36} ${GLYPH_W * 1.12}
-                    a ${GLYPH_W * 0.36} ${GLYPH_W * 0.42} 0 0 1 ${GLYPH_W * 0.72} 0 Z`}
-                fill={isFilled ? colour : '#39424C'}
-              />
+              {glyph === 'dot' ? (
+                <circle cx={0} cy={GLYPH_W * 0.56} r={GLYPH_W * 0.4} fill={isFilled ? colour : '#39424C'} />
+              ) : (
+                <>
+                  <circle cx={0} cy={GLYPH_W * 0.24} r={GLYPH_W * 0.24} fill={isFilled ? colour : '#39424C'} />
+                  <path
+                    d={`M ${-GLYPH_W * 0.36} ${GLYPH_W * 1.12}
+                        a ${GLYPH_W * 0.36} ${GLYPH_W * 0.42} 0 0 1 ${GLYPH_W * 0.72} 0 Z`}
+                    fill={isFilled ? colour : '#39424C'}
+                  />
+                </>
+              )}
             </g>
           );
         })}

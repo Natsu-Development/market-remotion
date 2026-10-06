@@ -50,7 +50,7 @@ export const activeBeatIndex = (beats: Beat[], frame: number, fps: number): numb
  */
 export const SceneShell: React.FC<{
   scene: Scene;
-  reel: Pick<Reel, 'ticker' | 'footer'>;
+  reel: Pick<Reel, 'ticker' | 'footer' | 'logo'>;
   durationInFrames: number;
   children: React.ReactNode;
 }> = ({scene, reel, durationInFrames, children}) => {
@@ -67,7 +67,7 @@ export const SceneShell: React.FC<{
       {scene.eyebrow ? <Eyebrow label={scene.eyebrow} /> : null}
       {children}
       <Headline beats={scene.beats} override={scene.headline} />
-      {footer ? <Footer text={footer} /> : null}
+      {footer ? <Footer text={footer} logo={reel.logo} /> : null}
     </AbsoluteFill>
   );
 };

@@ -3,7 +3,7 @@
  * Grades content/<reel>.json before it costs anything to be wrong.
  *
  *   npm run verify                every registered reel
- *   npm run verify -- RSI         one reel
+ *   npm run verify -- Channel     one reel
  *   npm run verify -- --strict    warnings and skips become errors (CI gate)
  *   npm run verify -- --json      machine-readable, for an orchestrator
  *
@@ -23,11 +23,19 @@
 import {execFileSync} from 'node:child_process';
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {reels} from './lib/reels.mjs';
+import {roleNames, roleOf, roleSpec} from './lib/roles.mjs';
+import {lexiconOf, loadRules, spellerOf} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const R = JSON.parse(readFileSync(resolve(ROOT, 'src/shared/content-rules.json'), 'utf8'));
+/**
+ * The rules grading the reel being checked. market-video's reels use content-rules.json; a reel
+ * with its own `rules` field (market-review's) is graded by that file, engine constants inherited
+ * (scripts/lib/rules.mjs). Set per reel in the run loop; the repo-wide checks use BASE.
+ */
+const BASE = loadRules(ROOT);
+let R = BASE;
 
 const SEV = {pass: 'PASS', warn: 'WARN', fail: 'FAIL', skip: 'SKIP'};
 
@@ -134,6 +142,21 @@ class Report {
 }
 const add = Report.add;
 
+/** The level content-rules `arc.severity` gives one story rule; unlisted rules warn. */
+const sevOf = (rule) => SEV[R.arc.severity?.[rule]] ?? SEV.warn;
+
+/**
+ * One check whose notes carry their own level (see sevOf): the worst decides the check,
+ * and each note is tagged with its level when the check mixes them.
+ */
+const addGraded = (bucket, id, notes, passMessage) => {
+  if (!notes.length) { add(bucket, id, SEV.pass, passMessage); return; }
+  const worst = notes.some((n) => n.sev === SEV.fail) ? SEV.fail : SEV.warn;
+  const mixed = new Set(notes.map((n) => n.sev)).size > 1;
+  add(bucket, id, worst, `${notes.length} ${id} ${worst === SEV.fail ? 'problem' : 'note'}(s)`,
+    notes.map((n) => (mixed ? `${n.sev}: ${n.text}` : n.text)).join('; '));
+};
+
 // ---------------------------------------------------------------- checks
 
 const VISUAL_REQUIRED = {
@@ -143,16 +166,23 @@ const VISUAL_REQUIRED = {
   zigzag: ['topLabel', 'endLabel', 'upLabel', 'downLabel', 'steps'],
   riskReward: ['left', 'right'],
   image: ['src'],
+  lines: ['top', 'bottom'],
+  movers: ['left'],
+  board: ['columns', 'rows'],
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
 const ACCENTS = new Set(['gold', 'red', 'green', 'white']);
-/** The TTS pronunciation map (voice.lexicon) as scripts/voiceover.mjs applies it. */
-const LEXICON = Object.entries(R.voice?.lexicon ?? {}).filter(([k, v]) => !k.startsWith('_') && typeof v === 'string');
-const sayAs = (text) => LEXICON.reduce(
+/** Image marks may also take the direction pair (src/theme.ts COLORS.up/down) — never text. */
+const MARK_ACCENTS = new Set([...ACCENTS, 'up', 'down']);
+/** The TTS pronunciation map (voice.lexicon) and ticker speller (voice.letters) as scripts/voiceover.mjs applies them. */
+let LEXICON = lexiconOf(R);
+let SPELL = spellerOf(R);
+const respell = (text) => LEXICON.reduce(
   (t, [word, say]) => t.replace(new RegExp(`(?<![\\p{L}\\p{N}])${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'gu'), say),
   String(text ?? ''),
 );
+const sayAs = (text) => (SPELL ? SPELL(respell(text)) : respell(text));
 /** Camera drift while an image shot holds (src/types.ts ImageShot). */
 const SHOT_MOVES = new Set(['push_in', 'pull_out', 'pan', 'tilt', 'static']);
 
@@ -166,8 +196,9 @@ function checkSchema(t, reel) {
       if (s[k] === undefined) errs.push(`${at}: missing ${k}`);
     }
     if (s.eyebrow === undefined) errs.push(`${at}: missing eyebrow (use "" for none)`);
-    if (s.act && !R.arc.acts.includes(s.act)) errs.push(`${at}: act "${s.act}" not in ${R.arc.acts.join('|')}`);
-    if (s.id && !new RegExp(R.arc.sceneIdPattern).test(s.id)) errs.push(`${at}: id "${s.id}" must be lower-kebab`);
+    if (s.act && R.arc && !R.arc.acts.includes(s.act)) errs.push(`${at}: act "${s.act}" not in ${R.arc.acts.join('|')}`);
+    if (s.role !== undefined && !roleSpec(R, s.role)) errs.push(`${at}: role "${s.role}" not in ${roleNames(R).join('|')}`);
+    if (s.id && R.arc?.sceneIdPattern && !new RegExp(R.arc.sceneIdPattern).test(s.id)) errs.push(`${at}: id "${s.id}" does not match ${R.arc.sceneIdPattern}`);
     const v = s.visual ?? {};
     if (!VISUAL_REQUIRED[v.type]) {
       errs.push(`${at}: visual.type "${v.type}" is not one of ${Object.keys(VISUAL_REQUIRED).join('|')}`);
@@ -194,7 +225,7 @@ function checkSchema(t, reel) {
           }
           if (a.kind === 'label' && !a.text) errs.push(`${where}: label needs text`);
           if (a.kind === 'label' && a.anchor !== undefined && !['start', 'middle', 'end'].includes(a.anchor)) errs.push(`${where}: anchor "${a.anchor}" not in start|middle|end`);
-          if (a.accent && !ACCENTS.has(a.accent)) errs.push(`${where}: accent "${a.accent}" invalid`);
+          if (a.accent && !MARK_ACCENTS.has(a.accent)) errs.push(`${where}: accent "${a.accent}" invalid`);
           if (a.until !== undefined && !(Number.isInteger(a.until) && a.until >= (a.beat ?? 0))) {
             errs.push(`${where}: until ${a.until} must be an integer beat at or after its beat (${a.beat ?? 0})`);
           }
@@ -207,6 +238,65 @@ function checkSchema(t, reel) {
         if (v.crop !== undefined && !rectOk(v.crop)) errs.push(`${at}: crop must be {x,y,w,h} fractions of the photo, inside it`);
         for (const [j, m] of (Array.isArray(v.masks) ? v.masks : v.masks === undefined ? [] : [null]).entries()) {
           if (!rectOk(m)) errs.push(`${at} mask ${j}: must be {x,y,w,h} fractions of the photo`);
+        }
+      }
+      if (v.type === 'movers') {
+        // `right` may be left out when the list is five names or fewer (a board of one column).
+        for (const side of ['left', 'right']) {
+          const col = v[side];
+          if (side === 'right' && col === undefined) continue;
+          if (!col?.title) errs.push(`${at}: movers.${side} needs a title`);
+          if (!Array.isArray(col?.rows) || !col.rows.length) errs.push(`${at}: movers.${side}.rows needs at least one row`);
+          else if (col.rows.length > 10) errs.push(`${at}: movers.${side} has ${col.rows.length} rows; the panel fits ten (one-line rows past five)`);
+          else if (!col.rows.every((r) => typeof r.symbol === 'string' && Number.isFinite(r.changePercent))) errs.push(`${at}: movers.${side}.rows need symbol and changePercent`);
+          else if (col.metric === 'rs' && !col.rows.every((r) => Number.isFinite(r.rs1m))) errs.push(`${at}: movers.${side} shows RS 1M but a row has no rs1m`);
+          else if (!col.rows.every((r) => r.volumeVsSma20Percent == null || Number.isFinite(r.volumeVsSma20Percent))) errs.push(`${at}: movers.${side} has a row whose volumeVsSma20Percent is not a number`);
+          if (col?.metric !== undefined && !['change', 'rs'].includes(col.metric)) errs.push(`${at}: movers.${side} metric "${col.metric}" is not change|rs`);
+          if (col?.accent && !ACCENTS.has(col.accent)) errs.push(`${at}: movers.${side} accent "${col.accent}" invalid`);
+        }
+      }
+      if (v.type === 'board') {
+        // A screener filter drawn as a table (market-review rs/uptrend, src/scenes/FilterBoard.tsx). RS 1M and the
+        // day's change are the columns the user asked for by name (2026-10-01 evening); every printed column needs
+        // its figure on every row (a row without one prints "—", which is only right for a missing average).
+        const COLS = {price: 'price', change: 'changePercent', rs1m: 'rs1m', rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent'};
+        const cols = Array.isArray(v.columns) ? v.columns : [];
+        const unknown = cols.filter((c) => !(c in COLS));
+        if (unknown.length) errs.push(`${at}: board columns ${unknown.join(', ')} are not ${Object.keys(COLS).join('|')}`);
+        for (const need of ['change', 'rs1m']) if (!cols.includes(need)) errs.push(`${at}: a board shows ${need} (user 2026-10-01: "must have the RS1M column, price change")`);
+        const extra = cols.filter((c) => !['price', 'change', 'rs1m'].includes(c));
+        if (extra.length > 2) errs.push(`${at}: board has ${extra.length} extra columns (${extra.join(', ')}); the table fits two`);
+        if (!Array.isArray(v.rows) || !v.rows.length) errs.push(`${at}: board.rows needs at least one row`);
+        else if (v.rows.length > 10) errs.push(`${at}: board has ${v.rows.length} rows; it fits ten`);
+        else {
+          for (const r of v.rows) {
+            if (typeof r.symbol !== 'string' || !Number.isFinite(r.changePercent) || !Number.isFinite(r.rs1m)) { errs.push(`${at}: board rows need symbol, changePercent and rs1m`); break; }
+            const missing = cols.filter((c) => !['aboveEma50', 'aboveSma200'].includes(c) && !Number.isFinite(r[COLS[c]]));
+            if (missing.length) { errs.push(`${at}: board row ${r.symbol} has no ${missing.map((c) => COLS[c]).join(', ')}`); break; }
+          }
+        }
+        // The board lights the names the reel reviews next (`focus`, user 2026-10-05: "decoration and animation with
+        // the symbol need focused") and never says which other filter a name is in ("Not need mentioned the stock on
+        // specific filter existed on other filter"): the both/all3/picks highlight of 2026-10-01 is refused.
+        const legacy = (Array.isArray(v.rows) ? v.rows : []).filter((r) => r && (r.both || r.all3 || r.pick)).map((r) => r.symbol);
+        if (legacy.length || v.legend) errs.push(`${at}: board ${legacy.length ? `rows ${legacy.join(', ')} carry both/all3/pick` : ''}${legacy.length && v.legend ? ' and ' : ''}${v.legend ? 'a legend' : ''} — the overlap highlight the user dropped 2026-10-05; re-run node scripts/review/scaffold.mjs (rows carry focus)`);
+        for (const e of v.emphasis ?? []) {
+          if (!Number.isInteger(e.beat) || e.beat < 1) errs.push(`${at}: board emphasis beat ${e.beat} — emphasis plays on beat 2 or later (index ≥ 1)`);
+          if (e.set !== 'focus') errs.push(`${at}: board emphasis set "${e.set}" is not focus${['both', 'all3', 'picks', 'only'].includes(e.set) ? ' — the overlap/picks sets of 2026-10-01 are gone; re-run node scripts/review/scaffold.mjs' : ''}`);
+          else if (!(v.rows ?? []).some((r) => r?.focus)) errs.push(`${at}: board emphasis lights the focus rows but no row has focus: true`);
+        }
+      }
+      if (v.type === 'lines') {
+        for (const side of ['top', 'bottom']) {
+          const pane = v[side];
+          const pts = pane?.points;
+          if (!pane?.label) errs.push(`${at}: lines.${side} needs a label`);
+          if (!Array.isArray(pts) || pts.length < 2) errs.push(`${at}: lines.${side}.points needs at least two [date, value] points`);
+          else if (!pts.every((p) => Array.isArray(p) && /^\d{4}-\d{2}-\d{2}$/.test(p[0]) && Number.isFinite(p[1]))) errs.push(`${at}: lines.${side}.points must be [YYYY-MM-DD, number] pairs`);
+          if (pane?.accent && !ACCENTS.has(pane.accent)) errs.push(`${at}: lines.${side} accent "${pane.accent}" invalid`);
+        }
+        for (const [j, e] of (v.events ?? []).entries()) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(e?.t ?? '')) errs.push(`${at} event ${j}: t must be YYYY-MM-DD`);
         }
       }
       if (v.type === 'image' && v.shots !== undefined) {
@@ -299,10 +389,14 @@ function checkBeats(t, reel) {
 function checkNarration(t, reel) {
   const bad = [], warn = [];
   const N = R.narration;
+  if (!N) { add(t, 'narration', SEV.skip, 'no narration block in this reel\'s rules'); return; }
   for (const s of reel.scenes) {
     if (!s.narration) continue;
-    if (/\d/.test(s.narration)) {
-      bad.push(`${s.id}: narration contains digits — spell them (${s.narration.match(/\S*\d\S*/g).join(', ')})`);
+    // Judged on what the voice SAYS: an indicator written as the trader says it (MA200, EMA50) is read by
+    // voice.lexicon as letters and number words (user 2026-10-01), so only a digit the lexicon leaves fails.
+    const said = respell(s.narration);
+    if (/\d/.test(said)) {
+      bad.push(`${s.id}: narration contains digits — spell them, or give the term a voice.lexicon reading (${said.match(/\S*\d\S*/g).join(', ')})`);
     }
     const w = words(s.narration).length;
     if (w < N.minWordsPerScene || w > N.maxWordsPerScene) {
@@ -327,7 +421,7 @@ function checkNarration(t, reel) {
  * two rows of digits. verify cannot hear tone; the reviewer reads the script aloud for that.
  * Added 2026-09-23 (later), same day the user asked for trader vocabulary and pace: a positive
  * vocabulary check (style.tradeWords), sentence-length contrast inside a scene, and role pace
- * (hook/outro at or below the reel's median words, evidence at or above).
+ * (short roles at or below the reel's median words, long roles at or above — arc.roles.*.pace).
  */
 function checkStyle(t, reel) {
   const S = R.style;
@@ -340,7 +434,10 @@ function checkStyle(t, reel) {
   // article, "hai năm" two years — people say those; they are not figures being read out.
   const spokenNumbers = (text) => {
     const toks = String(text).toLowerCase().replace(/[.,!?;:…()]/g, ' ').split(/\s+/).filter(Boolean);
-    const isTok = (i) => BASIC.has(toks[i]) || STRONG.has(toks[i]) || (toks[i] === 'phần' && toks[i + 1] === 'trăm');
+    // 'không' is part of the number in 'một nghìn không trăm chín mươi chín' (1099) and 'hai nghìn không trăm
+    // hai mươi hai'; elsewhere (hai không mười tám, không phải) it is not a figure.
+    const isTok = (i) => BASIC.has(toks[i]) || STRONG.has(toks[i]) || (toks[i] === 'phần' && toks[i + 1] === 'trăm')
+      || (toks[i] === 'không' && (toks[i + 1] === 'trăm' || toks[i - 1] === 'nghìn'));
     let runs = 0;
     for (let i = 0; i < toks.length;) {
       if (!isTok(i)) { i++; continue; }
@@ -353,16 +450,12 @@ function checkStyle(t, reel) {
   };
   const counts = [];
   const perRole = [];
-  const roleOf = (sc) => {
-    const parts = sc.id.split('-').filter((p) => !/^\d+$/.test(p));
-    return [...parts].reverse().find((p) => R.arc.roles.includes(p)) ?? '';
-  };
   let tradeScenes = 0;
   for (const sc of reel.scenes) {
     if (!sc.narration) continue;
     const n = sc.narration;
     counts.push(words(n).length);
-    perRole.push({id: sc.id, role: roleOf(sc), w: words(n).length});
+    perRole.push({id: sc.id, role: roleOf(R, sc), w: words(n).length});
     if ((S.tradeWords ?? []).some((w) => n.toLowerCase().includes(w))) tradeScenes++;
     const sents = sentences(n);
     const perSentence = sents.map(spokenNumbers);
@@ -385,6 +478,9 @@ function checkStyle(t, reel) {
     }
     const addr = S.addressWords.reduce((a, w) => a + (n.toLowerCase().match(new RegExp(`\\b${w}\\b`, 'g')) ?? []).length, 0);
     if (addr > S.maxAddressPerScene) warn.push(`${sc.id}: "bạn/mình" ×${addr} — one or two per scene`);
+    // A comma right before "phẩy" makes the voice pause there and drop the decimal word: "bốn mươi ba, phẩy
+    // mười ba" came out as "bốn mươi ba, mười ba" in 4 of 4 takes (Channel, 2026-09-30).
+    if (/,\s*phẩy\b/i.test(n)) warn.push(`${sc.id}: comma right before "phẩy" — the voice pauses and swallows the decimal; write "ba phẩy mười ba"`);
     if (S.headlineBothLinesNumeric === 'warn') {
       for (const [k, b] of sc.beats.entries()) {
         if (/\d/.test(b.line1 ?? '') && /\d/.test(b.line2 ?? '')) warn.push(`${sc.id} beat ${k}: both headline lines are numbers — line 2 should say what it means`);
@@ -395,12 +491,14 @@ function checkStyle(t, reel) {
     const spread = Math.max(...counts) - Math.min(...counts);
     if (spread < S.minSceneWordSpread) warn.push(`every scene is ${Math.min(...counts)}–${Math.max(...counts)} words — same budget edge everywhere; let hook and outro breathe`);
   }
-  if (S.pace && counts.length >= 4) {
+  if (counts.length >= 4) {
+    // Role pace lives with the role (arc.roles.<role>.pace), the same field enrich aims _words at.
     const sorted = [...counts].sort((a, b) => a - b);
     const median = sorted[Math.floor(sorted.length / 2)];
     for (const p of perRole) {
-      if (S.pace.shortRoles?.includes(p.role) && p.w > median) warn.push(`${p.id}: ${p.role} is ${p.w} words, above the reel's median ${median} — hook and outro breathe`);
-      if (S.pace.longRoles?.includes(p.role) && p.w < median) warn.push(`${p.id}: ${p.role} is ${p.w} words, below the reel's median ${median} — the evidence carries the detail`);
+      const pace = roleSpec(R, p.role)?.pace;
+      if (pace === 'short' && p.w > median) warn.push(`${p.id}: ${p.role} is ${p.w} words, above the reel's median ${median} — hook and outro breathe`);
+      if (pace === 'long' && p.w < median) warn.push(`${p.id}: ${p.role} is ${p.w} words, below the reel's median ${median} — the evidence carries the detail`);
     }
   }
   if (S.tradeWords?.length && counts.length >= 4) {
@@ -436,22 +534,100 @@ function checkStatus(t, reel) {
 }
 
 function checkArc(t, reel) {
+  if (!R.arc) { add(t, 'arc', SEV.skip, 'no arc block in this reel\'s rules'); return; }
   const n = reel.scenes.length;
-  const msgs = [];
+  const notes = [];
+  const note = (rule, text) => notes.push({sev: sevOf(rule), text});
   if (n < R.arc.minScenes || n > R.arc.maxScenes) {
-    msgs.push(`${n} scenes, outside ${R.arc.minScenes}-${R.arc.maxScenes}`);
+    note('sceneCount', `${n} scenes, outside ${R.arc.minScenes}-${R.arc.maxScenes}`);
   }
   const last = reel.scenes[n - 1];
-  if (last.visual?.type !== 'outro') msgs.push(`last scene is ${last.visual?.type}, expected outro`);
+  if (last.visual?.type !== 'outro') note('outroPanel', `last scene is ${last.visual?.type}, expected outro`);
   const order = R.arc.acts;
   let seen = 0;
   for (const s of reel.scenes) {
     const at = order.indexOf(s.act);
-    if (at < seen) { msgs.push(`${s.id}: act "${s.act}" goes backwards`); break; }
+    if (at < seen) { note('actOrder', `${s.id}: act "${s.act}" goes backwards`); break; }
     seen = at;
   }
-  if (msgs.length) add(t, 'arc', SEV.warn, `${msgs.length} arc note(s)`, msgs.join('; '));
-  else add(t, 'arc', SEV.pass, `${n} scenes, acts move forward, outro last`);
+  const secs = Math.round(reel.scenes.reduce((a, s) => a + (s.duration ?? 0), 0) * 10) / 10;
+  const [lo, hi] = R.arc.totalSecondsWarn ?? [0, Infinity];
+  if (secs < lo || secs > hi) {
+    note('totalSeconds', `${secs}s in all, outside ${lo}-${hi}s — ${secs > hi ? 'cut a scene or tighten the longest ones' : 'the reel ends before its argument lands'}`);
+  }
+  addGraded(t, 'arc', notes, `${n} scenes · ${secs}s, acts move forward, outro last`);
+}
+
+/**
+ * The story the roles tell (content-rules arc.roles, user 2026-09-29): it opens on the hook and
+ * closes on the outro, a role with `minRun` (the history chapters of a timeline) comes in
+ * consecutive runs, and a role with `mustSay` (a scenario) says out loud what it is.
+ */
+function checkRoles(t, reel) {
+  if (!R.arc?.roles) { add(t, 'roles', SEV.skip, 'no arc.roles in this reel\'s rules'); return; }
+  const notes = [];
+  const note = (rule, text) => notes.push({sev: sevOf(rule), text});
+  const roles = reel.scenes.map((s) => roleOf(R, s));
+  for (const [i, s] of reel.scenes.entries()) {
+    if (!roles[i]) note('roleOrder', `${s.id}: no role — set "role" to one of ${roleNames(R).join('|')}`);
+  }
+  const first = roles[0], last = roles[roles.length - 1];
+  if (first && first !== R.arc.firstRole) note('roleOrder', `the reel opens on ${first}, not ${R.arc.firstRole} — the promise has to land in the first seconds`);
+  if (last && last !== R.arc.lastRole) note('roleOrder', `the reel ends on ${last}, not ${R.arc.lastRole}`);
+  for (const role of roleNames(R)) {
+    const need = roleSpec(R, role).minRun;
+    if (!need) continue;
+    for (let i = 0; i < roles.length;) {
+      if (roles[i] !== role) { i++; continue; }
+      let j = i;
+      while (j < roles.length && roles[j] === role) j++;
+      if (j - i < need) note('minRun', `${reel.scenes[i].id}: ${j - i} ${role} in a row, needs ${need} — add its sibling chapters, or relabel a lone one as evidence`);
+      i = j;
+    }
+  }
+  const esc = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const [i, s] of reel.scenes.entries()) {
+    const must = roleSpec(R, roles[i])?.mustSay;
+    if (!must?.length || !s.narration || s.narration.includes('TODO')) continue;
+    const said = must.some((w) => new RegExp(`(?<![\\p{L}\\p{N}])${esc(w)}(?![\\p{L}\\p{N}])`, 'iu').test(s.narration));
+    if (!said) note('mustSay', `${s.id}: a ${roles[i]} has to say it is one — the narration needs ${must.map((w) => `"${w}"`).join(' / ')}, told as an if-then branch, not a call`);
+  }
+  // hook → concept → chapter×3 → …: the arc in one line, repeats folded.
+  const runs = [];
+  for (const r of roles) {
+    const top = runs[runs.length - 1];
+    if (top && top.r === r) top.n++;
+    else runs.push({r: r || '?', n: 1});
+  }
+  addGraded(t, 'roles', notes, runs.map((x) => (x.n > 1 ? `${x.r}×${x.n}` : x.r)).join(' → '));
+}
+
+/**
+ * vox-director's camera rules as SKILL.md 1d states them: neighbouring framings never share a
+ * move, and `static` is saved for a scene's payoff — its last shot. Framings are neighbours inside
+ * a scene, and across a scene cut when the next scene stays on the same photo.
+ */
+function checkCamera(t, reel) {
+  const notes = [];
+  const note = (text) => notes.push({sev: sevOf('shots'), text});
+  let prev = null;
+  let count = 0;
+  for (const s of reel.scenes) {
+    const v = s.visual ?? {};
+    const shots = v.type === 'image' && Array.isArray(v.shots) ? v.shots : [];
+    if (!shots.length) { prev = null; continue; }
+    for (const [j, sh] of shots.entries()) {
+      const move = sh.move ?? 'push_in';
+      count++;
+      if (prev && prev.move === move && (j > 0 || prev.src === v.src)) {
+        note(`${s.id} shot ${j}: ${move} again right after ${prev.id} shot ${prev.j} — change the move with the framing`);
+      }
+      if (move === 'static' && j < shots.length - 1) note(`${s.id} shot ${j}: static before the scene's last shot — hold still only for the payoff`);
+      prev = {src: v.src, move, id: s.id, j};
+    }
+  }
+  if (!count) { add(t, 'camera', SEV.pass, 'no image shots to check'); return; }
+  addGraded(t, 'camera', notes, `${count} shots: no move repeats back to back, static only on a payoff`);
 }
 
 /** Annotations that name a month or year the series does not contain draw nothing. */
@@ -619,7 +795,7 @@ function checkFacts(t, reel) {
   // A number that is a calendar month or a count of what is drawn is not a
   // claim about the data. Patterns live in content-rules.json; adding one
   // widens the gate, which is the user's call.
-  const exemptions = (R.claims.factsExemptions ?? []).map((e) => new RegExp(e.pattern, 'giu'));
+  const exemptions = (R.claims?.factsExemptions ?? []).map((e) => new RegExp(e.pattern, 'giu'));
   const exemptNumbers = (text) => {
     const out = new Set();
     for (const re of exemptions) {
@@ -643,6 +819,28 @@ function checkFacts(t, reel) {
       ...(sc.visual?.bars ?? []).map((b) => ['visual.bars', `${b.label} ${b.percent}`]),
       ...(sc.visual?.marks ?? []).map((m) => ['visual.marks', String(m.label)]),
       ...(sc.visual?.annotations ?? []).map((a) => ['visual.annotations', a.label ?? a.text ?? '']),
+      // A movers board prints each row's change, volume (% of its 20-session average when the row has
+      // volumeVsSma20Percent, Movers.tsx — else the ratio) and RS 1M from its numbers.
+      // A filter board prints each row at the precision FilterBoard.tsx shows: price and change 2dp, RS whole,
+      // volume vs TB20 whole %, the distances above EMA50/SMA200 1dp; its legend and emphasis plates are text.
+      ...(sc.visual?.type === 'board' ? [
+        ...(sc.visual.rows ?? []).map((r) => ['visual.rows', [
+          r.symbol,
+          r.price != null ? Number(r.price).toFixed(2) : '',
+          Number(r.changePercent).toFixed(2),
+          String(r.rs1m),
+          r.rs52w != null ? String(r.rs52w) : '',
+          r.volumeVsSma20Percent != null ? String(Math.abs(Math.round(Number(r.volumeVsSma20Percent)))) : '',
+          r.aboveEma50Percent != null ? Math.abs(Number(r.aboveEma50Percent)).toFixed(1) : '',
+          r.aboveSma200Percent != null ? Math.abs(Number(r.aboveSma200Percent)).toFixed(1) : '',
+        ].join(' ')]),
+        ...Object.values(sc.visual.legend ?? {}).map((t) => ['visual.legend', String(t)]),
+        ...(sc.visual.emphasis ?? []).map((e) => ['visual.emphasis', String(e.label ?? '')]),
+      ] : []),
+      ...['left', 'right'].flatMap((side) => (sc.visual?.type === 'movers' && sc.visual[side] ? [
+        [`visual.${side}.title`, sc.visual[side].title ?? ''],
+        ...(sc.visual[side].rows ?? []).map((r) => [`visual.${side}.rows`, `${r.symbol} ${Number(r.changePercent).toFixed(2)} ${r.volumeVsSma20Percent != null ? String(Math.round(Number(r.volumeVsSma20Percent))) : r.volumeRatio != null ? Number(r.volumeRatio).toFixed(2) : ''} ${r.rs1m != null ? String(r.rs1m) : ''}`]),
+      ] : [])),
     ];
     for (const [where, text] of surfaces) {
       const exempt = exemptNumbers(text);
@@ -669,6 +867,7 @@ function checkFacts(t, reel) {
 
 /** Superlatives and "right now" claims the data does not support. */
 function checkClaims(t, reel) {
+  if (!R.claims) { add(t, 'claims', SEV.skip, 'no claims block in this reel\'s rules'); return; }
   if (!SERIES) { add(t, 'claims', SEV.skip, `${R.series.path} not readable`); return; }
   const lastMonth = SERIES[SERIES.length - 1].t;
   const warn = [];
@@ -829,6 +1028,13 @@ for (const id of ids) {
   // A draft is checked on its own: its stems are meant to replace the registered reel's, so it
   // stays out of the cross-reel collision check.
   if (!DRAFTS.has(id)) loaded.push([id, reel]);
+  try {
+    R = loadRules(ROOT, {reel});
+  } catch (e) {
+    die(`${rel}: its rules file ${reel.rules} cannot be read — ${e.message}`);
+  }
+  LEXICON = lexiconOf(R);
+  SPELL = spellerOf(R);
   if (checkSchema(t.checks, reel).length) continue;   // gate, not a peer
   checkStatus(t.checks, reel);
   checkSentenceSync(t.checks, reel);
@@ -836,6 +1042,8 @@ for (const id of ids) {
   checkNarration(t.checks, reel);
   checkStyle(t.checks, reel);
   checkArc(t.checks, reel);
+  checkRoles(t.checks, reel);
+  checkCamera(t.checks, reel);
   checkDataRefs(t.checks, reel);
   checkPictogram(t.checks, reel);
   checkGeometry(t.checks, reel);
@@ -843,7 +1051,21 @@ for (const id of ids) {
   checkClaims(t.checks, reel);
   checkVoiceAssets(t.checks, reel);
   checkAudio(t.checks, reel, id);
+  // A rules file may add its own checks (market-review: scripts/review/checks.mjs). Each module's
+  // default export returns [{id, level: pass|warn|fail|skip, message, fix?}].
+  for (const mod of R.extraChecks ?? []) {
+    let out;
+    try {
+      out = await (await import(pathToFileURL(resolve(ROOT, mod)).href)).default(reel, {root: ROOT, rules: R, id});
+    } catch (e) {
+      die(`extra check ${mod} broke on ${id} — ${e.message}`);
+    }
+    for (const c of out ?? []) add(t.checks, c.id, SEV[c.level] ?? SEV.warn, c.message, c.fix);
+  }
 }
+R = BASE;
+LEXICON = lexiconOf(R);
+SPELL = spellerOf(R);
 checkRegistration(report);
 checkVoiceStems(report, loaded);
 checkSeries(report);

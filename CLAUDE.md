@@ -26,7 +26,7 @@ repo, không phải Google hay TradingView. Frontend Vite SPA, API ở `/api`, 1
 
 **Feed `/analyze` là feed NGÀY khoảng một năm, không phải lịch sử dài.** Đo 2026-09-22: đúng 254
 dòng `2025-09-15 .. 2026-09-22`, và `start_date` bị bỏ qua hoàn toàn. Gộp tháng chỉ ra 13 nến,
-trong khi `candles` và `macd` dựng cho ~13 năm. Đổi lại, feed kèm sẵn `rsi` từng ngày,
+trong khi chuỗi tháng của SSI phủ ~13 năm. Đổi lại, feed kèm sẵn `rsi` từng ngày,
 `divergences` và `trendlines` — dùng kết quả của trang thay vì tự tính lại. Lịch sử dài lấy từ
 SSI iBoard (`--source=ssi`, 3400 nến ngày từ 2013-01-02, không cần auth); VNDirect dchart chỉ có
 từ 2017-08 và không có khung tuần/tháng; TCBS bị Cloudflare chặn; CafeF đòi tham số khác.
@@ -185,9 +185,9 @@ nguyên vào là `JSON.parse` ném.
 (người dùng chốt 2026-09-22). Skill đi cả hai trang cho mã đang nói: terminal cho insight có cấu
 trúc (`fetch-market.mjs --signals` → `terminal.*` trong fact pack) + ảnh /analyze; FireAnt cho chart
 ngày nhiều năm (`--range=5y`, `--interval=D|W|2W|M` bấm nút interval người dùng đã ghim,
-`--zoom-out=6` lăn chuột để thấy lịch sử tới ~2001). `candles`/`macd`/`rsi` vẽ TẮT mặc định (người dùng chốt 2026-09-23:
-FireAnt đã có hết) — chỉ khi được bảo đích danh. **Người dùng chốt 2026-09-28: scene nào có SỐ trên màn
-hình đều là ảnh chart có mark** — không cột `riskReward`/`bars`, không `list` chứa số; tỉ lệ lời/lỗ là
+`--zoom-out=6` lăn chuột để thấy lịch sử tới ~2001). Các panel vẽ (`candles`/`macd`/`rsi`/`bars`/`pictogram`/`list`/`cards`/`zigzag`/`riskReward`) đã bị XOÁ 2026-10-06
+(người dùng: "remove the drawn scene since already have the picture and indicator of fireant"); panel còn lại: `image`, `outro`, `lines`, `movers`, `board`. **Người dùng chốt 2026-09-28: scene nào có SỐ trên màn
+hình đều là ảnh chart có mark** — (các panel đó đã bị xoá); tỉ lệ lời/lỗ là
 hai mũi tên trên chart, danh sách việc là nhãn gắn vào đúng mức giá. Thẻ outro cũng không mang số. Từ
 2026-09-23 chuỗi tháng là dữ liệu thật (SSI) nên fact pack, ticker và ảnh FireAnt cùng số khi kéo cùng ngày
 (đóng cửa 28/9: 1780,68 ở cả ba) — trước đó bản dựng lại lệch ảnh thật (1.878 vs 1816,93, đo 2026-09-22).
@@ -250,7 +250,7 @@ gọi tên kênh. Tên là tiếng Việt nên không cần dạng đọc trong 
 - TTS đọc thuật ngữ lung tung (MACD → "Macy đi") → thêm dạng đọc vào `voice.lexicon` ở content-rules, thu lại bằng `--force --only`; đừng viết "em a xê đê" vào `narration`
 - chữ cái MACD dính nhau, hoặc số thập phân đọc thiếu `phẩy` (`bốn mươi ba mười ba`) → không tin phiên âm Whisper thường; chạy `scripts/tts_takes.py` (thu N lượt, nghe với token chữ số bị chặn, giữ lượt rõ nhất) rồi `voiceover.mjs --reassemble --only=<id> --retime`; và bỏ dấu phẩy đứng ngay trước `phẩy` trong `narration`
 - hai mã cổ phiếu đánh vần nghe thành một, hay số đếm dính vào mã → tách mã bằng chữ trong `narration` ("AAS và HID, rồi tới DRI", "Số ba là BSR"), không sửa `voice.letters`; lẫn chữ cái (PVT/PVP) thì `tts_takes.py`
-- số lớn mất chữ ("năm nghìn tám trăm linh hai tỷ" nghe "năm tám không hai tỷ"), hay chữ I trong mã nghe thành "1" (VIC → "V1C", DRI → "DR1") → giọng tham chiếu (ThanhBinh) là giọng Nam: `voice.lexicon` của rules.json cho giọng đọc "ngàn"/"trăm lẻ" thay "nghìn"/"trăm linh", và `voice.letters.I` là "y" (đo 2026-10-05, script ở `.review-cache/staging/voice-fix/`); lời và headline vẫn viết "nghìn", "linh"
+- số lớn mất chữ ("năm nghìn tám trăm linh hai tỷ" nghe "năm tám không hai tỷ"), hay chữ I trong mã nghe thành "1" (VIC → "V1C", DRI → "DR1") → giọng tham chiếu (ThanhBinh) là giọng Nam: `voice.lexicon` của rules.json cho giọng đọc "ngàn"/"trăm lẻ" thay "nghìn"/"trăm linh", và `voice.letters.I` là "y" (đo 2026-10-05, script ở `scripts/voice-checks/`); lời và headline vẫn viết "nghìn", "linh"
 - mã đọc rời từng chữ, có ngắt giữa các chữ cái → `voice.letterJoin` ở `rules.json` phải là dấu cách (không `, `); `tts_takes.py` báo "gap … inside a spelled ticker" khi lượt nào cũng ngắt — thu thêm `--takes=12`
 - bản ghi thật biến mất → chạy `--force` lúc file đang nằm trong `public/voiceover/`
 - headline rơi sai câu → `sentenceStarts` cũ, hoặc thêm câu ngắn làm lệch `atSentence`
@@ -259,7 +259,6 @@ gọi tên kênh. Tên là tiếng Việt nên không cần dạng đọc trong 
 - `400 config_id is required` → chưa đặt `.zionle-config`
 - `404 configuration not found` → id sai hoặc đã hết hạn, không phải sai đường dẫn
 - market-review: khối lượng phiên hôm nay thấp bất thường (×0,5 phiên trước) → nến cùng ngày của SSI là số tạm (30/9: 359M lúc 15:20, hôm sau 505M; 1/10: 260M lúc 15:47, FireAnt 449M); đối chiếu thẻ FireAnt/Entrade cùng cơ sở trước khi kết luận phân phối, không in `volumeRatio` của phiên hôm nay, kéo lại trước `approve` (SKILL.md market-review §9)
-- panel thiếu chi tiết → chi tiết đó gác sau `beatIndex >= 1`, scene chỉ có một beat
 - `Unknown --id=X` → quên `REELS` ở `src/Root.tsx`
 - `roles` FAIL "has to say it is one" → scene `scenario` kể như lời gọi giá; viết lại thành nhánh nếu … thì, đừng thêm chữ vào `mustSay`
 - `voice-stems` FAIL giữa hai reel scaffold → id kiểu cũ `hook-1` trùng vị trí; enrich giờ sinh `<tên>-<vai>`

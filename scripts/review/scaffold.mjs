@@ -27,7 +27,6 @@ import {fireantLeaderVisual} from './lib/leader-fireant.mjs';
 import {boardOf} from './lib/board.mjs';
 import {FLOW_PHOTO} from './lib/fireant-flow.mjs';
 import {weekVisual, weeklyBars} from './lib/week-fireant.mjs';
-import {impactCompare} from './lib/impact-compare.mjs';
 
 const {opt, flag} = cli();
 const R = rules();
@@ -449,29 +448,7 @@ const buildMarket = () => {
 };
 
 // breadth — weekly only (user 2026-10-05: "Daily; old chart → weekly"): the old "Độ rộng thị trường" — the paradox on
-// the only drawn panel, the share of stocks above SMA200 (scripts/review/breadth.mjs) under the index line.
-const pictogramGrid = (pct) => {
-  // The Pictogram panel (and verify) re-derive the lit count from filledPercent and scatter it with
-  // (k*7+3) % total, which lights the wrong number on a grid whose total shares a factor with 7.
-  // Search the grids the panel has room for and keep the one whose drawn share is nearest the truth.
-  let best = null;
-  for (let rows = 3; rows <= 7; rows++) {
-    for (let columns = 4; columns <= 9; columns++) {
-      const total = rows * columns;
-      const drawnFor = (filled) => { let n = 0; for (let k = 0; k < total; k++) if ((k * 7 + 3) % total >= total - filled) n++; return n; };
-      const drawn = drawnFor(Math.round((pct / 100) * total));
-      const share = round((drawn / total) * 100, 2);
-      if (drawnFor(Math.round((share / 100) * total)) !== drawn) continue;
-      const err = Math.abs(share - pct);
-      // Within half a point of the truth, the fuller grid wins: 25 dots in an 880×560 panel read as empty.
-      const better = !best ? true
-        : err <= 0.5 && best.err <= 0.5 ? total > best.total
-        : err < best.err - 1e-9;
-      if (better) best = {rows, columns, total, drawn, filledPercent: share, err};
-    }
-  }
-  return best;
-};
+// the share of stocks above SMA200 (scripts/review/breadth.mjs) under the index line.
 const buildBreadth = () => {
   const B = F.screener.breadth;
   if (B?.aboveSma200Percent == null) {
@@ -479,8 +456,8 @@ const buildBreadth = () => {
     return;
   }
   // With a breadth history (scripts/review/breadth.mjs) the scene is a two-pane line chart — index
-  // above, share above SMA200 below (user, 2026-09-30: "better visual with chart line graph"); the
-  // dot grid stays as the fallback for a session without the history.
+  // above, share above SMA200 below (user, 2026-09-30: "better visual with chart line graph"). Without the history
+  // the scene is dropped: the dot-grid fallback went with the drawn panels (user 2026-10-06).
   if (B.line && B.history?.length >= 10) {
     const L = B.line;
     const events = ftd && B.history.some((h) => h.t === ftd.date) ? [{t: ftd.date, label: `FTD ${ftd.dm}`, accent: 'green'}] : [];
@@ -500,16 +477,7 @@ const buildBreadth = () => {
     });
     return;
   }
-  const g = pictogramGrid(B.aboveSma200Percent);
-  push('breadth', {
-    beats: todoBeats(1),
-    visual: {type: 'pictogram', glyph: 'dot', rows: g.rows, columns: g.columns, filledPercent: g.filledPercent, accent: 'green'},
-    brief: [
-      `NGHỊCH LÝ (pattern interrupt, panel vẽ duy nhất): chỉ số ${F.state.label.toLowerCase()} mà chỉ ${B.aboveSma200} trên ${B.withSma200 ?? B.universe} mã (${vi(B.aboveSma200Percent, 1)}%) đứng trên MA200 (SMA200 của terminal); hôm nay ${B.up} mã tăng, ${B.down} mã giảm.`,
-      `Lưới ${g.rows}×${g.columns} chấm, ${g.drawn} chấm sáng = ${vi(g.filledPercent, 1)}%; headline ghi ${Math.round(B.aboveSma200Percent)}% (số nguyên, có trong pack).`,
-      'Kết bằng câu dẫn: vậy tiền đang ở đâu? → bộ lọc.',
-    ],
-  });
+  console.log(`  breadth: dropped — no breadth history (node scripts/review/breadth.mjs --date=${date}, then facts.mjs)`);
 };
 
 // flow — FireAnt's "Thống kê sàn" for the edition's session (user 2026-10-05: "the chart of symbol increase and
@@ -991,18 +959,6 @@ const buildWeek = () => {
   });
 };
 
-// impact — the name that moved VN-Index most today, on one date axis with the index (user 2026-10-05: "with VIC symbol
-// since it affect to the market so much, so need a sentence and something like view VIC behavior price action change
-// beside the VNIndex? Only with VIC symbol"; lib/impact-compare.mjs). Right after the symbol reviews, only when that name
-// is one of them and carried at least rules.screener.impact.minShare % of the index's move.
-const buildImpact = () => {
-  const lead = F.flow?.impact?.lead?.symbol;
-  const bars = lead ? tryJson(`${PATHS.analyze}/${date}/${lead}.json`)?.price_history ?? [] : [];
-  const out = impactCompare({F, R, date, dir: DIR, analyzeBars: bars, indexBars: daily});
-  if (out.why) { console.log(`  impact: dropped — ${out.why}`); return; }
-  push('impact', {eyebrow: `${lead} · VN-Index`, beats: todoBeats(2), visual: out.visual, brief: out.brief});
-};
-
 // outro — the carried-over sign-off.
 const buildOutro = () => push('outro', {
   eyebrow: 'Theo dõi tiếp',
@@ -1012,7 +968,7 @@ const buildOutro = () => push('outro', {
   brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
 });
 
-const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, flow: buildFlow, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), watch: buildWatch, week: buildWeek, impact: buildImpact, outro: buildOutro};
+const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, flow: buildFlow, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), watch: buildWatch, week: buildWeek, outro: buildOutro};
 // Every other scene of the screener (rs, uptrend — one saved filter each): a drawn board of its top rows
 // when rules say `visual: "board"`, else the Screener photographed with those rows boxed.
 for (const [k, spec] of Object.entries(R.screener.scenes)) builders[k] ??= () => (spec.visual === 'board' || spec.visual === 'columns' ? buildBoard(k) : buildTable(k));

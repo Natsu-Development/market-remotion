@@ -266,7 +266,7 @@ export default function reviewChecks(reel, {root, rules: R}) {
     // "Not need mentioned the stock on specific filter existed on other filter"). Read on what is SAID and shown as
     // text: the narration sentence by sentence, the headlines and the eyebrow. A bridge sentence without a ticker may
     // still name the next filter ("Còn bộ lọc Uptrend thì sao?").
-    const scope = ['spike', 'rs', 'uptrend', 'leader', 'pick', 'impact'];
+    const scope = ['spike', 'rs', 'uptrend', 'leader', 'pick'];
     const scenes = reel.scenes.filter((s) => scope.includes(s.role));
     const ownOf = (role) => {
       const sc = R.screener?.scenes?.[role];
@@ -297,7 +297,7 @@ export default function reviewChecks(reel, {root, rules: R}) {
         const why = MEMBERSHIP.filter(([re]) => re.test(t)).map(([, w]) => w);
         // The old loop 2: the volume board hinting that one of its names is a leader, "kept for the end".
         if (s.role === 'spike' && /dẫn dắt|để cuối/iu.test(t)) why.push('ties the volume board to the leaders');
-        const named = (s.role === 'leader' || s.role === 'pick' || s.role === 'impact' ? names : others).filter((n) => nameRe(n).test(t));
+        const named = (s.role === 'leader' || s.role === 'pick' ? names : others).filter((n) => nameRe(n).test(t));
         if (named.length && (screen || tickers(t).length)) why.push(`puts ${tickers(t).join(', ') || 'the headline'} next to ${named.join(', ')}`);
         if (why.length) hits.push(`${s.id} (${where}): "${t}" ${why.join(', ')}`);
       }

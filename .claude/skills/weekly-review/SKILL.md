@@ -93,8 +93,8 @@ còn ảnh FireAnt "Biến động thị trường" (số mã tăng/giảm và p
   ~900 mã → `content/review/breadth.json`; `facts.mjs --format=weekly` đưa vào `screener.breadth` (`history[]`, `line`:
   đầu/cuối/đỉnh, % chỉ số cùng đoạn, `vsScreener` — độ lệch so với số đếm của Screener).
 - Scene: beat 1 đường chỉ số vẽ ra, beat 2 đường độ rộng vẽ ra; nghịch lý là chỉ số đi một đằng mà phần lớn mã đi một nẻo.
-  Thiếu `breadth.json` thì scene là lưới chấm `pictogram` một beat; pack thiếu `screener.breadth` thì scaffold bỏ scene và in
-  `breadth: dropped — <lý do>`, market trao lời thẳng cho các bộ lọc.
+  Thiếu lịch sử độ rộng (`breadth.json`) hay pack thiếu `screener.breadth` thì scaffold bỏ scene và in `breadth: dropped — <lý do>`
+  (lưới chấm `pictogram` dự phòng đã bỏ cùng các panel vẽ, người dùng 2026-10-06), market trao lời thẳng cho các bộ lọc.
 
 ## 4. Soi từng mã dẫn dắt
 

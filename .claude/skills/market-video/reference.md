@@ -2,24 +2,19 @@
 
 Tài liệu phụ của [SKILL.md](SKILL.md). Mở khi viết scene mới hoặc kéo số.
 
-## 1. Mười ba panel
+## 1. Năm panel
 
-`visual.type` chọn component ở `src/scenes/index.tsx`. Trường in đậm là **bắt buộc**.
+`visual.type` chọn component ở `src/scenes/index.tsx`. Trường in đậm là **bắt buộc**. Chín panel VẼ của các reel đầu
+(`candles`, `macd`, `rsi`, `pictogram`, `bars`, `list`, `cards`, `zigzag`, `riskReward`) đã bị XOÁ 2026-10-06 — người dùng:
+"remove the drawn scene since already have the picture and indicator of fireant". Nến, RSI, MACD, MA là ảnh FireAnt/terminal
+(`image`); con số suy ra là mark trên ảnh hoặc headline. Brief gọi panel đã xoá thì `enrich.mjs` dừng, `verify` FAIL schema.
 
 | `type` | Vẽ gì | Trường |
 |---|---|---|
-| `candles` | Nến tháng trong kênh giá log, có dấu chạm biên | `caption`, `touches[]` (năm), `bands[]` (`year`, `label`, `accent`, `drop`) |
-| `macd` | MACD(12,26,9) tính từ cùng chuỗi giá | `caption`, `note`, `peakLabel` |
-| `rsi` | Giá ở khung trên, khung dưới là bộ dao động 0-100 với ngưỡng 70/30 | `caption`, `note`, `highlightZone`, `marks[]` (`month`, `label`, `accent`), `divergence` (`from`, `to`, `label`) |
-| `pictogram` | Lưới người, n/tổng được tô | **`rows`**, **`columns`**, **`filledPercent`**, **`accent`** |
-| `bars` | Thanh ngang mảnh chạy tới tỉ lệ của nó, in `%` làm tròn | **`bars[]`** (`label`, `percent`, `accent`) |
-| `list` | Dòng có chip icon, hiện lần lượt | **`items[]`** (`icon`, `text`), **`accent`**, `chipShape` |
-| `cards` | Hai thẻ cảnh báo cạnh nhau | **`cards[]`** (`title`, `body`), **`accent`** |
-| `zigzag` | Bậc thang đi xuống, có chú thích "hy vọng / chần chừ" | **`topLabel`**, **`endLabel`**, **`upLabel`**, **`downLabel`**, **`steps`** |
-| `riskReward` | Khoản lời nhỏ đặt cạnh khoản lỗ lớn, vẽ đúng tỉ lệ | **`left`**, **`right`** (mỗi cái `label` + `value`) |
 | `image` | **Mặc định cho nến, chart và mọi scene về xu hướng giá** (người dùng chốt 2026-09-22/23): ảnh chụp terminal hoặc FireAnt trong cùng khung panel, có chip nguồn, caption, **mark vẽ dần theo beat**, quét mở màn và đẩy zoom nhẹ — hoặc **máy quay theo beat** khi có `shots` | **`src`** (dưới `public/`), `caption`, `source`, `fit` (`cover`/`contain`), `focus`, `zoom` (`false` để tắt đẩy), `sourceCorner`, `annotations[]` (`kind` box/circle/arrow/label/**hline**/**vline**, toạ độ PHẦN 0..1 của ảnh, `label`/`text`, `accent`, `beat`), `shots[]` (`beat`, `x`, `y`, `zoom` 1..4, `move`, `cut` — xem dưới), `crop` {x,y,w,h} (phần ảnh hiện, tỉ lệ 1,42 của `LAYOUT.imagePanel`), `masks[]` {x,y,w,h,color} + `maskColor` (che chữ giao diện của trang nguồn), mỗi mark nhận thêm `until` (beat cuối nó hiện) và `label` nhận `anchor` |
 | `lines` | Hai đường cùng trục thời gian, pane trên và pane dưới (chỉ số / độ rộng thị trường — thêm 2026-09-30 cho market-review); đường trên vẽ ở beat 1, đường dưới vẽ khi beat 2 bắt đầu; điểm cuối mang nhãn giá trị | **`top`**, **`bottom`** (mỗi cái `label`, `points[]` = `[YYYY-MM-DD, số]`, `accent`, `unit` points/percent, `ref`, `min`, `max`), `events[]` (`t`, `label`, `accent`), `caption` |
 | `movers` | Hai cột xếp hạng cạnh nhau — tăng mạnh nhất / giảm mạnh nhất (thêm 2026-09-30 cho market-review): mỗi dòng mã, tên, % đổi màu theo chiều, KL ×; cột trái hiện ở beat 1, cột phải khi beat 2 bắt đầu | **`left`**, **`right`** (mỗi cái `title`, `accent`, `rows[]` ≤ 5: `symbol`, `name`, `changePercent`, `volumeRatio`), `caption` |
+| `board` | Bảng xếp hạng một bộ lọc của market-review (RS Strong / Uptrend): tối đa 10 dòng theo RS 1M, mã cần soi được tô ở beat 2 | **`columns`**, **`rows[]`** (`symbol`, `price`, `changePercent`, `rs1m`, `focus`…), `emphasis[]`, `caption` |
 | `outro` | Thẻ chào cuối: nhận diện thương hiệu, kicker, pill, một dòng | **`brand`**, **`kicker`**, **`pill`**, **`line`**, `logo` |
 
 Giá trị enum:
@@ -27,17 +22,9 @@ Giá trị enum:
 - `act`: `blue` · `maroon` · `amber` · `navy` — nền đổi theo mạch lập luận: phân tích → cảnh
   báo → việc cần làm → chào cuối.
 - `accent`: `gold` · `red` · `green` · `white`
-- `icon` (**chỉ `list`**): `check` · `warning` · `cross` · `up` · `down`. Vẽ bằng SVG ở
-  `src/scenes/Icon.tsx` chứ không gõ ký tự — glyph ✓ và ⚠ thiếu ở vài weight của bộ vietnamese
-  và rơi về font khác, nhìn như lỗi. `cards` luôn vẽ glyph `warning`, không đổi được từ content
-  (`WarnCards.tsx:47` ghim cứng).
 
-`candles`, `macd`, `rsi` đọc chuỗi giá dùng chung ở `src/lib/series.ts`; trường của chúng chỉ là
-nhãn. Từ 2026-09-23 ba panel này TẮT mặc định: FireAnt đã có nến/RSI/MACD mọi khung trên dữ liệu
-thật, còn ba panel này vẽ từ chuỗi tháng dựng lại. Chỉ dùng khi người dùng bảo đích danh. Nến và
-chart là ảnh chụp (`image`, SKILL.md mục 1 và 1d); số suy ra đi vào `bars`/`pictogram`/`list`. Bảy panel còn lại lấy toàn bộ con số từ chính JSON — không cần dữ liệu tháng để VẼ. Nhưng
-`content/vnindex-monthly.json` vẫn phải tồn tại và phải phủ `PEAK_MONTHS`/`TROUGH_MONTHS`, vì
-`src/lib/series.ts` chạy ở module scope (xem mục 5).
+`content/vnindex-monthly.json` vẫn phải tồn tại và phải phủ `PEAK_MONTHS`/`TROUGH_MONTHS`: ticker trên cùng mọi scene đọc
+nó qua `src/lib/series.ts`, chạy ở module scope (xem mục 5).
 
 **"Vẽ lên ảnh" làm trong Remotion, không làm trong FireAnt.** `annotations` của `image` là hộp
 (`box`), vòng (`circle`), mũi tên (`arrow`), đoạn thẳng (`line` — trendline, hai biên kênh giá; `from`/`to`,
@@ -117,11 +104,6 @@ trên 1080p là hơi mềm — giữ cho payoff, còn lại ≤ 2,8. Nhãn `hlin
 ngoài khung cận; khi đó để `hline` không nhãn và đặt `label` riêng ở chỗ khung nhìn thấy. Đạo diễn đặt
 `shots` sau khi nhìn ảnh, như mark; worker KHÔNG đổi. Soát bằng `npm run review-page -- <Id>`: trang có
 khung hình cho TỪNG beat và dòng "Máy quay" của từng scene.
-
-**Chỉ `bands` của `candles` đánh chỉ số theo beat**: `bands[0]` hiện ở beat đầu, `bands[1]` ở
-beat thứ hai (`CandleChart.tsx:44`). `marks` của `rsi` thì hiện HẾT, chỉ lệch nhau bằng độ trễ
-khung hình (`pop(frame, fps, 58 + k * 12)`), không đọc `beatIndex`. `divergence`, khung callout
-của `macd` và `endLabel` của `zigzag` chỉ hiện từ `beatIndex >= 1`.
 
 ## 2. Trường content, và ai sở hữu
 
@@ -234,7 +216,7 @@ signals[]       : {"type":"breakdown_confirmed","price":1.65279,"time":"2026-03-
 
 1. **Đây là feed NGÀY, khoảng một năm.** 254 dòng, `2025-09-15 .. 2026-09-22`. `start_date` và
    `end_date` bị BỎ QUA — gửi `start_date=2013-01-01` vẫn trả đúng 254 dòng. Gộp thành tháng chỉ
-   ra 13 nến, trong khi panel `candles` và `macd` dựng cho ~13 năm. Dùng nó cho reel ngắn hạn
+   ra 13 nến, trong khi chuỗi tháng của SSI phủ ~13 năm. Dùng nó cho reel ngắn hạn
    (`--resample=none`), đừng dùng thay cho chuỗi tháng.
 2. **Giá về đơn vị NGHÌN đồng.** Với cổ phiếu đó là cách yết bình thường (FPT 66,6 = 66.600đ).
    Với chỉ số thì là chia 1000 (VNINDEX 1,809 = 1809 điểm). `--scale=auto` nhân 1000 lại cho
@@ -464,7 +446,7 @@ script đọc vai từ id (`<tên>-<vai>[-n]`). Đổi vai một scene đã có 
 
 ```
 Scene 2: role "villain" is not one of hook|concept|...|outro
-Scene 1: panel "donut" is not one of candles|macd|...|outro
+Scene 1: panel "donut" is not one of image|lines|movers|board|outro
 Scene 8: act "red" is not one of blue|maroon|amber|navy
 No scenes found. Each scene is an H2: "## <role> · <panel>".
 ```

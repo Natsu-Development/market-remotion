@@ -77,10 +77,11 @@ chart Remotion vẽ lại.** Với mỗi reel, bạn đi cả hai trang cho đú
    node scripts/shoot.mjs --site=fireant --symbol=VNINDEX --range=5y --out=public/shots/vnindex-fireant-5y.png
    ```
    Đừng đụng chuột ~25s. Đọc ảnh xong rồi mới viết brief: mắt bạn là bước "hiểu bối cảnh".
-3. **Không vẽ lại chart.** FireAnt đã có nến, RSI, MACD ở mọi khung với đúng tham số người dùng
-   lưu, trên dữ liệu sàn thật; `candles`/`macd`/`rsi` của Remotion chỉ dùng khi người dùng bảo
-   đích danh. Thứ còn lại cho Remotion là SỐ SUY RA (tần suất RSI trên 70, drawdown từng đỉnh,
-   checklist, cảnh báo) qua `bars`/`pictogram`/`list`/`cards` — không có gì để chụp ở đó.
+3. **Không vẽ lại chart.** FireAnt đã có nến, RSI, MACD, MA ở mọi khung với đúng tham số người dùng
+   lưu, trên dữ liệu sàn thật. Các panel vẽ của Remotion (`candles`/`macd`/`rsi`/`bars`/`pictogram`/
+   `list`/`cards`/`zigzag`/`riskReward`) đã bị XOÁ 2026-10-06 — người dùng: "remove the drawn scene since
+   already have the picture and indicator of fireant". SỐ SUY RA (tần suất RSI trên 70, drawdown từng đỉnh,
+   checklist, cảnh báo) đi vào mark trên ảnh chart và headline, không vào panel riêng.
    Khung tháng dài: `--interval=M --zoom-out=6` bấm nút interval người dùng đã ghim rồi lăn chuột
    kéo lịch sử ra (đo 2026-09-23: thấy từ ~2001). Script bấm theo thứ tự mã → range → interval →
    pan → zoom (`shoot_real.py`), thứ tự cờ trên dòng lệnh không đổi gì: nút range đặt lại cả độ
@@ -170,7 +171,7 @@ trong lúc nghe. Chữ trên nhãn truy về fact pack. Nếu ảnh FireAnt hi�
 FireAnt trong Chrome — nói với họ, đừng tự đăng nhập. Lệnh, chế độ và những điều đã đo:
 [reference.md](reference.md) mục 7.
 
-**Thanh khoản và động lượng cũng là ảnh FireAnt, không phải `bars`** (người dùng chốt 2026-09-23, scene 4
+**Thanh khoản và động lượng cũng là ảnh FireAnt** (người dùng chốt 2026-09-23, scene 4
 của `channel`): chụp khung TUẦN một năm có pane khối lượng và MACD —
 `--interval=W --range=1y --indicator=MACD --crop=chart` — rồi `box` quanh cụm cột khối lượng của tháng
 đỉnh và tháng hiện tại (nhãn mang số từ `daily.volume`), `hline` ở đường 0 của MACD và `box` quanh
@@ -180,7 +181,7 @@ LƯU nó vào layout của người dùng — chỉ dùng khi scene cần đúng
 họ. Nhãn `hline` mặc định nằm bên phải; khi mép phải ảnh có dải giá trị (badge MACD, trục giá) đặt
 `labelSide: "left"` để không chồng chữ. **Người dùng chốt 2026-09-28: scene có số là chart** — kể cả số
 suy ra (tỉ lệ lời/lỗ, danh sách việc có mức giá): vẽ thành mark trên ảnh chart (mũi tên +7% / −34%, nhãn
-"Vượt 1933 yếu → không mua đuổi" nằm trên đường 1933), không dùng `riskReward`/`bars`/`list` chứa số.
+"Vượt 1933 yếu → không mua đuổi" nằm trên đường 1933) — các panel `riskReward`/`bars`/`list` đã bị xoá (2026-10-06).
 
 **Khung ảnh và nhãn (2026-09-28).** Panel ảnh là `LAYOUT.imagePanel` (1000×752, ảnh 1000×704 — tỉ lệ
 1,42), to hơn panel thường để chart lấp khung dọc. Mỗi ảnh đặt `crop` (phần của ảnh, tỉ lệ 1,42) để bỏ
@@ -229,9 +230,8 @@ Người dùng không viết brief. Bạn viết, từ số thật, rồi đi ti
    khuôn), kịch bản "nếu … thì" là `scenario` (lời phải nói ra là kịch bản — `mustSay`, FAIL nếu thiếu),
    mức phải canh là `levels`. Màu mặc định của vai sai nghĩa (kịch bản tăng giá mang màu cảnh báo) thì
    scene đặt `act:` riêng. Mỗi scene một hai dòng ý đồ KÈM con số
-   định dùng — worker đọc chính dòng này qua `_brief`, càng cụ thể càng ít bịa. Đổi kiểu panel
-   giữa các scene. `bars` chỉ nhận phần trăm thật (nó in `%`), `macd` và `rsi.divergence` cần
-   từ hai beat, `candles.bands` phải bằng số beat.
+   định dùng — worker đọc chính dòng này qua `_brief`, càng cụ thể càng ít bịa. Panel là `image`
+   (ảnh FireAnt/terminal có mark) hoặc `outro`; các panel vẽ đã bị xoá 2026-10-06.
 5. **Không đưa brief cho người dùng đọc.** Họ duyệt ở 2c, khi đã có lời và headline. Sang 1b.
 
 Ví dụ đã chạy: `brief/channel.md` v4.
@@ -469,9 +469,8 @@ Ba check soi mạch kể, mức của từng luật ở `arc.severity` (người
 `camera` — hai khung máy liền nhau không cùng `move`, `static` chỉ ở khung cuối của scene (WARN).
 
 Những thứ nó bắt mà mắt không bắt được: `sentenceStarts` lệch với `narration` (tức là đã sửa lời
-mà quên `--force`), `atSentence` trỏ ra ngoài, beat trùng mốc, band nhiều hơn beat, panel một
-beat mà lại dùng tính năng gác sau beat 2, lưới pictogram không khớp phần trăm, chữ tràn panel,
-mã tháng không có trong chuỗi giá, hai reel giành cùng một file giọng, và reel khai trong
+mà quên `--force`), `atSentence` trỏ ra ngoài, beat trùng mốc, mark hay khung máy chờ một beat
+không có, panel đã bị xoá, chữ tràn panel, hai reel giành cùng một file giọng, và reel khai trong
 `Root.tsx` nhưng thiếu file content.
 
 ## 2c. Người duyệt — cửa chặn cuối trước khi tốn tiền
@@ -658,9 +657,3 @@ Mở file cho người dùng xem: `open out/<tên>.mp4`. Kèm bảng mốc thờ
   `<số thứ tự>-<scene.id>.wav`. Hai reel có scene cùng vị trí cùng `id` sẽ dùng chung một file
   giọng, và vì file cũ không bị ghi đè, reel thứ hai lặng lẽ thừa hưởng giọng của reel thứ nhất.
   Chèn hay đổi thứ tự scene cũng làm lệch toàn bộ tên file phía sau.
-
-- **Chi tiết panel chỉ hiện từ beat thứ hai trở đi.** `divergence` của `rsi`, khung callout của
-  `macd`, nhãn `endLabel` của `zigzag` đều gác sau `beatIndex >= 1`. Scene một beat thì những
-  thứ đó không bao giờ hiện — nhìn như component hỏng.
-
-- **RSI có `series.rsiPeriod` tháng khởi động.** `marks` trỏ vào tháng trước mốc đó thì vẽ ở mức 0, im lặng.

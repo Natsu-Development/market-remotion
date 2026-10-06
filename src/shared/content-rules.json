@@ -364,7 +364,7 @@
   "series": {
     "path": "content/vnindex-monthly.json",
     "rsiPeriod": 14,
-    "_rsiWarmup": "Wilder's RSI returns null for the first 14 bars and barAt() coerces that to 0, so a mark on an early month is drawn at the bottom of the pane.",
+    "_rsiWarmup": "Wilder's RSI returns null for the first 14 bars; enrich's fact pack reports where the warm-up ends. The drawn RSI/MACD/candle panels were removed 2026-10-06 (user: \"remove the drawn scene since already have the picture and indicator of fireant\") — the period only feeds the fact pack.",
     "peakMonths": [
       "2018-04",
       "2022-01",

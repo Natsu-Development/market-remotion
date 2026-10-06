@@ -120,35 +120,11 @@ export type BoardRow = {
 export type BoardEmphasis = {beat: number; set: 'focus'; dim?: boolean; label?: string};
 
 export type Visual =
-  /** Candlesticks inside a log price channel, with touch markers. */
-  | {
-      type: 'candles';
-      caption?: string;
-      /** Years to mark with a dot where price meets the upper rail. */
-      touches?: string[];
-      /**
-       * Per-beat vertical highlight: which year to band, and its colour.
-       * `drop` adds an arrow from that year's high to its low, labelled with
-       * the drawdown computed from the series.
-       */
-      bands?: {year: string; label: string; accent: AccentName; drop?: boolean}[];
-    }
-  /** MACD histogram + signal, drawn from the same series as the candles. */
-  | {type: 'macd'; caption?: string; note?: string; peakLabel?: string}
-  /** Price over a bounded 0-100 oscillator, with the 70/30 thresholds. */
-  | {
-      type: 'rsi';
-      caption?: string;
-      note?: string;
-      /** Shade the region above 70 or below 30. */
-      highlightZone?: 'overbought' | 'oversold';
-      /** Dots on specific months, e.g. the readings at each swing high. */
-      marks?: {month: string; label: string; accent: AccentName}[];
-      /** Price higher high against an oscillator lower high, revealed on beat 2. */
-      divergence?: {from: string; to: string; label: string}
-    }
-  /** Grid of person glyphs — n filled out of total. */
-  | {type: 'pictogram'; rows: number; columns: number; filledPercent: number; accent: AccentName; glyph?: 'person' | 'dot'}
+  /**
+   * Drawn panels of the early reels (candles, macd, rsi, pictogram, bars, list, cards, zigzag, riskReward) were removed
+   * 2026-10-06 (user: "remove the drawn scene since already have the picture and indicator of fireant"): charts and
+   * indicators are FireAnt/terminal photos (`image`). `lines` stays — the weekly breadth line has no FireAnt page.
+   */
   | {type: 'lines'; caption?: string; top: LinePane; bottom: LinePane; events?: {t: string; label?: string; accent?: AccentName}[]}
   | {type: 'movers'; caption?: string; left: MoverColumn; right: MoverColumn}
   /**
@@ -157,28 +133,6 @@ export type Visual =
    * and the focus rows get their mark; the `emphasis` lights the focus rows on its beat.
    */
   | {type: 'board'; caption?: string; columns: BoardColumn[]; rows: BoardRow[]; startRank?: number; emphasis?: BoardEmphasis[]}
-  /** Two labelled bars that race to their percentage. */
-  | {type: 'bars'; bars: {label: string; percent: number; accent: AccentName}[]}
-  /** Icon + text rows that reveal in sequence. */
-  | {
-      type: 'list';
-      items: {icon: string; text: string}[];
-      accent: AccentName;
-      chipShape?: 'square' | 'circle';
-    }
-  /** Side-by-side warning cards. */
-  | {type: 'cards'; cards: {title: string; body: string}[]; accent: AccentName}
-  /** Descending staircase with "hope / hesitate" annotations. */
-  | {
-      type: 'zigzag';
-      topLabel: string;
-      endLabel: string;
-      upLabel: string;
-      downLabel: string;
-      steps: number;
-    }
-  /** Small win vs. large loss, drawn to scale. */
-  | {type: 'riskReward'; left: {label: string; value: number}; right: {label: string; value: number}}
   /**
    * A photograph of a live page (scripts/shoot.mjs), path under public/.
    * `source` is shown as a chip so the viewer knows the picture is quoted.

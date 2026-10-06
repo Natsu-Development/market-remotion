@@ -166,12 +166,6 @@ const panelText = (vis) => {
     case 'image':
       p.push(`Ảnh: <code>${esc(vis.src)}</code> · nguồn ${esc(vis.source ?? '—')} · fit ${esc(vis.fit ?? 'cover')}${vis.zoom ? ` · zoom ${num(vis.zoom)}` : ''}`);
       break;
-    case 'list': for (const it of vis.items ?? []) p.push(`[${esc(it.icon)}] ${esc(it.text)}`); break;
-    case 'cards': for (const c of vis.cards ?? []) p.push(`<b>${esc(c.title)}</b> — ${esc(c.body)}`); break;
-    case 'bars': for (const b of vis.bars ?? []) p.push(`${esc(b.label)}: ${num(b.percent)}%`); break;
-    case 'pictogram': p.push(`${num(vis.filledPercent)}% của lưới ${vis.rows}×${vis.columns}`); break;
-    case 'zigzag': p.push(`${esc(vis.topLabel)} → ${esc(vis.endLabel)} (${esc(vis.upLabel)} / ${esc(vis.downLabel)}, ${vis.steps} bước)`); break;
-    case 'riskReward': p.push(`${esc(vis.left?.label)} = ${num(vis.left?.value)} · ${esc(vis.right?.label)} = ${num(vis.right?.value)}`); break;
     case 'outro': p.push(`${esc(vis.brand)} · ${esc(vis.pill)} · ${esc(vis.line)}`); break;
     case 'movers': {
       for (const side of ['left', 'right']) {
@@ -197,16 +191,6 @@ const panelText = (vis) => {
       for (const e of vis.events ?? []) p.push(`mốc ${esc(e.t)}: ${esc(e.label ?? '')}`);
       break;
     }
-    case 'candles':
-      for (const b of vis.bands ?? []) p.push(`band ${esc(b.year)}: ${esc(b.label)}${b.drop ? ' ↓' : ''}`);
-      if (vis.touches?.length) p.push(`touches ${vis.touches.map(esc).join(', ')}`);
-      break;
-    case 'macd': if (vis.peakLabel) p.push(`peak: ${esc(vis.peakLabel)}`); if (vis.note) p.push(`note: ${esc(vis.note)}`); break;
-    case 'rsi':
-      if (vis.note) p.push(esc(vis.note));
-      for (const m of vis.marks ?? []) p.push(`mark ${esc(m.month)}: ${esc(m.label)}`);
-      if (vis.divergence) p.push(`divergence ${esc(vis.divergence.from)} → ${esc(vis.divergence.to)}: ${esc(vis.divergence.label)}`);
-      break;
     default: break;
   }
   return p;
@@ -279,7 +263,6 @@ if (facts) {
 const total = reel.scenes.reduce((a, s) => a + (s.duration ?? 0), 0);
 const totalWords = reel.scenes.reduce((a, s) => a + words(s.narration), 0);
 const imgSources = [...new Set(reel.scenes.filter((s) => s.visual?.type === 'image').map((s) => s.visual.source ?? '?'))];
-const drawn = reel.scenes.filter((s) => ['candles', 'macd', 'rsi'].includes(s.visual?.type)).map((s) => s.id);
 const srcLabel = facts?.source?.label ?? seriesMeta?.source ?? (seriesMeta?.reconstructed ? 'chuỗi DỰNG LẠI' : '—');
 const reconstructed = facts?.source?.reconstructed ?? seriesMeta?.reconstructed ?? false;
 const voiced = reel.scenes.filter((s) => s.audio).length;
@@ -534,7 +517,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
     <div class="tile ${cadence && cadence <= 5 ? 'pass' : 'warn'}"><span class="k">Nhịp đổi khung</span><span class="v">~${num(Math.round(cadence * 10) / 10)}s</span></div>
     <div class="tile"><span class="k">Chữ đọc</span><span class="v">${totalWords}${before ? ` <span style="font-size:14px;color:var(--ink-3);font-weight:500">(trước ${before.scenes.reduce((a, x) => a + words(x.narration), 0)})</span>` : ''}</span></div>
     <div class="tile ${nFail ? 'fail' : 'warn'}"><span class="k">Bước kế</span><span class="v small">${esc(nextStep)}</span></div>
-    <div class="tile"><span class="k">Nguồn</span><span class="v small">Số: ${esc(srcLabel)}${reconstructed ? ' · <b>CHUỖI DỰNG LẠI</b>' : ''}${facts?.daily ? ' · zionle.io.vn (ngày)' : ''}${imgSources.length ? ` · ảnh: ${imgSources.map(esc).join(', ')}` : ''}${drawn.length ? ` · chart VẼ: ${drawn.map(esc).join(', ')}` : ''}</span></div>
+    <div class="tile"><span class="k">Nguồn</span><span class="v small">Số: ${esc(srcLabel)}${reconstructed ? ' · <b>CHUỖI DỰNG LẠI</b>' : ''}${facts?.daily ? ' · zionle.io.vn (ngày)' : ''}${imgSources.length ? ` · ảnh: ${imgSources.map(esc).join(', ')}` : ''}</span></div>
   </div>
 
   ${VIDEO ? `<section class="card" style="margin:0 0 28px">

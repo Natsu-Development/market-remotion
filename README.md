@@ -9,7 +9,7 @@ drives it.
 
 ```
 content/channel.json          ← reel "Channel": VNINDEX monthly channel, 4-year cycle, MACD
-content/vnindex-monthly.json  ← the price series every chart is drawn from
+content/vnindex-monthly.json  ← the monthly price series (fact pack, top ticker)
 ```
 
 Each content file is registered as its own composition in `src/Root.tsx` and
@@ -143,14 +143,14 @@ the reel reads as one piece.
     {"at": 12.63, "line1": "2026", "line2": "Đỉnh 1933",      "accent": "red"}
   ],
 
-  // What goes in the panel. The visual also reacts to the active beat —
-  // here, the highlighted year moves 2018 → 2022 → 2026.
+  // What goes in the panel: a photo of the user's FireAnt chart, its marks drawn in beat by beat
+  // and the camera moving per beat (`shots`).
   "visual": {
-    "type": "candles",
-    "bands": [
-      {"year": "2018", "label": "1204", "accent": "gold"},
-      {"year": "2022", "label": "1528", "accent": "gold", "drop": true},
-      {"year": "2026", "label": "1933", "accent": "red"}
+    "type": "image",
+    "src": "shots/vnindex-fireant-5y.png",
+    "source": "fireant.vn",
+    "annotations": [
+      {"kind": "hline", "y": 0.18, "label": "Đỉnh 1933", "accent": "red", "beat": 2}
     ]
   }
 }
@@ -164,20 +164,15 @@ the call to action, navy for the sign-off.
 
 | `visual.type` | Shows | Key fields |
 |---|---|---|
-| `candles` | Monthly candlesticks in a log price channel | `touches`, `bands` (`drop: true` adds a measured drawdown arrow), `caption` |
-| `macd` | MACD(12,26,9) computed from the same series | `caption`, `note`, `peakLabel` |
-| `rsi` | Price over a bounded 0-100 oscillator with the 70/30 thresholds | `highlightZone`, `marks`, `divergence`, `note` |
-| `pictogram` | "95 out of 100 people", as a grid you can count | `rows`, `columns`, `filledPercent` |
-| `bars` | Labelled bars racing to their share | `bars[]` |
-| `list` | Icon-chip rows revealing in sequence | `items[]`, `chipShape` |
-| `cards` | Side-by-side warning cards | `cards[]` |
-| `zigzag` | Distribution as a staircase of hope and hesitation | `steps`, `upLabel`, `downLabel` |
-| `riskReward` | What being right pays vs. what being wrong costs | `left`, `right` |
+| `image` | A photo of FireAnt or the terminal, with marks drawn per beat and a camera per beat | `src`, `source`, `annotations[]`, `shots[]`, `crop`, `masks[]` |
+| `lines` | Two dated series on stacked panes (the weekly breadth line) | `top`, `bottom`, `events[]` |
+| `movers` | Two ranked columns, gainers and losers (market-review Volume spike) | `left`, `right` |
+| `board` | One saved screener filter as a ranked table (market-review RS Strong / Uptrend) | `columns`, `rows[]`, `emphasis[]` |
 | `outro` | Sign-off card: mark, pill, one line | `brand`, `pill`, `line`, `logo` |
 
-Icons (`list`, `cards`) are drawn as SVG, not typed: `check`, `warning`,
-`cross`, `up`, `down`. Symbol glyphs like ✓ are missing from several weights of
-the Vietnamese subsets and silently fall back to another face.
+The drawn panels of the early reels (`candles`, `macd`, `rsi`, `pictogram`, `bars`, `list`, `cards`,
+`zigzag`, `riskReward`) were removed on 2026-10-06 — the user: "remove the drawn scene since already
+have the picture and indicator of fireant". Charts and indicators are FireAnt/terminal photos.
 
 Accents are `gold`, `red`, `green`, `white`.
 

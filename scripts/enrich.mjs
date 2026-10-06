@@ -116,21 +116,11 @@ if (BRIEF && !briefScenes.length) {
 
 const name = meta.name ?? opt('name') ?? basename(BRIEF).replace(/\.(md|brief\.md)$/, '');
 
+/** Drawn panels removed 2026-10-06: charts and indicators are FireAnt/terminal photos. A brief naming one stops here. */
+const REMOVED_PANELS = new Set(['candles', 'macd', 'rsi', 'pictogram', 'bars', 'list', 'cards', 'zigzag', 'riskReward']);
+
 /** A panel's required props, stubbed so verify's schema check can run at once. */
 const STUB = {
-  candles: () => ({type: 'candles', caption: 'VNINDEX · 1M · THANG LOG'}),
-  macd: () => ({type: 'macd', caption: 'TODO', note: 'TODO'}),
-  rsi: () => ({type: 'rsi', caption: 'TODO'}),
-  pictogram: () => ({type: 'pictogram', rows: 6, columns: 8, filledPercent: 50, accent: 'green'}),
-  bars: () => ({type: 'bars', bars: [{label: 'TODO', percent: 50, accent: 'gold'},
-                                     {label: 'TODO', percent: 50, accent: 'red'}]}),
-  list: () => ({type: 'list', accent: 'gold', chipShape: 'square',
-                items: [{icon: 'up', text: 'TODO'}, {icon: 'warning', text: 'TODO'}, {icon: 'cross', text: 'TODO'}]}),
-  cards: () => ({type: 'cards', accent: 'red',
-                 cards: [{title: 'TODO', body: 'TODO'}, {title: 'TODO', body: 'TODO'}]}),
-  zigzag: () => ({type: 'zigzag', topLabel: 'vùng đỉnh', endLabel: 'TODO',
-                  upLabel: 'hy vọng', downLabel: 'chần chừ', steps: 5}),
-  riskReward: () => ({type: 'riskReward', left: {label: 'Đúng', value: 20}, right: {label: 'Sai', value: 55}}),
   image: () => ({type: 'image', src: 'TODO', caption: 'TODO', source: 'TODO'}),
   // The call to action the user approved for Channel (2026-09-28): like · share · follow, no numbers.
   outro: () => ({type: 'outro', brand: meta.brand ?? R.channel?.name ?? 'Kênh của bạn', kicker: 'Phân tích',
@@ -142,6 +132,10 @@ const STUB = {
 // A brief with an unknown role, act or panel stops here, before the fact pack or the scaffold
 // is written — a typo must not regenerate content/<name>.facts.json on its way out.
 for (const [i, b] of briefScenes.entries()) {
+  if (REMOVED_PANELS.has(b.panel)) {
+    console.error(`Scene ${i + 1}: panel "${b.panel}" was removed 2026-10-06 (user: "remove the drawn scene since already have the picture and indicator of fireant") — use \`image\` with a FireAnt or terminal photo (scripts/shoot.mjs; FireAnt carries the MACD/RSI/MA indicators)`);
+    process.exit(2);
+  }
   if (!STUB[b.panel]) {
     console.error(`Scene ${i + 1}: panel "${b.panel}" is not one of ${Object.keys(STUB).join('|')}`);
     process.exit(2);
@@ -402,7 +396,7 @@ const facts = {
     // Consecutive months the histogram has shrunk, counted back from the latest bar.
     let falling = 0;
     for (let i = n - 1; i > 0 && hist[i] < hist[i - 1]; i--) falling++;
-    const TRAIL = 9; // the months MacdChart boxes as its "histogram thu hẹp" callout
+    const TRAIL = 9; // the months behind the "histogram thu hẹp" figure (the drawn MacdChart that boxed them was removed 2026-10-06)
     return {
       params: {fast: 12, slow: 26, signal: 9},
       current: r1(macdLine[n - 1]),

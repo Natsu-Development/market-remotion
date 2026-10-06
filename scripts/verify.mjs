@@ -101,28 +101,6 @@ const sentences = (text) => {
 };
 
 const words = (s) => String(s).trim().split(/\s+/).filter(Boolean);
-const near = (a, b, pct) => Math.abs(a - b) <= Math.abs(b) * (pct / 100);
-
-/** Wilder's RSI — same maths as src/lib/indicators.ts. */
-const rsiSeries = (closes, period) => {
-  const out = new Array(closes.length).fill(null);
-  if (closes.length <= period) return out;
-  let g = 0, l = 0;
-  for (let i = 1; i <= period; i++) {
-    const d = closes[i] - closes[i - 1];
-    if (d > 0) g += d; else l -= d;
-  }
-  g /= period; l /= period;
-  const v = () => 100 - 100 / (1 + g / (l || 1e-9));
-  out[period] = v();
-  for (let i = period + 1; i < closes.length; i++) {
-    const d = closes[i] - closes[i - 1];
-    g = (g * (period - 1) + Math.max(d, 0)) / period;
-    l = (l * (period - 1) + Math.max(-d, 0)) / period;
-    out[i] = v();
-  }
-  return out;
-};
 
 const ffprobe = (file) => {
   try {
@@ -160,18 +138,14 @@ const addGraded = (bucket, id, notes, passMessage) => {
 // ---------------------------------------------------------------- checks
 
 const VISUAL_REQUIRED = {
-  candles: [], macd: [], rsi: [],
-  pictogram: ['rows', 'columns', 'filledPercent', 'accent'],
-  bars: ['bars'], list: ['items', 'accent'], cards: ['cards', 'accent'],
-  zigzag: ['topLabel', 'endLabel', 'upLabel', 'downLabel', 'steps'],
-  riskReward: ['left', 'right'],
   image: ['src'],
   lines: ['top', 'bottom'],
   movers: ['left'],
   board: ['columns', 'rows'],
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
-const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
+/** Drawn panels removed 2026-10-06 (user: "remove the drawn scene since already have the picture and indicator of fireant"). */
+const REMOVED_VISUALS = new Set(['candles', 'macd', 'rsi', 'pictogram', 'bars', 'list', 'cards', 'zigzag', 'riskReward']);
 const ACCENTS = new Set(['gold', 'red', 'green', 'white']);
 /** Image marks may also take the direction pair (src/theme.ts COLORS.up/down) — never text. */
 const MARK_ACCENTS = new Set([...ACCENTS, 'up', 'down']);
@@ -200,16 +174,13 @@ function checkSchema(t, reel) {
     if (s.role !== undefined && !roleSpec(R, s.role)) errs.push(`${at}: role "${s.role}" not in ${roleNames(R).join('|')}`);
     if (s.id && R.arc?.sceneIdPattern && !new RegExp(R.arc.sceneIdPattern).test(s.id)) errs.push(`${at}: id "${s.id}" does not match ${R.arc.sceneIdPattern}`);
     const v = s.visual ?? {};
-    if (!VISUAL_REQUIRED[v.type]) {
+    if (REMOVED_VISUALS.has(v.type)) {
+      errs.push(`${at}: visual.type "${v.type}" was removed 2026-10-06 — charts and indicators are FireAnt/terminal photos: use an image panel (scripts/shoot.mjs)`);
+    } else if (!VISUAL_REQUIRED[v.type]) {
       errs.push(`${at}: visual.type "${v.type}" is not one of ${Object.keys(VISUAL_REQUIRED).join('|')}`);
     } else {
       for (const k of VISUAL_REQUIRED[v.type]) {
         if (v[k] === undefined) errs.push(`${at}: ${v.type} needs ${k}`);
-      }
-      if (v.type === 'list') {
-        for (const it of v.items ?? []) {
-          if (!ICONS.has(it.icon)) errs.push(`${at}: icon "${it.icon}" not in ${[...ICONS].join('|')}`);
-        }
       }
       if (v.accent && !ACCENTS.has(v.accent)) errs.push(`${at}: accent "${v.accent}" invalid`);
       if (v.type === 'image' && v.annotations !== undefined) {
@@ -363,11 +334,6 @@ function checkBeats(t, reel) {
       }
     }
     const v = s.visual ?? {};
-    const gated = (v.type === 'rsi' && v.divergence) || v.type === 'macd'
-      || (v.type === 'zigzag' && v.endLabel);
-    if (gated && s.beats.length < 2) {
-      bad.push(`${s.id}: ${v.type} hides part of its panel until beat 2, but the scene has one beat`);
-    }
     for (const [j, a] of (v.type === 'image' ? v.annotations ?? [] : []).entries()) {
       if ((a.beat ?? 0) >= s.beats.length) {
         bad.push(`${s.id}: annotation ${j} waits for beat ${a.beat} but the scene has ${s.beats.length} beat(s) — it never shows`);
@@ -377,9 +343,6 @@ function checkBeats(t, reel) {
       if ((sh.beat ?? 0) >= s.beats.length) {
         bad.push(`${s.id}: shot ${j} waits for beat ${sh.beat} but the scene has ${s.beats.length} beat(s) — the camera never gets there`);
       }
-    }
-    if (v.type === 'candles' && v.bands && v.bands.length !== s.beats.length) {
-      bad.push(`${s.id}: ${v.bands.length} bands for ${s.beats.length} beats — bands are indexed by beat, extras never show`);
     }
   }
   if (bad.length) add(t, 'beats', SEV.fail, `${bad.length} beat problem(s)`, bad.join('; '));
@@ -630,104 +593,16 @@ function checkCamera(t, reel) {
   addGraded(t, 'camera', notes, `${count} shots: no move repeats back to back, static only on a payoff`);
 }
 
-/** Annotations that name a month or year the series does not contain draw nothing. */
-function checkDataRefs(t, reel) {
-  if (!SERIES) { add(t, 'data-refs', SEV.skip, `${R.series.path} not readable`); return; }
-  const byMonth = new Map(SERIES.map((c) => [c.t, c]));
-  const years = new Set(SERIES.map((c) => c.t.slice(0, 4)));
-  const closes = SERIES.map((c) => c.c);
-  const rsi = rsiSeries(closes, R.series.rsiPeriod);
-  const idx = new Map(SERIES.map((c, i) => [c.t, i]));
-  const bad = [];
-  for (const s of reel.scenes) {
-    const v = s.visual ?? {};
-    for (const b of v.bands ?? []) {
-      if (!years.has(b.year)) bad.push(`${s.id}: band year ${b.year} has no candle`);
-    }
-    for (const y of v.touches ?? []) {
-      if (!R.series.peakMonths.some((m) => m.startsWith(y))) {
-        bad.push(`${s.id}: touch "${y}" is not a peakMonths year — no dot is drawn`);
-      }
-    }
-    for (const m of v.marks ?? []) {
-      if (!byMonth.has(m.month)) { bad.push(`${s.id}: mark ${m.month} has no candle`); continue; }
-      if (idx.get(m.month) < R.series.rsiPeriod) {
-        bad.push(`${s.id}: mark ${m.month} is inside the ${R.series.rsiPeriod}-bar RSI warm-up — it plots at 0`);
-      }
-      const want = rsi[idx.get(m.month)];
-      const got = Number(String(m.label).replace(',', '.'));
-      if (Number.isFinite(got) && want != null && !near(got, want, 2)) {
-        bad.push(`${s.id}: mark ${m.month} labelled ${m.label} but RSI there is ${want.toFixed(1)}`);
-      }
-    }
-    if (v.divergence) {
-      for (const k of ['from', 'to']) {
-        if (!byMonth.has(v.divergence[k])) bad.push(`${s.id}: divergence.${k} ${v.divergence[k]} has no candle`);
-      }
-    }
-  }
-  if (bad.length) add(t, 'data-refs', SEV.fail, `${bad.length} annotation(s) point at nothing`, bad.join('; '));
-  else add(t, 'data-refs', SEV.pass, 'every month and year on a chart exists in the series');
-}
-
-/** The one the viewer can count. */
-function checkPictogram(t, reel) {
-  const bad = [];
-  for (const s of reel.scenes) {
-    const v = s.visual ?? {};
-    if (v.type !== 'pictogram') continue;
-    const total = v.rows * v.columns;
-    const filled = Math.round((v.filledPercent / 100) * total);
-    let drawn = 0;
-    for (let k = 0; k < total; k++) if ((k * 7 + 3) % total >= total - filled) drawn++;
-    const actual = (drawn / total) * 100;
-    if (!near(actual, v.filledPercent, R.claims.tolerancePercent)) {
-      bad.push(`${s.id}: ${v.rows}x${v.columns} at ${v.filledPercent}% draws ${drawn}/${total} = ${actual.toFixed(1)}% — the viewer can count the difference`);
-    }
-  }
-  if (bad.length) add(t, 'pictogram', SEV.fail, `${bad.length} grid(s) disagree with their percentage`,
-    bad.join('; ') + '; fix: pick rows x columns so the percentage lands on a whole glyph');
-  else add(t, 'pictogram', SEV.pass, 'grids match their stated percentage');
-}
-
 /** Panel is 880x560 with overflow:hidden; SVG text does not wrap. */
 function checkGeometry(t, reel) {
   const bad = [], warn = [];
   const {panel, headlineMaxWidth, headlineWarnChars, monoAdvanceEm} = R.layout;
-  const first = SERIES ? monthIndex(SERIES[0].t) : null;
-  const last = SERIES ? monthIndex(SERIES[SERIES.length - 1].t) : null;
-  const span = first != null ? last - first : null;
   const PAD = 22, PLOT = panel.w - PAD * 2;
-  const x = (i) => PAD + ((i - first) / span) * PLOT;
 
   for (const s of reel.scenes) {
     const v = s.visual ?? {};
-    if (v.type === 'pictogram') {
-      const gridW = (v.columns - 1) * 95 + 45;
-      const gridH = (v.rows - 1) * 84.4 + 50.4;
-      if (gridW > panel.w) bad.push(`${s.id}: ${v.columns} columns need ${Math.round(gridW)}px of ${panel.w}`);
-      if (gridH > panel.h) bad.push(`${s.id}: ${v.rows} rows need ${Math.round(gridH)}px of ${panel.h}`);
-    }
-    if (v.type === 'list') {
-      const h = (v.items.length - 1) * 112 + 70;
-      if (h > panel.h) bad.push(`${s.id}: ${v.items.length} rows need ${Math.round(h)}px of ${panel.h}`);
-    }
-    if (v.type === 'candles' && span) {
-      const step = PLOT / span;
-      for (const b of v.bands ?? []) {
-        // CandleChart clamps the band to the panel, so an overrun is no longer
-        // a clipped rail — it means the year is only partly in the series and
-        // the band will look narrower than a full year.
-        const right = x(monthIndex(`${b.year}-12`)) + step * 3;
-        const left = x(monthIndex(`${b.year}-01`)) - step * 3;
-        const months = SERIES.filter((c) => c.t.startsWith(b.year)).length;
-        if (right > panel.w || left < 0) {
-          warn.push(`${s.id}: the ${b.year} band is clamped to the panel — that year has ${months}/12 months in the series, so it is drawn narrower than the others`);
-        }
-      }
-    }
     if (v.caption) {
-      // Chart footers are 17px JetBrains Mono with 1.6px tracking (CandleChart/RsiChart FOOTER).
+      // Panel captions are 17px JetBrains Mono with 1.6px tracking.
       const w = v.caption.length * (17 * monoAdvanceEm + 1.6);
       if (w > PLOT) bad.push(`${s.id}: caption is ${Math.round(w)}px wide, ${Math.round(PLOT)}px available`);
     }
@@ -1044,8 +919,6 @@ for (const id of ids) {
   checkArc(t.checks, reel);
   checkRoles(t.checks, reel);
   checkCamera(t.checks, reel);
-  checkDataRefs(t.checks, reel);
-  checkPictogram(t.checks, reel);
   checkGeometry(t.checks, reel);
   checkFacts(t.checks, reel);
   checkClaims(t.checks, reel);

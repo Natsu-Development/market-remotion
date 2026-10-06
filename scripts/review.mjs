@@ -43,17 +43,6 @@ const cell = (s) => String(s).replace(/\|/g, '\\|');
 
 const panelText = (v) => {
   switch (v.type) {
-    case 'candles': return [v.caption, ...(v.bands ?? []).map((b) => `band ${b.year}: ${b.label}${b.drop ? ' ↓' : ''}`),
-                            v.touches?.length ? `touches ${v.touches.join(', ')}` : null];
-    case 'macd': return [v.caption, v.peakLabel && `peak: ${v.peakLabel}`, v.note && `note: ${v.note}`];
-    case 'rsi': return [v.caption, v.note, ...(v.marks ?? []).map((m) => `mark ${m.month}: ${m.label}`),
-                        v.divergence && `divergence ${v.divergence.from} → ${v.divergence.to}: ${v.divergence.label}`];
-    case 'list': return (v.items ?? []).map((it) => `[${it.icon}] ${it.text}`);
-    case 'cards': return (v.cards ?? []).map((c) => `${c.title} — ${c.body}`);
-    case 'bars': return (v.bars ?? []).map((b) => `${b.label}: ${b.percent}%`);
-    case 'pictogram': return [`${v.filledPercent}% of ${v.rows}×${v.columns}`];
-    case 'zigzag': return [`${v.topLabel} → ${v.endLabel} (${v.upLabel} / ${v.downLabel}, ${v.steps} steps)`];
-    case 'riskReward': return [`${v.left.label} ${v.left.value} vs ${v.right.label} ${v.right.value}`];
     case 'outro': return [v.brand, v.pill, v.line];
     default: return [];
   }

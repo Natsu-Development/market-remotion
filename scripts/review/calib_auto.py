@@ -28,7 +28,24 @@ import numpy as np
 from PIL import Image
 
 spec = json.loads(sys.argv[1])
-im = np.asarray(Image.open(spec['img']).convert('RGB')).astype(int)
+src_img = spec['img']
+pil = Image.open(src_img).convert('RGB')
+blank_tmp = None
+if spec.get('blank'):
+    # Rects (photo fractions) painted in the pane's background before anything is detected — FireAnt's legend
+    # rows sit INSIDE the price pane and print values in the candle colours (2026-10-01, the MA50/MA200 rows of
+    # the stock tab), so cutting the pane below them would also cut the newest highs. calib_chart.py reads the
+    # image itself, so it gets the blanked copy too; the result still names the original photo.
+    from PIL import ImageDraw
+    Wb, Hb = pil.size
+    bg = tuple(int(v) for v in spec.get('blankColor', [21, 23, 31]))
+    draw = ImageDraw.Draw(pil)
+    for fx0, fy0, fx1, fy1 in spec['blank']:
+        draw.rectangle([int(fx0 * Wb), int(fy0 * Hb), int(fx1 * Wb), int(fy1 * Hb)], fill=bg)
+    blank_tmp = str(Path(spec['out']).with_suffix('.blanked.png'))
+    pil.save(blank_tmp)
+    spec['img'] = blank_tmp
+im = np.asarray(pil).astype(int)
 H, W = im.shape[:2]
 tol = spec.get('tol', 45)
 mask = np.zeros((H, W), bool)
@@ -118,5 +135,9 @@ out['xFit'] = {'from': {'last_x': out['last_x'], 'd': out['d']}, 'matched': len(
 out['last_x'], out['d'] = lx, dd
 out['pane'] = job['pane']
 out['columnsFound'] = len(centres)
+out['img'] = src_img
+if blank_tmp:
+    out['blank'] = spec['blank']
+    Path(blank_tmp).unlink(missing_ok=True)
 json.dump(out, open(spec['out'], 'w'), indent=1)
 print(json.dumps(out))

@@ -45,10 +45,10 @@ export const LAYOUT = {
     fontSize: 78,
     maxWidth: CONTENT_WIDTH,
   },
-  /** Source + disclaimer line under the headline block (every scene but the outro). */
-  footer: {x: GUTTER, baseline: 1628, fontSize: 20, letterSpacing: 1.8},
-  /** Fine print under the headline (outro only). */
-  footnote: {x: GUTTER, y: 1570, fontSize: 28, lineHeight: 1.55},
+  /** Channel badge under the headline block (every scene but the outro): ring with the logo, name beside it. */
+  footer: {x: GUTTER, baseline: 1628, fontSize: 22, letterSpacing: 4, markSize: 40, gap: 16},
+  /** Fine print under the headline (outro only): centred, balanced over two lines inside maxWidth. */
+  footnote: {x: GUTTER, y: 1570, fontSize: 26, lineHeight: 1.5, maxWidth: 760},
 } as const;
 
 export const COLORS = {

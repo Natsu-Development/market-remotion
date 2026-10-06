@@ -167,7 +167,7 @@ dưới, nên ticker và footer nằm sát mép trong của vùng đó, không n
 `VN-INDEX · 1M · <close cuối> ▲/▼ <% đổi so tháng trước> · T9/2026`, tính thẳng từ
 `content/vnindex-monthly.json`; ghi đè ở cấp reel bằng `ticker: {symbol, timeframe, asOf, last, prev}` hoặc
 `ticker: false`. **Footer dưới headline là tên kênh** (người dùng 2026-09-29: không ghi nguồn): enrich chép
-`channel.name` của content-rules (`Radar Chứng Khoán`) vào `footer`; `footer: false` trong brief để ẩn. Reel không
+`channel.name` của content-rules (`Chứng Vịt`) vào `footer`; `footer: false` trong brief để ẩn. Reel không
 đặt `footer` thì `SceneShell` vẫn tự ghi `Nguồn: <nguồn chuỗi> · tới <tháng>` (reel cũ). Scene `outro` không bao
 giờ có footer vì đã có disclaimer.
 
@@ -383,7 +383,7 @@ FAIL; năm đọc `hai không hai hai`, KHÔNG `năm hai mươi hai`), **giọng
 quan sát, tối đa hai số đọc ra lời mỗi scene, câu dài ngắn xen kẽ, "bạn/mình" một hai lần, thuật ngữ
 giao dịch thay chữ đời thường theo bảng thay từ — người dùng bác "bậc thang", "tiền mỏng dần", "cái
 biên này" 2026-09-23 — không ẩn dụ, headline là ý không phải bảng số, ngân sách chữ khác nhau giữa các
-scene, kết scene mở đường), **soi dấu vết AI** (skill `humanizer`, người dùng cài 2026-09-30: bảng mẫu cấu trúc áp
+scene, chuyển đoạn ở câu mở của scene sau thay cho câu nhử cuối scene, nói thành câu thay cho chú thích), **soi dấu vết AI** (skill `humanizer`, người dùng cài 2026-09-30: bảng mẫu cấu trúc áp
 cho lời đọc tiếng Việt, mẫu không áp như dấu trừ và mũi tên trên màn, câu người dùng đã chốt giữ nguyên; đạo diễn soi
 `_script.md` bằng `/humanizer` trước merge), **outro** (một câu thả tim · chia sẻ · theo dõi + lý do theo dõi, không số,
 không thuật ngữ, không câu vọng hook — người dùng chốt 2026-09-28, gộp thành một câu 2026-09-30), và bảng ba cột bản tin → ví von (bị bác) → trader nói, lấy từ reel `channel`. Muốn đổi giọng kênh thì sửa file đó, không sửa lẻ trong prompt của agent. Ngưỡng máy đo
@@ -401,8 +401,9 @@ title: VNINDEX · thanh khoản cạn dần # tuỳ chọn, mặc định = name
 symbol: VNINDEX                      # tuỳ chọn; có content/<symbol>-analysis.json thì fact pack thêm `terminal.*`,
                                      # có content/<symbol>-daily.json thì thêm `daily.*` (nến ngày thật)
 ticker: daily                        # tuỳ chọn; ticker in phiên thật cuối cùng từ `daily` thay vì close tháng dựng lại
-footer: Radar Chứng Khoán            # mặc định = channel.name của content-rules; false để ẩn
-brand: Radar Chứng Khoán             # mặc định = channel.name, rót vào thẻ outro (monogram RC)
+footer: Chứng Vịt                    # mặc định = channel.name của content-rules; false để ẩn
+brand: Chứng Vịt                     # mặc định = channel.name, rót vào thẻ outro (tên in dưới vòng tròn)
+logo: logo/chung-vit.png    # tuỳ chọn, ảnh dưới public/: thay monogram CĐ trong vòng tròn
 act: blue                            # tuỳ chọn, ép act cho mọi scene trừ cuối
 disclaimer: ...                      # tuỳ chọn, mặc định là câu miễn trừ sẵn có
 

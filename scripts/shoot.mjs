@@ -46,6 +46,13 @@
  *   --reset-view                      FireAnt (real mode): ⌥R after the interval (TradingView reset view)
  *   --pan=-330                        FireAnt (real mode): drag the pane left by 330pt so later dates come into view (deterministic)
  *   --indicator=MACD                  FireAnt (real mode): add an indicator via the fx dialog — saved into the user's layout
+ *   --tab=VNM                         FireAnt (real mode): make that chart tab active first (found by OCR on the tab strip)
+ *   --restore-symbol=VNM --restore-tab=VNINDEX
+ *                                     FireAnt (real mode): after the capture, paste the tab's own ticker back and
+ *                                     re-activate the tab that was active — a photo of a stock on the user's stock tab
+ *                                     leaves their layout as it was
+ *   --hover-back=1                    FireAnt (real mode): also capture <out>.hover.png with the pointer on the candle N bars
+ *                                     before the last — the legend then prints that bar's values (an edition older than the chart)
  *   --crop=chart|full|x,y,w,h         real mode: what to capture inside the page area (fireant defaults to chart)
  *   --keep-open                       leave the window open afterwards (profile mode; sign in once, then re-run)
  *   --cookies=<domain>                debug: list the cookie NAMES the browser holds for that domain (never values)
@@ -392,6 +399,10 @@ if (REAL) {
   if (opt('pan')) args.push('--pan', opt('pan'));
   if (opt('zoom-out')) args.push('--zoom-out', opt('zoom-out'));
   if (opt('indicator')) args.push('--indicator', opt('indicator'));
+  if (opt('tab')) args.push('--tab', opt('tab'));
+  if (opt('restore-symbol')) args.push('--restore-symbol', opt('restore-symbol'));
+  if (opt('restore-tab')) args.push('--restore-tab', opt('restore-tab'));
+  if (opt('hover-back') != null) args.push('--hover-back', opt('hover-back'));
   // FireAnt: the panel wants the chart, not the header and order book around it.
   args.push('--crop', opt('crop', site === 'fireant' ? 'chart' : 'full'));
   if (KEEP) args.push('--keep-open');

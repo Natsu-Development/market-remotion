@@ -66,7 +66,7 @@ chart Remotion vẽ lại.** Với mỗi reel, bạn đi cả hai trang cho đú
    Chuyện 12 tháng gần đây thì trích `daily.*` (nến ngày thật của terminal); chuyện nhiều năm trích
    `series`/`peaks`/`rsi`/`macd` — từ 2026-09-23 chuỗi tháng cũng là dữ liệu THẬT (SSI iBoard, xem
    `facts.source`), không còn là bản dựng lại. Brief đặt `ticker: daily` để dòng ticker in phiên
-   thật; footer tự ghi "Nguồn: SSI iBoard" từ meta của chuỗi, ghi đè bằng `footer:` khi cần. Phiên đang giao dịch (fetch trước 15:00 ICT)
+   thật; không có dòng nguồn dưới headline (người dùng bỏ 2026-09-29), `footer:` trong brief mới hiện lại. Phiên đang giao dịch (fetch trước 15:00 ICT)
    bị loại khỏi `daily` — xem `daily.droppedIntraday`.
    Script KHÔNG ghi đè `content/vnindex-monthly.json` nếu không có `--replace-series` (đã xảy ra
    2026-09-23: `--resample=none` mặc định ghi vào đó; khôi phục bằng `node scripts/make-series.mjs`).
@@ -152,8 +152,9 @@ KHÔNG bịa số từ ảnh — số trên headline và trong lời vẫn truy 
 kỳ/tín hiệu, phần còn lại cho giá/RSI/MACD tháng). `verify` từ chối ảnh thiếu sidecar `.json`.
 **Scene nào nói về xu hướng giá thì panel là ảnh chart có mark** (người dùng chốt 2026-09-23) — không
 list, không thẻ, không hai cột cho chuyện giá đi đâu. Mark là `visual.annotations`: `hline` cho mức
-kháng cự/hỗ trợ/giá hiện tại, `line` (from/to, `dashed` cho đoạn chiếu) cho trendline và hai biên của kênh giá
-song song, `box` cho pha tích luỹ/phá vỡ, `circle` cho đỉnh đáy, `arrow` cho
+kháng cự/hỗ trợ/giá hiện tại, `line` (from/to) cho trendline và hai biên của kênh giá
+song song — biên kênh luôn nét liền, kể cả đoạn kéo dài qua điểm chạm cuối (người dùng 2026-09-29: nét đứt
+trông như hai đường khác nhau), `box` cho pha tích luỹ/phá vỡ, `circle` cho đỉnh đáy, `arrow` cho
 chuỗi đỉnh thấp dần, `vline` cho một mốc ngày — toạ độ phần 0..1 của ẢNH, `beat` là beat nó hiện, do
 ĐẠO DIỄN đặt sau khi nhìn ảnh. Toạ độ y của một mức giá tính từ trục giá trong ảnh (ví dụ ảnh
 terminal 1356×760 chụp 2026-09-23: `y = (31,5 + (1,95 − p/1000)/0,45 × 446)/760`); đặt xong render
@@ -312,6 +313,14 @@ tới, ẩn dụ, scene nào ngắn scene nào dài, điều KHÔNG được nó
 nói liền mạch — để bạn đọc như người xem sẽ nghe TRƯỚC khi merge; đọc thấy "bản tin" thì trả lại
 với ghi chú, đừng merge rồi sửa lẻ.
 
+Đọc xong thì soi `_script.md` bằng `/humanizer` (skill `.claude/skills/humanizer/`, người dùng cài 2026-09-30)
+theo mục **"Soi dấu vết AI"** của prompt: mẫu cấu trúc nào áp cho lời đọc tiếng Việt (không X mà là Y, câu chốt
+lặp ý, mở màn dàn dựng, cãi với người không có mặt, bộ ba ép, thổi phồng), mẫu nào không (chữ trên màn giữ `−`,
+`→`, `·`), và câu người dùng đã chốt thì giữ nguyên. Người viết đã tự soát theo mục đó; lượt của bạn bắt thứ họ
+bỏ sót. Còn dấu vết thì trả lại kèm ghi chú như khi nghe ra "bản tin"; một cụm lẻ thì sửa trong `<id>.json` rồi
+merge, vì `_script.md` chỉ là bản để đọc. Đã vấp 2026-09-30: "Tức là mình có một kênh giá thật, chứ không phải
+cố vẽ cho khớp." (§1) lọt tới trang duyệt và người dùng phải tự bắt ("not like the people talking").
+
 Agent trả về mỗi scene `eyebrow`, `narration`, `beats`, `visual` đã điền, kèm hai trường bắt buộc:
 
 - `citedFacts` — đường dẫn tới từng con số đã dùng (`volume.latestVsTrailingPercent`)
@@ -340,9 +349,10 @@ Hai điều dặn thêm cho worker, có từ 2026-09-22 khi khung hình có tick
 viết dấu phẩy (`165,1`) theo quy ước Việt Nam, ticker cũng in `2,85%` — checker nhận cả hai.
 
 Outro có khuôn riêng ở mục "Outro" của prompt (người dùng chốt 2026-09-28, bốn vòng sửa outro `channel`):
-một câu kêu gọi thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật; không số, không
+một câu kêu gọi thả tim · chia sẻ · theo dõi bằng giọng người, gắn luôn lý do theo dõi (cập nhật sớm những
+biến động của thị trường — người dùng gộp hai câu cũ thành một 2026-09-30); không số, không
 MACD, không câu vọng lại hook, không lặp "không phải khuyến nghị" — chữ miễn trừ nằm dưới thẻ outro
-(`disclaimer`, mặc định của enrich), footer các scene chỉ ghi nguồn. Không script nào gác điều này; soát
+(`disclaimer`, mặc định của enrich), footer các scene là tên kênh `Chứng Vịt` (`channel.name`). Không script nào gác điều này; soát
 ở `_script.md` và trên trang duyệt.
 
 Nhịp và chữ của nghề có script gác từ 2026-09-23 (người dùng hỏi thẳng giọng trader, nhịp đọc và từ vựng
@@ -537,8 +547,14 @@ cắt giữa chữ ở ranh giới scene. Dòng ⚠ đó trôi qua giữa output
 và trang duyệt vẫn giữ chữ viết. Đo 2026-09-28 (OmniVoice + Whisper large-v3, 3 câu × 2 lượt): `MACD`
 đọc trần 0/6 lần nghe ra MACD ("Macy đi", "FCD"), `em a xê đê` 6/6 — ghi số đo của từng cách viết vào
 `_lexicon` trước khi thêm từ mới. Dạng đọc nằm trong khoá cache, nên đổi lexicon rồi chạy
-`--force --only=<các scene có từ đó>` là thu lại đúng những câu đó. Soát: phiên âm từng câu bằng
-Whisper (mục 5.1) — dạng đọc đúng thì Whisper viết lại đúng thuật ngữ.
+`--force --only=<các scene có từ đó>` là thu lại đúng những câu đó. Whisper viết lại đúng thuật ngữ KHÔNG
+chứng minh các âm đã được đọc: nó đoán `MACD` và `43,13%` theo ngữ cảnh (đo 2026-09-30 — lượt trong video đọc
+`bốn mươi ba, mười ba` mà Whisper vẫn viết `43,13%`). Soát bằng `scripts/tts_takes.py` (mục 5.1): thu N lượt,
+nghe với token chữ số và `MAC…` bị chặn, in từng chữ cái kèm thời lượng, giữ lượt rõ nhất. Dạng đọc MACD từ
+2026-09-30 là `em, a, xê, đê` — dấu phẩy giữa các chữ làm mỗi chữ được giữ gấp đôi (`a` 0,12–0,18 s thay vì
+0,06–0,10 s) mà không có khoảng lặng nghe được; số đo của từng cách viết nằm trong `_lexicon`. Từ 2026-10-01 lexicon
+cũng đọc `phẩy` thành `chấm`: OmniVoice nuốt `phẩy` sau một chữ số ở ~90% lượt dù viết cách nào (1/16 lượt thường,
+0/24 ở bốn cách viết khác), `chấm` được nghe 6/6; lời và headline vẫn viết `phẩy`.
 
 **Giọng thật của người dùng và `--force` loại trừ nhau.** Thả file vào
 `public/voiceover/<NN>-<id>.wav` thì script không ghi đè NẾU KHÔNG có `--force`; chạy `--force`
@@ -579,6 +595,15 @@ import mlx_whisper
 r = mlx_whisper.transcribe('public/voiceover/02-history.wav',
     path_or_hf_repo='mlx-community/whisper-large-v3-mlx', language='vi')
 print(r['text'])"
+
+# 1a. Nhịp đọc — voice.pace trong content-rules (tốc độ gốc OmniVoice theo câu, khoảng lặng sau câu); đổi rồi:
+node scripts/voiceover.mjs --reassemble --retime      # thu câu có khoá mới, ghép lại mọi scene với khoảng lặng mới
+
+# 1b. Số thập phân và thuật ngữ có được ĐỌC không — phiên âm thường ở trên không bắt được (nó đoán 43,13% và
+#     MACD theo ngữ cảnh). Thu N lượt, nghe với token chữ số bị chặn, giữ lượt rõ nhất, rồi dựng lại track:
+../video-factory/.venv/bin/python scripts/tts_takes.py --dry-run            # xếp hạng, không chép gì
+../video-factory/.venv/bin/python scripts/tts_takes.py --takes=8            # chép lượt tốt nhất vào .tts-cache
+node scripts/voiceover.mjs --reassemble --only=<id in ra ở cuối> --retime   # dựng lại, không thu lại
 
 # 2. Tốc độ đọc — ngưỡng ở narration.syllableRateWarn / syllableRateFail
 node -e "/* số âm tiết / (thời lượng - 1.15) */"

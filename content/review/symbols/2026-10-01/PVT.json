@@ -1,0 +1,398 @@
+{
+  "symbol": "PVT",
+  "date": "2026-10-01",
+  "method": "symbol-reviewer/1",
+  "inputs": {
+    "facts": "content/review-daily.facts.json#screener.leaders.top[1]",
+    "analyze": "content/review/analyze/2026-10-01/PVT.json",
+    "photo": null,
+    "ma": null
+  },
+  "window": {
+    "source": "default",
+    "bars": 142,
+    "from": "2026-03-10",
+    "to": "2026-10-01",
+    "low": 16.05,
+    "high": 26.363
+  },
+  "numbers": [
+    {
+      "key": "price",
+      "value": 23.75,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].price"
+    },
+    {
+      "key": "changePercent",
+      "value": -0.21,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].changePercent"
+    },
+    {
+      "key": "volumeVsSma20Percent",
+      "value": 3,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].volumeVsSma20Percent"
+    },
+    {
+      "key": "rs1m",
+      "value": 91,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].rs1m"
+    },
+    {
+      "key": "rs52w",
+      "value": 95,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].rs52w"
+    },
+    {
+      "key": "high52w",
+      "value": 29.73,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].high52w"
+    },
+    {
+      "key": "fromHigh52wPercent",
+      "value": -20.1,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].fromHigh52wPercent"
+    },
+    {
+      "key": "ema50Terminal",
+      "value": 21.32,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].ema50",
+      "note": "terminal EMA50, context only"
+    },
+    {
+      "key": "sma200Terminal",
+      "value": 19.91,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].sma200",
+      "note": "terminal SMA200, context only"
+    },
+    {
+      "key": "indexClose",
+      "value": 1749.3,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#session.close"
+    },
+    {
+      "key": "indexChangePercent",
+      "value": -1.09,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#session.changePercent"
+    },
+    {
+      "key": "distributionCount",
+      "value": 4,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#distribution.count"
+    },
+    {
+      "key": "dangerAt",
+      "value": 5,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#distribution.dangerAt"
+    },
+    {
+      "key": "toDanger",
+      "value": 1,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#distribution.toDanger"
+    },
+    {
+      "key": "low52w",
+      "value": 14.95,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:min(l) of the last 250 bars",
+      "date": "2025-10-20"
+    },
+    {
+      "key": "pivot",
+      "value": 25.05,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:max(h) of the 20 sessions before 2026-10-01",
+      "date": "2026-09-29"
+    },
+    {
+      "key": "pullbackLow",
+      "value": 23.3,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:min(l) after 2026-09-29",
+      "date": "2026-10-01"
+    },
+    {
+      "key": "pullbackDepthPercent",
+      "value": -6.99,
+      "source": "derived",
+      "path": "pullbackLow / pivot − 1",
+      "formula": "pullbackLow / pivot − 1"
+    },
+    {
+      "key": "pullbackVolumeVsPivotPercent",
+      "value": -49.71,
+      "source": "derived",
+      "path": "mean(v after pivot) / v(pivot) − 1",
+      "formula": "mean(v after pivot) / v(pivot) − 1"
+    },
+    {
+      "key": "swingLow",
+      "value": 22.3,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:5-bar pivot low on 2026-09-24",
+      "date": "2026-09-24"
+    },
+    {
+      "key": "range20High",
+      "value": 25.05,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:max(h) of the 20 sessions before 2026-10-01"
+    },
+    {
+      "key": "range20Low",
+      "value": 19.9,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:min(l) of the 20 sessions before 2026-10-01"
+    },
+    {
+      "key": "range20DepthPercent",
+      "value": -20.56,
+      "source": "derived",
+      "path": "range20Low / range20High − 1",
+      "formula": "range20Low / range20High − 1"
+    },
+    {
+      "key": "todayHigh",
+      "value": 24.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:h on 2026-10-01",
+      "date": "2026-10-01"
+    },
+    {
+      "key": "todayLow",
+      "value": 23.3,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-01/PVT.json#price_history:l on 2026-10-01",
+      "date": "2026-10-01"
+    },
+    {
+      "key": "closeRangePercent",
+      "value": 42.86,
+      "source": "derived",
+      "path": "(c − l) / (h − l) of the session",
+      "formula": "(c − l) / (h − l)"
+    },
+    {
+      "key": "aboveLow52wPercent",
+      "value": 58.86,
+      "source": "derived",
+      "path": "price / low52w − 1",
+      "formula": "price / low52w − 1"
+    },
+    {
+      "key": "closeVsPivotPercent",
+      "value": -5.19,
+      "source": "derived",
+      "path": "price / pivot − 1",
+      "formula": "price / pivot − 1"
+    },
+    {
+      "key": "ma50",
+      "value": null,
+      "source": "fireant",
+      "path": "public/shots/review/2026-10-01/pvt-fireant.ma.json#ma.ma50.value",
+      "pending": "no FireAnt MA file yet"
+    },
+    {
+      "key": "ma200",
+      "value": null,
+      "source": "fireant",
+      "path": "public/shots/review/2026-10-01/pvt-fireant.ma.json#ma.ma200.value",
+      "pending": "no FireAnt MA file yet"
+    },
+    {
+      "key": "aboveMa50Percent",
+      "value": null,
+      "source": "derived",
+      "path": "price / ma50 (FireAnt) − 1",
+      "formula": "price / ma50 − 1"
+    },
+    {
+      "key": "aboveMa200Percent",
+      "value": null,
+      "source": "derived",
+      "path": "price / ma200 (FireAnt) − 1",
+      "formula": "price / ma200 − 1"
+    }
+  ],
+  "checks": [
+    {
+      "id": "price-ma50",
+      "label": "Giá trên MA50",
+      "pass": "pending",
+      "keys": [
+        "price",
+        "ma50"
+      ]
+    },
+    {
+      "id": "price-ma200",
+      "label": "Giá trên MA200",
+      "pass": "pending",
+      "keys": [
+        "price",
+        "ma200"
+      ]
+    },
+    {
+      "id": "ma50-ma200",
+      "label": "MA50 trên MA200",
+      "pass": "pending",
+      "keys": [
+        "ma50",
+        "ma200"
+      ]
+    },
+    {
+      "id": "near-high",
+      "label": "Trong vòng 25% dưới đỉnh 52 tuần",
+      "pass": true,
+      "keys": [
+        "fromHigh52wPercent"
+      ]
+    },
+    {
+      "id": "above-low",
+      "label": "Trên đáy 52 tuần ít nhất 30%",
+      "pass": true,
+      "keys": [
+        "aboveLow52wPercent"
+      ]
+    },
+    {
+      "id": "rs",
+      "label": "RS 1M và RS 52W từ 70",
+      "pass": true,
+      "keys": [
+        "rs1m",
+        "rs52w"
+      ]
+    },
+    {
+      "id": "extension",
+      "label": "Không kéo xa MA50 quá 25%",
+      "pass": "pending",
+      "keys": [
+        "aboveMa50Percent"
+      ]
+    },
+    {
+      "id": "volume-up",
+      "label": "Phiên tăng có khối lượng từ +40% TB20",
+      "pass": "n/a",
+      "keys": [
+        "volumeVsSma20Percent",
+        "changePercent"
+      ]
+    },
+    {
+      "id": "volume-down",
+      "label": "Phiên giảm không kèm khối lượng từ +40% TB20",
+      "pass": true,
+      "keys": [
+        "volumeVsSma20Percent",
+        "changePercent"
+      ]
+    },
+    {
+      "id": "pivot",
+      "label": "Đóng cửa trên đỉnh 20 phiên trước",
+      "pass": false,
+      "keys": [
+        "closeVsPivotPercent",
+        "pivot"
+      ]
+    },
+    {
+      "id": "day",
+      "label": "Giữ giá khi chỉ số giảm (giảm chưa tới một nửa chỉ số)",
+      "pass": true,
+      "keys": [
+        "changePercent",
+        "indexChangePercent"
+      ]
+    }
+  ],
+  "setup": "pullback",
+  "verdict": "PVT nghỉ dưới đỉnh 25,05 của phiên 29/9: nhịp chỉnh 7,0% với khối lượng thấp hơn phiên tạo đỉnh 50%, và phiên chỉ số giảm 1,09% thì PVT chỉ lùi 0,21% — thị trường còn 1 phiên phân phối nữa là chạm ngưỡng nguy hiểm.",
+  "detail": {
+    "kind": "pullback",
+    "text": "Nhịp chỉnh dưới đỉnh gần: đóng cửa 23,75, thấp hơn đỉnh 25,05 của phiên 29/9 là 5,19%; khối lượng hai phiên chỉnh thấp hơn phiên tạo đỉnh 50%.",
+    "keys": [
+      "price",
+      "pivot",
+      "closeVsPivotPercent",
+      "pullbackVolumeVsPivotPercent"
+    ]
+  },
+  "marks": [
+    {
+      "kind": "level",
+      "price": 25.05,
+      "label": "Đỉnh 29/9 · 25,05",
+      "accent": "gold",
+      "beat": 0,
+      "ref": "pivot"
+    },
+    {
+      "kind": "level",
+      "price": 22.3,
+      "label": "Đáy 24/9 · 22,30",
+      "accent": "red",
+      "beat": 0,
+      "ref": "swingLow"
+    },
+    {
+      "kind": "pointer",
+      "date": "last",
+      "price": 23.75,
+      "label": "−0,21% khi chỉ số −1,09%",
+      "accent": "white",
+      "beat": 1,
+      "side": "below"
+    }
+  ],
+  "camera": [
+    {
+      "beat": 0,
+      "focus": "all"
+    },
+    {
+      "beat": 1,
+      "focus": "last",
+      "zoom": 1.8
+    }
+  ],
+  "branches": [
+    {
+      "if": "Nếu PVT vượt lại 25,05 với khối lượng cao hơn trung bình",
+      "then": "nhịp tăng từ đáy 24/9 tiếp diễn, nhịp chỉnh vừa rồi chỉ là nghỉ."
+    },
+    {
+      "if": "Nếu thủng 22,30, đáy của phiên 24/9",
+      "then": "nhịp chỉnh sâu hơn, cấu trúc đáy sau cao hơn đáy trước bị phá."
+    }
+  ],
+  "context": {
+    "market": "Xu hướng tăng chịu áp lực",
+    "toDanger": 1,
+    "index": "VN-Index −1,09%"
+  },
+  "unsupported": [
+    "FireAnt MA50/MA200 chưa có: public/shots/review/2026-10-01/pvt-fireant.ma.json không tồn tại và ảnh FireAnt của mã chưa chụp. Bốn ô price-ma50, price-ma200, ma50-ma200, extension để pending; không có mark MA (không tự tính MA, không thay bằng EMA50 của terminal).",
+    "Đỉnh 52 tuần 29,73 (9/3/2026) nằm ngoài cửa sổ ảnh FireAnt (~6,5 tháng): không vẽ, chỉ nói bằng chữ nếu cần (−20,1%)."
+  ]
+}

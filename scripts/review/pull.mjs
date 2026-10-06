@@ -19,10 +19,10 @@
  *    ({match: "and"}, what the Screener sends on load), then each saved filter a scene uses.
  *    The server's result lists are authoritative; a local evaluation of the same conditions on
  *    the universe rows cross-checks them and settles whether volume_vs_sma is a ratio or a %.
- * 5. Ranks each table scene's picks (rules.screener.scenes — one saved filter per scene, sorted by
- *    its own column; user 2026-09-30: RS Strong and Uptrend are two scenes, not an intersection)
- *    and the chart countdown (rules.screener.leaders: the top names of one scene, or of the names
- *    in every listed scene), then GETs /api/analyze for each leader.
+ * 5. Ranks each scene's picks (rules.screener.scenes — one saved filter per scene, sorted by its
+ *    own column; user 2026-09-30: RS Strong and Uptrend are two scenes, not an intersection) and
+ *    the chart countdown (rules.screener.leaders: tiers of scene keys — the names in all three
+ *    filters first, then RS Strong ∩ Uptrend; user 2026-10-01), then GETs /api/analyze for each leader.
  * 6. Reads FireAnt's public market page for the session's advancers/unchanged/decliners per exchange
  *    (headless shell, no sign-in); kept only when the page shows this session's close. --no-fireant skips.
  *                                            -> content/review/snapshots/<date>.json, analyze/<date>/
@@ -37,6 +37,7 @@
  */
 import {PATHS, cli, configId, die, exists, finishedBars, ict, ictInstant, readJson, round, rules, ssiDaily, tryJson, writeJson, writeRows, zionle} from './lib/common.mjs';
 import {fetchFireantBreadth, matchesSession} from './lib/fireant.mjs';
+import {compactRow} from './lib/requested.mjs';
 
 const {flag, opt} = cli();
 const R = rules();
@@ -44,6 +45,45 @@ const now = new Date();
 const log = (...a) => console.log(...a);
 const REBUILD = flag('rebuild');
 const asOf = opt('as-of');
+
+/** GET /api/analyze/<sym> (daily) into content/review/analyze/<session>/<sym>.json; the path, or null when it failed. */
+const fetchAnalyze = async (sym, session) => {
+  const rel = `${PATHS.analyze}/${session}/${sym}.json`;
+  const a = await zionle(`/api/analyze/${encodeURIComponent(sym)}?interval=1D`).catch((e) => {
+    console.warn(`  /analyze ${sym}: ${e.message}`);
+    return null;
+  });
+  if (!a) return null;
+  writeJson(rel, {
+    symbol: sym, fetchedAt: new Date().toISOString(), timestamp: a.timestamp ?? null,
+    _units: 'prices in thousands of VND (the terminal quotes stocks that way); volume in shares',
+    price_history: (a.price_history ?? []).map((b) => ({t: b.date, o: b.open, h: b.high, l: b.low, c: b.close, v: b.volume, rsi: b.rsi})),
+    signals: a.signals ?? [], trendlines: a.trendlines ?? [], divergences: a.divergences ?? [],
+  });
+  return rel;
+};
+
+// --symbols=FPT,HPG --analyze-only: the charts of the names the user asked for on the review page (user 2026-10-05:
+// "… i can choose and fill the symbol on the artifact to review beside existed symbol on 3 filter") — GET only, for the
+// session already pulled: no SSI fetch, no POST, no snapshot, filters or index history rewritten. The freshness gate is
+// the same as a full pull's.
+if (flag('analyze-only')) {
+  const syms = [...new Set((opt('symbols') ?? '').split(',').map((x) => x.trim().toUpperCase()).filter(Boolean))];
+  if (!syms.length) die('--analyze-only needs --symbols=AAA,BBB');
+  const onDisk = tryJson(PATHS.daily) ?? die(`no ${PATHS.daily} — run a full pull first`);
+  const session = asOf ?? onDisk[onDisk.length - 1]?.t ?? die(`${PATHS.daily} holds no session`);
+  const info = await zionle('/api/stocks/cache-info', {withId: false}).catch((e) => die(`terminal: ${e.message}`));
+  const c = ict(new Date(info.cached_at));
+  const laterSession = c.date > session && c.dow >= 1 && c.dow <= 5 && c.hm >= '09:00';
+  if (!(new Date(info.cached_at) >= ictInstant(session, R.screener.freshAfter)) || laterSession) {
+    die(`screener cache is stamped ${c.date} ${c.hm} ICT — not end-of-day ${session}${laterSession ? ' (a later session)' : ''}; the analyze bars would not be that session's. Run after the post-close refresh.`);
+  }
+  for (const sym of syms) {
+    const rel = await fetchAnalyze(sym, session);
+    log(rel ? `analyze  ${sym} → ${rel}` : `analyze  ${sym}: failed (see above)`);
+  }
+  process.exit(0);
+}
 
 // ------------------------------------------------------------------ 1. index history
 
@@ -216,26 +256,28 @@ for (const [scene, spec] of Object.entries(R.screener.scenes)) {
   picks[scene] = rows.slice(0, spec.top).map((s) => s.symbol);
 }
 
-// The chart countdown (rules.screener.leaders): the ranked names of ONE table scene, or the names
-// in every scene of a list (["rs", "uptrend"] = the RS Strong ∩ Uptrend the reel showed before
-// 2026-09-30). Their charts draw an EMA50 line, so a name without averages is never a leader.
-const L = R.screener.leaders ?? {from: 'uptrend', sortBy: 'rs_1m', top: 3};
-const leaderFrom = [].concat(L.from);
-for (const k of leaderFrom) if (!members[k]) die(`rules.screener.leaders.from names "${k}", which is not a scene in rules.screener.scenes (${Object.keys(R.screener.scenes).join(', ')})`);
-const pool = members[leaderFrom[0]].filter((sym) => leaderFrom.every((k) => members[k].includes(sym)));
-const leaderRows = ranked(pool.map((sym) => bySymbol.get(sym)).filter((s) => s && maOk(s)), L.sortBy ?? 'rs_1m');
-members.leaders = leaderRows.map((s) => s.symbol);
-picks.leaders = members.leaders.slice(0, L.top ?? 3);
+// The chart countdown (rules.screener.leaders). `from` is a list of TIERS, each a list of scene keys a
+// name must be in (a flat list or a bare key is one tier): names come tier by tier — all three filters
+// first, then RS Strong ∩ Uptrend (user 2026-10-01) — ranked by sortBy inside a tier, until `top` is
+// reached. Their charts draw an EMA50 line, so a name without averages is never a leader.
+const L = R.screener.leaders ?? {from: [['rs', 'uptrend']], sortBy: 'rs_1m', top: 2};
+const tiers = Array.isArray(L.from) && L.from.some(Array.isArray) ? L.from.map((t) => [].concat(t)) : [[].concat(L.from)];
+const tierOf = {};
+const leaderOrder = [];
+for (const [i, tier] of tiers.entries()) {
+  for (const k of tier) if (!members[k]) die(`rules.screener.leaders.from names "${k}", which is not a scene in rules.screener.scenes (${Object.keys(R.screener.scenes).join(', ')})`);
+  const names = members[tier[0]].filter((sym) => tier.every((k) => members[k].includes(sym)));
+  for (const s of ranked(names.map((sym) => bySymbol.get(sym)).filter((s) => s && maOk(s)), L.sortBy ?? 'rs_1m')) {
+    if (tierOf[s.symbol] !== undefined) continue;
+    tierOf[s.symbol] = i + 1;
+    leaderOrder.push(s.symbol);
+  }
+}
+members.leaders = leaderOrder;
+picks.leaders = leaderOrder.slice(0, L.top ?? 2);
 
 const keep = new Set([...Object.values(members).flat()]);
-const compact = (s) => ({
-  name: s.name ?? null, exchange: s.exchange ?? null,
-  price: s.current_price, changePercent: s.price_change_pct,
-  volume: s.current_volume, volumeSma20: s.volume_sma20, volumeRatio: volumeRatio(s) == null ? null : round(volumeRatio(s), 4),
-  rs_1m: s.rs_1m, rs_3m: s.rs_3m, rs_6m: s.rs_6m, rs_9m: s.rs_9m, rs_52w: s.rs_52w,
-  ema_9: s.ema_9, ema_21: s.ema_21, ema_50: s.ema_50, sma_200: s.sma_200,
-  signals: Object.fromEntries(Object.entries(s).filter(([k, v]) => k.startsWith('has_') && v)),
-});
+const compact = compactRow;
 // A moving average of 0 means the server could not compute it (new listing), so the shares are
 // taken among the stocks that have one.
 const withEma50 = universe.filter((s) => s.ema_50 > 0);
@@ -260,18 +302,7 @@ for (const sym of picks.leaders) {
     else console.warn(`  /analyze ${sym}: not on disk (${rel}) — --rebuild fetches nothing; the leader scene will have no chart until an online pull`);
     continue;
   }
-  const a = await zionle(`/api/analyze/${encodeURIComponent(sym)}?interval=1D`).catch((e) => {
-    console.warn(`  /analyze ${sym}: ${e.message}`);
-    return null;
-  });
-  if (!a) continue;
-  writeJson(rel, {
-    symbol: sym, fetchedAt: new Date().toISOString(), timestamp: a.timestamp ?? null,
-    _units: 'prices in thousands of VND (the terminal quotes stocks that way); volume in shares',
-    price_history: (a.price_history ?? []).map((b) => ({t: b.date, o: b.open, h: b.high, l: b.low, c: b.close, v: b.volume, rsi: b.rsi})),
-    signals: a.signals ?? [], trendlines: a.trendlines ?? [], divergences: a.divergences ?? [],
-  });
-  analyzed[sym] = rel;
+  if (await fetchAnalyze(sym, session)) analyzed[sym] = rel;
 }
 
 // ------------------------------------------------------------------ FireAnt advance/decline
@@ -301,7 +332,7 @@ const snapshot = {
   filters: Object.fromEntries(needed.map((n) => [n, {count: server[n].length, symbols: server[n]}])),
   members,
   picks,
-  leaders: {from: leaderFrom, sortBy: L.sortBy ?? 'rs_1m', top: L.top ?? 3},
+  leaders: {from: tiers, sortBy: L.sortBy ?? 'rs_1m', top: L.top ?? 2, tierOf},
   breadth,
   analyze: analyzed,
   fireant,
@@ -311,6 +342,6 @@ const snapRel = writeJson(`${PATHS.snapshots}/${session}.json`, snapshot);
 
 log(`filters  ${needed.map((n) => `${n} ${server[n].length} (local agree ${agree[n]})`).join(' · ')}`);
 log(`         volume_vs_sma reads as a ${volumeVsSmaUnit ?? '?'}`);
-for (const [scene, list] of Object.entries(picks)) log(`${scene.padEnd(8)} ${members[scene].length} names · top ${list.join(', ') || '—'}${scene === 'leaders' ? ` (from ${leaderFrom.join(' ∩ ')}, by ${L.sortBy ?? 'rs_1m'})` : ''}`);
+for (const [scene, list] of Object.entries(picks)) log(`${scene.padEnd(8)} ${members[scene].length} names · top ${list.join(', ') || '—'}${scene === 'leaders' ? ` (tiers ${tiers.map((t) => t.join(' ∩ ')).join(' → ')}, by ${L.sortBy ?? 'rs_1m'}; tier of each: ${list.map((s) => `${s}:${tierOf[s]}`).join(' ')})` : ''}`);
 log(`breadth  ${breadth.up} up · ${breadth.down} down · ${breadth.aboveSma200}/${breadth.universe} above SMA200`);
 log(`wrote    ${REBUILD ? '' : `${PATHS.daily}, ${PATHS.filters}, `}${snapRel}${Object.keys(analyzed).length && !REBUILD ? `, ${PATHS.analyze}/${session}/` : ''}`);

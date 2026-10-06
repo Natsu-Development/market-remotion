@@ -21,7 +21,6 @@ Prints "OK <out> <secs>" or "FAIL <out> <reason>" per line; exit 0 when nothing 
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -46,28 +45,24 @@ def main() -> int:
     ref_audio, ref_text = spec["ref_audio"], spec["ref_text"]
     speed = float(spec.get("speed") or 1.0)
     failed = 0
+    # Speed is the model's own factor (an item's "speed" overrides the spec's); 1.0 is left to the
+    # model's estimate. Earlier builds stretched with ffmpeg atempo, which past 1.15 sounded synthetic.
 
     for it in spec["items"]:
         out = Path(it["out"])
         out.parent.mkdir(parents=True, exist_ok=True)
         try:
             t = time.time()
-            audio = model.generate(text=it["text"], ref_audio=ref_audio, ref_text=ref_text)
+            sp = float(it.get("speed") or speed)
+            audio = model.generate(
+                text=it["text"], ref_audio=ref_audio, ref_text=ref_text,
+                speed=None if abs(sp - 1.0) < 1e-3 else sp,
+            )
             wav = np.asarray(
                 audio[0] if hasattr(audio, "__len__") else audio, dtype="float32"
             ).squeeze()
             tmp = out.with_suffix(".part.wav")
             sf.write(str(tmp), wav, SAMPLE_RATE)
-            # OmniVoice has no speed parameter; stretch with atempo afterwards.
-            if abs(speed - 1.0) > 1e-3:
-                sped = out.with_suffix(".sped.wav")
-                subprocess.run(
-                    ["ffmpeg", "-y", "-v", "error", "-i", str(tmp),
-                     "-af", f"atempo={speed:.4f}", str(sped)],
-                    check=True,
-                )
-                tmp.unlink(missing_ok=True)
-                tmp = sped
             tmp.replace(out)
             print(f"OK {out} {len(wav) / SAMPLE_RATE:.1f}s/{time.time() - t:.1f}s", flush=True)
         except Exception as e:  # noqa: BLE001

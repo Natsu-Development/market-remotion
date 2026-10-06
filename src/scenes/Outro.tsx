@@ -140,21 +140,39 @@ export const Outro: React.FC<Props> = ({logo, brand, kicker, pill, line, disclai
       </Panel>
 
       {disclaimer ? (
+        // Centred fine print under the headline, balanced over two lines, with a short gold rule
+        // above it so it reads as the card's footnote and not as a third headline (the user,
+        // 2026-10-01: "justify center", "optimize its styles").
         <div
           style={{
             position: 'absolute',
-            left: LAYOUT.footnote.x,
+            left: 0,
             top: footnoteY ?? LAYOUT.footnote.y,
-            width: LAYOUT.headline.maxWidth,
-            fontFamily: FONTS.text,
-            fontWeight: 400,
-            fontSize: LAYOUT.footnote.fontSize,
-            lineHeight: LAYOUT.footnote.lineHeight,
-            color: 'rgba(255, 255, 255, 0.62)',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             opacity: ramp(frame, 48, 74),
           }}
         >
-          {disclaimer}
+          <div style={{width: 36, height: 3, borderRadius: 2, backgroundColor: `${COLORS.gold}99`}} />
+          <div
+            style={{
+              marginTop: 18,
+              maxWidth: LAYOUT.footnote.maxWidth,
+              padding: '0 20px',
+              fontFamily: FONTS.text,
+              fontWeight: 500,
+              fontSize: LAYOUT.footnote.fontSize,
+              lineHeight: LAYOUT.footnote.lineHeight,
+              letterSpacing: 0.3,
+              color: 'rgba(255, 255, 255, 0.58)',
+              textAlign: 'center',
+              textWrap: 'balance',
+            } as React.CSSProperties}
+          >
+            {disclaimer}
+          </div>
         </div>
       ) : null}
     </>

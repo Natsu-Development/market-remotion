@@ -26,7 +26,7 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {reels} from './lib/reels.mjs';
 import {roleNames, roleOf, roleSpec} from './lib/roles.mjs';
-import {lexiconOf, loadRules} from './lib/rules.mjs';
+import {lexiconOf, loadRules, spellerOf} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /**
@@ -167,19 +167,22 @@ const VISUAL_REQUIRED = {
   riskReward: ['left', 'right'],
   image: ['src'],
   lines: ['top', 'bottom'],
-  movers: ['left', 'right'],
+  movers: ['left'],
+  board: ['columns', 'rows'],
   outro: ['brand', 'kicker', 'pill', 'line'],
 };
 const ICONS = new Set(['check', 'warning', 'cross', 'up', 'down']);
 const ACCENTS = new Set(['gold', 'red', 'green', 'white']);
 /** Image marks may also take the direction pair (src/theme.ts COLORS.up/down) — never text. */
 const MARK_ACCENTS = new Set([...ACCENTS, 'up', 'down']);
-/** The TTS pronunciation map (voice.lexicon) as scripts/voiceover.mjs applies it. */
+/** The TTS pronunciation map (voice.lexicon) and ticker speller (voice.letters) as scripts/voiceover.mjs applies them. */
 let LEXICON = lexiconOf(R);
-const sayAs = (text) => LEXICON.reduce(
+let SPELL = spellerOf(R);
+const respell = (text) => LEXICON.reduce(
   (t, [word, say]) => t.replace(new RegExp(`(?<![\\p{L}\\p{N}])${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`, 'gu'), say),
   String(text ?? ''),
 );
+const sayAs = (text) => (SPELL ? SPELL(respell(text)) : respell(text));
 /** Camera drift while an image shot holds (src/types.ts ImageShot). */
 const SHOT_MOVES = new Set(['push_in', 'pull_out', 'pan', 'tilt', 'static']);
 
@@ -238,13 +241,49 @@ function checkSchema(t, reel) {
         }
       }
       if (v.type === 'movers') {
+        // `right` may be left out when the list is five names or fewer (a board of one column).
         for (const side of ['left', 'right']) {
           const col = v[side];
+          if (side === 'right' && col === undefined) continue;
           if (!col?.title) errs.push(`${at}: movers.${side} needs a title`);
           if (!Array.isArray(col?.rows) || !col.rows.length) errs.push(`${at}: movers.${side}.rows needs at least one row`);
-          else if (col.rows.length > 5) errs.push(`${at}: movers.${side} has ${col.rows.length} rows; the panel fits five`);
+          else if (col.rows.length > 10) errs.push(`${at}: movers.${side} has ${col.rows.length} rows; the panel fits ten (one-line rows past five)`);
           else if (!col.rows.every((r) => typeof r.symbol === 'string' && Number.isFinite(r.changePercent))) errs.push(`${at}: movers.${side}.rows need symbol and changePercent`);
+          else if (col.metric === 'rs' && !col.rows.every((r) => Number.isFinite(r.rs1m))) errs.push(`${at}: movers.${side} shows RS 1M but a row has no rs1m`);
+          else if (!col.rows.every((r) => r.volumeVsSma20Percent == null || Number.isFinite(r.volumeVsSma20Percent))) errs.push(`${at}: movers.${side} has a row whose volumeVsSma20Percent is not a number`);
+          if (col?.metric !== undefined && !['change', 'rs'].includes(col.metric)) errs.push(`${at}: movers.${side} metric "${col.metric}" is not change|rs`);
           if (col?.accent && !ACCENTS.has(col.accent)) errs.push(`${at}: movers.${side} accent "${col.accent}" invalid`);
+        }
+      }
+      if (v.type === 'board') {
+        // A screener filter drawn as a table (market-review rs/uptrend, src/scenes/FilterBoard.tsx). RS 1M and the
+        // day's change are the columns the user asked for by name (2026-10-01 evening); every printed column needs
+        // its figure on every row (a row without one prints "—", which is only right for a missing average).
+        const COLS = {price: 'price', change: 'changePercent', rs1m: 'rs1m', rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent'};
+        const cols = Array.isArray(v.columns) ? v.columns : [];
+        const unknown = cols.filter((c) => !(c in COLS));
+        if (unknown.length) errs.push(`${at}: board columns ${unknown.join(', ')} are not ${Object.keys(COLS).join('|')}`);
+        for (const need of ['change', 'rs1m']) if (!cols.includes(need)) errs.push(`${at}: a board shows ${need} (user 2026-10-01: "must have the RS1M column, price change")`);
+        const extra = cols.filter((c) => !['price', 'change', 'rs1m'].includes(c));
+        if (extra.length > 2) errs.push(`${at}: board has ${extra.length} extra columns (${extra.join(', ')}); the table fits two`);
+        if (!Array.isArray(v.rows) || !v.rows.length) errs.push(`${at}: board.rows needs at least one row`);
+        else if (v.rows.length > 10) errs.push(`${at}: board has ${v.rows.length} rows; it fits ten`);
+        else {
+          for (const r of v.rows) {
+            if (typeof r.symbol !== 'string' || !Number.isFinite(r.changePercent) || !Number.isFinite(r.rs1m)) { errs.push(`${at}: board rows need symbol, changePercent and rs1m`); break; }
+            const missing = cols.filter((c) => !['aboveEma50', 'aboveSma200'].includes(c) && !Number.isFinite(r[COLS[c]]));
+            if (missing.length) { errs.push(`${at}: board row ${r.symbol} has no ${missing.map((c) => COLS[c]).join(', ')}`); break; }
+          }
+        }
+        // The board lights the names the reel reviews next (`focus`, user 2026-10-05: "decoration and animation with
+        // the symbol need focused") and never says which other filter a name is in ("Not need mentioned the stock on
+        // specific filter existed on other filter"): the both/all3/picks highlight of 2026-10-01 is refused.
+        const legacy = (Array.isArray(v.rows) ? v.rows : []).filter((r) => r && (r.both || r.all3 || r.pick)).map((r) => r.symbol);
+        if (legacy.length || v.legend) errs.push(`${at}: board ${legacy.length ? `rows ${legacy.join(', ')} carry both/all3/pick` : ''}${legacy.length && v.legend ? ' and ' : ''}${v.legend ? 'a legend' : ''} — the overlap highlight the user dropped 2026-10-05; re-run node scripts/review/scaffold.mjs (rows carry focus)`);
+        for (const e of v.emphasis ?? []) {
+          if (!Number.isInteger(e.beat) || e.beat < 1) errs.push(`${at}: board emphasis beat ${e.beat} — emphasis plays on beat 2 or later (index ≥ 1)`);
+          if (e.set !== 'focus') errs.push(`${at}: board emphasis set "${e.set}" is not focus${['both', 'all3', 'picks', 'only'].includes(e.set) ? ' — the overlap/picks sets of 2026-10-01 are gone; re-run node scripts/review/scaffold.mjs' : ''}`);
+          else if (!(v.rows ?? []).some((r) => r?.focus)) errs.push(`${at}: board emphasis lights the focus rows but no row has focus: true`);
         }
       }
       if (v.type === 'lines') {
@@ -353,8 +392,11 @@ function checkNarration(t, reel) {
   if (!N) { add(t, 'narration', SEV.skip, 'no narration block in this reel\'s rules'); return; }
   for (const s of reel.scenes) {
     if (!s.narration) continue;
-    if (/\d/.test(s.narration)) {
-      bad.push(`${s.id}: narration contains digits — spell them (${s.narration.match(/\S*\d\S*/g).join(', ')})`);
+    // Judged on what the voice SAYS: an indicator written as the trader says it (MA200, EMA50) is read by
+    // voice.lexicon as letters and number words (user 2026-10-01), so only a digit the lexicon leaves fails.
+    const said = respell(s.narration);
+    if (/\d/.test(said)) {
+      bad.push(`${s.id}: narration contains digits — spell them, or give the term a voice.lexicon reading (${said.match(/\S*\d\S*/g).join(', ')})`);
     }
     const w = words(s.narration).length;
     if (w < N.minWordsPerScene || w > N.maxWordsPerScene) {
@@ -436,6 +478,9 @@ function checkStyle(t, reel) {
     }
     const addr = S.addressWords.reduce((a, w) => a + (n.toLowerCase().match(new RegExp(`\\b${w}\\b`, 'g')) ?? []).length, 0);
     if (addr > S.maxAddressPerScene) warn.push(`${sc.id}: "bạn/mình" ×${addr} — one or two per scene`);
+    // A comma right before "phẩy" makes the voice pause there and drop the decimal word: "bốn mươi ba, phẩy
+    // mười ba" came out as "bốn mươi ba, mười ba" in 4 of 4 takes (Channel, 2026-09-30).
+    if (/,\s*phẩy\b/i.test(n)) warn.push(`${sc.id}: comma right before "phẩy" — the voice pauses and swallows the decimal; write "ba phẩy mười ba"`);
     if (S.headlineBothLinesNumeric === 'warn') {
       for (const [k, b] of sc.beats.entries()) {
         if (/\d/.test(b.line1 ?? '') && /\d/.test(b.line2 ?? '')) warn.push(`${sc.id} beat ${k}: both headline lines are numbers — line 2 should say what it means`);
@@ -774,10 +819,27 @@ function checkFacts(t, reel) {
       ...(sc.visual?.bars ?? []).map((b) => ['visual.bars', `${b.label} ${b.percent}`]),
       ...(sc.visual?.marks ?? []).map((m) => ['visual.marks', String(m.label)]),
       ...(sc.visual?.annotations ?? []).map((a) => ['visual.annotations', a.label ?? a.text ?? '']),
-      // A movers board prints each row's change and volume ratio from its numbers.
+      // A movers board prints each row's change, volume (% of its 20-session average when the row has
+      // volumeVsSma20Percent, Movers.tsx — else the ratio) and RS 1M from its numbers.
+      // A filter board prints each row at the precision FilterBoard.tsx shows: price and change 2dp, RS whole,
+      // volume vs TB20 whole %, the distances above EMA50/SMA200 1dp; its legend and emphasis plates are text.
+      ...(sc.visual?.type === 'board' ? [
+        ...(sc.visual.rows ?? []).map((r) => ['visual.rows', [
+          r.symbol,
+          r.price != null ? Number(r.price).toFixed(2) : '',
+          Number(r.changePercent).toFixed(2),
+          String(r.rs1m),
+          r.rs52w != null ? String(r.rs52w) : '',
+          r.volumeVsSma20Percent != null ? String(Math.abs(Math.round(Number(r.volumeVsSma20Percent)))) : '',
+          r.aboveEma50Percent != null ? Math.abs(Number(r.aboveEma50Percent)).toFixed(1) : '',
+          r.aboveSma200Percent != null ? Math.abs(Number(r.aboveSma200Percent)).toFixed(1) : '',
+        ].join(' ')]),
+        ...Object.values(sc.visual.legend ?? {}).map((t) => ['visual.legend', String(t)]),
+        ...(sc.visual.emphasis ?? []).map((e) => ['visual.emphasis', String(e.label ?? '')]),
+      ] : []),
       ...['left', 'right'].flatMap((side) => (sc.visual?.type === 'movers' && sc.visual[side] ? [
         [`visual.${side}.title`, sc.visual[side].title ?? ''],
-        ...(sc.visual[side].rows ?? []).map((r) => [`visual.${side}.rows`, `${r.symbol} ${Number(r.changePercent).toFixed(2)} ${r.volumeRatio != null ? Number(r.volumeRatio).toFixed(2) : ''}`]),
+        ...(sc.visual[side].rows ?? []).map((r) => [`visual.${side}.rows`, `${r.symbol} ${Number(r.changePercent).toFixed(2)} ${r.volumeVsSma20Percent != null ? String(Math.round(Number(r.volumeVsSma20Percent))) : r.volumeRatio != null ? Number(r.volumeRatio).toFixed(2) : ''} ${r.rs1m != null ? String(r.rs1m) : ''}`]),
       ] : [])),
     ];
     for (const [where, text] of surfaces) {
@@ -972,6 +1034,7 @@ for (const id of ids) {
     die(`${rel}: its rules file ${reel.rules} cannot be read — ${e.message}`);
   }
   LEXICON = lexiconOf(R);
+  SPELL = spellerOf(R);
   if (checkSchema(t.checks, reel).length) continue;   // gate, not a peer
   checkStatus(t.checks, reel);
   checkSentenceSync(t.checks, reel);
@@ -1002,6 +1065,7 @@ for (const id of ids) {
 }
 R = BASE;
 LEXICON = lexiconOf(R);
+SPELL = spellerOf(R);
 checkRegistration(report);
 checkVoiceStems(report, loaded);
 checkSeries(report);

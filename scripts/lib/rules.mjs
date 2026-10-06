@@ -20,7 +20,7 @@ export const DEFAULT_RULES = 'src/shared/content-rules.json';
 /** Top-level blocks that describe the engine, not the content. */
 const ENGINE_KEYS = ['layout', 'audio', 'series'];
 /** voice.* fields that belong to the TTS engine; `lexicon` stays with the reel's own rules. */
-const ENGINE_VOICE_KEYS = ['engine', 'model', 'dtype', '_dtypeWhy', 'refAudio', 'refTextOverlapWords', '_refWhy'];
+const ENGINE_VOICE_KEYS = ['engine', 'model', 'dtype', '_dtypeWhy', 'refAudio', 'refTextOverlapWords', '_refWhy', 'pace', '_pace'];
 
 const cache = new Map();
 const read = (root, rel) => {
@@ -49,3 +49,30 @@ export const loadRules = (root, {reel, path} = {}) => {
 /** `voice.lexicon` as [written, spoken] pairs, the shape voiceover.mjs and verify.mjs apply. */
 export const lexiconOf = (R) => Object.entries(R?.voice?.lexicon ?? {})
   .filter(([k, v]) => !k.startsWith('_') && typeof v === 'string');
+
+/** A ticker as the narration writes it: three capitals standing alone (HOSE/UPCOM/MACD are longer). */
+export const TICKER_RE = /(?<![\p{L}\p{N}])[A-Z]{3}(?![\p{L}\p{N}])/u;
+
+/** What goes between the letter names of a spelled ticker: `voice.letterJoin`, else the old comma form. */
+export const letterJoinOf = (R) => (typeof R?.voice?.letterJoin === 'string' ? R.voice.letterJoin : ', ');
+
+/**
+ * How the voice SAYS a ticker. `voice.letters` names each letter ("B": "bê") and the speller joins the
+ * names with `voice.letterJoin`. market-review sets a single space (user 2026-10-01: "Pronounce of symbol
+ * must be solid and clearly not separate" — the comma form "em, ét, rờ" made the voice stop on every
+ * letter; the same move the user made for MACD, "em ây xê đê"). A rules file with a table but no joiner
+ * keeps the comma form. It runs AFTER the lexicon, so FTD and MACD keep their own entries, and only for
+ * a rules file that carries a table: Channel's content-rules.json has none, so its reels are read exactly
+ * as before. User 2026-10-01: market-review's filter scenes and countdown say the ticker, never the
+ * company name.
+ */
+export const spellerOf = (R) => {
+  const table = Object.fromEntries(Object.entries(R?.voice?.letters ?? {}).filter(([k, v]) => !k.startsWith('_') && typeof v === 'string'));
+  if (!Object.keys(table).length) return null;
+  const join = letterJoinOf(R);
+  const re = new RegExp(TICKER_RE.source, 'gu');
+  return (text) => String(text ?? '').replace(re, (tk, at) => {
+    const said = [...tk].map((c) => table[c] ?? c.toLowerCase()).join(join);
+    return at === 0 ? said.charAt(0).toUpperCase() + said.slice(1) : said;
+  });
+};

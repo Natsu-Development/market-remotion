@@ -30,7 +30,8 @@
  * divergences, trendlines and signals join the fact pack as `terminal`; when
  * content/<symbol>-daily.json exists (--resample=none), the REAL last-year bars join
  * as `daily`. Front matter `ticker: daily` puts that latest session in the ticker
- * strip; `footer: <text>` names the source when the numbers really came from it.
+ * strip. The footer under every headline is the channel name from content-rules `channel.name` (the user,
+ * 2026-09-29: no source line); `footer: <text>` replaces it, `footer: false` hides it.
  *
  *     title: VNINDEX · thanh khoản cạn dần
  *     name: liquidity
@@ -132,8 +133,10 @@ const STUB = {
   riskReward: () => ({type: 'riskReward', left: {label: 'Đúng', value: 20}, right: {label: 'Sai', value: 55}}),
   image: () => ({type: 'image', src: 'TODO', caption: 'TODO', source: 'TODO'}),
   // The call to action the user approved for Channel (2026-09-28): like · share · follow, no numbers.
-  outro: () => ({type: 'outro', brand: meta.brand ?? 'Kênh của bạn', kicker: 'Chứng khoán',
-                 pill: 'Thả tim · Chia sẻ · Theo dõi', line: 'Cập nhật mỗi khi thị trường đổi nhịp'}),
+  outro: () => ({type: 'outro', brand: meta.brand ?? R.channel?.name ?? 'Kênh của bạn', kicker: 'Phân tích',
+                 pill: 'Thả tim · Chia sẻ · Theo dõi', line: 'Cập nhật mỗi khi thị trường biến động',
+                 // brief `logo: logo/x.png` (a file under public/) takes the monogram's place inside the ring
+                 ...(meta.logo ? {logo: meta.logo} : {})}),
 };
 
 // A brief with an unknown role, act or panel stops here, before the fact pack or the scaffold
@@ -199,6 +202,7 @@ const hist = macdLine.map((x, i) => x - signal[i]);
 
 const r1 = (x) => (x == null ? null : Math.round(x * 10) / 10);
 const r0 = (x) => (x == null ? null : Math.round(x));
+const r2 = (x) => (x == null ? null : Math.round(x * 100) / 100);
 
 const byYear = new Map();
 for (const c of SERIES) {
@@ -234,7 +238,9 @@ const drawdownFrom = (t) => {
   return {
     from: t, to: trough.t, percent: r1(((trough.c - SERIES[i].c) / SERIES[i].c) * 100),
     highToLow: {high: r0(SERIES[i].h), low: r0(lowest.l), lowMonth: lowest.t,
-                percent: r1(((lowest.l - SERIES[i].h) / SERIES[i].h) * 100)},
+                percent: r1(((lowest.l - SERIES[i].h) / SERIES[i].h) * 100),
+                highExact: r2(SERIES[i].h), lowExact: r2(lowest.l),
+                percentExact: r2(((lowest.l - SERIES[i].h) / SERIES[i].h) * 100)},
   };
 };
 
@@ -250,7 +256,11 @@ const drawdownHighToLow = (t) => {
   if (!after.length) return null;
   const trough = after.reduce((m, c) => (c.l < m.l ? c : m));
   return {from: t, to: trough.t, high: r0(SERIES[i].h), low: r0(trough.l),
-          percent: r1(((trough.l - SERIES[i].h) / SERIES[i].h) * 100)};
+          percent: r1(((trough.l - SERIES[i].h) / SERIES[i].h) * 100),
+          // 2018 is −28.852%: one decimal says −28,9 while 1211 → 862 on screen says −28,8. The exact
+          // endpoints and a two-decimal percent let a label be checked from what it shows.
+          highExact: r2(SERIES[i].h), lowExact: r2(trough.l),
+          percentExact: r2(((trough.l - SERIES[i].h) / SERIES[i].h) * 100)};
 };
 
 /** First month after `t` where the histogram closes below zero: the MACD/signal cross-down. */
@@ -326,23 +336,30 @@ const cycleFacts = () => {
   const P = R.series.peakMonths.filter((t) => idx.has(t));
   if (P.length < 2) return null;
   const lastPeak = P[P.length - 1];
-  const athHigh = r0(SERIES[idx.get(lastPeak)].h);
+  const athExact = SERIES[idx.get(lastPeak)].h;
+  const athHigh = r0(athExact);
   const close = r0(last.c);
   const spacing = P.slice(1).map((t, k) => ({from: P[k], to: t, months: mnum(t) - mnum(P[k])}));
   const falls = P.slice(0, -1).map((t) => {
     const d = drawdownHighToLow(t);
-    return d && {peak: t, high: d.high, low: d.low, lowMonth: d.to, percent: d.percent, months: mnum(d.to) - mnum(t)};
+    return d && {peak: t, high: d.high, low: d.low, lowMonth: d.to, percent: d.percent, months: mnum(d.to) - mnum(t),
+                 highExact: d.highExact, lowExact: d.lowExact, percentExact: d.percentExact};
   }).filter(Boolean);
   return {
     peakSpacing: spacing,
     falls,
-    latestPeak: {month: lastPeak, high: athHigh, monthsSince: mnum(last.t) - mnum(lastPeak), closeVsHighPercent: r1(((close - athHigh) / athHigh) * 100)},
-    ifRepeat: falls.map((f) => ({
-      like: f.peak, percent: f.percent,
-      fromAth: r0(athHigh * (1 + f.percent / 100)),
-      fromLatestClose: r0(close * (1 + f.percent / 100)),
-      athTargetVsLatestClosePercent: r1(((athHigh * (1 + f.percent / 100) - close) / close) * 100),
-    })),
+    latestPeak: {month: lastPeak, high: athHigh, highExact: r2(athExact), monthsSince: mnum(last.t) - mnum(lastPeak), closeVsHighPercent: r1(((close - athHigh) / athHigh) * 100)},
+    // Targets from the unrounded high and fall (before 2026-09-29 they multiplied the rounded 1933 by
+    // the rounded −28.9%, which put the 2018 repeat at 1374 instead of 1375 and 2022 at 1100, not 1099).
+    ifRepeat: falls.map((f) => {
+      const ratio = (f.lowExact - f.highExact) / f.highExact;   // the series is two-decimal, so this is exact
+      return {
+        like: f.peak, percent: f.percent, percentExact: f.percentExact,
+        fromAth: r0(athExact * (1 + ratio)),
+        fromLatestClose: r0(last.c * (1 + ratio)),
+        athTargetVsLatestClosePercent: r1(((athExact * (1 + ratio) - last.c) / last.c) * 100),
+      };
+    }),
   };
 };
 
@@ -702,9 +719,12 @@ const reel = {
   disclaimer: meta.disclaimer
     ?? 'Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.',
   // `ticker: daily` in the brief: the strip shows the latest REAL session from facts.daily
-  // instead of the reconstructed monthly close. `footer:` names the source when it is real.
+  // instead of the reconstructed monthly close.
   ...(meta.ticker === 'daily' ? {ticker: tickerFromDaily()} : {}),
-  ...(meta.footer ? {footer: meta.footer} : {}),
+  // The footer is the channel name, never a source line (user, 2026-09-29); `footer: false` hides it.
+  footer: meta.footer === 'false' ? false : (meta.footer ?? R.channel?.name ?? false),
+  // The mark beside that name on every scene; the outro ring shows the same file (channel.logo in the rules).
+  ...((meta.logo ?? R.channel?.logo) ? {logo: meta.logo ?? R.channel?.logo} : {}),
   scenes,
 };
 

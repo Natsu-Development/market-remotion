@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-09-30T08:20:21.425Z",
+  "fetchedAt": "2026-10-05T09:40:52.187Z",
   "_note": "names and conditions only, taken from GET /api/config/{id}.metrics_filter",
   "filters": [
     {
@@ -169,7 +169,7 @@
         {
           "field": "volume_sma20",
           "op": ">=",
-          "value": 1000000
+          "value": 2000000
         }
       ]
     },

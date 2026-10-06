@@ -1,0 +1,37 @@
+{
+  "_": "The ONE Facebook Page this skill posts to, read by scripts/publish/prep.mjs and scripts/publish/fb.py. There is no second Page: a reel that is not for Chứng Vịt has no business in this skill. The Chrome account that manages the Page is NOT here: it names a person, so it lives in the gitignored .publish-profile (or $PUBLISH_PROFILE), like .shoot-profile.",
+  "name": "Chứng Vịt",
+  "_name": "must equal channel.name in src/shared/content-rules.json and the reel's footer + outro brand; prep.mjs stops on any mismatch, since the name on screen is the name of the Page it lands on",
+  "pageId": "61594722910397",
+  "_pageId": "the Page named Chứng Vịt of the account in .publish-profile. 2026-10-01, first live run: the account switcher held exactly one 'Chứng Vịt', /me resolved to profile.php?id=61594722910397 with the duck cover and avatar and 0 followers — a NEW Page, not the old 61594310620177 (created as 'Cuộc sống sang chành' and meant to be renamed); the id here was corrected from that old one. fb.py whoami passes only when /me resolves to this id. The id is the whole check: for this Page the /me window title is just 'Facebook - <profile>', so a name-in-title check could never pass",
+  "draftsUrl": "https://business.facebook.com/latest/posts/draft_posts?asset_id=1251665218041026",
+  "_draftsUrl": "Business Suite's asset id for this Page is NOT the Page id: measured 2026-10-01 on the first saved draft — draft_posts?asset_id=61594722910397 shows 'nội dung này hiện không khả dụng', while opening draft_posts with no asset_id redirects to asset_id=1251665218041026 and lists the draft under Chứng Vịt. If the list ever errors, open the URL without asset_id and read the one Business Suite chooses. fb.py open drafts reads this field; nothing else repeats the id.",
+  "profileFile": ".publish-profile",
+  "caption": {
+    "tailTags": "#xuhuong #chungkhoan #chungvit",
+    "_tailTags": "the Page's fixed tail, same shape as video-factory's #xuhuong #review #chamreview: trend + category + brand. Changing it is the user's call",
+    "topicTags": 5,
+    "maxBodyChars": 125,
+    "callWords": [
+      "nên mua",
+      "nên bán",
+      "mua ngay",
+      "bán ngay",
+      "điểm mua",
+      "vào lệnh",
+      "vào hàng",
+      "gom ngay",
+      "chốt lời ngay",
+      "cắt lỗ ngay",
+      "cam kết",
+      "chắc chắn",
+      "lãi chắc",
+      "x2 tài khoản",
+      "ăn chắc",
+      "không thể bỏ lỡ"
+    ],
+    "_callWords": "a caption with any of these reads as an investment call; prep.mjs blocks it. Same reason verify FAILs a scenario scene without its if-then words"
+  },
+  "minSeconds": 10,
+  "_minSeconds": "the one floor left for Facebook Reels (video-factory reference/nghien-cuu-facebook.md §1, Help Center 09/2025)"
+}

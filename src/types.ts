@@ -34,7 +34,7 @@ export type ImageAnnotation =
   | {kind: 'line'; from: [number, number]; to: [number, number]; label?: string; labelAt?: 'from' | 'to'; dashed?: boolean; accent?: AccentName; beat?: number; until?: number}
   /** Free text at a photo point; `anchor: 'end'` right-aligns it there so a label near the right
    *  edge grows leftwards instead of running off the photo. */
-  | {kind: 'label'; x: number; y: number; text: string; anchor?: 'start' | 'middle' | 'end'; accent?: AccentName; beat?: number; until?: number}
+  | {kind: 'label'; x: number; y: number; text: string; anchor?: 'start' | 'middle' | 'end'; accent?: AccentName; beat?: number; until?: number; /** Scales the plate's type (1 = the 20 px label): a ticker standing in for a table's own column reads at the table's size. */ size?: number}
   /** Horizontal level (support / resistance) across the photo at fraction y; label at the right end. */
   | {kind: 'hline'; y: number; label?: string; labelSide?: 'left' | 'right'; accent?: AccentName; beat?: number; until?: number}
   /** Vertical marker (a date) across the photo at fraction x; label at the top. */
@@ -69,12 +69,55 @@ export type LinePane = {
   max?: number;
 };
 
-/** One ranked column of a `movers` panel: up to five names with their change and volume ratio. */
+/**
+ * One ranked column of a `movers` panel: up to ten names. `metric` picks the big figure of each row —
+ * the day's change (default; the volume under it: `volumeVsSma20Percent` as "KL +92%" when present, the
+ * Volume spike board since 2026-10-01 evening, else `volumeRatio` as "KL ×1,92") or the RS 1M rating
+ * (the change under it).
+ * Five rows or fewer get the two-line row; six to ten the one-line row (user 2026-10-01).
+ */
 export type MoverColumn = {
   title: string;
   accent?: AccentName;
-  rows: {symbol: string; name?: string; changePercent: number; volumeRatio?: number; price?: number}[];
+  metric?: 'change' | 'rs';
+  /** Rank printed on the first row (default 1): a right column that continues a ranking starts at 6. */
+  startRank?: number;
+  rows: {symbol: string; name?: string; changePercent: number; volumeRatio?: number; volumeVsSma20Percent?: number; price?: number; rs1m?: number}[];
 };
+
+/**
+ * The figures a filter `board` may print besides rank and ticker, always laid out in this order: price, the
+ * day's change, RS 1M (figure + bar), then up to two of the rest. RS Strong shows RS 52W and volume vs its
+ * 20-session average; Uptrend shows how far price sits above EMA50 and SMA200 — what that filter tests.
+ */
+export type BoardColumn = 'price' | 'change' | 'rs1m' | 'rs52w' | 'volume' | 'aboveEma50' | 'aboveSma200';
+
+/**
+ * One row of a filter board: the terminal's own figures, from the fact pack. `focus` = a name the reel reviews
+ * next (a leader scene or a name the user asked for on the review page): marked once the rows have landed and lit
+ * on the focus beat, the same way on every board (user 2026-10-05: "decoration and animation with the symbol need
+ * focused"). A board never says which other filter a name is in ("Not need mentioned the stock on specific filter
+ * existed on other filter") — the `both`/`all3` highlight of 2026-10-01 is gone.
+ */
+export type BoardRow = {
+  symbol: string;
+  /** Thousand đồng, as the terminal quotes it. */
+  price?: number;
+  changePercent: number;
+  rs1m: number;
+  rs52w?: number;
+  /** (volume − SMA20) / SMA20 × 100, whole percent — "+92%". */
+  volumeVsSma20Percent?: number;
+  aboveEma50Percent?: number;
+  aboveSma200Percent?: number;
+  focus?: boolean;
+};
+
+/**
+ * What a later beat brings forward: `set: 'focus'` lights the rows marked `focus`, `dim` fades the rest, `label` is
+ * the plate that says it ("Xem kỹ: MSR · DGW").
+ */
+export type BoardEmphasis = {beat: number; set: 'focus'; dim?: boolean; label?: string};
 
 export type Visual =
   /** Candlesticks inside a log price channel, with touch markers. */
@@ -108,6 +151,12 @@ export type Visual =
   | {type: 'pictogram'; rows: number; columns: number; filledPercent: number; accent: AccentName; glyph?: 'person' | 'dot'}
   | {type: 'lines'; caption?: string; top: LinePane; bottom: LinePane; events?: {t: string; label?: string; accent?: AccentName}[]}
   | {type: 'movers'; caption?: string; left: MoverColumn; right: MoverColumn}
+  /**
+   * One saved screener filter as a ranked table (market-review rs/uptrend, user 2026-10-01 evening: "must have
+   * the RS1M column, price change & more info"): up to ten rows in the chart panel's box. Beat 1 the rows come in
+   * and the focus rows get their mark; the `emphasis` lights the focus rows on its beat.
+   */
+  | {type: 'board'; caption?: string; columns: BoardColumn[]; rows: BoardRow[]; startRank?: number; emphasis?: BoardEmphasis[]}
   /** Two labelled bars that race to their percentage. */
   | {type: 'bars'; bars: {label: string; percent: number; accent: AccentName}[]}
   /** Icon + text rows that reveal in sequence. */
@@ -225,6 +274,11 @@ export type Reel = {
    * the source here only when the series really came from it.
    */
   footer?: false | string;
+  /**
+   * Channel mark printed beside the footer name on every scene, path under public/ (the outro
+   * ring shows the same file). Without it the footer carries a small gold dot instead.
+   */
+  logo?: string;
   /** Optional bed music under the whole reel, path under public/. */
   music?: string;
   musicVolume?: number;

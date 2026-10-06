@@ -10,6 +10,7 @@
  *   npm run review-page -- Channel --notes=<file.json>     director verdicts (default: <out>/notes.json)
  *   npm run review-page -- Channel --no-stills             reuse the stills already in the folder
  *   npm run review-page -- Channel --out=<dir>
+ *   npm run review-page -- Channel --video=video/x.mp4 [--video-note="…"]   embed a rendered preview (a file under <out>)
  *
  * Stills come from `npx remotion still <Id>` for every beat — the last one 1.5s in (later when its marks
  * need longer to finish drawing) as
@@ -175,8 +176,15 @@ const panelText = (vis) => {
     case 'movers': {
       for (const side of ['left', 'right']) {
         const col = vis[side];
-        if (col) p.push(`${esc(col.title)}: ${(col.rows ?? []).map((r) => `${esc(r.symbol)} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%${r.volumeRatio != null ? ` (KL ×${num(r.volumeRatio)})` : ''}`).join(' · ')}`);
+        if (col) p.push(`${esc(col.title)}: ${(col.rows ?? []).map((r) => `${esc(r.symbol)}${r.rs1m != null ? ` RS1M ${num(r.rs1m)}` : ''} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%${r.volumeVsSma20Percent != null ? ` (KL ${r.volumeVsSma20Percent >= 0 ? '+' : ''}${num(r.volumeVsSma20Percent)}% so SMA20)` : r.volumeRatio != null ? ` (KL ×${num(r.volumeRatio)})` : ''}`).join(' · ')}`);
       }
+      break;
+    }
+    case 'board': {
+      // market-review's filter table (FilterBoard.tsx): ◎ = a name the reel reviews next (focus, lit on its beat).
+      p.push(`Cột: ${(vis.columns ?? []).map(esc).join(' · ')}`);
+      p.push((vis.rows ?? []).map((r) => `${r.focus ? '◎' : ''}${esc(r.symbol)} RS1M ${num(r.rs1m)} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%`).join(' · '));
+      for (const e of vis.emphasis ?? []) p.push(`beat ${e.beat + 1}: ${esc(e.set)}${e.dim ? ' (dòng khác mờ)' : ''}${e.label ? ` — «${esc(e.label)}»` : ''}`);
       break;
     }
     case 'lines': {
@@ -288,6 +296,119 @@ const conclusion = Array.isArray(notes._conclusion) ? notes._conclusion : [];
 const summary = notes._summary
   ?? 'Đây là điểm dừng duy nhất trước khi lồng tiếng và render. Đọc lời từng scene thành tiếng như người xem sẽ nghe, nhìn khung hình, đọc phần "fact pack không đỡ được", rồi trả lời: duyệt · sửa scene nào, đổi gì · bỏ.';
 const now = new Date();
+// A rendered preview to watch on the page (a file under the out folder, published beside the stills).
+const VIDEO = opt('video') && existsSync(resolve(OUT, opt('video'))) ? opt('video') : null;
+if (opt('video') && !VIDEO) console.warn(`--video=${opt('video')}: no such file under ${OUT.replace(ROOT + '/', '')} — page built without it`);
+
+// "Soi thêm mã" (user 2026-10-05: "edit for me i can choose and fill the symbol on the artifact to review beside existed
+// symbol on 3 filter"): on a market-review reel the page lets its owner type extra tickers. They are saved in the
+// artifact's own db (doc requests/<edition>: {edition, symbols, done, updatedAt}) — the page is published with
+// capabilities {db: {}, user: {}} — and the director reads them back with ArtifactData on the next run, writes
+// content/review/requests/<edition>.json, and the reel gets one `pick` scene per ticker after the filter leaders.
+// The page renders without the db (outside claude.ai) and says so; it never writes on load.
+const picksEdition = reel.rules && facts?.screener?.leaders ? (facts.session?.date ?? reel.edition ?? null) : null;
+const picksTaken = picksEdition ? (facts.screener.leaders.top ?? []).map((x) => x.symbol) : [];
+const picksMax = R.screener?.requested?.max ?? 3;
+const picksUni = picksEdition ? (readJson(`.review-cache/${picksEdition}-universe.json`)?.stocks ?? []) : [];
+const picksValid = picksUni.map((x) => x.symbol).filter((sym) => /^[A-Z0-9]{3}$/.test(sym)).sort();
+// Every stock in at least rules.screener.requested.listMinFilters of the three saved filters (user 2026-10-05: "If have
+// better 2 symbols, display all of it so can i select it to review by inputing the text", then "Option 2, listing it existed
+// on what filter for me"), each row naming its filters; the full members come from the session's snapshot (the pack keeps
+// only the top rows). Most filters first, then RS 1M; the reel's own reviews are tagged.
+const picksRow = new Map(picksUni.map((x) => [x.symbol, x]));
+const picksMembers = picksEdition ? (readJson(`content/review/snapshots/${picksEdition}.json`)?.members ?? {}) : {};
+const picksScenes = Object.keys(R.screener?.scenes ?? {}).filter((k) => Array.isArray(picksMembers[k]));
+const picksMin = R.screener?.requested?.listMinFilters ?? 2;
+const picksPool = [...new Set(picksScenes.flatMap((k) => picksMembers[k]))]
+  .map((sym) => {
+    const u = picksRow.get(sym) ?? {};
+    const filters = picksScenes.filter((k) => picksMembers[k].includes(sym)).map((k) => R.screener.scenes[k].photo ?? k);
+    return {sym, filters, rs1m: u.rs_1m ?? null, change: u.price_change_pct ?? null, reviewed: picksTaken.includes(sym)};
+  })
+  .filter((r) => r.filters.length >= picksMin)
+  .sort((a, b) => b.filters.length - a.filters.length || (b.rs1m ?? -1) - (a.rs1m ?? -1) || a.sym.localeCompare(b.sym));
+const fmtSigned = (n) => (n == null ? '—' : `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(2).replace('.', ',')}%`);
+const picksBlock = picksEdition ? `<section class="card picks" id="picks" data-edition="${esc(picksEdition)}" data-max="${picksMax}" data-taken="${esc(picksTaken.join(','))}">
+    <h3>Soi thêm mã</h3>
+    <p class="sub">Các mã có mặt ở từ ${picksMin} trong ${picksScenes.length || 3} bộ lọc của phiên (cột Bộ lọc ghi mã ở bộ lọc nào) — reel đã soi ${picksTaken.length ? esc(picksTaken.join(' và ')) : 'các mã đầu bảng'}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(picksTaken.join(' và ')) : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>
+    ${picksPool.length ? `<table class="pick-pool">
+      <thead><tr><th>Mã</th><th>Bộ lọc</th><th class="num">RS 1M</th><th class="num">% phiên</th><th></th></tr></thead>
+      <tbody>${picksPool.map((r) => `<tr${r.reviewed ? ' class="reviewed"' : ''}><td class="sym">${esc(r.sym)}</td><td class="pick-filters">${r.filters.map((f) => `<span class="pick-filter">${esc(f)}</span>`).join('')}${r.filters.length === picksScenes.length ? '<span class="pick-all">cả ba</span>' : ''}</td><td class="num">${r.rs1m ?? '—'}</td><td class="num ${r.change >= 0 ? 'up' : 'down'}">${esc(fmtSigned(r.change))}</td><td>${r.reviewed ? '<span class="pick-tag">đã soi</span>' : ''}</td></tr>`).join('')}</tbody>
+    </table>` : ''}
+    <form id="pick-form" class="pick-form" autocomplete="off" hidden>
+      <input id="pick-input" maxlength="3" placeholder="VD: PVT" aria-label="Mã cổ phiếu muốn soi thêm" spellcheck="false" autocapitalize="characters">
+      <button type="submit">Thêm</button>
+    </form>
+    <ul id="pick-list" class="pick-list"></ul>
+    <p id="pick-status" class="meta" aria-live="polite">Mở trang này trên claude.ai để chọn mã soi thêm.</p>
+    <script type="application/json" id="pick-valid">${JSON.stringify(picksValid)}</script>
+  </section>` : '';
+const picksScript = picksEdition ? `<script>
+(async function () {
+  var box = document.getElementById('picks');
+  if (!box) return;
+  var edition = box.dataset.edition, max = Number(box.dataset.max) || 3;
+  var taken = box.dataset.taken ? box.dataset.taken.split(',') : [];
+  var valid = new Set(JSON.parse((document.getElementById('pick-valid') || {}).textContent || '[]'));
+  var form = document.getElementById('pick-form'), input = document.getElementById('pick-input');
+  var list = document.getElementById('pick-list'), status = document.getElementById('pick-status');
+  var symbols = [], done = [], canWrite = false, busy = false, ref = null;
+  function say(t) { status.textContent = t; }
+  function render() {
+    list.replaceChildren.apply(list, symbols.map(function (sym) {
+      var li = document.createElement('li');
+      li.className = 'pick-chip' + (done.indexOf(sym) >= 0 ? ' done' : '');
+      var b = document.createElement('b'); b.textContent = sym; li.appendChild(b);
+      var st = document.createElement('span'); st.textContent = done.indexOf(sym) >= 0 ? 'đã có scene' : 'chờ soi'; li.appendChild(st);
+      if (canWrite) {
+        var x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Bỏ ' + sym);
+        x.addEventListener('click', function () { save(symbols.filter(function (t) { return t !== sym; })); });
+        li.appendChild(x);
+      }
+      return li;
+    }));
+    form.hidden = !canWrite;
+    input.disabled = !canWrite || symbols.length >= max;
+  }
+  async function save(next) {
+    if (busy || !ref) return;
+    busy = true; say('Đang lưu…');
+    try {
+      await ref.set({edition: edition, symbols: next, done: done.filter(function (t) { return next.indexOf(t) >= 0; }), updatedAt: new Date().toISOString()});
+    } catch (e) {
+      if (e && e.code === 'invalid_argument') { canWrite = false; render(); say('Trang này chỉ xem — không lưu được danh sách.'); }
+      else say('Chưa lưu được (' + ((e && e.code) || 'lỗi') + '). Thử lại sau giây lát.');
+    } finally { busy = false; }
+  }
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var sym = input.value.trim().toUpperCase();
+    if (!/^[A-Z0-9]{3}$/.test(sym)) return say('Mã gồm 3 ký tự, ví dụ FPT.');
+    if (valid.size && !valid.has(sym)) return say(sym + ' không có trong danh sách mã của phiên ' + edition + '.');
+    if (taken.indexOf(sym) >= 0) return say(sym + ' đã có scene soi mã từ ba bộ lọc.');
+    if (symbols.indexOf(sym) >= 0) return say(sym + ' đã có trong danh sách.');
+    if (symbols.length >= max) return say('Tối đa ' + max + ' mã.');
+    input.value = '';
+    save(symbols.concat([sym]));
+  });
+  var api = window.claude && window.claude.use ? window.claude : null;
+  var db = api ? await api.use('db') : null;
+  if (!db) return;
+  var user = await api.use('user');
+  var can = user ? await user.can('data.write') : null;
+  canWrite = can !== false;
+  ref = db.doc('requests/' + edition);
+  say(canWrite ? 'Chưa có mã nào.' : 'Chỉ xem.');
+  render();
+  ref.onSnapshot(function (snap) {
+    var d = snap.exists ? snap.data() : {};
+    symbols = Array.isArray(d.symbols) ? d.symbols.slice() : [];
+    done = Array.isArray(d.done) ? d.done.slice() : [];
+    render();
+    if (!busy) say(symbols.length ? (canWrite ? 'Đã lưu. Nhắn Claude "soi thêm mã" (hoặc "tiếp") để thêm scene.' : 'Danh sách mã soi thêm.') : (canWrite ? 'Chưa có mã nào.' : 'Chỉ xem.'));
+  }, function (e) { say('Không đọc được danh sách (' + ((e && e.code) || 'lỗi') + ').'); });
+})();
+</script>` : '';
 
 const html = `<title>Duyệt reel ${esc(id)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -382,6 +503,24 @@ td.fix{color:var(--ink-2);font-size:13px}
 details summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--ink-2)}
 @media (max-width:720px){.scene{grid-template-columns:1fr}.still{max-width:260px}.verdict{margin-left:0}.cmp-row,.cmp-head{grid-template-columns:1fr}}
 a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.picks{margin:0 0 28px}
+.pick-form{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.pick-form input{font:600 16px "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.06em;width:12ch;padding:8px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink)}
+.pick-form button{font:600 14px "Be Vietnam Pro",system-ui,sans-serif;padding:8px 16px;border-radius:8px;border:0;background:var(--gold);color:var(--surface);cursor:pointer}
+.pick-form input:focus-visible,.pick-form button:focus-visible,.pick-chip button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.pick-list{list-style:none;margin:0 0 8px;padding:0;display:flex;gap:8px;flex-wrap:wrap}
+.pick-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--chip);font-size:13px;color:var(--ink-2)}
+.pick-chip b{font-family:"JetBrains Mono",monospace;color:var(--ink);letter-spacing:.04em}
+.pick-chip.done{background:var(--pass-soft)}
+.pick-chip button{border:0;background:transparent;color:var(--ink-3);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+.pick-pool{margin:0 0 16px;max-width:640px}
+.pick-filters{display:flex;gap:6px;flex-wrap:wrap}
+.pick-filter{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--ink-2);white-space:nowrap}
+.pick-all{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--gold-soft);color:var(--gold)}
+.pick-pool td.sym{font-family:"JetBrains Mono",monospace;font-weight:700;letter-spacing:.04em}
+.pick-pool td.up{color:var(--pass)} .pick-pool td.down{color:var(--fail)}
+.pick-pool tr.reviewed td{color:var(--ink-3)}
+.pick-tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--pass-soft);color:var(--pass)}
 </style>
 <div class="wrap">
   <div class="rule"></div>
@@ -398,10 +537,18 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
     <div class="tile"><span class="k">Nguồn</span><span class="v small">Số: ${esc(srcLabel)}${reconstructed ? ' · <b>CHUỖI DỰNG LẠI</b>' : ''}${facts?.daily ? ' · zionle.io.vn (ngày)' : ''}${imgSources.length ? ` · ảnh: ${imgSources.map(esc).join(', ')}` : ''}${drawn.length ? ` · chart VẼ: ${drawn.map(esc).join(', ')}` : ''}</span></div>
   </div>
 
+  ${VIDEO ? `<section class="card" style="margin:0 0 28px">
+    <h3>Video — xem như trên điện thoại</h3>
+    <video controls playsinline preload="metadata" src="${esc(VIDEO)}" style="display:block;width:100%;max-width:360px;aspect-ratio:9/16;border-radius:10px;background:#000"></video>
+    ${opt('video-note') ? `<p class="meta" style="margin:10px 0 0">${esc(opt('video-note'))}</p>` : ''}
+  </section>` : ''}
+
   ${conclusion.length ? `<section class="card">
     <h3>Kết luận của đạo diễn</h3>
     <ul class="fixes">${conclusion.map((c) => `<li><span class="sev ${LEVEL[c.level]?.[1] ?? 'pass'}">${esc(c.tag ?? '')}</span><span>${esc(c.text ?? '')}</span></li>`).join('')}</ul>
   </section>` : ''}
+
+  ${picksBlock}
 
   ${reel.unsupported?.length ? `<section>
     <h3>Ý đồ mà fact pack không đỡ được — đọc trước khi duyệt</h3>
@@ -455,10 +602,12 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
 
   <p class="foot">Sinh ${esc(now.toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'}))} từ <code>${esc(path)}</code>${facts ? `, <code>content/${esc(name)}.facts.json</code> (${esc(srcLabel)}${facts.source?.fetchedAt ? `, tải ${esc(facts.source.fetchedAt.slice(0, 16).replace('T', ' '))} UTC` : ''})` : ''}${brief ? ` và <code>brief/${esc(name)}.md</code>` : ''}. Khung hình: <code>npx remotion still ${esc(id)}</code> cuối mỗi beat (beat cuối: +1,5s, hoặc tới khi mark cuối vẽ xong), thu nhỏ 50%. Không phải khuyến nghị đầu tư.</p>
 </div>
+${picksScript}
 `;
 
 writeFileSync(resolve(OUT, 'index.html'), html);
 const files = Object.fromEntries(frames.flatMap((f) => f.stills).filter((st) => existsSync(resolve(STILLS, st.file))).map((st) => [`stills/${st.file}`, `stills/${st.file}`]));
+if (VIDEO) files[VIDEO] = VIDEO;
 writeFileSync(resolve(OUT, 'files.json'), JSON.stringify(files, null, 1));
 console.log(`wrote ${resolve(OUT, 'index.html').replace(ROOT + '/', '')} (${html.length} chars) · ${Object.keys(files).length} still(s)`);
 console.log(`publish: Artifact file_path=${OUT.replace(ROOT + '/', '')}/index.html root=${OUT.replace(ROOT + '/', '')} files=<files.json>`);

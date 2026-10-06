@@ -51,6 +51,9 @@ npm run build -- --frames=0-450  # render one scene while iterating
 npm run review-page -- Channel   # review page + stills → out/review/channel/, published as an Artifact for approval
 npm run voiceover -- --force     # re-synthesize after editing narration text
 npm run voiceover -- --force --only=channel-evidence-4   # ...only that scene; the rest keep their track
+../video-factory/.venv/bin/python scripts/tts_takes.py   # key lines, decimals ("phẩy") and acronyms (MACD): record N takes,
+                                                        # keep the clearest, most expressive one (voice.pace marks the key lines)
+npm run voiceover -- --reassemble --only=channel-evidence-4   # rebuild that track from the picked takes, no re-synthesis
 npm run voiceover -- --voice=Linh --rate=150
 ```
 
@@ -109,6 +112,13 @@ node scripts/fetch-market.mjs --symbol=FPT --signals      # daily bars → month
 whole process: pull the numbers, write the content JSON, voice it, render it, and the four
 manual checks nothing in the pipeline enforces. It is written in Vietnamese to match the
 sibling `video-factory` repo.
+
+Three more skills sit next to it. `/market-review` makes the session review (`DailyReview`) and
+`/weekly-review` makes the week's (`WeeklyReview`). They share one rules file, one writer prompt and
+`scripts/review/` (`--format=daily|weekly`). The daily reel has FireAnt's advancers/decliners and
+money-flow charts as scene 02, right after the hook (the hook no longer reads the advancers/decliners); only the weekly reel has the breadth line (share of
+stocks above SMA200). `/publish-video` uploads a rendered reel to the
+channel's Facebook Page as a draft.
 
 ---
 
@@ -175,8 +185,9 @@ Accents are `gold`, `red`, `green`, `white`.
 
 ## Making it yours
 
-- **Branding.** `content/channel.json` ships with the placeholder brand
-  `Kênh của bạn` and a generated monogram. Put your mark in `public/` and set
+- **Branding.** The channel is `Chứng Vịt` (`channel.name` in
+  `src/shared/content-rules.json`, renamed 2026-09-30): it is the footer under every headline and
+  the outro brand, with a generated `CĐ` monogram. Put your mark in `public/` and set
   `visual.logo` on the outro scene — the monogram and the duplicate brand line
   both disappear in favour of your image.
 - **Real prices.** `content/vnindex-monthly.json` is real SSI iBoard data (daily

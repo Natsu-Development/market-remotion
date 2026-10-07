@@ -71,8 +71,9 @@ def words_of(tsv: str, x0: int, y0: int, k: float):
 
 
 def dominant_colour(x0, y0, x1, y1):
-    """The most saturated colour among the bright pixels of a text box — the plot colour of a legend value."""
-    box = A[int(y0):int(y1), int(x0):int(x1)].reshape(-1, 3)
+    """The most saturated colour among the bright pixels of a text box — the plot colour of a legend value (a dotted
+    last-price line through the box is not part of it)."""
+    box = without_dotted_lines(A)[int(y0):int(y1), int(x0):int(x1)].reshape(-1, 3)
     if not len(box):
         return None
     sat = box.max(axis=1) - box.min(axis=1)
@@ -111,7 +112,7 @@ def reread_dark(bx, by, bw, bh, tag):
     the background, where luminance loses green and red text (measured 2026-10-01: C58.60, L54.30,
     +5.97% and 3.989M read right this way; inverted luminance missed them)."""
     box = (max(0, int(bx) - 2), max(0, int(by) - 2), min(W, int(bx + bw) + 3), min(H, int(by + bh) + 3))
-    v = A[box[1]:box[3], box[0]:box[2]].max(axis=2).astype(np.uint8)
+    v = without_dotted_lines(A)[box[1]:box[3], box[0]:box[2]].max(axis=2).astype(np.uint8)
     g = Image.fromarray(v).resize(((box[2] - box[0]) * 6, (box[3] - box[1]) * 6), Image.LANCZOS).point(lambda p: 0 if p > 90 else 255)
     return ocr_box(ImageOps.expand(g, border=24, fill=255), tag)
 
@@ -148,7 +149,71 @@ def consensus(readings):
 TITLE_X = (71, 250)
 
 
+def hue_of(c):
+    """A colour's hue as its channels scaled to 0..1 between its own min and max: (239,58,66) and the dim (131,44,52)
+    of the same red behind the legend's backdrop are both ~(1, 0, 0.05)."""
+    c = np.asarray(c, dtype=float)
+    lo, hi = c.min(axis=-1, keepdims=True), c.max(axis=-1, keepdims=True)
+    return (c - lo) / np.maximum(hi - lo, 1)
+
+
+def dotted_rows(arr, y0, y1):
+    """Pixel rows of the legend band that a dotted last-price line crosses, as (y, hue). The stripe can run just UNDER a
+    row's text and miss the title area: PVT 7/10, close 24.85, a teal line at y 197 under "MA Cross … 21.01 20.07" —
+    tesseract read its dashes as "Bo ccccesss…" past the values, the title seemed to end there and both values were lost.
+    Such a row is 60+ dashes of at most 5 px over most of the pane, one hue (PVT: 161 dashes, x 62–971, period 3 px;
+    DGW 6/10: 250). A text row gives about 40 dashes over 270 px (DGW's red OHLC header); candles alternate hues."""
+    found = []
+    px0, px1 = PANE_X
+    for yy in range(y0, y1):
+        row = arr[yy, px0:px1]
+        hot = ((row.max(axis=1) - row.min(axis=1)) > 60) & (row.max(axis=1) > 90)
+        if hot.sum() < 60:
+            continue
+        edges = np.diff(np.concatenate(([0], hot.astype(int), [0])))
+        starts, ends = np.where(edges == 1)[0], np.where(edges == -1)[0]
+        lens = ends - starts
+        if len(lens) < 60 or (lens <= 5).mean() < 0.9 or starts[-1] - starts[0] < 0.6 * (px1 - px0):
+            continue
+        hue = hue_of(np.median(row[hot], axis=0))
+        if (np.abs(hue_of(row[hot]) - hue).sum(axis=1) < 0.35).mean() < 0.85:
+            continue
+        found.append((yy, hue))
+    return found
+
+
+def without_dotted_lines(arr):
+    """FireAnt's last-price line is a dotted stripe in the close's colour. When the close sits at a legend row's height
+    it runs THROUGH the row, and tesseract reads its dashes as dots, digits and letters: DGW 6/10, close 47.75 across
+    "MA Cross … 50 200 41.28 41.45" → "…4.1.28.41.45 21. esssccss…" and no value (2026-10-06). A pixel row of the legend
+    box where saturated pixels cover an eighth or more of the title area (the DGW stripe: 19,6%) is that stripe — the
+    titles are grey, nothing else there is saturated. Its pixels, on that row and the rows next to it, across the whole
+    pane width, take the row's background when they have the stripe's HUE: the stripe is dim (131,44,52) over the
+    legend's backdrop and full (239,58,66) past it. The values' own hues (green MA50, orange MA200) stay."""
+    out = arr.copy()
+    x0, y0, x1, y1 = LEGEND
+    x1 = PANE_X[1]
+    y1 = min(y1, out.shape[0])
+    title = out[y0:y1, TITLE_X[0]:TITLE_X[1]]
+    sat = title.max(axis=2) - title.min(axis=2)
+    hot = (sat > 60) & (title.max(axis=2) > 90)
+    stripes = {y0 + k: hue_of(np.median(title[k][hot[k]], axis=0)) for k in np.where(hot.mean(axis=1) >= 0.12)[0]}
+    for y, hue in dotted_rows(arr, y0, y1):
+        stripes.setdefault(y, hue)
+    for y, hue in sorted(stripes.items()):
+        for yy in (y - 1, y, y + 1):
+            if not 0 <= yy < out.shape[0]:
+                continue
+            row = out[yy, x0:x1]
+            dark = row.max(axis=1) < 60
+            bg = np.median(row[dark], axis=0) if dark.any() else np.array([19, 23, 34])
+            coloured = ((row.max(axis=1) - row.min(axis=1)) > 40) & (row.max(axis=1) > 70)
+            row[coloured & (np.abs(hue_of(row) - hue).sum(axis=1) < 0.35)] = bg
+    return out
+
+
 def legend_rows_of(arr, im):
+    arr = without_dotted_lines(arr)
     lum = arr.mean(axis=2)
     sat = arr.max(axis=2) - arr.min(axis=2)
     grey = (lum > 150) & (sat < 45)

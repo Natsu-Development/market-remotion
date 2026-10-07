@@ -134,7 +134,18 @@ if (REBUILD) {
 
 // ------------------------------------------------------------------ 2–4. cache stamp, saved filters, universe, filter lists
 
-const needed = [...new Set(Object.values(R.screener.scenes).flatMap((s) => [...s.filters, s.photo]))];
+// The shared scenes (rules.screener.scenes — the daily's three) and every format's own (rules.formats.<format>.screener
+// .scenes — the weekly's Momentum breakout / breakdown, user 2026-10-06): all pulled into the one session snapshot, so
+// either edition can be built from it; only the format that lists a scene builds it.
+const formatScenes = {};
+for (const [fname, f] of Object.entries(R.formats)) {
+  for (const [k, spec] of Object.entries(f.screener?.scenes ?? {})) {
+    if (R.screener.scenes[k] || (formatScenes[k] && formatScenes[k] !== spec)) die(`rules.formats.${fname}.screener.scenes.${k}: the scene key is already taken — keys are scene ids and snapshot keys`);
+    formatScenes[k] = spec;
+  }
+}
+const allScenes = {...R.screener.scenes, ...formatScenes};
+const needed = [...new Set(Object.values(allScenes).flatMap((s) => [...s.filters, s.photo]))];
 const pick = ({name, match, negate, conditions, groups, exchanges}) => ({name, match, ...(negate ? {negate} : {}), ...(conditions ? {conditions} : {}), ...(groups ? {groups} : {}), ...(exchanges ? {exchanges} : {})});
 let info;
 let saved;
@@ -149,10 +160,17 @@ if (REBUILD) {
   if (!universe.length) die(`--rebuild: the cached universe for ${session} is empty`);
   info = {cached_at: cached.cachedAt ?? prior.cachedAt, total_stocks: universe.length};
   saved = (tryJson(PATHS.filters)?.filters ?? die(`--rebuild: no ${PATHS.filters} — it is written by an online pull`)).map(pick);
+  // A filter the snapshot never pulled (the weekly's Momentum filters before 2026-10-06) may come from a capture of the
+  // SAME cache stamp: .review-cache/<date>-filters-server.json {cachedAt, lists: {name: [symbols]}} — the director saved
+  // every saved filter's server list at the 5/10 close before the terminal's 12:00 refresh replaced it.
+  const capture = tryJson(`${PATHS.cache}/${session}-filters-server.json`);
+  const captureOk = capture?.cachedAt && capture.cachedAt === info.cached_at;
   for (const name of needed) {
     const f = prior.filters?.[name];
-    if (!f) die(`--rebuild: the ${session} snapshot has no server list for "${name}" — that filter was never pulled; run pull.mjs online after the next close`);
-    server[name] = f.symbols;
+    const listed = f?.symbols ?? (captureOk ? capture.lists?.[name] : null);
+    if (!listed) die(`--rebuild: the ${session} snapshot has no server list for "${name}" — that filter was never pulled${capture && !captureOk ? ` (${PATHS.cache}/${session}-filters-server.json is of another cache stamp)` : ''}; run pull.mjs online after the next close`);
+    if (!f) log(`  ${name}: server list from ${PATHS.cache}/${session}-filters-server.json (same cache stamp, fetched ${capture.fetchedAt})`);
+    server[name] = listed;
   }
   const c = ict(new Date(info.cached_at));
   log(`screener cache ${c.date} ${c.hm} ICT, ${universe.length} stocks — reused from ${PATHS.cache}/${session}-universe.json`);
@@ -246,7 +264,7 @@ const ranked = (rows, by) => {
 };
 const picks = {};
 const members = {};
-for (const [scene, spec] of Object.entries(R.screener.scenes)) {
+for (const [scene, spec] of Object.entries(allScenes)) {
   const sets = spec.filters.map((n) => new Set(server[n]));
   const inAll = [...sets[0]].filter((sym) => sets.every((s) => s.has(sym)));
   // A moving average of 0 means "not computable yet" (new listing), not "below the price".
@@ -276,6 +294,34 @@ for (const [i, tier] of tiers.entries()) {
 members.leaders = leaderOrder;
 picks.leaders = leaderOrder.slice(0, L.top ?? 2);
 
+// A format's own reviews (rules.formats.<format>.screener.leaders — the weekly's "Top of each filter", user 2026-10-06):
+// tiers of that format's scene keys; inside a tier ranked by sortBy, at most `perTier` names taken, a name already taken
+// by an earlier tier skipped, `top` in all. `order: "tier"` = the reel plays them in tier order, each right after its own
+// board. members = every tier name (first tier wins), picks = the reviews; tierScene = the board a pick came from.
+const leadersByFormat = {};
+for (const [fname, f] of Object.entries(R.formats)) {
+  const FL = f.screener?.leaders;
+  if (!FL) continue;
+  const ftiers = Array.isArray(FL.from) && FL.from.some(Array.isArray) ? FL.from.map((t) => [].concat(t)) : [[].concat(FL.from)];
+  const pool = [];
+  const poolTier = {};
+  const fpicks = [];
+  const pickTier = {};
+  const tierScene = {};
+  for (const [i, tier] of ftiers.entries()) {
+    for (const k of tier) if (!members[k]) die(`rules.formats.${fname}.screener.leaders.from names "${k}", which is not a screener scene (${Object.keys(allScenes).join(', ')})`);
+    const names = ranked(members[tier[0]].filter((sym) => tier.every((k) => members[k].includes(sym))).map((sym) => bySymbol.get(sym)).filter((s) => s && maOk(s)), FL.sortBy ?? 'rs_1m').map((s) => s.symbol);
+    for (const sym of names) if (poolTier[sym] === undefined) { poolTier[sym] = i + 1; pool.push(sym); }
+    for (const sym of names.filter((s) => !fpicks.includes(s)).slice(0, FL.perTier ?? Infinity)) {
+      if (fpicks.length >= (FL.top ?? 2)) break;
+      fpicks.push(sym);
+      pickTier[sym] = i + 1;
+      tierScene[sym] = tier.length === 1 ? tier[0] : null;
+    }
+  }
+  leadersByFormat[fname] = {from: ftiers, perTier: FL.perTier ?? null, sortBy: FL.sortBy ?? 'rs_1m', top: FL.top ?? 2, order: FL.order ?? null, members: pool, picks: fpicks, tierOf: pickTier, poolTierOf: poolTier, tierScene};
+}
+
 const keep = new Set([...Object.values(members).flat()]);
 const compact = compactRow;
 // A moving average of 0 means the server could not compute it (new listing), so the shares are
@@ -295,7 +341,7 @@ const breadth = {
 // ------------------------------------------------------------------ leaders' charts (GET)
 
 const analyzed = {};
-for (const sym of picks.leaders) {
+for (const sym of [...new Set([...picks.leaders, ...Object.values(leadersByFormat).flatMap((x) => x.picks)])]) {
   const rel = `${PATHS.analyze}/${session}/${sym}.json`;
   if (REBUILD) {
     if (exists(rel)) analyzed[sym] = rel;
@@ -333,6 +379,7 @@ const snapshot = {
   members,
   picks,
   leaders: {from: tiers, sortBy: L.sortBy ?? 'rs_1m', top: L.top ?? 2, tierOf},
+  ...(Object.keys(leadersByFormat).length ? {leadersByFormat} : {}),
   breadth,
   analyze: analyzed,
   fireant,
@@ -343,5 +390,6 @@ const snapRel = writeJson(`${PATHS.snapshots}/${session}.json`, snapshot);
 log(`filters  ${needed.map((n) => `${n} ${server[n].length} (local agree ${agree[n]})`).join(' · ')}`);
 log(`         volume_vs_sma reads as a ${volumeVsSmaUnit ?? '?'}`);
 for (const [scene, list] of Object.entries(picks)) log(`${scene.padEnd(8)} ${members[scene].length} names · top ${list.join(', ') || '—'}${scene === 'leaders' ? ` (tiers ${tiers.map((t) => t.join(' ∩ ')).join(' → ')}, by ${L.sortBy ?? 'rs_1m'}; tier of each: ${list.map((s) => `${s}:${tierOf[s]}`).join(' ')})` : ''}`);
+for (const [fname, x] of Object.entries(leadersByFormat)) log(`${fname.padEnd(8)} reviews ${x.picks.map((s) => `${s} (${x.tierScene[s] ?? `tier ${x.tierOf[s]}`})`).join(', ') || '—'} — ${x.perTier ?? 'all'} a tier from ${x.from.map((t) => t.join(' ∩ ')).join(' → ')}, by ${x.sortBy}, order ${x.order ?? 'rank'}`);
 log(`breadth  ${breadth.up} up · ${breadth.down} down · ${breadth.aboveSma200}/${breadth.universe} above SMA200`);
 log(`wrote    ${REBUILD ? '' : `${PATHS.daily}, ${PATHS.filters}, `}${snapRel}${Object.keys(analyzed).length && !REBUILD ? `, ${PATHS.analyze}/${session}/` : ''}`);

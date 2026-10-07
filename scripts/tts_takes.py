@@ -1,70 +1,78 @@
 #!/usr/bin/env python
-"""Best-of-N takes for the sentences OmniVoice gets wrong: decimals ("phẩy") and spelled acronyms (MACD).
+"""Listen to every sentence of a voiced reel and keep, per sentence, a take in which every figure, ticker and term is HEARD.
 
-OmniVoice is stochastic. Measured 2026-09-30 on the Channel reel: it dropped "phẩy" from
-"bốn mươi ba phẩy mười ba" in 3 of 4 takes and from "hai mươi tám phẩy tám lăm" in 2 of 4, and
-squeezed "em mờ a xê đê" into 0.65 s with "a" at 0.06–0.08 s — while Whisper's plain transcript
-still read "43,13%" and "MACD". Whisper infers those from context, so a plain transcript is no
-evidence the syllables were spoken. This script LISTENS harder: it transcribes with every digit
-token (and the tokens of each written lexicon term) suppressed, so a decimal has to come back as
-words, "phẩy" present or not, and an acronym as the letters actually heard, with per-word timing.
+OmniVoice is stochastic: the same sentence comes back clean in one take and with a word gone in the next. Measured
+2026-09-30 on the Channel reel it dropped "phẩy" from "bốn mươi ba phẩy mười ba" in 3 of 4 takes and squeezed
+"em mờ a xê đê" into 0.65 s — while Whisper's plain transcript still read "43,13%" and "MACD". Whisper infers those
+from context, so a plain transcript is no evidence the syllables were spoken. This script listens harder.
 
-For every sentence that carries such a term — and every sentence voice.pace marks `key` (it speaks a
-figure, a headline beat is pinned to it, or it is the hook) — it records N extra takes, ranks them, and
-Every spoken figure ("một nghìn ba trăm bảy mươi lăm", "chín phẩy bảy phần trăm") is a required term of
-its own: a take has to be heard with the whole run of number words, because OmniVoice drops "nghìn" or
-"trăm" from a price as readily as "phẩy" from a decimal (measured 2026-10-01: "một nghìn bảy trăm bảy
-mươi bảy" came back "một bẩy bẩy mươi bẩy").
-copies the clearest one onto the .tts-cache path scripts/voiceover.mjs assembles the scene from. Among
-takes that are equally clear it prefers the one with the widest pitch range (10th–90th percentile of F0,
-credit capped at 12 semitones): OmniVoice's intonation varies from take to take and cannot be asked for,
-so a lively read is chosen, not generated (the user, 2026-10-01: "no pace or highlight"). Then:
+2026-10-06 (user, on the 6/10 daily: "The pronounce of the number on this video is not clear … ensure it not happened
+again"). The earlier version let unclear figures through: its strict pass also suppressed every token that is a piece
+of a figure the reel speaks ("một", "trăm", "mươi" …) and every piece of "Strong"/"Uptrend", so it collapsed into
+"!!!!" on nearly every figure sentence; its fallback plain pass then counted digits as the figure heard — Whisper wrote
+"1.759" for a take that said "bảy trăm năm chín" — and its prompt carried the reel's own figures. Sentences it could not
+resolve were only printed, and a sentence voiced after it last ran was never listened to (6/10: MSB's "mười ba phẩy
+bảy"). Measured on the 6/10 takes with this version: the hook's take said "một nghìn bảy trăm năm chín" (no "mươi"), the
+flow's take said "… kéo lùi không chấm bốn phẩy tám điểm" — FPT's 0,58 never spoken.
 
-    node scripts/voiceover.mjs --content=<content> --reassemble --only=<ids printed at the end> --retime
+How it listens now, per take:
+  words    every digit token suppressed and a neutral primer that writes numbers as words but names none of the
+           reel's figures, so a figure has to come back as the words actually said. Figures are judged here only.
+  letters  for a sentence that spells a ticker or an acronym (MA50, FTD, RS): the pieces Whisper would write the
+           letters with are suppressed too, so each letter comes back as a letter name with its timing.
+A figure is every run of two or more number words ("một ngàn bảy trăm năm mươi chín", "không chấm năm tám"), matched
+word for word (ngàn = nghìn, chấm = phẩy, lăm = năm, tư = bốn, mốt = một, lẻ = linh, bẩy = bảy). A take is CLEAR when it
+has a sane length, ONE of its transcripts holds every figure / ticker / acronym / filter name in the script's order (a
+figure said twice heard twice; no syllable glued onto a figure — 6/10 "… bốn hai chân thì …"), no spelled ticker has a
+gap inside it, and almost every other word of the script is in the transcript (tone marks ignored). Letter names are
+matched the way the southern reference voice says them (rờ = giờ = dờ, xờ = sờ).
 
-Usage — run with the video-factory venv (torch + omnivoice + mlx_whisper), after a voiceover run
-has written .tts-cache/_sentences.json for the reel (a plain `node scripts/voiceover.mjs --content=<reel>`
-refreshes it without synthesizing anything; a sentence whose base take is missing — the lexicon just
-changed its spoken form — is recorded here along with its takes):
+Transcripts and verdicts go into .tts-cache/_heard.json, keyed by the take's audio bytes: a take is transcribed once
+(TRANSCRIBE_VERSION) and re-judged without listening again when the rule changes (LISTEN_VERSION).
+scripts/verify.mjs (check `voice-heard`) and scripts/render.mjs refuse a reel whose tracks hold a sentence take that
+was never listened to, is not clear, or is newer than its scene's track (picked but not reassembled).
 
-    ../video-factory/.venv/bin/python scripts/tts_takes.py                 # 6 extra takes, pick, copy
-    ../video-factory/.venv/bin/python scripts/tts_takes.py --dry-run       # rank only, copy nothing
-    ../video-factory/.venv/bin/python scripts/tts_takes.py --takes=8 --only=channel-evidence-4
-    ../video-factory/.venv/bin/python scripts/tts_takes.py --commas        # also re-take sentences with a
-                                                                           # comma and prefer takes that pause there
-    --terms=ép tê đi,chứng vịt   extra spoken forms that must be heard whole (default: "phẩy" + the lexicon
-                                 + every spelled ticker of the reel, voice.letters + voice.letterJoin)
-    --fresh                      record new takes even where .takeN.wav files already exist
-    --report=<path.json>         write the full ranking
-    --match=<regex>              only sentences whose spoken text matches (e.g. the ones a rewrite changed)
+Which take is kept: takes are tried widest pitch range first (10th–90th percentile of F0; the user 2026-10-01: "no pace
+or highlight") and the first CLEAR one is kept, so a lively read wins among clear ones. A key sentence (a figure, a
+ticker, a pinned headline, the hook) gets --takes takes up front; any sentence with no clear take gets --takes more per
+round, up to --max-takes, before it is reported unresolved (exit 3).
 
-Ranking, per sentence: sane length (0.6–1.6× the median take) > every required term heard >
-no gap of 0.15 s or more inside a spelled ticker (user 2026-10-01: "solid and clearly not separate") >
-a pause at every comma > not a junk transcript > clarity (how long "phẩy" / the shortest letter
-is held) > word overlap with the script. A sentence where no take is heard whole is left as it is
-and flagged — record more takes (--takes=12) or reword it.
+    ../video-factory/.venv/bin/python scripts/tts_takes.py --content=content/review-daily.json --rebuild
+    ../video-factory/.venv/bin/python scripts/tts_takes.py --content=<reel> --listen-only   # what the tracks hold now
+    ../video-factory/.venv/bin/python scripts/tts_takes.py --dry-run          # listen + rank what exists, record/copy nothing
 
-Whisper large-v3 (mlx-community/whisper-large-v3-mlx, ~3 GB) is fetched to ~/.cache/huggingface on
-first use. Needs ffmpeg.
+    --content=<reel.json>  read .tts-cache/manifests/<reel>.json (scripts/voiceover.mjs writes it; default: the
+                           latest run's .tts-cache/_sentences.json)
+    --takes=6 --max-takes=18   takes per round, and the cap per sentence
+    --rebuild              reassemble the scenes whose take changed (voiceover.mjs --reassemble --only=… --retime)
+    --only=<scene ids>  --match=<regex on the spoken text>  --fresh (drop the .takeN.wav files first)
+    --commas               also require a pause at every comma   --terms=a,b   extra spoken forms that must be heard
+    --report=<path.json>   full verdicts   --whisper=<repo>   (default mlx-community/whisper-large-v3-mlx)
+
+Run with the video-factory venv (torch + omnivoice + mlx_whisper + librosa); needs ffmpeg.
 """
 from __future__ import annotations
 
 import difflib
 import glob
+import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 import time
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / '.tts-cache'
-MANIFEST = CACHE / '_sentences.json'
-WHISPER = 'mlx-community/whisper-large-v3-mlx'  # --whisper=mlx-community/whisper-large-v3-turbo is ~5× faster, slightly less exact
-DEFAULT_RULES = ROOT / 'src/shared/content-rules.json'
+LEDGER = CACHE / '_heard.json'
+# Bump when what counts as CLEAR changes: verdicts of another version are listened to again (scripts/lib/heard.mjs).
+LISTEN_VERSION = 5
+WHISPER = 'mlx-community/whisper-large-v3-mlx'
 
 argv = sys.argv[1:]
 flag = lambda n: f'--{n}' in argv
@@ -72,205 +80,215 @@ def opt(n, d=None):
     hit = next((a for a in argv if a.startswith(f'--{n}=')), None)
     return hit[len(n) + 3:] if hit else d
 
+CONTENT_ARG = opt('content')
 TAKES = int(opt('takes', '6'))
+MAX_TAKES = int(opt('max-takes', '18'))
 DRY = flag('dry-run')
+LISTEN_ONLY = flag('listen-only')
 FRESH = flag('fresh')
 COMMAS = flag('commas')
+REBUILD = flag('rebuild')
 ONLY = set(filter(None, opt('only', '').split(',')))
 REPORT = opt('report')
 WHISPER = opt('whisper', WHISPER)
-# --match=<regex>: only the sentences whose SPOKEN text matches (re-take what changed, not a whole scene again).
 MATCH = opt('match')
 
 low = lambda t: unicodedata.normalize('NFC', t.lower())
 words_of = lambda t: re.sub(r'[^\w\s]', ' ', low(t)).split()
 
+def strip_marks(w):
+    """A word without tone and vowel marks ('rờ' → 'ro', 'đê' → 'de')."""
+    d = unicodedata.normalize('NFD', w.replace('đ', 'd').replace('Đ', 'D'))
+    return ''.join(ch for ch in d if unicodedata.category(ch) != 'Mn')
 
-# ---------------------------------------------------------------- what to listen for
+def phon(w):
+    """A letter name or syllable as the reference voice (ThanhBinh, southern) says it: r / d / gi one sound, x = s,
+    tr = ch, final t = c — Whisper writes 'giờ ét' or 'dờ ét' for its 'rờ ét' (RS) and 'sờ trong' for 'xờ trong'
+    (measured 2026-10-06). Used only while no two letter names collide under it (LETTER_KEY)."""
+    w = low(w)
+    w = re.sub(r'^(gi|r|d)', 'z', w)  # plain d only: 'đ' is another letter
+    w = re.sub(r'^x', 's', w)
+    w = re.sub(r'^tr', 'ch', w)
+    w = strip_marks(w)
+    return re.sub(r'(t|ch)$', 'c', w)
 
+
+# ---------------------------------------------------------------- the reel
+
+def manifest_path():
+    latest = CACHE / '_sentences.json'
+    if not CONTENT_ARG:
+        return latest
+    per_reel = CACHE / 'manifests' / f'{Path(CONTENT_ARG).stem}.json'
+    if per_reel.exists():
+        return per_reel
+    if latest.exists() and json.load(open(latest, encoding='utf-8')).get('content') == str(Path(CONTENT_ARG)):
+        return latest
+    sys.exit(f'{per_reel.relative_to(ROOT)} is missing — run `node scripts/voiceover.mjs --content={CONTENT_ARG}` first '
+             '(it writes the manifest before synthesizing anything, and synthesizes nothing that is cached).')
+
+MANIFEST = manifest_path()
 if not MANIFEST.exists():
-    sys.exit(f'{MANIFEST.relative_to(ROOT)} is missing — run `node scripts/voiceover.mjs --content=<reel>` first '
-             '(it writes the manifest before synthesizing anything).')
+    sys.exit(f'{MANIFEST.relative_to(ROOT)} is missing — run `node scripts/voiceover.mjs --content=<reel>` first.')
 manifest = json.load(open(MANIFEST, encoding='utf-8'))
 content = ROOT / manifest['content']
 reel = json.load(open(content, encoding='utf-8'))
 rules_path = ROOT / reel.get('rules', 'src/shared/content-rules.json')
-lexicon = {k: v for k, v in (json.load(open(rules_path, encoding='utf-8')).get('voice', {}).get('lexicon', {}) or {}).items()
-           if not k.startswith('_') and isinstance(v, str)}
-# spoken forms that must be heard whole, as word lists, keyed by their written term when they have one
-terms = {'phẩy': ['phẩy']}
-for written, spoken in lexicon.items():
-    terms[written] = words_of(spoken)
-for extra in filter(None, (opt('terms') or '').split(',')):
-    terms[extra.strip()] = words_of(extra)
-
-# Spelled tickers (market-review; user 2026-10-01: "Pronounce of symbol must be solid and clearly not separate").
-# The manifest holds the SPOKEN text, where a ticker is already spelled, so the tickers come from the reel's
-# written narration (three capitals standing alone — scripts/lib/rules.mjs TICKER_RE) and their spoken form
-# from voice.letters joined by voice.letterJoin, exactly as spellerOf builds it. A lexicon term (FTD) is
-# respelled before the speller sees it and stays a lexicon term. Each spelled ticker is a required term:
-# every letter heard as a letter (the strict pass suppresses the pieces Whisper would write the ticker with),
-# the shortest letter held as long as possible, and no long gap inside the ticker (see GAP).
 voice_rules = json.load(open(rules_path, encoding='utf-8')).get('voice', {}) or {}
+lexicon = {k: v for k, v in (voice_rules.get('lexicon') or {}).items() if not k.startswith('_') and isinstance(v, str)}
 letters = {k: v for k, v in (voice_rules.get('letters') or {}).items() if not k.startswith('_') and isinstance(v, str)}
 letter_join = voice_rules['letterJoin'] if isinstance(voice_rules.get('letterJoin'), str) else ', '
+
+NUMBER_WORDS = {'không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'bẩy', 'tám', 'chín', 'mười', 'mươi', 'trăm',
+                'nghìn', 'ngàn', 'lăm', 'lẻ', 'linh', 'mốt', 'tư', 'phẩy', 'chấm', 'phần'}
+# The same number heard either way: the voice says 'ngàn' / 'chấm' / 'lẻ' (voice.lexicon), Whisper may write the other.
+CANON = {'bẩy': 'bảy', 'ngàn': 'nghìn', 'lẻ': 'linh', 'chấm': 'phẩy', 'tư': 'bốn', 'lăm': 'năm', 'mốt': 'một'}
+canon = lambda w: CANON.get(w, w)
+
+# Required items besides figures, as spoken word lists:
+#   letters — a spelled ticker (voice.letters + voice.letterJoin, as scripts/lib/rules.mjs spellerOf builds it) or the
+#             letter part of an acronym lexicon term (MA50 → 'em ây'; its 'năm mươi' is a figure).
+#   word    — a lexicon term that is a word read in Vietnamese syllables (Strong → 'xờ trong'); Whisper writing the word
+#             itself ('Uptrend') is that word heard.
+LETTER_ITEMS, WORD_ITEMS = {}, {}
 TICKER_RE = re.compile(r'(?<![^\W_])[A-Z]{3}(?![^\W_])')
-TICKERS = {}
+for written, spoken in lexicon.items():
+    ws = words_of(spoken)
+    if written == 'phẩy' or not ws or all(w in NUMBER_WORDS for w in ws):
+        continue  # a respelling of number words: the figure runs cover it
+    if re.fullmatch(r'[A-Z][A-Z0-9]*', written):
+        head = []
+        for w in ws:
+            if w in NUMBER_WORDS:
+                break
+            head.append(w)
+        if head:
+            LETTER_ITEMS[re.sub(r'\d', '', written)] = head
+    else:
+        WORD_ITEMS[written] = ws
 if letters:
     for sc in reel.get('scenes', []):
         for tk in TICKER_RE.findall(sc.get('narration') or ''):
-            if tk not in lexicon and tk not in TICKERS:
-                TICKERS[tk] = words_of(letter_join.join(letters.get(c, c.lower()) for c in tk))
-terms.update(TICKERS)
-# a gap this long inside a spelled ticker (between two of its letters) is the ticker said "separated"
+            if tk not in lexicon and tk not in LETTER_ITEMS:
+                LETTER_ITEMS[tk] = words_of(letter_join.join(letters.get(c, c.lower()) for c in tk))
+for extra in filter(None, (opt('terms') or '').split(',')):
+    WORD_ITEMS[extra.strip()] = words_of(extra)
+# a gap this long inside a spelled ticker (between two of its letters) is the ticker said "separated" (user 2026-10-01)
 GAP = 0.15
 
-NUMBER_WORDS = {'không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín', 'mười', 'mươi', 'trăm',
-                'nghìn', 'ngàn', 'lăm', 'lẻ', 'linh', 'mốt', 'tư', 'phẩy', 'chấm', 'phần'}
-
-def figure_runs(text):
-    """Maximal runs of number words, two or more long — the figures the sentence speaks."""
-    ws = words_of(text); runs, cur = [], []
-    for w in ws + ['']:
-        if w in NUMBER_WORDS:
-            cur.append(w)
-        else:
-            if len(cur) >= 2 and any(x not in {'một', 'hai', 'năm', 'ba'} for x in cur):
-                runs.append(cur)
-            cur = []
-    return runs
-
-UNIT = {'không': 0, 'một': 1, 'mốt': 1, 'hai': 2, 'ba': 3, 'bốn': 4, 'tư': 4, 'năm': 5, 'lăm': 5, 'sáu': 6, 'bảy': 7, 'tám': 8, 'chín': 9}
-
-def words_to_int(ws):
-    """Vietnamese number words → integer: standard grammar (nghìn/trăm/mươi/mười/linh), or digit by digit
-    ('hai không mười tám' → 2018, 'tám lăm' → 85) when the words do not fit the grammar."""
-    if not ws or not all(w in UNIT or w in ('nghìn', 'ngàn', 'trăm', 'mươi', 'mười', 'linh', 'lẻ') for w in ws):
-        return None
-    total, cur, i, standard = 0, 0, 0, True
-    while i < len(ws):
-        w = ws[i]
-        if w in ('nghìn', 'ngàn'):
-            total += (cur or 1) * 1000; cur = 0
-        elif w == 'trăm':
-            cur = (cur or 1) * 100 if cur < 100 else cur
-        elif w == 'mười':
-            cur += 10
-        elif w == 'mươi':
-            cur = (cur % 10) * 10 + (cur - cur % 10) if cur % 10 else cur
-        elif w in ('linh', 'lẻ'):
-            pass
-        else:
-            nxt = ws[i + 1] if i + 1 < len(ws) else None
-            if nxt == 'mươi':
-                cur += UNIT[w] * 10; i += 2; continue
-            if UNIT[w] == 0 and nxt == 'trăm':
-                i += 2; continue
-            if i and ws[i - 1] in UNIT:
-                standard = False  # two units in a row: digit-by-digit reading
-            cur += UNIT[w]
-        i += 1
-    if standard:
-        return total + cur
-    digits = ''.join(str(UNIT[w]) if w in UNIT else ('1' if w == 'mười' else '') for w in ws if w not in ('mươi',))
-    # 'hai không mười tám': units 2,0 then 'mười tám' = 18
-    out, j = '', 0
-    while j < len(ws):
-        if ws[j] == 'mười':
-            out += str(10 + (UNIT.get(ws[j + 1], 0) if j + 1 < len(ws) else 0)); j += 2
-        elif ws[j] in UNIT:
-            if j + 1 < len(ws) and ws[j + 1] == 'mươi':
-                out += str(UNIT[ws[j]] * 10 + (UNIT.get(ws[j + 2], 0) if j + 2 < len(ws) else 0)); j += 3
+def items_of(text):
+    """The spoken words of a sentence and what in them must be heard: [(pos, kind, label, words)], in order."""
+    seq = words_of(text)
+    used = [False] * len(seq)
+    found = []
+    cands = [(lb, ws, 'letters') for lb, ws in LETTER_ITEMS.items()] + [(lb, ws, 'word') for lb, ws in WORD_ITEMS.items()]
+    for label, ws, kind in sorted(cands, key=lambda c: -len(c[1])):
+        i = 0
+        while i <= len(seq) - len(ws):
+            if seq[i:i + len(ws)] == ws and not any(used[i:i + len(ws)]):
+                found.append((i, kind, label, ws))
+                for k in range(i, i + len(ws)):
+                    used[k] = True
+                i += len(ws)
             else:
-                out += str(UNIT[ws[j]]); j += 1
-        else:
-            j += 1
-    return int(out) if out.isdigit() else None
+                i += 1
+    run = []
+    for i in range(len(seq) + 1):
+        if i < len(seq) and not used[i] and seq[i] in NUMBER_WORDS:
+            run.append(i)
+            continue
+        if len(run) >= 2 and any(seq[k] not in {'một', 'hai', 'năm', 'ba'} for k in run):
+            ws = [seq[k] for k in run]
+            found.append((run[0], 'figure', ' '.join(ws), ws))
+        run = []
+    found.sort()
+    return seq, found
 
-def figure_digits(run):
-    """The digit strings a transcript may use for this run: '1099', '43.13', '43,13' (percent sign stripped)."""
-    ws = [w for w in run if w not in ('phần',) and not (w == 'trăm' and run[-2:] == ['phần', 'trăm'])]
-    if ws[-2:] == ['phần', 'trăm'] or (len(run) >= 2 and run[-2:] == ['phần', 'trăm']):
-        ws = run[:-2]
-    sep = next((k for k, w in enumerate(ws) if w in ('chấm', 'phẩy')), None)
-    if sep is None:
-        n = words_to_int(ws)
-        return {str(n)} if n is not None else set()
-    ip, fp = words_to_int(ws[:sep]), words_to_int(ws[sep + 1:])
-    if ip is None or fp is None:
-        return set()
-    frac = ''.join(str(UNIT[w]) for w in ws[sep + 1:] if w in UNIT) if len(ws[sep + 1:]) <= 2 and all(w in UNIT for w in ws[sep + 1:]) else str(fp)
-    return {f'{ip}.{frac}', f'{ip},{frac}', f'{ip}.{fp}', f'{ip},{fp}'}
 
-def has_run(seq, sub):
-    return bool(sub) and any(seq[i:i + len(sub)] == sub for i in range(len(seq) - len(sub) + 1))
-
-def needs(text):
-    t = low(text)
-    seq = words_of(t)
-    want = [w for w, ws in terms.items() if w not in TICKERS and ' '.join(ws) in ' '.join(seq)]
-    # a ticker is matched word by word, so "pê vê tê" never matches inside another ticker's letters
-    want += [w for w, ws in TICKERS.items() if has_run(seq, ws)]
-    for run in figure_runs(text):
-        key = ' '.join(run)
-        if key not in terms:
-            terms[key] = run
-        if key not in want:
-            want.append(key)
-    if COMMAS and ',' in t:
-        want.append(',')
-    return want
+# ---------------------------------------------------------------- what to listen to
 
 targets = []
 for sc in manifest['scenes']:
     if ONLY and sc['id'] not in ONLY:
         continue
-    for sent in sc['sentences']:
+    for k, sent in enumerate(sc['sentences']):
         if MATCH and not re.search(MATCH, sent['text']):
             continue
-        want = needs(sent['text'])
-        if want or sent.get('key'):
-            targets.append({'scene': sc['id'], 'wav': sc['wav'], 'text': sent['text'], 'file': sent['file'], 'speed': sent.get('speed'),
-                            'want': want, 'key': bool(sent.get('key'))})
+        seq, items = items_of(sent['text'])
+        targets.append({'scene': sc['id'], 'n': k + 1, 'wav': sc['wav'], 'text': sent['text'], 'file': sent['file'],
+                        'speed': sent.get('speed'), 'key': bool(sent.get('key')) or any(it[1] != 'word' for it in items),
+                        'seq': seq, 'items': items})
 if not targets:
-    sys.exit('nothing to re-take: no sentence carries "phẩy", a lexicon term' + (', or a comma' if COMMAS else '') + ', and none is key.')
-print(f"{len(targets)} sentence(s) to re-take in {content.relative_to(ROOT)}: " +
-      ', '.join(sorted({t['scene'] for t in targets})), flush=True)
+    sys.exit('nothing to listen to (check --only / --match).')
+print(f"{len(targets)} sentence(s) of {content.relative_to(ROOT)} to listen to"
+      + (' (current takes only)' if LISTEN_ONLY else ''), flush=True)
+
+
+# ---------------------------------------------------------------- the ledger
+
+def digest(path):
+    return hashlib.sha1(Path(path).read_bytes()).hexdigest()[:16]
+
+def load_ledger():
+    try:
+        d = json.load(open(LEDGER, encoding='utf-8'))
+    except Exception:  # noqa: BLE001
+        d = {}
+    d.setdefault('clips', {})
+    d.setdefault('pitch', {})
+    d.setdefault('heard', {})
+    return d
+
+LED = load_ledger()
+
+def save_ledger():
+    LED['note'] = ('Verdicts of scripts/tts_takes.py, keyed by the first 16 hex of the sha1 of a take\'s audio. '
+                   'scripts/lib/heard.mjs (verify voice-heard, render.mjs) reads it.')
+    tmp = LEDGER.with_suffix('.part')
+    tmp.write_text(json.dumps(LED, ensure_ascii=False, indent=1), encoding='utf-8')
+    tmp.replace(LEDGER)
+
+def take_paths(base):
+    return sorted(glob.glob(base.replace('.wav', '.take*.wav')),
+                  key=lambda p: int(re.search(r'take(\d+)', p).group(1)))
 
 
 # ---------------------------------------------------------------- record
 
-def take_paths(base):
-    return sorted(glob.glob(base.replace('.wav', '.take*.wav')), key=lambda p: int(re.search(r'take(\d+)', p).group(1)))
-
-todo = []
-for t in targets:
-    # A base take is missing right after the lexicon changed (new spoken form, new cache key): record it here
-    # so the whole batch is one model load, and voiceover.mjs --reassemble finds it in place.
-    if not Path(t['file']).exists():
-        todo.append({'text': t['text'], 'out': t['file'], 'speed': t.get('speed')})
-    have = take_paths(t['file'])
-    if FRESH:
-        for p in have:
-            Path(p).unlink()
-        have = []
-    start = 2 if not have else int(re.search(r'take(\d+)', have[-1]).group(1)) + 1
-    for n in range(start, start + max(0, TAKES - len(have))):
-        todo.append({'text': t['text'], 'out': t['file'].replace('.wav', f'.take{n}.wav'), 'speed': t.get('speed')})
-if todo:
+def record(items):
+    """One OmniVoice job for every take of this round (the model loads once)."""
+    if not items:
+        return
     spec = {k: manifest[k] for k in ('model', 'device', 'ref_audio', 'ref_text', 'speed')}
-    spec['items'] = todo
+    spec['items'] = items
     spec_path = CACHE / '_takes_items.json'
     spec_path.write_text(json.dumps(spec, ensure_ascii=False, indent=1), encoding='utf-8')
-    print(f"recording {len(todo)} extra take(s) with OmniVoice…", flush=True)
+    print(f"recording {len(items)} take(s) with OmniVoice…", flush=True)
     r = subprocess.run([sys.executable, str(ROOT / 'scripts/tts_omnivoice.py'), str(spec_path)], capture_output=True, text=True)
     ok = sum(l.startswith('OK') for l in r.stdout.splitlines())
     fails = [l for l in r.stdout.splitlines() if l.startswith('FAIL')]
     print(f"  {ok} ok, {len(fails)} failed" + (f"\n  {fails[0]}" if fails else ''), flush=True)
     if not ok and fails:
         sys.exit(1)
-else:
-    print('every take already recorded (use --fresh to record new ones)', flush=True)
+
+def queue_takes(t, upto):
+    """Paths for new takes of t so it has `upto` takes in all (base not counted)."""
+    have = take_paths(t['file'])
+    start = 2 if not have else int(re.search(r'take(\d+)', have[-1]).group(1)) + 1
+    return [{'text': t['text'], 'out': t['file'].replace('.wav', f'.take{n}.wav'), 'speed': t.get('speed')}
+            for n in range(start, start + max(0, upto - len(have)))]
+
+if FRESH and not (DRY or LISTEN_ONLY):
+    for t in targets:
+        for p in take_paths(t['file']):
+            Path(p).unlink()
+# A base take is missing right after the lexicon changed (new spoken form, new cache key): record it with the first
+# round so the whole batch is one model load, and voiceover.mjs --reassemble finds it in place.
+first = [{'text': t['text'], 'out': t['file'], 'speed': t.get('speed')} for t in targets if not Path(t['file']).exists()]
+if first and (DRY or LISTEN_ONLY):
+    sys.exit(f"{len(first)} sentence take(s) not recorded yet — run scripts/voiceover.mjs --content={manifest['content']} first.")
+if not (DRY or LISTEN_ONLY):
+    record(first + [it for t in targets if t['key'] for it in queue_takes(t, TAKES)])
 
 
 # ---------------------------------------------------------------- listen
@@ -280,63 +298,59 @@ from mlx_whisper.tokenizer import get_tokenizer  # noqa: E402
 import librosa  # noqa: E402
 import numpy as np  # noqa: E402
 
+# The prompt of every pass: numbers and a date written as words, so a figure comes back as the words said — but none of
+# the sentence's own figures (a prompt holding the expected figure primes Whisper to hear it): each part has an
+# alternative for a sentence that says one of its numbers. Measured 2026-10-06 on "Thứ Ba, ngày sáu tháng mười.":
+# without the date part Whisper looped ("!!!! Ngày mùng sáu tháng mười.") and lost "Thứ Ba"; with it, all heard.
+PRIMER_PARTS = [
+    ['Thứ Năm, ngày hai mươi chín tháng hai.', 'Thứ Hai, ngày mười hai tháng tám.'],
+    ['Chỉ số đóng cửa một nghìn sáu trăm linh hai điểm,', 'Chỉ số đóng cửa một nghìn ba trăm linh tám điểm,'],
+    ['giảm hai phẩy tám lăm phần trăm,', 'giảm bốn phẩy sáu ba phần trăm,'],
+    ['có bốn mươi mốt mã tăng.', 'có sáu mươi tư mã tăng.'],
+]
+
+def primer_for(t):
+    mine = [' '.join(canon(w) for w in ws) for _, kind, _, ws in t['items'] if kind == 'figure']
+    def clash(part):
+        theirs = [' '.join(canon(w) for w in ws) for _, kind, _, ws in items_of(part)[1] if kind == 'figure']
+        return any(a in b or b in a for a in theirs for b in mine)
+    return ' '.join(next((p for p in alts if not clash(p)), alts[0]) for alts in PRIMER_PARTS)
+
+TOK = get_tokenizer(multilingual=True, language='vi', task='transcribe')
+DEC = lambda i: TOK.encoding.decode([i])
+# Text tokens only: a timestamp token decodes to '<|0.00|>' — suppressing those (the earlier version did, 1501 of
+# them) leaves the decoder nothing legal where a timestamp is due, so it emits token 0, '!', and loops ("!!!!").
+CJK_NUM = set('〇零一二三四五六七八九十百千万萬億')
+EN_NUM = {'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+          'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty', 'forty',
+          'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred', 'thousand', 'million', 'billion', 'percent'}
+# ... and number words in other scripts: with the digits gone Whisper wrote "S-九 mươi sáu" and "S-Ninety" (2026-10-06).
+DIGITS = [i for i in range(TOK.eot) if (lambda s: re.search(r'\d|%', s) or any(c in CJK_NUM for c in s)
+                                        or s.strip().lower() in EN_NUM)(DEC(i))]
+# Upper-case pieces Whisper writes a spelled item with ('M', 'SB', 'MSB', 'EMA'), suppressed only for a sentence that says it.
+PIECE_IDS = {}
+_subs = {lb[a:b] for lb in LETTER_ITEMS for a in range(len(lb)) for b in range(a + 1, len(lb) + 1)}
+for i in range(TOK.eot):
+    s = DEC(i).strip()
+    if s in _subs or (len(s) >= 2 and s.upper() in LETTER_ITEMS):
+        PIECE_IDS.setdefault(s if s in _subs else s.upper(), []).append(i)
+
 def pitch_range(wav):
-    """10th–90th percentile spread of the voiced pitch, in semitones around its median."""
+    """10th–90th percentile spread of the voiced pitch, in semitones around its median (cached by audio)."""
+    h = digest(wav)
+    if h in LED['pitch']:
+        return LED['pitch'][h]
     y, sr = librosa.load(wav, sr=None)
     f0, voiced, _ = librosa.pyin(y, fmin=60, fmax=400, sr=sr, frame_length=2048)
     f = f0[voiced & ~np.isnan(f0)]
-    if len(f) < 10:
-        return 0.0
-    st = 12 * np.log2(f / np.median(f))
-    return round(float(np.percentile(st, 90) - np.percentile(st, 10)), 2)
+    v = 0.0 if len(f) < 10 else round(float(np.percentile(12 * np.log2(f / np.median(f)), 90)
+                                            - np.percentile(12 * np.log2(f / np.median(f)), 10)), 2)
+    LED['pitch'][h] = v
+    return v
 
-PROMPT = 'Giá mất hai mươi tám phẩy tám lăm phần trăm. ' + ' '.join(
-    f"{' '.join(ws).capitalize()} tháng cắt xuống." for w, ws in terms.items() if w != 'phẩy' and w not in TICKERS)
-
-def prompt_for(t):
-    """The shared prompt, plus the spelled tickers of THIS sentence (a sentence without one gets PROMPT as is)."""
-    tks = [w for w in t['want'] if w in TICKERS]
-    return PROMPT + (' ' + ' '.join(f"{' '.join(TICKERS[w]).capitalize()} tăng." for w in tks) if tks else '')
-
-def suppression():
-    tok = get_tokenizer(multilingual=True, language='vi', task='transcribe')
-    dec = lambda i: tok.encoding.decode([i])
-    n = tok.encoding.n_vocab
-    digits = [i for i in range(n) if re.search(r'\d|%', dec(i))]
-    written = [w.lower() for w in terms if w != 'phẩy' and w != ',' and w not in TICKERS]
-    acronym = [i for i in range(n) if (lambda s: len(s) >= 3 and any(s in w for w in written))(dec(i).strip().lower())]
-    # A ticker's pieces: every uppercase run of 1–3 ASCII letters inside a reel ticker ("M", "SR", "MSR") and the
-    # ticker itself in any case — what Whisper writes a ticker with. Suppressed only for a sentence that says it.
-    pieces = {}
-    if TICKERS:
-        subs = {tk[a:b] for tk in TICKERS for a in range(len(tk)) for b in range(a + 1, len(tk) + 1)}
-        for i in range(n):
-            s = dec(i).strip()
-            if s in subs or s.upper() in TICKERS:
-                pieces.setdefault(s.upper() if s.upper() in TICKERS else s, []).append(i)
-    return digits, acronym, pieces
-
-DIGITS, ACRONYM, PIECES = suppression()
-
-def stages_for(t):
-    tks = [w for w in t['want'] if w in TICKERS]
-    extra = sorted({i for tk in tks for a in range(len(tk)) for b in range(a + 1, len(tk) + 1) for i in PIECES.get(tk[a:b], [])})
-    return [('strict', [-1] + DIGITS + ACRONYM + extra), ('digits', [-1] + DIGITS), ('plain', '-1')]
-
-def transcribe(wav, suppress, expected, prompt=None):
-    # sample_len caps a suppressed decode that starts looping ("chỉ còn chỉ còn …"): a sentence needs
-    # ~2 tokens a word, so 3× is generous and a loop stops in seconds instead of running to 448 tokens.
-    r = mlx_whisper.transcribe(wav, path_or_hf_repo=WHISPER, language='vi', word_timestamps=True,
-                               initial_prompt=PROMPT if prompt is None else prompt, suppress_tokens=suppress, temperature=0.0,
-                               compression_ratio_threshold=None, logprob_threshold=None,
-                               no_speech_threshold=None, condition_on_previous_text=False,
-                               sample_len=3 * expected + 12)
-    words = [(low(w['word']).strip(' .,!?…'), w['start'], w['end']) for s in r['segments'] for w in s.get('words', [])]
-    return r['text'].strip(), words
-
-def junk(heard, expected):
+def junk(heard, n):
     ws = words_of(heard)
-    if len(ws) < 0.6 * expected or len(ws) > 1.8 * expected + 2 or heard.count('!') > 2:
+    if len(ws) < 0.6 * n or len(ws) > 1.8 * n + 2 or heard.count('!') > 3 or '$' in heard:
         return True
     run = 1
     for a, b in zip(ws, ws[1:]):
@@ -345,184 +359,296 @@ def junk(heard, expected):
             return True
     return len(ws) > 4 and len(set(ws)) < len(ws) / 2
 
-def listen(wav, expected, t):
-    """Strictest transcript that is not junk: a suppressed hypothesis can make Whisper loop or stutter."""
-    for mode, sup in stages_for(t):
-        heard, words = transcribe(wav, sup, expected, prompt_for(t))
-        if not junk(heard, expected):
-            return mode, heard, words
+def transcribe(wav, suppress, prompt, n, temperature):
+    # sample_len caps a suppressed decode that starts looping ("!!!!", "$-$-$"): a sentence needs ~2–3 tokens a word.
+    r = mlx_whisper.transcribe(wav, path_or_hf_repo=WHISPER, language='vi', word_timestamps=True, initial_prompt=prompt,
+                               suppress_tokens=suppress, temperature=temperature, compression_ratio_threshold=None,
+                               logprob_threshold=None, no_speech_threshold=None, condition_on_previous_text=False,
+                               sample_len=3 * n + 12)
+    words = []
+    for s in r['segments']:
+        for w in s.get('words', []):
+            parts = re.findall(r'\w+', low(w['word']))  # "S-X-X" → three timed pieces
+            if not parts:
+                continue
+            step = (float(w['end']) - float(w['start'])) / len(parts)
+            for k, p in enumerate(parts):
+                words.append((p, float(w['start']) + k * step, float(w['start']) + (k + 1) * step))
+    return r['text'].strip(), words
+
+def listen(wav, suppress, prompt, n, temps=(0.0, 0.3, 0.5)):
+    """Greedy first; a suppressed decode that loops is retried with a little sampling before it counts as junk."""
+    for temp in temps:
+        heard, words = transcribe(wav, suppress, prompt, n, temp)
+        if not junk(heard, n):
+            return ('greedy' if temp == 0.0 else f'temp{temp}'), heard, words
     return 'junk', heard, words
 
-def pauses(wav):
-    e = subprocess.run(['ffmpeg', '-i', wav, '-af', 'silencedetect=noise=-40dB:d=0.06', '-f', 'null', '-'],
-                       capture_output=True, text=True).stderr
-    dur = float(re.search(r'Duration: (\d+):(\d+):([\d.]+)', e).group(3))
-    sil = [(float(a) - float(b), float(b)) for a, b in re.findall(r'silence_end: ([\d.]+) \| silence_duration: ([\d.]+)', e)]
-    return [round(d, 2) for s, d in sil if s > 0.15 and s + d < dur - 0.15 and d >= 0.2], dur
-
-def find(seq, sub):
-    for i in range(len(seq) - len(sub) + 1):
+def find(seq, sub, start=0):
+    """First match at or after `start` — no wrap-around, so a figure said twice has to be heard twice."""
+    for i in range(start, len(seq) - len(sub) + 1):
         if seq[i:i + len(sub)] == sub:
             return i
     return None
 
-def strip_marks(w):
-    """A letter name without tone and vowel marks ('rờ' → 'ro', 'đê' → 'de'): Whisper writes a heard letter
-    either way. Used only while no two names in voice.letters collide once stripped (LETTER_KEY)."""
-    d = unicodedata.normalize('NFD', w.replace('đ', 'd'))
-    return ''.join(ch for ch in d if unicodedata.category(ch) != 'Mn')
-
-_names = [x for v in letters.values() for x in words_of(v)]
-LETTER_KEY = strip_marks if len({strip_marks(x) for x in _names}) == len(set(_names)) else (lambda w: w)
-
-def inner_silence(wav, lo, hi):
-    """Longest silence that lies inside (lo, hi) — between the first and last letter of a ticker."""
+def silences(wav):
     e = subprocess.run(['ffmpeg', '-i', wav, '-af', 'silencedetect=noise=-40dB:d=0.06', '-f', 'null', '-'],
                        capture_output=True, text=True).stderr
+    dur = float(re.search(r'Duration: (\d+):(\d+):([\d.]+)', e).group(3))
     sil = [(float(a) - float(b), float(b)) for a, b in re.findall(r'silence_end: ([\d.]+) \| silence_duration: ([\d.]+)', e)]
-    return round(max([d for s, d in sil if s >= lo - 0.05 and s + d <= hi + 0.05] or [0.0]), 2)
+    return sil, dur
 
-def ticker_held(wav, words, seq, first, letters_of):
-    """Where a spelled ticker is heard, how long each letter is held, and the longest gap between two letters
-    (Whisper's word timing, and a silence inside the ticker): None when the letters are not all there."""
-    key = [LETTER_KEY(x) for x in letters_of]
-    i = find([LETTER_KEY(x) for x in seq], key)
-    if i is None:
-        return None
-    ks = range(i, i + len(letters_of))
-    durs = [round(float(words[k][2] - words[k][1]), 2) for k in ks]
-    # the clip's opening word often gets a 0.0 s span from Whisper, so it is not timed (see features)
-    timed = [k for k in ks if k != first]
-    gaps = [float(words[k + 1][1] - words[k][2]) for k in ks[:-1] if k != first and k + 1 in ks]
-    lo = float(words[i][2]) if i != first else 0.15
-    hi = float(words[i + len(letters_of) - 1][1])
-    gap = round(max(gaps + [inner_silence(wav, lo, hi) if hi > lo else 0.0] + [0.0]), 2)
-    return {'held': durs, 'span': round(float(words[i + len(letters_of) - 1][2] - words[i][1]), 2), 'gap': gap,
-            'measured': [float(words[k][2] - words[k][1]) for k in timed]}
+_names = set(x for v in letters.values() for x in words_of(v)) | set(x for ws in LETTER_ITEMS.values() for x in ws)
+LETTER_KEY = next((k for k in (phon, strip_marks) if len({k(x) for x in _names}) == len(_names)), lambda w: w)
 
-def features(t, wav):
-    text = t['text']
-    mode, heard, words = listen(wav, len(words_of(text)), t)
-    seq = [w.replace('bẩy', 'bảy') for w, _, _ in words]
-    f = {'take': wav, 'mode': mode, 'heard': heard, 'terms': {}, 'ok': 0, 'need': 0, 'clarity': 0.0,
-         'ratio': round(difflib.SequenceMatcher(None, words_of(text), words_of(heard)).ratio(), 3)}
-    f['pauses'], f['dur'] = pauses(wav)
-    f['pitch'] = pitch_range(wav)
-    # share of the non-number words of the script that appear in the transcript — a gate against garbled
-    # takes that does not punish a transcript for writing the figure in digits
-    spoken_terms = {x for w, ws in terms.items() if w not in TICKERS for x in ws} | \
-                   {x for w in t['want'] if w in TICKERS for x in TICKERS[w]}
-    content_words = {w for w in words_of(text) if w not in NUMBER_WORDS and w not in spoken_terms}
-    heard_set = set(words_of(heard))
-    f['coverage'] = round(len(content_words & heard_set) / len(content_words), 2) if content_words else 1.0
-    f['commas'] = text.count(',')
-    f['comma_ok'] = len(f['pauses']) >= f['commas'] if ',' in t['want'] else True
-    f['joined'] = True
-    first = next((k for k, (word, _, _) in enumerate(words) if word), 0)  # a strict pass may open with "!"
-    for w in t['want']:
-        if w == ',':
-            continue
-        f['need'] += 1
-        if w in TICKERS:
-            # solid and clear (user 2026-10-01): every letter heard, the shortest one held, no gap inside
-            v = ticker_held(wav, words, seq, first, TICKERS[w])
-            if v is None:
-                f['terms'][w] = None
+# Bump when HOW a take is transcribed changes (suppression, primer, passes): cached transcripts are made again. The
+# verdict built on them has its own LISTEN_VERSION, so a stricter rule re-scores every take without re-listening.
+TRANSCRIBE_VERSION = 1
+
+def transcripts(t, wav, h):
+    """The words pass and (for a sentence that spells something) the letters pass of this take, cached by its audio."""
+    spelled = [it for it in t['items'] if it[1] == 'letters']
+    primer = primer_for(t)
+    c = LED['heard'].get(h)
+    if c and c.get('tv') == TRANSCRIBE_VERSION and c.get('text') == t['text'] and c.get('prompt') == primer \
+            and (c.get('b') is not None or not spelled):
+        return c
+    n = len(t['seq'])
+    a = listen(wav, [-1] + DIGITS, primer, n)
+    b = None
+    if spelled:
+        extra = sorted({i for _, _, lb, _ in spelled for x in range(len(lb)) for y in range(x + 1, len(lb) + 1)
+                        for i in PIECE_IDS.get(lb[x:y], [])} | {i for _, _, lb, _ in spelled for i in PIECE_IDS.get(lb, [])})
+        prompt_b = primer + ' ' + ' '.join(f"{' '.join(ws).capitalize()} tăng." for _, _, _, ws in spelled)
+        # one retry: when the letters pass loops, the words pass still shows the tickers (written, not spelled)
+        b = listen(wav, [-1] + DIGITS + extra, prompt_b, n, temps=(0.0, 0.3))
+    pack = lambda r: [r[0], r[1], [[w, round(s, 3), round(e, 3)] for w, s, e in r[2]]]
+    c = {'tv': TRANSCRIBE_VERSION, 'text': t['text'], 'prompt': primer, 'a': pack(a), 'b': pack(b) if b else None}
+    LED['heard'][h] = c
+    return c
+
+def align(t, words, mode, sil):
+    """Every item of t matched IN SPOKEN ORDER against ONE transcript: a figure said twice has to be heard twice, and a
+    repeat cannot be borrowed from the other pass (6/10: "giá trên EMA50, EMA50 trên MA200" said with the second EMA50
+    missing passed when each pass lent one "năm mươi")."""
+    r = {'found': {}, 'missing': [], 'inferred': [], 'joined': True, 'clarity': 0.0}
+    if mode == 'junk' or not words:
+        r['missing'] = [label for _, _, label, _ in t['items']]
+        return r
+    hw = [w for w, _, _ in words]
+    can, ph, key, flat = [canon(w) for w in hw], [phon(w) for w in hw], [LETTER_KEY(w) for w in hw], [strip_marks(w) for w in hw]
+    spoken = t['seq']
+    cur = 0
+    for pos, kind, label, ws in t['items']:
+        tag = f"{label}@{pos}"
+        if kind == 'figure':
+            want = [canon(w) for w in ws]
+            i = find(can, want, cur)
+            if i is None:
+                r['missing'].append(label)
                 continue
-            measured = v.pop('measured')
-            f['terms'][w] = v
-            f['ok'] += 1
-            f['clarity'] += min(min(measured), 0.25) if measured else 0.1
-            f['joined'] = f['joined'] and v['gap'] < GAP
-            continue
-        i = find(seq, terms[w])
-        if i is None and terms[w] and all(x in NUMBER_WORDS for x in terms[w]):
-            # a plain-mode transcript writes the figure in digits — that is the figure heard whole
-            want_digits = figure_digits(terms[w])
-            norm = lambda tok: tok.replace('%', '').replace('.', '').replace(',', '').strip()
-            hit = next((k for k, (word, _, _) in enumerate(words) if norm(word) in {norm(d) for d in want_digits} and any(ch.isdigit() for ch in word)), None)
-            if hit is not None:
-                f['terms'][w] = {'held': [round(float(words[hit][2] - words[hit][1]), 2)], 'span': round(float(words[hit][2] - words[hit][1]), 2), 'digits': True}
-                f['ok'] += 1
-                f['clarity'] += min(float(words[hit][2] - words[hit][1]) / len(terms[w]), 0.25)
+            j = i + len(want)
+            cur = j
+            # a syllable glued onto the figure is a figure heard wrong: 6/10 "… hai mươi bảy chấm bốn hai chân thì xu
+            # hướng gãy" — the script's next word comes one word late, after a word the script does not have
+            nxt = spoken[pos + len(ws)] if pos + len(ws) < len(spoken) else None
+            prv = spoken[pos - 1] if pos else None
+            glued = None
+            if nxt and j + 1 < len(hw) and ph[j] != phon(nxt) and ph[j + 1] == phon(nxt):
+                glued = hw[j]
+            elif prv and i >= 2 and ph[i - 1] != phon(prv) and ph[i - 2] == phon(prv):
+                glued = hw[i - 1]
+            if glued:
+                r['missing'].append(f"{label} (+{glued})")
                 continue
-        if i is None:
-            f['terms'][w] = None
-            continue
-        durs = [round(float(words[k][2] - words[k][1]), 2) for k in range(i, i + len(terms[w]))]
-        span = round(float(words[i + len(terms[w]) - 1][2] - words[i][1]), 2)
-        # Whisper's alignment gives a clip's opening word a 0.0 s span more often than not ("Em, a, xê, đê
-        # tháng…" measured Em=0.0 in 7 of 9 takes while the letter was plainly heard), so the first word of
-        # the clip does not count towards how well the term is held.
-        first = next((k for k, (word, _, _) in enumerate(words) if word), 0)  # a strict pass may open with "!"
-        measured = [d for k, d in zip(range(i, i + len(terms[w])), durs) if k != first]
-        f['terms'][w] = {'held': durs, 'span': span}
-        f['ok'] += 1
-        f['clarity'] += min(min(measured), 0.25) if measured else 0.1
-        f['clarity'] += min(span, 1.2) / 10 if len(durs) > 1 else 0
+            durs = [round(words[k][2] - words[k][1], 2) for k in range(i, j)]
+            timed = [d for k, d in zip(range(i, j), durs) if k != 0]  # a clip's opening word gets a ~0 s span
+            span = round(words[j - 1][2] - words[i][1], 2)
+            r['found'][tag] = {'held': durs, 'span': span, 'rate': round(len(want) / span, 1) if span > 0 else None}
+            r['clarity'] += (min(min(timed), 0.2) + min(sum(timed) / len(timed), 0.3) / 2) if timed else 0.1
+        elif kind == 'word':
+            i, m = find(ph, [phon(w) for w in ws], cur), len(ws)
+            if i is None:
+                # Whisper writing the word itself ("Uptrend", "Up trend") is the word heard
+                glued_word = ''.join(strip_marks(w) for w in words_of(label))
+                i, m = next(((k, n) for k in range(cur, len(flat)) for n in (1, 2, 3)
+                             if ''.join(flat[k:k + n]) == glued_word), (None, 0))
+            if i is None:
+                r['missing'].append(label)
+                continue
+            cur = i + m
+            r['found'][tag] = {'heard': True}
+        else:
+            want = [LETTER_KEY(w) for w in ws]
+            i = find(key, want, cur)
+            if i is None:
+                # the letters written as the acronym itself: heard, but not letter by letter (no timing to judge)
+                k = next((k for k in range(cur, len(hw)) if hw[k] == label.lower()), None)
+                if k is None:
+                    r['missing'].append(label)
+                    continue
+                cur = k + 1
+                r['found'][tag] = {'held': None, 'how': 'written'}
+                r['inferred'].append(label)
+                r['clarity'] += 0.05
+                continue
+            j = i + len(want)
+            ks = range(i, j)
+            durs = [round(words[k][2] - words[k][1], 2) for k in ks]
+            timed = [words[k][2] - words[k][1] for k in ks if k != 0]
+            gaps = [words[k + 1][1] - words[k][2] for k in ks[:-1] if k != 0]
+            lo, hi = (words[i][2] if i != 0 else 0.15), words[j - 1][1]
+            inner = max([d for s, d in sil if s >= lo - 0.05 and s + d <= hi + 0.05] or [0.0]) if hi > lo else 0.0
+            gap = round(max(gaps + [inner, 0.0]), 2)
+            cur = j
+            r['found'][tag] = {'held': durs, 'gap': gap, 'how': 'letters'}
+            r['joined'] = r['joined'] and gap < GAP
+            r['clarity'] += min(min(timed), 0.25) if timed else 0.1
+    return r
+
+def features(t, wav, h):
+    seq = t['seq']
+    n = len(seq)
+    c = transcripts(t, wav, h)
+    sil, dur = silences(wav)
+    passes = [('words', c['a'])] + ([('letters', c['b'])] if c.get('b') else [])
+    judged = []
+    for name, (mode, heard, words) in passes:
+        ws = [(w, s, e) for w, s, e in words]
+        judged.append((name, mode, ws, align(t, ws, mode, sil)))
+    # the one transcript that hears the most, whole: fewest missing, then fewest only written as an acronym, then clearest
+    name, mode, ws, r = min(judged, key=lambda x: (len(x[3]['missing']), len(x[3]['inferred']), -x[3]['clarity']))
+    f = {'v': LISTEN_VERSION, 'text': t['text'], 'mode': c['a'][0], 'heard': c['a'][1],
+         'mode_letters': c['b'][0] if c.get('b') else None, 'heard_letters': c['b'][1] if c.get('b') else None,
+         'judged_on': name, 'items': [[kind, label] for _, kind, label, _ in t['items']],
+         'found': r['found'], 'missing': r['missing'], 'inferred': r['inferred'], 'joined': r['joined'],
+         'dur': round(dur, 2)}
+    # every other word of the script (single number words included), tone marks ignored, heard in either pass
+    covered = {k for pos, _, _, its in t['items'] for k in range(pos, pos + len(its))}
+    rest = [strip_marks(w) for k, w in enumerate(seq) if k not in covered]
+    pool = {strip_marks(w) for _, (m, _, words) in passes if m != 'junk' for w, _, _ in words}
+    misses = [w for w in rest if w not in pool]
+    f['coverage'] = round(1 - len(misses) / len(rest), 2) if rest else 1.0
+    f['misses'] = misses
+    f['cov_ok'] = len(misses) <= max(1, int(0.15 * len(rest)))
+    pauses = [round(d, 2) for s, d in sil if s > 0.15 and s + d < dur - 0.15 and d >= 0.2]
+    f['comma_ok'] = (len(pauses) >= t['text'].count(',')) if COMMAS else True
+    rate = n / dur if dur else 0
+    f['sane'] = 1.8 <= rate <= 9.0
+    f['clarity'] = round(r['clarity'], 3)
+    f['ratio'] = round(difflib.SequenceMatcher(None, [strip_marks(w) for w in seq], [strip_marks(w) for w, _, _ in ws]).ratio(), 3)
+    f['clear'] = bool(f['sane'] and mode != 'junk' and not f['missing'] and f['joined'] and f['cov_ok'] and f['comma_ok'])
+    f['required'] = [label for _, _, label, _ in t['items']]
+    f['at'] = datetime.now(timezone.utc).isoformat(timespec='seconds')
     return f
 
-def rank(rows):
-    med = sorted(r['dur'] for r in rows)[len(rows) // 2]
-    for r in rows:
-        r['sane'] = 0.6 * med <= r['dur'] <= 1.6 * med
-    return sorted(rows, key=lambda r: (r['sane'], r['ok'], r['joined'], r['comma_ok'], r['mode'] != 'junk', round(r['clarity'] * 20) / 20,
-                                       r['coverage'] >= 0.85, min(r['pitch'], 12.0), r['ratio']),
-                  reverse=True)
+def verdict(t, wav):
+    """The ledger entry for this take of t, judged now if it has none (or one of another version / text)."""
+    h = digest(wav)
+    e = LED['clips'].get(h)
+    if e and e.get('v') == LISTEN_VERSION and e.get('text') == t['text']:
+        return h, e, False
+    t0 = time.time()
+    e = features(t, wav, h)
+    e['pitch'] = pitch_range(wav)
+    LED['clips'][h] = e
+    save_ledger()
+    return h, e, time.time() - t0
+
+def show(e):
+    miss = (' missing ' + ', '.join(e['missing'])) if e['missing'] else ''
+    inf = (' (written, not spelled: ' + ', '.join(e['inferred']) + ')') if e['inferred'] else ''
+    cov = '' if e['cov_ok'] else f" dropped {e['misses']}"
+    gap = '' if e['joined'] else ' GAP-in-ticker'
+    return f"{'CLEAR' if e['clear'] else 'unclear'}{miss}{cov}{gap}{inf}"
+
+def partial_key(e):
+    return (e['clear'], e['sane'], -len(e['missing']), e['joined'], e['cov_ok'], e['mode'] != 'junk',
+            round(e['clarity'] * 20) / 20, min(e.get('pitch', 0), 12.0), e['ratio'])
 
 
 # ---------------------------------------------------------------- pick
 
-report, changed, unresolved = [], {}, []
+chosen, report = {}, []
+pending = list(targets)
+rnd = 0
+while pending:
+    rnd += 1
+    still = []
+    for t in pending:
+        base = t['file']
+        clips = [base] if LISTEN_ONLY else [base] + take_paths(base)
+        uniq, seen = [], set()
+        for c in clips:
+            h = digest(c)
+            if h not in seen:
+                seen.add(h)
+                uniq.append(c)
+        # widest pitch range first: the first CLEAR take in this order is the liveliest clear one
+        order = uniq if len(uniq) == 1 else sorted(uniq, key=lambda c: -pitch_range(c))
+        rows, best = [], None
+        for c in order:
+            h, e, took = verdict(t, c)
+            rows.append((c, e))
+            if took:
+                print(f"  {t['scene']}#{t['n']} {Path(c).name:24} {show(e)}  {took:4.0f}s", flush=True)
+            if e['clear']:
+                best = (c, e)
+                break
+        if best is None:
+            best = max(rows, key=lambda r: partial_key(r[1]))
+        chosen[id(t)] = (t, best, rows, len(uniq))
+        if not best[1]['clear']:
+            still.append(t)
+    if LISTEN_ONLY or DRY or not still:
+        break
+    more = [it for t in still for it in queue_takes(t, min(len(take_paths(t['file'])) + TAKES, MAX_TAKES))]
+    if not more:
+        break
+    print(f"\nround {rnd + 1}: {len(still)} sentence(s) with no clear take yet — more takes", flush=True)
+    record(more)
+    pending = still
+
+changed, unresolved, soft = {}, [], []
+print()
 for t in targets:
-    if not Path(t['file']).exists():
-        print(f"\n== {t['scene']}: {t['text']}\n  !! base take was not recorded — see the TTS output above")
-        unresolved.append(t)
-        continue
-    clips = [t['file']] + take_paths(t['file'])
-    print(f"\nlistening to {len(clips)} take(s) of {t['scene']}: {t['text'][:60]}…", flush=True)
-    rows = []
-    for c in clips:
-        t0 = time.time()
-        rows.append(features(t, c))
-        print(f"  {Path(c).name:24} {rows[-1]['mode']:6} {time.time() - t0:4.0f}s", flush=True)
-    rows = rank(rows)
-    best = rows[0]
-    print(f"\n== {t['scene']}: {t['text']}")
-    for r in rows:
-        held = ' '.join((f"{w}={v['held']}" + (f" gap {v['gap']}" if 'gap' in v else '')) if v else f"{w}=MISSING"
-                        for w, v in r['terms'].items())
-        mark = '*' if r is best else ' '
-        print(f"  {mark} {Path(r['take']).name:24} {r['ok']}/{r['need']} {'pause' if r['comma_ok'] else 'NO-PAUSE'}{r['pauses']} "
-              f"{r['dur']:.2f}s pitch {r['pitch']:4.1f}st [{r['mode']}] {held}  | {r['heard']}", flush=True)
-    whole = best['ok'] == best['need'] and best['sane']
-    if not whole:
-        # The best available take still goes in (the base is only another take); the flag says
-        # a human should listen, record more (--takes=12) or reword the sentence.
-        unresolved.append(t)
-        print('  !! no take is heard whole — the best available one is used; listen, record more (--takes=12) or reword')
-    elif not best['joined']:
-        unresolved.append(t)
-        print(f'  !! every take leaves a gap of {GAP}s or more inside a spelled ticker — listen, or record more (--takes=12)')
-    if not DRY and Path(best['take']).resolve() != Path(t['file']).resolve():
-        shutil.copyfile(best['take'], t['file'])
+    t_, (best_clip, e), rows, n_clips = chosen[id(t)]
+    label = f"{t['scene']}#{t['n']}"
+    print(f"{'✓' if e['clear'] else '✗'} {label:22} {Path(best_clip).name:24} {show(e)}  | {t['text'][:70]}", flush=True)
+    if not e['clear']:
+        print(f"      heard: {e['heard']}" + (f"\n      letters: {e['heard_letters']}" if e.get('heard_letters') else ''), flush=True)
+        (unresolved if e['required'] else soft).append((t, e))
+    if not (DRY or LISTEN_ONLY) and digest(best_clip) != digest(t['file']):
+        shutil.copyfile(best_clip, t['file'])
         Path(t['file'].replace('.wav', '.trim.wav')).unlink(missing_ok=True)
-        changed.setdefault(t['scene'], []).append(Path(best['take']).name)
-        print(f"  -> {Path(best['take']).name} copied onto {Path(t['file']).name}")
-    elif not DRY:
-        print('  -> the base take is already the best')
-    report.append({**t, 'ranked': rows})
+        changed.setdefault(t['scene'], []).append(Path(best_clip).name)
+    report.append({**{k: v for k, v in t.items() if k not in ('seq', 'items')}, 'chosen': best_clip, 'verdict': e,
+                   'listened': [{'take': c, **v} for c, v in rows], 'takes': n_clips})
 
 if REPORT:
     Path(REPORT).write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding='utf-8')
+save_ledger()
 print()
-if unresolved:
-    print(f"{len(unresolved)} sentence(s) unresolved: " + '; '.join(f"{u['scene']}: {u['text'][:50]}…" for u in unresolved))
+clear = sum(1 for t in targets if chosen[id(t)][1][1]['clear'])
+print(f"{clear}/{len(targets)} sentence(s) clear", flush=True)
+if soft:
+    print(f"{len(soft)} sentence(s) without a figure or term not heard whole (a word dropped?) — listen: "
+          + '; '.join(f"{t['scene']}#{t['n']}" for t, _ in soft))
 if changed:
     ids = ','.join(changed)
-    print(f"{sum(len(v) for v in changed.values())} take(s) swapped in {len(changed)} scene(s). Rebuild their tracks:\n"
-          f"  node scripts/voiceover.mjs --content={content.relative_to(ROOT)} --reassemble --only={ids} --retime")
-elif DRY:
-    print('dry run — nothing copied')
-else:
-    print('nothing to rebuild')
+    cmd = ['node', 'scripts/voiceover.mjs', f"--content={manifest['content']}", '--reassemble', f'--only={ids}', '--retime']
+    print(f"{sum(len(v) for v in changed.values())} take(s) swapped in {len(changed)} scene(s).")
+    if REBUILD:
+        print('rebuilding: ' + ' '.join(cmd), flush=True)
+        if subprocess.run(cmd, cwd=ROOT).returncode:
+            sys.exit(1)
+    else:
+        print('Rebuild their tracks:\n  ' + ' '.join(cmd))
+elif not (DRY or LISTEN_ONLY):
+    print('no take changed')
+if unresolved:
+    print(f"\n{len(unresolved)} sentence(s) UNRESOLVED — no clear take in {MAX_TAKES} takes: "
+          + '; '.join(f"{t['scene']}#{t['n']} ({', '.join(e['missing']) or 'garbled'})" for t, e in unresolved)
+          + "\nShorten the sentence (one or two figures per sentence) or split it, re-voice that scene with "
+            "`voiceover.mjs --force --only=<id>`, and run this again. Render stays blocked until then.")
+    sys.exit(3)

@@ -11,6 +11,13 @@
  *   npm run review-page -- Channel --no-stills             reuse the stills already in the folder
  *   npm run review-page -- Channel --out=<dir>
  *   npm run review-page -- Channel --video=video/x.mp4 [--video-note="…"]   embed a rendered preview (a file under <out>)
+ *   npm run review-page -- DailyReview --video=out/review/daily-<edition>.mp4   the full render: a 540×960 preview is made
+ *                                                       at <out>/video/<name>.mp4 (ffmpeg, ≤ 15 MB — the artifact file limit)
+ *
+ * A DAILY market-review edition (reel.rules + format "daily" + edition) has its own folder, out/review/daily-<edition>/,
+ * and its own artifact (user 2026-10-06: "With each review daily, create another daily file .mp4 and its artifact
+ * respective for me"): the first publish of an edition is a NEW artifact, recorded in content/review/artifacts.json
+ * (scripts/review/artifacts.mjs set); re-review rounds republish that link; the page links the previous edition's.
  *
  * Stills come from `npx remotion still <Id>` for every beat — the last one 1.5s in (later when its marks
  * need longer to finish drawing) as
@@ -28,12 +35,14 @@
  * fact pack could not support.
  */
 import {spawnSync} from 'node:child_process';
-import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
-import {basename, dirname, resolve} from 'node:path';
+import {existsSync, mkdirSync, readFileSync, statSync, writeFileSync} from 'node:fs';
+import {basename, dirname, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {reels} from './lib/reels.mjs';
 import {roleOf as roleIn, roleSpec} from './lib/roles.mjs';
 import {loadRules} from './lib/rules.mjs';
+import {artifactOf, dmOf, pageOf, previousArtifact} from './review/lib/artifacts.mjs';
+import {requestKey, requestPool} from './review/lib/requested.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -62,7 +71,10 @@ const name = basename(path, '.json');
 const reel = JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));
 /** The rules grading this reel: its own `rules` file, or content-rules.json (scripts/lib/rules.mjs). */
 const R = loadRules(ROOT, {reel});
-const OUT = resolve(ROOT, opt('out') ?? `out/review/${name}`);
+// A daily market-review edition: its own folder and artifact (scripts/review/lib/artifacts.mjs). The weekly and
+// Channel keep out/review/<name>.
+const EDITION = reel.rules && reel.format === 'daily' && /^\d{4}-\d{2}-\d{2}$/.test(reel.edition ?? '') ? reel.edition : null;
+const OUT = resolve(ROOT, opt('out') ?? (EDITION ? pageOf('daily', EDITION) : `out/review/${name}`));
 const STILLS = resolve(OUT, 'stills');
 mkdirSync(STILLS, {recursive: true});
 
@@ -170,14 +182,21 @@ const panelText = (vis) => {
     case 'movers': {
       for (const side of ['left', 'right']) {
         const col = vis[side];
-        if (col) p.push(`${esc(col.title)}: ${(col.rows ?? []).map((r) => `${esc(r.symbol)}${r.rs1m != null ? ` RS1M ${num(r.rs1m)}` : ''} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%${r.volumeVsSma20Percent != null ? ` (KL ${r.volumeVsSma20Percent >= 0 ? '+' : ''}${num(r.volumeVsSma20Percent)}% so SMA20)` : r.volumeRatio != null ? ` (KL ×${num(r.volumeRatio)})` : ''}`).join(' · ')}`);
+        if (col) p.push(`${esc(col.title)}: ${(col.rows ?? []).map((r) => `${r.focus ? '◎' : ''}${esc(r.symbol)}${r.rs1m != null ? ` RS1M ${num(r.rs1m)}` : ''} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%${r.volumeVsSma20Percent != null ? ` (KL ${r.volumeVsSma20Percent >= 0 ? '+' : ''}${num(r.volumeVsSma20Percent)}% so SMA20)` : r.volumeRatio != null ? ` (KL ×${num(r.volumeRatio)})` : ''}`).join(' · ')}`);
       }
+      // The Volume spike board lights the names reviewed next on its emphasis beat (◎ above; user 2026-10-06).
+      for (const e of vis.emphasis ?? []) p.push(`beat ${e.beat + 1}: ${esc(e.set)}${e.dim ? ' (dòng khác mờ)' : ''}${e.label ? ` — «${esc(e.label)}»` : ''}`);
       break;
     }
     case 'board': {
       // market-review's filter table (FilterBoard.tsx): ◎ = a name the reel reviews next (focus, lit on its beat).
       p.push(`Cột: ${(vis.columns ?? []).map(esc).join(' · ')}`);
-      p.push((vis.rows ?? []).map((r) => `${r.focus ? '◎' : ''}${esc(r.symbol)} RS1M ${num(r.rs1m)} ${r.changePercent >= 0 ? '+' : ''}${num(r.changePercent)}%`).join(' · '));
+      // A row is a ticker (rs, uptrend, the weekly's Momentum boards — % of the day or of the week) or, on the weekly's
+      // sector board (mode 'sector'), an ICB group with a name and no ticker.
+      p.push((vis.rows ?? []).map((r) => {
+        const ch = r.changePercent ?? r.weekChangePercent;
+        return `${r.focus ? '◎' : ''}${esc(r.name ?? r.symbol)}${r.rs1m != null ? ` RS1M ${num(r.rs1m)}` : ''}${ch != null ? ` ${ch >= 0 ? '+' : ''}${num(ch)}%${r.changePercent == null ? ' tuần' : ''}` : ''}`;
+      }).join(' · '));
       for (const e of vis.emphasis ?? []) p.push(`beat ${e.beat + 1}: ${esc(e.set)}${e.dim ? ' (dòng khác mờ)' : ''}${e.label ? ` — «${esc(e.label)}»` : ''}`);
       break;
     }
@@ -279,9 +298,43 @@ const conclusion = Array.isArray(notes._conclusion) ? notes._conclusion : [];
 const summary = notes._summary
   ?? 'Đây là điểm dừng duy nhất trước khi lồng tiếng và render. Đọc lời từng scene thành tiếng như người xem sẽ nghe, nhìn khung hình, đọc phần "fact pack không đỡ được", rồi trả lời: duyệt · sửa scene nào, đổi gì · bỏ.';
 const now = new Date();
-// A rendered preview to watch on the page (a file under the out folder, published beside the stills).
-const VIDEO = opt('video') && existsSync(resolve(OUT, opt('video'))) ? opt('video') : null;
-if (opt('video') && !VIDEO) console.warn(`--video=${opt('video')}: no such file under ${OUT.replace(ROOT + '/', '')} — page built without it`);
+// A rendered preview to watch on the page, published beside the stills. A file under the out folder is embedded as it
+// is; the full render (anywhere in the repo, e.g. out/review/daily-<edition>.mp4 — 40 MB at 1080×1920) or any file
+// above the artifact's 15 MB per-file limit becomes a 540×960 preview at <out>/video/<name>.mp4 first. An up-to-date
+// preview is reused, so republishing does not re-encode.
+const VIDEO_MAX = 15e6;
+const relOut = (p) => relative(OUT, p).split('\\').join('/');
+const preview = (src) => {
+  let dst = resolve(OUT, 'video', basename(src));
+  if (dst === src) dst = resolve(OUT, 'video', basename(src).replace(/\.mp4$/i, '') + '-preview.mp4');
+  if (existsSync(dst) && statSync(dst).mtimeMs >= statSync(src).mtimeMs && statSync(dst).size <= VIDEO_MAX) return relOut(dst);
+  mkdirSync(dirname(dst), {recursive: true});
+  for (const crf of [28, 31, 34, 37]) {
+    process.stdout.write(`video ${relative(ROOT, src)} → ${relative(ROOT, dst)} (540×960, crf ${crf}) … `);
+    const r = spawnSync('ffmpeg', ['-y', '-v', 'error', '-i', src, '-vf', 'scale=540:-2', '-c:v', 'libx264', '-preset', 'medium', '-crf', String(crf), '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', dst], {encoding: 'utf8'});
+    if (r.status !== 0) {
+      console.log('FAIL');
+      console.warn(`ffmpeg: ${r.error?.message ?? (r.stderr || r.stdout).trim()} — page built without the video`);
+      return null;
+    }
+    const mb = statSync(dst).size / 1e6;
+    console.log(`${mb.toFixed(1)} MB`);
+    if (statSync(dst).size <= VIDEO_MAX) return relOut(dst);
+  }
+  console.warn(`${relative(ROOT, dst)} is still above 15 MB at crf 37 — page built without the video`);
+  return null;
+};
+const VIDEO = (() => {
+  const v = opt('video');
+  if (!v) return null;
+  const src = [resolve(OUT, v), resolve(ROOT, v)].find((p) => existsSync(p) && statSync(p).isFile());
+  if (!src) { console.warn(`--video=${v}: no such file under ${relative(ROOT, OUT)} or the repo — page built without it`); return null; }
+  if (!src.startsWith(ROOT + '/')) { console.warn(`--video=${v}: outside the repo — page built without it`); return null; }
+  return src.startsWith(OUT + '/') && statSync(src).size <= VIDEO_MAX ? relOut(src) : preview(src);
+})();
+// The previous daily edition's own artifact (content/review/artifacts.json), linked from the top of the page.
+const PREV = EDITION ? previousArtifact('daily', EDITION) : null;
+const editionDmy = EDITION ? `${dmOf(EDITION)}/${EDITION.slice(0, 4)}` : null;
 
 // "Soi thêm mã" (user 2026-10-05: "edit for me i can choose and fill the symbol on the artifact to review beside existed
 // symbol on 3 filter"): on a market-review reel the page lets its owner type extra tickers. They are saved in the
@@ -298,25 +351,32 @@ const picksValid = picksUni.map((x) => x.symbol).filter((sym) => /^[A-Z0-9]{3}$/
 // better 2 symbols, display all of it so can i select it to review by inputing the text", then "Option 2, listing it existed
 // on what filter for me"), each row naming its filters; the full members come from the session's snapshot (the pack keeps
 // only the top rows). Most filters first, then RS 1M; the reel's own reviews are tagged.
+// A format with its own saved-filter scenes (the weekly's Momentum breakout/breakdown, 2026-10-06) lists THOSE, every
+// name in at least one; its requests live under their own key, `<date>-weekly` (lib/requested.mjs requestKey, requestPool).
 const picksRow = new Map(picksUni.map((x) => [x.symbol, x]));
 const picksMembers = picksEdition ? (readJson(`content/review/snapshots/${picksEdition}.json`)?.members ?? {}) : {};
-const picksScenes = Object.keys(R.screener?.scenes ?? {}).filter((k) => Array.isArray(picksMembers[k]));
-const picksMin = R.screener?.requested?.listMinFilters ?? 2;
-const picksPool = [...new Set(picksScenes.flatMap((k) => picksMembers[k]))]
-  .map((sym) => {
-    const u = picksRow.get(sym) ?? {};
-    const filters = picksScenes.filter((k) => picksMembers[k].includes(sym)).map((k) => R.screener.scenes[k].photo ?? k);
-    return {sym, filters, rs1m: u.rs_1m ?? null, change: u.price_change_pct ?? null, reviewed: picksTaken.includes(sym)};
-  })
-  .filter((r) => r.filters.length >= picksMin)
-  .sort((a, b) => b.filters.length - a.filters.length || (b.rs1m ?? -1) - (a.rs1m ?? -1) || a.sym.localeCompare(b.sym));
+const picksKey = picksEdition ? requestKey(reel.format, picksEdition) : null;
+const {own: picksOwn, scenes: picksScenes, min: picksMin, pool: picksPool} = requestPool({R, format: reel.format, members: picksMembers, rows: picksRow, taken: picksTaken});
+const picksAllTag = picksScenes.length === 3 ? 'cả ba' : picksScenes.length === 2 ? 'cả hai' : null;
+const picksIntro = picksOwn
+  ? `Các mã có mặt ở ${picksMin <= 1 ? `bộ lọc ${picksScenes.map((s) => esc(s.label)).join(' hoặc ')}` : `từ ${picksMin} trong ${picksScenes.length} bộ lọc ${picksScenes.map((s) => esc(s.label)).join(', ')}`} của phiên`
+  : `Các mã có mặt ở từ ${picksMin} trong ${picksScenes.length || 3} bộ lọc của phiên`;
+// The daily reviews on its own only the names in all three filters from rules.formats.daily.leaders.since on (user
+// 2026-10-06: "All 3 filters only"); a name in two filters gets a scene only when it is typed here.
+const picksRule = R.formats?.[reel.format]?.leaders;
+const picksAllThree = !!(picksEdition && picksRule?.from && !(picksRule.since && picksEdition < picksRule.since));
+/** A Vietnamese list: "A và B", "A, B, C và D" (the daily reviews up to four names since 2026-10-06). */
+const viList = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} và ${xs[xs.length - 1]}`);
+const picksAuto = picksAllThree
+  ? (picksTaken.length ? `reel tự soi các mã có mặt ở cả ba bộ lọc: ${esc(viList(picksTaken))}; mã ở hai bộ lọc chỉ có scene khi được gõ vào đây` : 'hôm nay không mã nào có mặt ở cả ba bộ lọc nên reel không tự soi mã nào; mã ở hai bộ lọc chỉ có scene khi được gõ vào đây')
+  : `reel đã soi ${picksTaken.length ? esc(viList(picksTaken)) : 'các mã đầu bảng'}`;
 const fmtSigned = (n) => (n == null ? '—' : `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(2).replace('.', ',')}%`);
-const picksBlock = picksEdition ? `<section class="card picks" id="picks" data-edition="${esc(picksEdition)}" data-max="${picksMax}" data-taken="${esc(picksTaken.join(','))}">
+const picksBlock = picksEdition ? `<section class="card picks" id="picks" data-edition="${esc(picksKey)}" data-session="${esc(picksEdition)}" data-max="${picksMax}" data-taken="${esc(picksTaken.join(','))}">
     <h3>Soi thêm mã</h3>
-    <p class="sub">Các mã có mặt ở từ ${picksMin} trong ${picksScenes.length || 3} bộ lọc của phiên (cột Bộ lọc ghi mã ở bộ lọc nào) — reel đã soi ${picksTaken.length ? esc(picksTaken.join(' và ')) : 'các mã đầu bảng'}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(picksTaken.join(' và ')) : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>
+    <p class="sub">${picksIntro} (cột Bộ lọc ghi mã ở bộ lọc nào) — ${picksAuto}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(viList(picksTaken)) : picksAllThree ? 'các bảng bộ lọc' : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>
     ${picksPool.length ? `<table class="pick-pool">
       <thead><tr><th>Mã</th><th>Bộ lọc</th><th class="num">RS 1M</th><th class="num">% phiên</th><th></th></tr></thead>
-      <tbody>${picksPool.map((r) => `<tr${r.reviewed ? ' class="reviewed"' : ''}><td class="sym">${esc(r.sym)}</td><td class="pick-filters">${r.filters.map((f) => `<span class="pick-filter">${esc(f)}</span>`).join('')}${r.filters.length === picksScenes.length ? '<span class="pick-all">cả ba</span>' : ''}</td><td class="num">${r.rs1m ?? '—'}</td><td class="num ${r.change >= 0 ? 'up' : 'down'}">${esc(fmtSigned(r.change))}</td><td>${r.reviewed ? '<span class="pick-tag">đã soi</span>' : ''}</td></tr>`).join('')}</tbody>
+      <tbody>${picksPool.map((r) => `<tr${r.reviewed ? ' class="reviewed"' : ''}><td class="sym">${esc(r.sym)}</td><td class="pick-filters">${r.filters.map((f) => `<span class="pick-filter">${esc(f)}</span>`).join('')}${picksAllTag && r.filters.length === picksScenes.length ? `<span class="pick-all">${picksAllTag}</span>` : ''}</td><td class="num">${r.rs1m ?? '—'}</td><td class="num ${r.change >= 0 ? 'up' : 'down'}">${esc(fmtSigned(r.change))}</td><td>${r.reviewed ? '<span class="pick-tag">đã soi</span>' : ''}</td></tr>`).join('')}</tbody>
     </table>` : ''}
     <form id="pick-form" class="pick-form" autocomplete="off" hidden>
       <input id="pick-input" maxlength="3" placeholder="VD: PVT" aria-label="Mã cổ phiếu muốn soi thêm" spellcheck="false" autocapitalize="characters">
@@ -367,8 +427,8 @@ const picksScript = picksEdition ? `<script>
     ev.preventDefault();
     var sym = input.value.trim().toUpperCase();
     if (!/^[A-Z0-9]{3}$/.test(sym)) return say('Mã gồm 3 ký tự, ví dụ FPT.');
-    if (valid.size && !valid.has(sym)) return say(sym + ' không có trong danh sách mã của phiên ' + edition + '.');
-    if (taken.indexOf(sym) >= 0) return say(sym + ' đã có scene soi mã từ ba bộ lọc.');
+    if (valid.size && !valid.has(sym)) return say(sym + ' không có trong danh sách mã của phiên ' + (box.dataset.session || edition) + '.');
+    if (taken.indexOf(sym) >= 0) return say(sym + ' ${picksOwn ? 'đã có scene soi mã.' : 'đã có scene soi mã từ ba bộ lọc.'}');
     if (symbols.indexOf(sym) >= 0) return say(sym + ' đã có trong danh sách.');
     if (symbols.length >= max) return say('Tối đa ' + max + ' mã.');
     input.value = '';
@@ -393,7 +453,7 @@ const picksScript = picksEdition ? `<script>
 })();
 </script>` : '';
 
-const html = `<title>Duyệt reel ${esc(id)}</title>
+const html = `<title>${EDITION ? `Tổng kết phiên ${esc(editionDmy)}` : `Duyệt reel ${esc(id)}`}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
 <style>
@@ -504,10 +564,12 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
 .pick-pool td.up{color:var(--pass)} .pick-pool td.down{color:var(--fail)}
 .pick-pool tr.reviewed td{color:var(--ink-3)}
 .pick-tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--pass-soft);color:var(--pass)}
+.prev-edition a{color:var(--gold);font-weight:600}
 </style>
 <div class="wrap">
   <div class="rule"></div>
-  <h1>Duyệt reel ${esc(id)}</h1>
+  <h1>Duyệt reel ${esc(id)}${EDITION ? ` · phiên ${esc(editionDmy)}` : ''}</h1>
+  ${PREV ? `<p class="meta prev-edition">Bản trước: <a href="${esc(PREV.url)}" target="_blank" rel="noopener">phiên ${esc(dmOf(PREV.edition))}</a> — mỗi bản phiên một artifact riêng.</p>` : ''}
   <p class="sub">${esc(reel.title)}. Bản <b>${esc(reel.status ?? 'hand-authored')}</b> · ${reel.scenes.length} scene · ~${Math.round(total)}s · ${totalWords} chữ đọc${voiced ? ` · ${voiced}/${reel.scenes.length} scene đã có giọng` : ' · chưa có giọng'}. ${esc(summary)}</p>
 
   <div class="strip">
@@ -592,6 +654,10 @@ writeFileSync(resolve(OUT, 'index.html'), html);
 const files = Object.fromEntries(frames.flatMap((f) => f.stills).filter((st) => existsSync(resolve(STILLS, st.file))).map((st) => [`stills/${st.file}`, `stills/${st.file}`]));
 if (VIDEO) files[VIDEO] = VIDEO;
 writeFileSync(resolve(OUT, 'files.json'), JSON.stringify(files, null, 1));
-console.log(`wrote ${resolve(OUT, 'index.html').replace(ROOT + '/', '')} (${html.length} chars) · ${Object.keys(files).length} still(s)`);
-console.log(`publish: Artifact file_path=${OUT.replace(ROOT + '/', '')}/index.html root=${OUT.replace(ROOT + '/', '')} files=<files.json>`);
+console.log(`wrote ${resolve(OUT, 'index.html').replace(ROOT + '/', '')} (${html.length} chars) · ${Object.keys(files).length - (VIDEO ? 1 : 0)} still(s)${VIDEO ? ` + ${VIDEO}` : ''}`);
+const pub = `Artifact file_path=${OUT.replace(ROOT + '/', '')}/index.html root=${OUT.replace(ROOT + '/', '')} files=<files.json>`;
+const mine = EDITION ? artifactOf('daily', EDITION) : null;
+if (!EDITION) console.log(`publish: ${pub}`);
+else if (mine) console.log(`publish: ${pub} url=${mine.url}   — the ${EDITION} edition's own artifact (a new conversation reads it first)`);
+else console.log(`publish: FIRST publish of the ${EDITION} edition → a NEW artifact: ${pub} icon=chart, NO url${PREV ? ` (never ${PREV.url}, the ${PREV.edition} page)` : ''}; then record it at once:\n         node scripts/review/artifacts.mjs set daily ${EDITION} --url=<the link the Artifact tool returned>`);
 if (verify) console.log(`verify: ${nFail} error(s) · ${nWarn} warning(s)${nFail ? ' — the page shows them; do not present as reviewable' : ''}`);

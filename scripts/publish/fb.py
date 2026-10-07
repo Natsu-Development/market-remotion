@@ -244,7 +244,9 @@ def cmd_upload(path: str) -> None:
 
 
 def cmd_close() -> None:
-    for pid, idx, _m, url, _t in app_windows():
+    # Highest index first: closing window 1 renumbers the rest, so an ascending loop hit "window 2" that was gone
+    # (osascript -1719) and left a window open (2026-10-06).
+    for pid, idx, _m, url, _t in sorted(app_windows(), key=lambda r: (r[0], -r[1])):
         close_window(win_ref(pid, idx))
         print(f"closed {url}")
 

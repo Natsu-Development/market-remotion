@@ -16,9 +16,10 @@ TTS, một người viết, miễn trừ chỉ ở outro, outro thả tim · chi
    `session` (phiên), `distribution` (phiên phân phối còn hiệu lực), `state` (trạng thái, FTD, đáy nhịp
    hồi), `watch` (điều gì sẽ đổi trạng thái — chất liệu cho câu nếu … thì), `screener.spike` /
    `screener.rs` / `screener.uptrend` (mỗi bộ lọc một scene, đã xếp hạng — người dùng tách RS Strong và
-   Uptrend 2026-09-30, KHÔNG gộp) / `screener.leaders` (tối đa hai mã dẫn dắt được SOI ở hai scene leader — người dùng chốt 2026-10-01: mã có mặt
+   Uptrend 2026-09-30, KHÔNG gộp) / `screener.leaders` (tối đa BỐN mã dẫn dắt được SOI, mỗi mã một scene leader — người dùng 2026-10-06: "I want change and allow for the at most 2 with review stock, the number i want is 4", trước là hai; chốt 2026-10-01: mã có mặt
    ở cả BA bộ lọc trước (`tiers[0].names`), không đủ thì mã ở cả RS Strong lẫn Uptrend, trong một tầng xếp
-   theo RS 1M; mỗi mã trong `top[]` có `tier` 1/2 và `tierFilters`; `leaders.count` là số mã qua cả hai), `weekly` (bản tuần). Thiếu
+   theo RS 1M; mỗi mã trong `top[]` có `tier` 1/2 và `tierFilters`; `leaders.count` là số mã qua cả hai — bản phiên từ 2026-10-06
+   chỉ giữ tầng đầu, `rules.formats.daily.leaders`: 0–4 mã ở cả ba bộ lọc, `top[]` rỗng là ngày không có scene leader), `weekly` (bản tuần). Thiếu
    số thì ghi `unsupported`.
 2. `.claude/skills/market-review/rules.json` — `narration.*` (ngân sách chữ, câu), `status` (tên trạng
    thái được phép hiện), `arc.roles.<vai>.job` (mỗi scene làm gì), `style.*` (verify sẽ cảnh báo gì về
@@ -33,6 +34,11 @@ TTS, một người viết, miễn trừ chỉ ở outro, outro thả tim · chi
 - Lời đọc KHÔNG có chữ số. Đọc số ra chữ: `một phẩy tám sáu phần trăm`, `một nghìn sáu trăm năm mươi mốt`.
   Dấu thập phân là `phẩy`. NGOẠI LỆ duy nhất là tên chỉ báo (`MA200`, `EMA50`): viết đúng như trader gọi, `voice.lexicon`
   đọc thành chữ ("em ây hai trăm"), verify soi chữ số trên dạng đọc.
+- **Số phải nghe được** (người dùng 2026-10-06: "The pronounce of the number on this video is not clear"). Tên chỉ báo có
+  số không đứng sát một con số: "vượt MA50 ở một nghìn bảy trăm bảy mươi sáu", không "vượt MA50 một nghìn …" (giọng đọc
+  liền thành "năm mươi mốt ngàn …" — verify FAIL). Một câu đọc tối đa HAI số: bản 6/10 câu "VPL góp một phẩy hai hai điểm,
+  VHM …, còn FPT và ACB kéo lùi không phẩy năm tám và không phẩy bốn tám điểm" (bốn số một câu) ra lượt nuốt 0,58 và đọc
+  sai hai số kia — tách thành hai câu. Render chỉ mở khi `tts_takes.py` nghe đủ chữ từng số.
 - **Chỉ báo và động từ của mẫu hình giữ nguyên tên của trader** (người dùng 2026-10-01: "Not change the verb or the
   indicator of trading pattern, hai trăm phiên => MA200"). Viết `MA200`, `EMA50`, `RS`, `FTD` — KHÔNG diễn giải thành
   "đường trung bình hai trăm phiên", "đường trung bình", "sức mạnh giá". Động từ của mẫu hình cũng vậy: giá *trên* /
@@ -50,12 +56,16 @@ TTS, một người viết, miễn trừ chỉ ở outro, outro thả tim · chi
 - Mã cổ phiếu trên màn hình chỉ là mã trong `screener.spike.top` (và `gainers`/`losers`), `screener.rs.top`,
   `screener.uptrend.top` hay `screener.leaders.top`.
 - Scene `watch` phải có chữ **"nếu"**: điều kiện nói như một nhánh nếu … thì, lấy từ `watch` của fact pack.
-  Không bao giờ gọi giá, không "nên mua", "nên bán", "vào lệnh". Scene `market` chỉ kể bối cảnh.
+  Không bao giờ gọi giá, không "nên mua", "nên bán", "vào lệnh". Scene `market` chỉ kể bối cảnh. NGOẠI LỆ duy nhất (người
+  dùng 2026-10-07): HAI CÂU HAI VAI cuối mỗi scene soi mã (leader, pick) — "Đang giữ: …" và "Chưa có hàng: …" — nói hành động
+  ĐÚNG như `review.roles` của bản soi (hạ tỷ trọng, chốt lời một nửa, thoát hết, không mua đuổi, chờ vượt, đứng ngoài…);
+  không tự nghĩ thêm hành động, không mục tiêu giá, không tỷ trọng nào ngoài "một nửa".
 - **Mức nguy hiểm của hệ thống** (người dùng 2026-10-01: "With my system, have 5 day DD is dangerous and must warning
   and re-check the symbol and risk"): từ `distribution.dangerAt` (năm) phiên phân phối khi xu hướng tăng còn đứng
   (`distribution.danger`), scene `market` PHẢI có chữ "nguy hiểm" và nói rà lại từng mã và rủi ro (`rules.distribution.danger`),
   rồi câu người dùng chốt 2026-10-05 (`danger.say`) thay câu đếm tới điều chỉnh;
-  `watch` giữ lời cảnh báo; mỗi scene `leader` thêm MỘT câu nhắc rủi ro của chính mã đó (mức nó đang giữ). Đó là bước
+  `watch` giữ lời cảnh báo; mỗi scene `leader` thêm MỘT câu nhắc rủi ro của chính mã đó (mức nó đang giữ) — từ 2026-10-07
+  đó là câu của người đang giữ trong hai vai (bảng của bản soi đã siết theo mức nguy hiểm), không thêm câu riêng. Đó là bước
   quản trị rủi ro của hệ thống kênh ("theo hệ thống của mình"), không phải quy tắc O'Neil và không gọi mua bán. Chưa tới
   năm thì mức nguy hiểm là ngưỡng kế mà market và watch gọi tên. Trạng thái vẫn là bốn tên của `rules.status`.
 - **Không đổi** `id`, `role`, `act`, `visual` — chép `visual` y nguyên từ khung. Mark, nhãn số, crop, máy
@@ -93,8 +103,9 @@ và nhãn giữ mã. Cách đọc chưa đo — mã có chữ hiếm (W, J, Z) t
 - **Headline là ý, không phải bảng số.** Dòng 1 = điều nhìn thấy, dòng 2 = nghĩa của nó. Không hai dòng cùng
   là số. Mỗi dòng bốn năm chữ (tối đa ~26 ký tự).
 - **Kết scene bằng câu mở đường** cho scene sau (trừ outro): "Vậy tiền đang chảy vào đâu?" dẫn sang bộ lọc.
-- **Hai scene `leader` (tối đa) cùng một khuôn** (price action và xu hướng trên chart FireAnt, giá so với MA50 và
-  MA200 của chính FireAnt → một chi tiết riêng → mức phải canh), nhưng mỗi mã một chi tiết riêng — không chép câu.
+- **Các scene `leader` (tối đa bốn) cùng một khuôn** (price action và xu hướng trên chart FireAnt, giá so với MA50 và
+  MA200 của chính FireAnt → một chi tiết riêng → HAI VAI: người đang giữ, người chưa có hàng), nhưng mỗi mã một chi tiết
+  riêng — không chép câu.
 - **Không nói mã của bộ lọc này có ở bộ lọc khác** (người dùng 2026-10-05: "Not need mentioned the stock on specific
   filter existed on other filter"): không "cũng ở / cũng nằm trong …", không "cả hai / cả ba bộ lọc", không "dải vàng",
   không gọi tên bộ lọc khác trong câu có mã — ở spike, rs, uptrend, leader lẫn pick. Câu cầu không mang mã ("Còn bộ lọc
@@ -103,7 +114,7 @@ và nhãn giữ mã. Cách đọc chưa đo — mã có chữ hiếm (W, J, Z) t
 
 ## Giữ người xem — arc và các móc (người dùng yêu cầu 2026-09-29)
 
-Reel theo arc **hook_payoff** của vox-director, thân là phần **soi mã** cho tối đa hai mã dẫn dắt (mã RS thấp hơn chiếu
+Reel theo arc **hook_payoff** của vox-director, thân là phần **soi mã** cho tối đa bốn mã dẫn dắt (mã RS thấp hơn chiếu
 trước, mã RS 1M cao nhất sau cùng — người dùng 2026-10-01 bỏ lời đếm ngược: "Remove 'Đếm ngược từ hai' => 'Let's review …'"). Người xem quyết định
 trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi scene phải có lý do để xem tiếp.
 
@@ -156,9 +167,14 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   đọc tới hàng tỷ ("năm nghìn tám trăm linh hai tỷ" cho 5801,5), không "khoảng", không "gần"; nhãn giữ số lẻ của pack.
   FireAnt chỉ hiện phiên mới nhất: ảnh lệch phiên thì scaffold bỏ scene, không bao giờ kể số của phiên khác. Câu kết dẫn
   sang market (chuyện hệ thống: phiên phân phối, trạng thái theo quy tắc), không sang bộ lọc.
-- **breadth** (chỉ bản tuần — đường "Độ rộng thị trường" cũ, người dùng 2026-10-05: 'Daily; old chart → weekly') là
-  nghịch lý (scene vẽ duy nhất, đường dưới = % mã trên MA200 — lời nói "trên MA200"): chỉ số ở trạng thái tăng mà phần
-  lớn mã không đi cùng. Một câu kết dẫn: "vậy tiền đang ở đâu?".
+- **breadth** (chỉ bản tuần — đường "Độ rộng thị trường" cũ, người dùng 2026-10-05: 'Daily; old chart → weekly') nói
+  CON SỐ (người dùng 2026-10-06: "amount of stock have price better than its SMA200"): terminal đếm bao nhiêu mã đóng
+  cửa trên MA200, trên tổng bao nhiêu mã có MA200 (`screener.breadth.count`: 247/901 = 27,4% ngày 5/10 — lời nói "trên
+  MA200", đọc số thành chữ), trong tuần nhiều lên hay ít đi (`breadth.week`, nói bằng chữ). Hai đường cùng trục: chỉ số
+  ở trên, SỐ mã trên MA200 ở dưới — đường dưới tính lại từ giá đóng cửa SSI vì terminal không giữ lịch sử, nên điểm cuối
+  của nó lệch vài mã so với số của terminal (`breadth.line.residual`): KHÔNG đọc số của đường, KHÔNG ghép số của đường
+  với số terminal trong một câu; chiều của đường nói bằng chữ. Cùng chiều (chỉ số và số mã cùng giảm: điểm yếu lan rộng)
+  hay nghịch chiều (chỉ số tăng mà số mã giảm: vài mã kéo chỉ số) là chuyện của scene. Câu kết dẫn sang scene sau.
 - **spike** chỉ kể bảng của nó (người dùng 2026-10-05 bỏ móc 2 "mã dẫn dắt ở bảng này — để cuối": "Not need mentioned
   the stock on specific filter existed on other filter") — không "mã dẫn dắt", không "để cuối".
   Bảng spike (từ 2026-10-01) là CẢ bộ lọc: cột TĂNG và cột GIẢM, mỗi cột tối đa mười mã, xếp theo % THAY ĐỔI
@@ -166,7 +182,10 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   tăng" là mã tăng mạnh nhất, "đầu cột giảm" là mã giảm sâu nhất; beat 1 = cột tăng, beat 2 = cột giảm. Khối lượng
   in là % so với trung bình 20 phiên ("KL +92%", `volumeVsSma20Percent`) — headline và nhãn cũng vậy, KHÔNG "KL ×1,92";
   lời có thể nói "gần gấp đôi" cho +92%. Lời KHÔNG đọc hết bảng: số mã mỗi cột (`screener.spike.up`/`down`)
-  và một hai mã đáng chú ý — bảng gánh phần còn lại.
+  và một hai mã đáng chú ý — bảng gánh phần còn lại. Mã sẽ soi ngay sau mà bảng có được tô và tạo hiệu ứng ở BEAT 3
+  (người dùng 2026-10-06: "With the volumn spike also have the animation with this scene for me highlight the symbol must noted" — như bảng RS Strong/Uptrend: các dòng khác mờ, nhãn "Xem kỹ: DGW"): câu ghim beat 3 nói về
+  mã đó TRÊN BẢNG NÀY — % thay đổi và khối lượng so trung bình 20 phiên —, không mời "xem kỹ" (lời mời là câu cuối của
+  bảng Uptrend), không "mã dẫn dắt", không nói nó có ở bộ lọc khác. Bảng không có mã nào sẽ soi thì vẫn hai beat.
 - **rs** rồi **uptrend**: MỖI BỘ LỌC MỘT SCENE, không gộp (người dùng chốt 2026-09-30: "separate the filter …
   not union it first"), mỗi scene một BẢNG VẼ tối đa mười mã xếp theo RS 1M giảm dần (người dùng chốt 2026-10-01).
   Bảng (`board`, người dùng 2026-10-01: "must have the RS1M column, price change & more info") là MỘT bảng đủ rộng:
@@ -183,22 +202,27 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
     và DGW." (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' => 'Let's review …'"; KHÔNG "soi kỹ": OmniVoice đọc
     "soi" nghe thành "xoay" — 7/7 lượt, đo 2026-10-04) — không "đếm ngược", không chữ "review" (TTS đọc tiếng Anh thất
     thường), không "dẫn đầu" (mã sẽ soi chưa chắc đứng đầu bảng này), không lặp "điểm lại" của hook. Vì sao chọn chúng
-    (tầng bộ lọc) là việc của đạo diễn, không lên lời.
+    (tầng bộ lọc) là việc của đạo diễn, không lên lời. Không có scene leader mà có mã soi thêm thì lời mời gọi tên các mã đó;
+    không có scene soi mã nào (bản phiên chỉ soi mã ở cả ba bộ lọc từ 2026-10-06) thì không mời: câu cuối dẫn sang kịch bản
+    VN-Index ("Còn VN-Index thì sao?"), không nói vì sao hôm nay không soi mã.
   Mã trong lời là MÃ ba chữ cái, tách bằng chữ; không đọc hết mười mã; tối đa hai số đọc ra lời mỗi scene.
-- **leader** — SOI MÃ, tối đa hai scene, không còn đếm ngược (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' =>
+- **leader** — SOI MÃ, tối đa bốn scene (người dùng 2026-10-06; trước là hai), không còn đếm ngược (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' =>
   'Let's review …'"): mã có mặt ở CẢ BA bộ lọc (Volume spike, RS Strong, Uptrend) đi trước; không đủ thì tới mã có mặt
   ở cả RS Strong lẫn Uptrend; trong một tầng xếp theo RS 1M (`screener.leaders.top`, mỗi mã có `tier` 1/2 và
-  `tierFilters`; `rules.screener.leaders`). Thứ tự giữ như cũ: mã RS thấp hơn chiếu trước, `top[0]` (RS 1M cao nhất)
+  `tierFilters`; `rules.screener.leaders`). Bản phiên từ 2026-10-06 CHỈ soi mã ở cả ba bộ lọc (`rules.formats.daily.leaders`,
+  người dùng chọn "All 3 filters only"): có ngày một scene, có ngày không có; một scene thì không có scene leader kia để
+  cùng khuôn, và khi đó là scene soi mã DUY NHẤT của reel (không mã chọn nào theo sau) câu đầu là "Mã đáng chú ý hôm nay
+  là …" — "Mã đầu tiên" hứa một mã thứ hai không bao giờ tới. Thứ tự giữ như cũ: mã RS thấp hơn chiếu trước, `top[0]` (RS 1M cao nhất)
   chiếu sau cùng. Eyebrow `Soi mã · PVT`, rồi `Soi mã · MSR` — không "#", không "Dẫn dắt #2". Câu đầu gọi thứ tự bằng
   chữ và tách nó khỏi mã bằng "là": "Mã đầu tiên là PVT, …", "Mã thứ hai là MSR, …" (không "Số hai là", "Số một là").
-  Hai scene `leader` CÙNG KHUÔN câu (price action → chi tiết riêng → mức phải canh), mỗi mã MỘT chi tiết riêng: mã còn
+  Các scene `leader` CÙNG KHUÔN câu (price action → chi tiết riêng → mức phải canh), mỗi mã MỘT chi tiết riêng: mã còn
   xa đỉnh 52 tuần, mã sát đỉnh, mã có khối lượng đột biến hôm nay. Scene KHÔNG nói mã có ở bộ lọc nào (người dùng
   2026-10-05) — không "ở cả ba bộ lọc", không "ở cả RS Strong lẫn Uptrend", không nhắc bảng của scene trước ("ngay dưới
   LPB"); `tier`/`filters[]` trong pack chỉ cho đạo diễn.
   **Nội dung scene leader mọc từ BẢN SOI** của agent `symbol-reviewer` (người dùng 2026-10-01: "define the method to
   review each symbols"; `.claude/agents/symbol-reviewer.md`) khi pack có nó: đọc `screener.leaders.top[i].review` và
   `content/review/symbols/<ngày>/<MÃ>.md` — `verdict` → `detail` (MỘT chi tiết; `review.setup` của hai mã luôn khác
-  nhau) → mức của một nhánh nếu … thì (nói điều mẫu hình nghĩa là gì, không nói phải làm gì). Số đọc ra lời là số của
+  nhau) → HAI VAI (`review.roles`, mục dưới). Số đọc ra lời là số của
   `review.numbers`; ô `pending` (MA của FireAnt chưa có) thì không nói tới. Mark trên chart là của bản soi — câu ghim
   beat 2 nói đúng điều mark beat 2 chỉ. Hai scene không bao giờ giống nhau: khác chi tiết, khác câu mở, khác mức.
   **Price action là thứ scene leader NÓI** (người dùng 2026-10-03: "include the price action … trendline & resistance and
@@ -208,11 +232,22 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   ("giá bị đạp xuống", "đi lên đều"). Beat 1 (toàn cảnh) nói cấu trúc + kháng cự/hỗ trợ/trendline mà chart đang vẽ;
   beat 2 (cận cảnh) nói read của nến cuối (`candle` mark). Tối đa HAI giá đọc ra lời (mức quyết định của nhánh); mọi
   giá còn lại nằm trên nhãn của chart — mỗi đường trên chart đã mang giá của nó.
+  **Hai vai — beat 3 "Hành động"** (người dùng 2026-10-07: "With the scene review symbol, also add the role of holder and not
+  holder with action and behavior like 'Không mua đuổi' with not holder when it exhausted run, and … with holder: 'nếu dưới giá
+  …' thì hạ tỷ trọng & chốt lời một nửa"; bản soi `symbol-reviewer/3`, §6b/§6c): pack mang `review.roles.holder` và
+  `review.roles.notHolder` — `case`, `if`, `then`, `price`, `plate`, `say`, `headline` — do phương pháp tính từ số đo. Scene
+  KẾT bằng hai câu, theo thứ tự: câu người ĐANG GIỮ ("Đang giữ, thủng sáu mươi ba phẩy hai thì chốt lời một nửa.") rồi câu
+  người CHƯA CÓ HÀNG ("Chưa có hàng thì không mua đuổi, giá đã kéo xa.") — mẫu là `say` của từng vai: đọc số thành chữ, nắn
+  chữ cho tự nhiên được, GIỮ đúng giá và hành động. Mỗi câu tối đa MỘT số; tên chỉ báo không đứng sát số ("thủng MA50 ở mười ba
+  phẩy bốn một"). Hai câu này THAY nhánh "nếu … thì" và câu rủi ro — scene vẫn ≤ 58 chữ, nên phần price action và chi tiết phải
+  gọn lại. Câu ghim BEAT 3 (scene có ba beat) là câu người đang giữ; headline beat 3: dòng 1 = `roles.holder.headline`, dòng 2 =
+  `roles.notHolder.headline` (≤ 26 ký tự, số có trong pack). Trên chart, beat 3 đặt plate đỏ "Đang giữ: …" và plate trắng
+  "Chưa mua: …" lên đúng đường giá — lời không tả plate. Verify `review-roles` FAIL khi scene thiếu một trong hai câu.
 - **pick** (người dùng 2026-10-05: "… i can choose and fill the symbol on the artifact to review beside existed symbol on 3
   filter") — mã người dùng gõ trên trang duyệt (`screener.requested`), mỗi mã một scene SAU các scene leader, soi y như
   leader: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá. Câu đầu "Thêm một mã đáng
-  chú ý là <MÃ>, …"; KHÔNG nói mã có hay không có ở bộ lọc nào (người dùng 2026-10-05), KHÔNG nói "bạn chọn" / "theo
-  yêu cầu" (người xem không biết trang duyệt). Ở mức nguy hiểm cũng một câu rủi ro như leader.
+  chú ý là <MÃ>, …" — reel không có scene leader thì mã chọn ĐẦU TIÊN mở bằng "Mã đầu tiên là <MÃ>." (là mã chọn duy nhất thì "Mã đáng chú ý hôm nay là <MÃ>."); KHÔNG nói mã có hay không có ở bộ lọc nào (người dùng 2026-10-05), KHÔNG nói "bạn chọn" / "theo
+  yêu cầu" (người xem không biết trang duyệt). Kết bằng hai vai như leader (beat 3).
 - **Mã gánh chỉ số** (người dùng 2026-10-05: "Not need the scene: VIC · VN-Index since i want it combine into the VIC symbol
   review scene not separate scene, the purpose is warning the trader monitor the behavior of VIC, not compare it with the market
   VNIndex") — KHÔNG có scene riêng. Khi mã kéo chỉ số nhiều nhất hôm nay (`flow.impact.lead`, ≥ `screener.impact.minShare` %
@@ -229,7 +264,7 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
 - **Headline là phụ đề**: phần lớn người xem tắt tiếng. Mỗi headline đứng một mình kể được chuyện: dòng 1
   = điều nhìn thấy (có số), dòng 2 = nghĩa của nó. Mark hiện ra đúng câu gọi tên nó (`atSentence`).
 - Nhịp: mỗi scene 1–3 beat, đổi khung 3–5 giây (đạo diễn đã đặt máy quay). Ngân sách chữ theo `_words`: hook
-  và outro ngắn nhất, market dài nhất, hai scene leader bằng nhau.
+  và outro ngắn nhất, market dài nhất, các scene leader bằng nhau.
 
 ## Bản tuần (skill `weekly-review`)
 
@@ -242,18 +277,63 @@ những chỗ sau là khác:
 - **hook**: câu đầu gọi tên TUẦN thay cho ngày của phiên, đọc thành chữ: "Tuần từ hai mươi tám tháng chín đến hai tháng
   mười." (`weekly.fromDm` → `session.dm`). Câu hai là điểm đóng cửa tuần và % của TUẦN ("VN-Index đóng tuần ở …,
   giảm … phần trăm"), rồi câu hỏi và lời mời như bản phiên ("điểm lại tuần qua"). Không chữ hệ thống, như bản phiên.
-- **week**: cây nến tuần trên ảnh FireAnt tuần. Tuần tăng hay giảm bao nhiêu, khối lượng so với tuần trước, đóng cửa
-  gần đỉnh hay gần đáy của biên tuần. Tối đa hai số đọc ra lời.
+- **week** (VN-Index · Khung tuần, từ 2026-10-06 là ĐÁNH GIÁ khung tuần, không chỉ cây nến): ảnh FireAnt tuần. Beat 1
+  cận cảnh cây nến tuần: tuần tăng hay giảm bao nhiêu, đóng cửa gần đỉnh hay gần đáy của biên tuần, khối lượng so với tuần
+  trước — trừ khi `_brief` báo KL phiên cuối của SSI còn là số tạm (khi đó không đọc tỉ lệ KL); tuần chưa khép lại
+  (`indexWeekly.openThrough`) thì nói "tuần này tới thứ Ba", không "cả tuần". Beat 2 toàn cảnh, số ở `indexWeekly`: cấu
+  trúc đỉnh/đáy tuần (`structure.text`, hai đường đứt trên ảnh), giá so với MA50 tuần / MA200 tuần của FireAnt
+  (`maPosition`, `ma.*.closeVsPercent`), vùng kháng cự và hỗ trợ tuần gần nhất (`up[0]` / `down[0]`). Gọi "MA50 tuần",
+  "MA200 tuần" — không lẫn với MA ngày của scene sau. Không nhánh nếu … thì (để watch). Tối đa hai số đọc ra lời.
 - **market**: trạng thái theo quy tắc tính tới phiên cuối tuần. Phiên phân phối mới trong tuần (`weekly.distributionDays`)
   và lần đổi trạng thái trong tuần (`weekly.transitions`) là chuyện của tuần. Kết bằng câu dẫn sang độ rộng.
-- **breadth** chỉ có ở bản tuần: đường % mã trên MA200 (`screener.breadth.line`, `breadth.mjs`) dưới đường chỉ số, theo
-  bullet `breadth` ở trên. Ảnh FireAnt "Biến động thị trường" (`flow`) là của bản phiên, bản tuần không có.
-- **spike, rs, uptrend, leader**: bảng và chart là của PHIÊN CUỐI TUẦN (terminal không giữ lịch sử). Chữ "hôm nay"
-  trong `_brief` là phiên đó, nên lời nói "phiên cuối tuần" hay "thứ Sáu", không "hôm nay". Muốn nói về cả tuần thì
-  chỉ có `weekly.spikeNamesThisWeek` (số mã từng qua Volume spike trong tuần) và `newLeaders` / `droppedLeaders` (khi
-  có snapshot của tuần trước).
+- **breadth** chỉ có ở bản tuần: SỐ mã đóng cửa trên MA200 theo terminal (`screener.breadth.count`, caption và headline
+  beat 2 in "<n>/<tổng> mã trên SMA200") và đường số mã đó (`screener.breadth.history`, tính lại từ giá SSI bởi
+  `breadth.mjs`) dưới đường chỉ số, theo bullet `breadth` ở trên. Ảnh FireAnt "Biến động thị trường" (`flow`) là của bản
+  phiên, bản tuần không có.
+- **spike, rs, uptrend**: từ 2026-10-06 CHỈ có ở bản phiên — bản tuần thay chúng bằng hai bộ lọc Momentum (mục dưới).
+  Bảng, chart và scene soi mã của bản tuần vẫn là của PHIÊN CUỐI TUẦN (terminal không giữ lịch sử).
 - **watch**: các nhánh nếu … thì nhìn sang TUẦN SAU.
 - **outro**: hứa "mỗi cuối tuần" (headline `Cập nhật mỗi cuối tuần`).
+
+### Bản tuần từ 2026-10-06
+
+Người dùng 2026-10-06: "With weekly artifact, eval the VNIndex as daily and weekly of this week, eval the filter: Momentum
+breakout, Momentum breakdown. Also include major ranking and amount of stock have price better than its SMA200." Thứ tự:
+hook → week → daily → market → breadth → sectors → breakout → leader → breakdown → leader → watch → outro. Ba bộ lọc của
+bản phiên (Volume spike, RS Strong, Uptrend) KHÔNG có ở bản tuần (người dùng chọn "Replace").
+
+- **daily** (VN-Index · Khung ngày): CẤU TRÚC và XU HƯỚNG trên ảnh FireAnt ngày, số ở `indexDaily`. Beat 1: hai đỉnh
+  dao động gần nhất và hai đáy gần nhất (`structure.highs` / `structure.lows`, hai đường đứt có nhãn giá) — đỉnh sau cao
+  hay thấp hơn, đáy sau cao hay thấp hơn (`structure.text`); khi `structure.broke` có thì giá đã đóng dưới đáy (trên đỉnh)
+  gần nhất, nói ra — đó là chi tiết đắt nhất của khung ngày. Khung vàng là các phiên của tuần (`weekSessions`; phiên có
+  `volumeProvisional` thì không đọc tỉ lệ KL). Beat 2: giá so với MA50 / MA200 của FireAnt (`maPosition`, bao nhiêu phần
+  trăm), MA50 trên hay dưới MA200 (`ma50AboveMa200`), rồi kết luận khung ngày khỏe / yếu / giằng co như `_brief` đưa (do
+  số quyết định). KHÔNG nói phiên phân phối hay FTD (scene market ngay sau), KHÔNG nhánh nếu … thì (scene watch; verify
+  `review-timeframes` cảnh báo). Câu cuối trao lời cho market bằng một câu hỏi ngắn. Tối đa hai số đọc ra lời.
+- **sectors** (nhóm ngành ICB theo RS — người dùng: "major ranking", chọn "ICB groups by RS"): bảng tối đa mười nhóm
+  ngành (fact pack `sectors.groups`), xếp theo RS 1M TRUNG VỊ của các mã có thanh khoản trong nhóm — cách xếp hạng nhóm
+  ngành của O'Neil, trên RS của terminal. Nói thước đo một lần bằng chữ của trader ("RS 1M trung vị của các mã trong
+  nhóm"), không giảng định nghĩa. Gọi nhóm bằng TÊN TIẾNG VIỆT ĐẦY ĐỦ (`name`: "hàng hóa và dịch vụ công nghiệp"),
+  bảng in tên gọn (`short`). Hai ba nhóm dẫn đầu (beat 2 làm chúng sáng lên, câu ghim beat 2 nói về chúng), nhóm yếu
+  nhất TRÊN BẢNG, một nhận xét từ cột % trên SMA200 hoặc % tuần ("ngay nhóm đứng đầu cũng chỉ bốn mươi hai phần trăm
+  số mã trên MA200"); tối đa hai số đọc ra lời. Nhóm ở `unranked` (quá ít mã thanh khoản) và nhóm ngoài mười dòng không
+  lên bảng: nói tên được, không đọc số. Không đọc mã; nếu gọi một mã thì đó là mã mạnh nhất của nhóm (`strongest`), và
+  KHÔNG nói mã đó có ở bộ lọc nào. Không khuyên mua bán nhóm ngành nào. `comparedWith` là null (chưa có bảng tuần trước)
+  thì không nói "tăng hạng / tụt hạng". Tuần chưa trọn (`weekly.sessions` < 5) thì % tuần là "từ đầu tuần".
+- **breakout / breakdown** (người dùng: "eval the filter: Momentum breakout, Momentum breakdown", chọn "Replace" và
+  "Top of each filter"): hai bộ lọc đã lưu của terminal, mỗi bộ lọc một bảng (fact pack `screener.breakout` /
+  `screener.breakdown`): mã đang có sức mạnh giá (RS 1M, RS 3M, RS 52W cao, thanh khoản) kèm tín hiệu trendline của
+  terminal — breakout = vượt trendline giảm, breakdown = thủng trendline tăng; "xác nhận" = đã vượt / đã thủng, "tiềm
+  năng" = đang áp sát (`confirmed` / `potential`, đếm cả bộ lọc). Bảng xếp theo RS 1M, cột % TUẦN (`weekChangePercent`,
+  `weekUp` / `weekDown` đếm cả bộ lọc) thay cho % ngày. Gọi đúng tên terminal — "bộ lọc Momentum breakout", "bộ lọc
+  Momentum breakdown" (lexicon đọc), không dịch thành "đà tăng", "động lượng". Lời: số mã, mấy mã đã xác nhận, một hai
+  mã đầu bảng, một nhận xét từ cột % tuần; tối đa hai số đọc ra lời; nói "tuần này", không "hôm nay". Breakout là danh
+  sách để theo dõi, không lời khuyên mua; breakdown là danh sách CẢNH BÁO (mã mạnh gãy hoặc sắp gãy hỗ trợ — phải canh
+  rủi ro), không lời khuyên bán. Mỗi bảng có MỘT mã soi (RS 1M cao nhất của bảng đó, chưa được soi ở bảng trước —
+  `screener.leaders.top[k].tierScene`): beat 2 làm nó sáng lên và câu cuối là lời mời "Cùng mình xem kỹ HAH."; scene
+  soi mã đó chiếu ngay sau bảng (`leaders.order` = "tier": breakout → mã của nó → breakdown → mã của nó), câu đầu
+  "Mã đầu tiên là …" / "Mã thứ hai là …" như bản phiên. KHÔNG nói mã nào có ở cả hai bộ lọc Momentum (5/10: PVS và
+  ABB ở cả hai) — verify `review-overlap` FAIL.
 
 ## Outro — người làm kênh chào người xem
 
@@ -295,11 +375,12 @@ Kèm `_script.md`: bài nói liền mạch để đạo diễn đọc như ngư�
 - [ ] `watch` có "nếu … thì" lấy từ `watch` của fact pack; `market` không nói điều kiện; không câu nào gọi giá.
 - [ ] Từ năm phiên phân phối (`distribution.danger`): market có "nguy hiểm" + "rà lại từng mã và rủi ro" + câu người dùng chốt 5/10
   "Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa." (không đếm "thêm … nữa là điều chỉnh"), watch giữ lời cảnh báo,
-  mỗi leader một câu nhắc rủi ro; chưa tới năm thì mức nguy hiểm là ngưỡng kế của market và nhánh của watch.
+  mỗi leader một câu nhắc rủi ro (từ 7/10: câu người đang giữ của hai vai); chưa tới năm thì mức nguy hiểm là ngưỡng kế của market và nhánh của watch.
 - [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); câu đầu "Thứ …, ngày …" (có chữ "ngày"); điểm số + % trước, hai chữ theo `breadthToday` (bản phiên có scene 02 `flow`: hook không đọc số mã — người dùng 2026-10-05), câu hỏi, lời mời "cùng mình điểm lại…". `market` đếm bằng "hiện tại đang có <n> phiên phân phối" (không "đếm lại còn …") và gọi tên trạng thái. `spike` chỉ kể bảng của nó, không móc sang nhóm dẫn dắt (bỏ 2026-10-05).
 - [ ] `rs` và `uptrend` là hai bộ lọc RIÊNG, gọi đúng tên "RS Strong" / "Uptrend" (không "RS mạnh", không "bộ lọc xu hướng tăng"); câu ghim beat 2 của `rs` nói về mã cần chú ý trên bảng; `uptrend` kể nghĩa của bộ lọc và mã đầu bảng, rồi kết bằng lời mời gọi tên mã sẽ soi ("Cùng mình xem kỹ MSR và DGW.", không "đếm ngược"); KHÔNG câu nào nói mã có ở bộ lọc khác (`review-overlap`).
-- [ ] Tối đa hai scene leader (soi mã) cùng khuôn, mỗi mã một chi tiết riêng; không nói mã có ở bộ lọc nào; eyebrow `Soi mã · <MÃ>`; câu đầu "Mã đầu tiên là …" / "Mã thứ hai là …"; không "số một / số hai", không "đếm ngược".
+- [ ] Tối đa bốn scene leader (soi mã) cùng khuôn (bản phiên: chỉ mã ở cả ba bộ lọc, từ không tới bốn scene), mỗi mã một chi tiết riêng; không nói mã có ở bộ lọc nào; eyebrow `Soi mã · <MÃ>`; câu đầu "Mã đầu tiên là …" / "Mã thứ hai là …" / "Mã thứ ba là …" / "Mã thứ tư là …" (scene soi mã duy nhất của reel: "Mã đáng chú ý hôm nay là …"); không "số một / số hai", không "đếm ngược".
 - [ ] Leader có `review` trong pack: chi tiết là `review.detail`, số đọc ra lời có trong `review.numbers`, ô `pending` không nói tới.
+- [ ] Scene soi mã có `review.roles`: hai câu cuối là người đang giữ rồi người chưa có hàng, đúng giá và hành động của bản soi, mỗi câu tối đa một số; beat 3 ghim vào câu người đang giữ, headline beat 3 là `headline` của hai vai.
 - [ ] Mọi chữ số trên màn hình có trong fact pack đúng độ chính xác; mã trên màn hình là mã trong picks.
 - [ ] Mã cổ phiếu trong lời đọc là MÃ ba chữ cái (không tên công ty), hai mã cạnh nhau tách bằng chữ; chỉ báo và động từ của mẫu hình giữ tên trader (`MA200`, `EMA50`, `RS`, `FTD`), không diễn giải.
 - [ ] `visual` chép nguyên; số beat giữ nguyên; `atSentence` trỏ đúng câu.

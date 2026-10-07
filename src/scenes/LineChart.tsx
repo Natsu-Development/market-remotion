@@ -15,7 +15,12 @@ const TOP = {y0: 74, y1: 246};
 const BOTTOM = {y0: 322, y1: 494};
 const HEADER_TOP = 50;
 const HEADER_BOTTOM = 298;
-const AXIS_Y = 532;
+/** Date labels under the bottom pane, and the caption under them: 30 px apart so the two lines never touch (the weekly
+ * count scene's caption sat on the "3/8" "3/9" labels at 532/548, 2026-10-06). */
+const AXIS_Y = 520;
+const CAPTION_Y = 550;
+/** Two date labels closer than this (centre to centre) collide; the inner one is dropped ("1/10" over "5/10"). */
+const TICK_GAP = 64;
 
 /** 1777.73 -> "1.778" (the ticker's integer form), 27.9 -> "27,9%". */
 const fmt = (v: number, unit: LinePane['unit']) =>
@@ -97,20 +102,28 @@ export const LineChart: React.FC<Props> = ({caption, top, bottom, events = [], b
             <path d={`${d} L${xOf(tip[0]).toFixed(1)},${box.y1} L${PAD_L},${box.y1} Z`} fill={`url(#${areaId})`} />
             <path d={d} fill="none" stroke={colour} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
             <circle cx={xOf(tip[0])} cy={s.y(tip[1])} r={5.5} fill={colour} stroke={COLORS.plot} strokeWidth={2} />
-            <g transform={`translate(${xOf(tip[0]) + 12} ${s.y(tip[1]) - 14})`}>
-              <rect x={0} y={0} width={PAD_R - 22} height={28} rx={5} fill="rgba(4, 6, 10, 0.86)" stroke={colour} strokeWidth={1} />
-              <text x={(PAD_R - 22) / 2} y={19} textAnchor="middle" fontFamily={FONTS.mono} fontSize={17} fontWeight={700} fill={colour}>
-                {fmt(tip[1], p.unit)}
-              </text>
-            </g>
+            {p.tag === false ? null : (
+              <g transform={`translate(${xOf(tip[0]) + 12} ${s.y(tip[1]) - 14})`}>
+                <rect x={0} y={0} width={PAD_R - 22} height={28} rx={5} fill="rgba(4, 6, 10, 0.86)" stroke={colour} strokeWidth={1} />
+                <text x={(PAD_R - 22) / 2} y={19} textAnchor="middle" fontFamily={FONTS.mono} fontSize={17} fontWeight={700} fill={colour}>
+                  {fmt(tip[1], p.unit)}
+                </text>
+              </g>
+            )}
           </>
         ) : null}
       </g>
     );
   };
 
-  // Axis: first and last session, plus the first session of each month in between.
-  const ticks = dates.filter((t, k) => k === 0 || k === n - 1 || (k > 0 && t.slice(0, 7) !== dates[k - 1].slice(0, 7)));
+  // Axis: first and last session, plus the first session of each month in between — a month's label that would
+  // touch its neighbour or the last session's is left out (the last session's always stays).
+  const monthStarts = dates.filter((t, k) => k > 0 && k < n - 1 && t.slice(0, 7) !== dates[k - 1].slice(0, 7));
+  const ticks: string[] = [dates[0]];
+  for (const t of monthStarts) {
+    if (xOf(t) - xOf(ticks[ticks.length - 1]) >= TICK_GAP && xOf(dates[n - 1]) - xOf(t) >= TICK_GAP) ticks.push(t);
+  }
+  if (n > 1) ticks.push(dates[n - 1]);
 
   return (
     <Panel tint="rgba(2, 4, 8, 0.55)">
@@ -124,8 +137,10 @@ export const LineChart: React.FC<Props> = ({caption, top, bottom, events = [], b
           return (
             <g key={e.t} opacity={eventsIn}>
               <line x1={x} x2={x} y1={TOP.y0 - 8} y2={BOTTOM.y1} stroke={c} strokeWidth={1.4} strokeDasharray="5 5" opacity={0.8} />
+              {/* In the empty band between the two panes: above the top pane it ran into that pane's header ("FTD 3/8"
+                  over "ĐÓNG CỬA", 2026-10-06). */}
               {e.label ? (
-                <text x={x + 6} y={TOP.y0 - 12} fontFamily={FONTS.mono} fontSize={15} fill={c}>
+                <text x={x + 6} y={TOP.y1 + 22} fontFamily={FONTS.mono} fontSize={15} fill={c}>
                   {e.label}
                 </text>
               ) : null}
@@ -138,7 +153,7 @@ export const LineChart: React.FC<Props> = ({caption, top, bottom, events = [], b
           </text>
         ))}
         {caption ? (
-          <text x={W / 2} y={H - 12} textAnchor="middle" fontFamily={FONTS.mono} fontSize={16} fill={COLORS.inkMuted} letterSpacing={1.2}>
+          <text x={W / 2} y={CAPTION_Y} textAnchor="middle" fontFamily={FONTS.mono} fontSize={16} fill={COLORS.inkMuted} letterSpacing={1.2}>
             {caption}
           </text>
         ) : null}

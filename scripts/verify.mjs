@@ -26,6 +26,7 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {reels} from './lib/reels.mjs';
 import {roleNames, roleOf, roleSpec} from './lib/roles.mjs';
+import {heardCheck} from './lib/heard.mjs';
 import {lexiconOf, loadRules, spellerOf} from './lib/rules.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -225,24 +226,59 @@ function checkSchema(t, reel) {
           if (col?.metric !== undefined && !['change', 'rs'].includes(col.metric)) errs.push(`${at}: movers.${side} metric "${col.metric}" is not change|rs`);
           if (col?.accent && !ACCENTS.has(col.accent)) errs.push(`${at}: movers.${side} accent "${col.accent}" invalid`);
         }
+        // The Volume spike board lights the names reviewed next on a later beat, like the filter boards (user 2026-10-06).
+        for (const e of v.emphasis ?? []) {
+          if (!Number.isInteger(e.beat) || e.beat < 1) errs.push(`${at}: movers emphasis beat ${e.beat} — emphasis plays on beat 2 or later (index ≥ 1)`);
+          if (e.set !== 'focus') errs.push(`${at}: movers emphasis set "${e.set}" is not focus`);
+          else if (![...(v.left?.rows ?? []), ...(v.right?.rows ?? [])].some((r) => r?.focus)) errs.push(`${at}: movers emphasis lights the focus rows but no row has focus: true`);
+        }
       }
-      if (v.type === 'board') {
+      if (v.type === 'board' && v.mode === 'sector') {
+        // The weekly's ICB industry ranking (market-review rules.sectors, scripts/review/lib/sectors.mjs; user
+        // 2026-10-06: "Also include major ranking"): one row per group — its short name in place of a ticker, its number
+        // of liquid stocks, its median RS 1M with the bar, and optionally its median % of the week and its share above
+        // SMA200. No price and no day's change; a missing optional figure prints "—".
+        const SCOLS = {members: 'members', rs1m: 'rs1m', weekChange: 'weekChangePercent', aboveSma200Share: 'aboveSma200Share'};
+        const cols = Array.isArray(v.columns) ? v.columns : [];
+        const unknown = cols.filter((c) => !(c in SCOLS));
+        if (unknown.length) errs.push(`${at}: sector board columns ${unknown.join(', ')} are not ${Object.keys(SCOLS).join('|')}`);
+        if (!cols.includes('rs1m')) errs.push(`${at}: a sector board ranks by RS 1M and shows it`);
+        if (!Array.isArray(v.rows) || !v.rows.length) errs.push(`${at}: board.rows needs at least one row`);
+        else if (v.rows.length > 10) errs.push(`${at}: board has ${v.rows.length} rows; it fits ten`);
+        else {
+          for (const r of v.rows) {
+            if (typeof r.name !== 'string' || !r.name.trim() || !Number.isFinite(r.rs1m)) { errs.push(`${at}: sector board rows need name and rs1m`); break; }
+            if (r.name.length > 22) { errs.push(`${at}: sector name "${r.name}" is longer than 22 characters (rules.sectors.short)`); break; }
+            if (cols.includes('members') && !Number.isInteger(r.members)) { errs.push(`${at}: sector row ${r.name} has no members count`); break; }
+          }
+        }
+        for (const e of v.emphasis ?? []) {
+          if (!Number.isInteger(e.beat) || e.beat < 1) errs.push(`${at}: board emphasis beat ${e.beat} — emphasis plays on beat 2 or later (index ≥ 1)`);
+          if (e.set !== 'focus') errs.push(`${at}: board emphasis set "${e.set}" is not focus`);
+          else if (!(v.rows ?? []).some((r) => r?.focus)) errs.push(`${at}: board emphasis lights the focus rows but no row has focus: true`);
+        }
+      } else if (v.type === 'board') {
         // A screener filter drawn as a table (market-review rs/uptrend, src/scenes/FilterBoard.tsx). RS 1M and the
         // day's change are the columns the user asked for by name (2026-10-01 evening); every printed column needs
         // its figure on every row (a row without one prints "—", which is only right for a missing average).
-        const COLS = {price: 'price', change: 'changePercent', rs1m: 'rs1m', rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent'};
+        // The weekly's Momentum boards (2026-10-06) print the WEEK's change in the change slot (`weekChange`, the board
+        // has no day column then), the terminal's trendline signal as a pill (`signal`, coloured by `signalKind`) and RS 3M.
+        const COLS = {price: 'price', change: 'changePercent', rs1m: 'rs1m', rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent', weekChange: 'weekChangePercent', rs3m: 'rs3m', signal: 'signal'};
         const cols = Array.isArray(v.columns) ? v.columns : [];
         const unknown = cols.filter((c) => !(c in COLS));
         if (unknown.length) errs.push(`${at}: board columns ${unknown.join(', ')} are not ${Object.keys(COLS).join('|')}`);
-        for (const need of ['change', 'rs1m']) if (!cols.includes(need)) errs.push(`${at}: a board shows ${need} (user 2026-10-01: "must have the RS1M column, price change")`);
-        const extra = cols.filter((c) => !['price', 'change', 'rs1m'].includes(c));
+        const changeSlot = cols.includes('change') ? 'change' : cols.includes('weekChange') ? 'weekChange' : null;
+        if (!changeSlot) errs.push(`${at}: a board shows change (user 2026-10-01: "must have the RS1M column, price change"; a weekly board may show the week's, weekChange)`);
+        if (!cols.includes('rs1m')) errs.push(`${at}: a board shows rs1m (user 2026-10-01: "must have the RS1M column, price change")`);
+        const extra = cols.filter((c) => !['price', changeSlot, 'rs1m'].includes(c));
         if (extra.length > 2) errs.push(`${at}: board has ${extra.length} extra columns (${extra.join(', ')}); the table fits two`);
+        if (cols.includes('signal') && !['breakout', 'breakdown'].includes(v.signalKind)) errs.push(`${at}: a board with a signal column needs signalKind breakout|breakdown (it colours the pill)`);
         if (!Array.isArray(v.rows) || !v.rows.length) errs.push(`${at}: board.rows needs at least one row`);
         else if (v.rows.length > 10) errs.push(`${at}: board has ${v.rows.length} rows; it fits ten`);
         else {
           for (const r of v.rows) {
             if (typeof r.symbol !== 'string' || !Number.isFinite(r.changePercent) || !Number.isFinite(r.rs1m)) { errs.push(`${at}: board rows need symbol, changePercent and rs1m`); break; }
-            const missing = cols.filter((c) => !['aboveEma50', 'aboveSma200'].includes(c) && !Number.isFinite(r[COLS[c]]));
+            const missing = cols.filter((c) => !['aboveEma50', 'aboveSma200'].includes(c) && (c === 'signal' ? !['confirmed', 'potential'].includes(r.signal) : !Number.isFinite(r[COLS[c]])));
             if (missing.length) { errs.push(`${at}: board row ${r.symbol} has no ${missing.map((c) => COLS[c]).join(', ')}`); break; }
           }
         }
@@ -349,6 +385,9 @@ function checkBeats(t, reel) {
   else add(t, 'beats', SEV.pass, 'beats ordered, in scene, and matched to their panel');
 }
 
+/** A Vietnamese number word, as the narration spells figures. */
+const NUMBER_WORD = /^(không|một|mốt|hai|ba|bốn|tư|năm|lăm|sáu|bảy|bẩy|tám|chín|mười|mươi|trăm|nghìn|ngàn|linh|lẻ)$/iu;
+
 function checkNarration(t, reel) {
   const bad = [], warn = [];
   const N = R.narration;
@@ -360,6 +399,19 @@ function checkNarration(t, reel) {
     const said = respell(s.narration);
     if (/\d/.test(said)) {
       bad.push(`${s.id}: narration contains digits — spell them, or give the term a voice.lexicon reading (${said.match(/\S*\d\S*/g).join(', ')})`);
+    }
+    // An indicator whose spoken name ends in a number, straight before a spoken figure, is heard as ONE number: 6/10
+    // "vượt MA50 một nghìn bảy trăm bảy mươi sáu" came back "MA năm mươi mốt ngàn …" (scripts/tts_takes.py). A comma
+    // adds no pause (measured 2026-10-01), a word does: "vượt MA50 ở một nghìn …".
+    for (const [term, spoken] of LEXICON) {
+      // indicator names written with their number (MA50, EMA50, MA200) — not the number respellings (nghìn → ngàn)
+      if (!/^[A-Z]+\d+$/.test(term) || !NUMBER_WORD.test(spoken.trim().split(/\s+/).pop())) continue;
+      const re = new RegExp(`(?<![\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s,;:]+(\\p{L}+)`, 'gu');
+      for (const m of s.narration.matchAll(re)) {
+        if (NUMBER_WORD.test(m[1])) {
+          bad.push(`${s.id}: "${term} ${m[1]} …" — the voice runs ${term}'s number into the figure (heard as one number); put a word between them ("${term} ở ${m[1]} …")`);
+        }
+      }
     }
     const w = words(s.narration).length;
     if (w < N.minWordsPerScene || w > N.maxWordsPerScene) {
@@ -698,7 +750,19 @@ function checkFacts(t, reel) {
       // volumeVsSma20Percent, Movers.tsx — else the ratio) and RS 1M from its numbers.
       // A filter board prints each row at the precision FilterBoard.tsx shows: price and change 2dp, RS whole,
       // volume vs TB20 whole %, the distances above EMA50/SMA200 1dp; its legend and emphasis plates are text.
-      ...(sc.visual?.type === 'board' ? [
+      // A sector board (mode 'sector', the weekly's ICB ranking) prints the group's name, its stock count and median
+      // RS 1M whole, its median % of the week 2dp and its share above SMA200 whole %.
+      ...(sc.visual?.type === 'board' && sc.visual.mode === 'sector' ? [
+        ...(sc.visual.rows ?? []).map((r) => ['visual.rows', [
+          r.name,
+          r.members != null ? String(r.members) : '',
+          String(r.rs1m),
+          r.weekChangePercent != null ? Number(r.weekChangePercent).toFixed(2) : '',
+          r.aboveSma200Share != null ? String(r.aboveSma200Share) : '',
+        ].join(' ')]),
+        ...(sc.visual.emphasis ?? []).map((e) => ['visual.emphasis', String(e.label ?? '')]),
+      ] : []),
+      ...(sc.visual?.type === 'board' && sc.visual.mode !== 'sector' ? [
         ...(sc.visual.rows ?? []).map((r) => ['visual.rows', [
           r.symbol,
           r.price != null ? Number(r.price).toFixed(2) : '',
@@ -708,6 +772,9 @@ function checkFacts(t, reel) {
           r.volumeVsSma20Percent != null ? String(Math.abs(Math.round(Number(r.volumeVsSma20Percent)))) : '',
           r.aboveEma50Percent != null ? Math.abs(Number(r.aboveEma50Percent)).toFixed(1) : '',
           r.aboveSma200Percent != null ? Math.abs(Number(r.aboveSma200Percent)).toFixed(1) : '',
+          // The weekly's Momentum boards (2026-10-06): the week's change 2dp, RS 3M whole.
+          r.weekChangePercent != null ? Number(r.weekChangePercent).toFixed(2) : '',
+          r.rs3m != null ? String(r.rs3m) : '',
         ].join(' ')]),
         ...Object.values(sc.visual.legend ?? {}).map((t) => ['visual.legend', String(t)]),
         ...(sc.visual.emphasis ?? []).map((e) => ['visual.emphasis', String(e.label ?? '')]),
@@ -833,6 +900,16 @@ function checkAudio(t, reel, id) {
   else add(t, 'audio', SEV.pass, `${present.length} tracks fit their scenes`);
 }
 
+/**
+ * Every sentence take the tracks are built from was listened to by scripts/tts_takes.py and heard whole — figures,
+ * tickers, terms (scripts/lib/heard.mjs; user 2026-10-06: "The pronounce of the number on this video is not clear …
+ * ensure it not happened again"). SKIP until a track exists; render.mjs refuses what this fails.
+ */
+function checkVoiceHeard(t, reel, rel) {
+  const r = heardCheck(ROOT, reel, rel);
+  add(t, 'voice-heard', SEV[r.level], r.message, r.problems.length ? [...r.problems, `fix: ${r.fix}`].join('; ') : undefined);
+}
+
 // ---------------------------------------------------------------- repo-wide
 
 /** One registry now, so the check is that every declared reel resolves to a file. */
@@ -924,6 +1001,7 @@ for (const id of ids) {
   checkClaims(t.checks, reel);
   checkVoiceAssets(t.checks, reel);
   checkAudio(t.checks, reel, id);
+  checkVoiceHeard(t.checks, reel, rel);
   // A rules file may add its own checks (market-review: scripts/review/checks.mjs). Each module's
   // default export returns [{id, level: pass|warn|fail|skip, message, fix?}].
   for (const mod of R.extraChecks ?? []) {

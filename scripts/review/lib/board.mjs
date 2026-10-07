@@ -18,20 +18,32 @@
  */
 import {signed, vi} from './common.mjs';
 
-/** Default columns per scene key; `rules.screener.scenes.<key>.board.columns` overrides. */
+/** Default columns per scene key; `rules.screener.scenes.<key>.board.columns` (or the format's own scene spec) overrides. */
 export const BOARD_COLUMNS = {
   rs: ['price', 'change', 'rs1m', 'rs52w', 'volume'],
   uptrend: ['price', 'change', 'rs1m', 'aboveEma50', 'aboveSma200'],
+  // The weekly's Momentum boards (2026-10-06): the WEEK's change, the terminal's trendline signal, RS 52W.
+  breakout: ['price', 'weekChange', 'rs1m', 'signal', 'rs52w'],
+  breakdown: ['price', 'weekChange', 'rs1m', 'signal', 'rs52w'],
 };
 /** The fact-pack field behind each optional column. */
-const FIELD = {rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent'};
+const FIELD = {rs52w: 'rs52w', rs3m: 'rs3m', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent', weekChange: 'weekChangePercent', signal: 'signal'};
+
+/** A scene's spec: the format's own screener scenes first (rules.formats.<format>.screener.scenes, the weekly's
+ *  Momentum boards), then the shared ones (rules.screener.scenes). */
+export const sceneSpecOf = (R, format, scene) => R.formats?.[format]?.screener?.scenes?.[scene] ?? R.screener?.scenes?.[scene] ?? {};
 
 /**
  * The names the reel reviews after the boards, in the order their scenes play: the leader scenes show the weaker
  * pick first and top[0] last (scaffold's order), then the requested picks (screener.requested, user 2026-10-05).
+ * A format whose leaders say `order: "tier"` (the weekly's one review per Momentum filter, 2026-10-06) plays them in
+ * tier order, top[0] first.
  */
-export const reviewOrderOf = (F) =>
-  [...new Set([...[...(F.screener?.leaders?.top ?? [])].reverse(), ...(F.screener?.requested ?? [])].map((x) => x.symbol))];
+export const reviewOrderOf = (F) => {
+  const L = F.screener?.leaders;
+  const top = [...(L?.top ?? [])];
+  return [...new Set([...(L?.order === 'tier' ? top : top.reverse()), ...(F.screener?.requested ?? [])].map((x) => x.symbol))];
+};
 
 /**
  * @param {object} o
@@ -43,11 +55,15 @@ export const reviewOrderOf = (F) =>
  */
 export function boardOf({scene, F, R, roles = []}) {
   const S = F.screener[scene];
-  const spec = R.screener.scenes[scene] ?? {};
+  const spec = sceneSpecOf(R, F.format, scene);
   const columns = spec.board?.columns ?? BOARD_COLUMNS[scene] ?? ['price', 'change', 'rs1m'];
   const top = S.top.slice(0, Math.min(spec.top ?? 10, 10));
   const onBoard = new Set(top.map((x) => x.symbol));
-  const focus = reviewOrderOf(F).filter((s) => onBoard.has(s));
+  // Picks that came from one board (the weekly's one review per Momentum filter carries `tierScene`, 2026-10-06) light
+  // only on that board; the daily's picks carry none and light wherever they are shown, as before.
+  const fromBoard = new Map((F.screener?.leaders?.top ?? []).filter((x) => x.tierScene !== undefined).map((x) => [x.symbol, x.tierScene]));
+  const focus = reviewOrderOf(F).filter((s) => onBoard.has(s) && (!fromBoard.has(s) || fromBoard.get(s) === scene));
+  const signalKind = spec.board?.signal ?? S.signalKind ?? null;
 
   const rows = top.map((x) => ({
     symbol: x.symbol,
@@ -68,6 +84,7 @@ export function boardOf({scene, F, R, roles = []}) {
     columns,
     rows,
     ...(emphasis.length ? {emphasis} : {}),
+    ...(signalKind ? {signalKind} : {}),
   };
 
   const cell = {
@@ -78,6 +95,9 @@ export function boardOf({scene, F, R, roles = []}) {
     volume: (x) => (x.volumeVsSma20Percent == null ? null : `KL ${signed(x.volumeVsSma20Percent, 0)}% so TB20`),
     aboveEma50: (x) => (x.aboveEma50Percent == null ? null : `${signed(x.aboveEma50Percent, 1)}% trên EMA50`),
     aboveSma200: (x) => (x.aboveSma200Percent == null ? null : `${signed(x.aboveSma200Percent, 1)}% trên SMA200`),
+    rs3m: (x) => (x.rs3m == null ? null : `RS 3M ${x.rs3m}`),
+    weekChange: (x) => (x.weekChangePercent == null ? null : `${signed(x.weekChangePercent, 2)}% tuần`),
+    signal: (x) => (x.signal == null ? null : `${signalKind ?? 'tín hiệu'} ${x.signal === 'confirmed' ? 'xác nhận' : 'tiềm năng'}`),
   };
   const rowLines = top.map((x, i) => {
     const cells = ['rs1m', ...columns.filter((c) => c !== 'rs1m')].map((c) => cell[c]?.(x)).filter(Boolean);
@@ -89,7 +109,7 @@ export function boardOf({scene, F, R, roles = []}) {
   const beatLine = focus.length
     ? [
         `Beat 1 = bảng ${rows.length} mã hiện dần từ trên xuống (RS 1M thành thanh); bảng xong thì ${focus.length > 1 ? `các mã sẽ soi kỹ ở scene sau (${names})` : `mã sẽ soi kỹ ở scene sau (${names})`} có vạch vàng ở mép trái.`,
-        `Beat 2 = ${names} sáng lên lần lượt từ trên xuống (nền vàng quét ngang dòng, viền vàng, mã phóng to và đổi vàng, biểu tượng kính lúp), các dòng khác mờ đi, nhãn "${label}" thay caption — ${feeds ? `câu ghim beat 2 là LỜI MỜI gọi tên ${focus.length > 1 ? 'các mã đó' : 'mã đó'}: "Cùng mình xem kỹ ${names}."` : `câu ghim beat 2 nói về ${focus.length > 1 ? 'các mã đó' : 'mã đó'} trên CHÍNH bảng này (thứ hạng RS 1M, % hôm nay, cột riêng của bộ lọc), gọi MÃ, tách bằng chữ`}.`,
+        `Beat 2 = ${names} sáng lên lần lượt từ trên xuống (nền vàng quét ngang dòng, viền vàng, mã phóng to và đổi vàng, biểu tượng kính lúp), các dòng khác mờ đi, nhãn "${label}" thay caption — ${feeds ? 'câu ghim beat 2 là LỜI MỜI ở cuối scene — đúng câu ở dòng "Bảng này MỞ PHẦN SOI MÃ" của brief (scaffold countdownBrief: ' + (fromBoard.size ? 'nó gọi đúng mã soi của CHÍNH bảng này)' : 'nó gọi mọi mã sẽ soi, cả mã không có trên bảng này)') :`câu ghim beat 2 nói về ${focus.length > 1 ? 'các mã đó' : 'mã đó'} trên CHÍNH bảng này (thứ hạng RS 1M, ${columns.includes('weekChange') ? '% tuần' : '% hôm nay'}, cột riêng của bộ lọc), gọi MÃ, tách bằng chữ`}.`,
         'Lời không tả hiệu ứng (không "dòng sáng", "kính lúp", "viền vàng") và không nói mã có ở bộ lọc nào khác (người dùng 2026-10-05: "Not need mentioned the stock on specific filter existed on other filter").',
       ].join(' ')
     : `Beat 1 = bảng ${rows.length} mã hiện dần từ trên xuống (RS 1M thành thanh). Không có beat nhấn mạnh: không mã nào sẽ soi kỹ nằm trong ${rows.length} dòng của bảng này. Lời không nói mã có ở bộ lọc nào khác (người dùng 2026-10-05).`;

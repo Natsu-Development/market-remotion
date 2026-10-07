@@ -17,6 +17,9 @@
  *   review-symbols each leader on a FireAnt chart has a valid symbol-reviewer review in the pack (screener.leaders.top[i]
  *                  .review) — WARN only: without one the scene renders scaffold's default marks; skipped while the
  *                  leaders still sit on terminal photos
+ *   review-roles   a review scene whose symbol review carries the two roles (symbol-reviewer/3, user 2026-10-07) ends on
+ *                  the action beat and says both — the one holding the name ("Đang giữ: …") and the one without it
+ *                  ("Chưa có hàng: …"); WARN from 2026-10-07 when a review has no roles
  *   review-payoff  the watch scene (the hook's promise) shows the level and the count that change the state, and
  *                  names the danger level when it is the next threshold (or keeps the warning once reached)
  *
@@ -53,7 +56,7 @@ const onScreen = (scene) => [
     ...(scene.visual.emphasis ?? []).map((e) => e.label ?? ''),
   ] : []),
 ].filter(Boolean);
-const NOT_TICKERS = new Set(['FTD', 'EMA', 'SMA', 'RSI', 'KL', 'RS', 'TB', 'HOSE', 'HNX', 'UPCOM', 'VN', 'VNINDEX', 'MACD', 'TODO', 'ICT']);
+const NOT_TICKERS = new Set(['FTD', 'EMA', 'SMA', 'RSI', 'KL', 'RS', 'TB', 'HOSE', 'HNX', 'UPCOM', 'VN', 'VNINDEX', 'MACD', 'TODO', 'ICT', 'ICB']);
 
 export default function reviewChecks(reel, {root, rules: R}) {
   const out = [];
@@ -150,9 +153,9 @@ export default function reviewChecks(reel, {root, rules: R}) {
   // ---------------------------------------------------------------- review-picks
   {
     const bad = [];
-    // Every table scene of the screener (spike, rs, uptrend — one saved filter each since 2026-09-30),
-    // the movers board's two columns and the chart countdown.
-    const tableScenes = Object.keys(R.screener?.scenes ?? {});
+    // Every table scene of the screener (spike, rs, uptrend — one saved filter each since 2026-09-30; the format's own
+    // boards — the weekly's Momentum breakout / breakdown, 2026-10-06), the movers board's two columns and the reviews.
+    const tableScenes = [...Object.keys(R.screener?.scenes ?? {}), ...Object.keys(R.formats?.[reel.format ?? F.format]?.screener?.scenes ?? {})];
     const picked = new Set([
       ...tableScenes.flatMap((k) => F.screener[k]?.top ?? []),
       ...(F.screener.leaders?.top ?? []),
@@ -175,11 +178,28 @@ export default function reviewChecks(reel, {root, rules: R}) {
       }
     }
     const leaders = reel.scenes.filter((s) => s.role === 'leader');
-    // The countdown shows the weakest of the picks first and #1 (top[0], the highest RS 1M) last.
-    for (const [k, s] of leaders.entries()) {
+    // The countdown shows the weakest of the picks first and #1 (top[0], the highest RS 1M) last. Tier order (the weekly's
+    // one review per Momentum filter, 2026-10-06) plays top[k] after its own board — review-momentum checks that order.
+    for (const [k, s] of F.screener.leaders?.order === 'tier' ? [] : leaders.entries()) {
       const want = F.screener.leaders?.top?.[leaders.length - 1 - k]?.symbol;
       // The pick's own chart: its FireAnt photo (user 2026-10-01), or the terminal's as the fallback.
       if (want && !new RegExp(`/${want.toLowerCase()}-(fireant|terminal)\\.png$`).test(String(s.visual?.src))) bad.push(`${s.id}: leader ${k + 1} is ${want} but the photo is ${s.visual?.src}`);
+    }
+    // One leader scene per pick of the pack, no more: a day can have fewer picks than leader roles (the daily keeps only
+    // the names in all three filters since 2026-10-06), and a scene left from an older skeleton would review a dropped name.
+    const nTop = F.screener.leaders?.top?.length ?? 0;
+    if (leaders.length > nTop) bad.push(`${leaders.slice(0, leaders.length - nTop).map((s) => s.id).join(', ')}: ${leaders.length} leader scene(s) but the fact pack reviews ${nTop} — re-run node scripts/review/scaffold.mjs --format=${reel.format ?? F.format ?? 'daily'}`);
+    // The tiers a format keeps (rules.formats.<fmt>.leaders, from its `since` edition on — user 2026-10-06, the daily: "All
+    // 3 filters only"): a pack ranked before the rule still carries an RS Strong ∩ Uptrend name.
+    {
+      const fk = reel.format ?? F.format;
+      const rule = R.formats?.[fk]?.leaders;
+      if (rule?.from && !(rule.since && session < rule.since)) {
+        const keep = Array.isArray(rule.from) && rule.from.some(Array.isArray) ? rule.from.length : 1;
+        for (const x of F.screener.leaders?.top ?? []) {
+          if (!(x.tier >= 1 && x.tier <= keep)) bad.push(`${x.symbol}: a leader from tier ${x.tier ?? '?'} (${(x.tierFilters ?? []).join(' ∩ ') || '?'}), but rules.formats.${fk}.leaders keeps tier ≤ ${keep} from ${rule.since ?? 'every edition'} on — re-run node scripts/review/facts.mjs --format=${fk}, then scaffold`);
+        }
+      }
     }
     // Each pick scene (a name the user asked for, user 2026-10-05) shows its own chart, in the pack's requested order —
     // scaffold drops a name without a photo, so the scenes follow the requested names that have one.
@@ -246,6 +266,24 @@ export default function reviewChecks(reel, {root, rules: R}) {
         if (off.length) bad.push(`${s.id}: ${r.symbol} prints ${off.map((k) => `${k} ${r[k]} (pack ${x[k]})`).join(', ')}`);
       }
     }
+    // The Volume spike board lights the same way (user 2026-10-06: "With the volumn spike also have the animation with
+    // this scene for me highlight the symbol must noted"): exactly the names reviewed next that its two columns show,
+    // brought forward by an emphasis beat whose plate names them in play order — graded from rules
+    // screener.scenes.spike.movers.focusSince on, so an earlier edition is not failed for a beat it never had.
+    {
+      const s = reel.scenes.find((x) => x.role === 'spike' && x.visual?.type === 'movers');
+      const since = R.screener?.scenes?.spike?.movers?.focusSince;
+      const edition = reel.edition ?? F.asOf ?? '';
+      if (s && (!since || edition >= since)) {
+        const rows = [...(s.visual.left?.rows ?? []), ...(s.visual.right?.rows ?? [])];
+        const focus = order.filter((sym, i) => order.indexOf(sym) === i && rows.some((r) => r.symbol === sym));
+        const lit = rows.filter((r) => r.focus).map((r) => r.symbol);
+        if ([...lit].sort().join(' ') !== [...focus].sort().join(' ')) bad.push(`${s.id}: the spike board lights ${lit.join(', ') || 'no row'}, but the names reviewed next that it shows are ${focus.join(', ') || 'none'}`);
+        const em = (s.visual.emphasis ?? []).filter((e) => e.set === 'focus');
+        if (focus.length && !em.length) bad.push(`${s.id}: ${focus.join(', ')} are reviewed next but no beat brings them forward on the spike board (emphasis set "focus")`);
+        for (const e of em) if (e.label && !String(e.label).endsWith(focus.join(' · '))) bad.push(`${s.id}: the plate "${e.label}" should name ${focus.join(' · ')}, in the order their scenes play`);
+      }
+    }
     for (const scene of tableScenes) {
       const s = reel.scenes.find((x) => x.role === scene);
       if (!s || s.visual?.type !== 'image') continue;
@@ -266,13 +304,15 @@ export default function reviewChecks(reel, {root, rules: R}) {
     // "Not need mentioned the stock on specific filter existed on other filter"). Read on what is SAID and shown as
     // text: the narration sentence by sentence, the headlines and the eyebrow. A bridge sentence without a ticker may
     // still name the next filter ("Còn bộ lọc Uptrend thì sao?").
-    const scope = ['spike', 'rs', 'uptrend', 'leader', 'pick'];
+    // The format's own boards count too (the weekly's Momentum breakout / breakdown, 2026-10-06: PVS and ABB were in both).
+    const fmtScenes = R.formats?.[reel.format ?? F.format]?.screener?.scenes ?? {};
+    const scope = ['spike', 'rs', 'uptrend', 'leader', 'pick', ...Object.keys(fmtScenes)];
     const scenes = reel.scenes.filter((s) => scope.includes(s.role));
     const ownOf = (role) => {
-      const sc = R.screener?.scenes?.[role];
+      const sc = R.screener?.scenes?.[role] ?? fmtScenes[role];
       return sc ? [sc.photo, ...(sc.filters ?? [])].filter(Boolean) : [];
     };
-    const names = [...new Set(Object.keys(R.screener?.scenes ?? {}).flatMap(ownOf))];
+    const names = [...new Set([...Object.keys(R.screener?.scenes ?? {}), ...Object.keys(fmtScenes)].flatMap(ownOf))];
     const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const nameRe = (n) => new RegExp(`(^|[^\\p{L}])${esc(n)}(?![\\p{L}])`, 'iu');
     const words = names.map(esc).join('|');
@@ -314,7 +354,10 @@ export default function reviewChecks(reel, {root, rules: R}) {
     const onFireant = reel.scenes.filter((s) => (s.role === 'leader' || s.role === 'pick') && /-fireant\.png$/.test(String(s.visual?.src)));
     // The requested names' pick scenes are written from a review too (user 2026-10-05).
     const top = [...(F.screener?.leaders?.top ?? []), ...(F.screener?.requested ?? [])];
-    if (!onFireant.length) add('review-symbols', 'skip', 'leaders are on terminal photos — no symbol review expected');
+    // A daily with no name in all three filters and no requested name has no review scene at all (since 2026-10-06).
+    const reviews = reel.scenes.filter((s) => s.role === 'leader' || s.role === 'pick').length;
+    if (!reviews) add('review-symbols', 'skip', 'no symbol review scene in this edition — no symbol review expected');
+    else if (!onFireant.length) add('review-symbols', 'skip', 'leaders are on terminal photos — no symbol review expected');
     else {
       const missing = top.filter((L) => !L.review).map((L) => L.symbol);
       const pending = top.filter((L) => L.review?.pending?.length).map((L) => `${L.symbol} (${L.review.pending.join(', ')})`);
@@ -322,6 +365,35 @@ export default function reviewChecks(reel, {root, rules: R}) {
       else if (pending.length) add('review-symbols', 'warn', `symbol reviews with checks still pending: ${pending.join('; ')}`, "the MA checks wait for FireAnt's MA50/MA200 (<sym>-fireant.ma.json); re-run the reviewer once the photo carries them");
       else add('review-symbols', 'pass', `every leader${(F.screener?.requested ?? []).length ? ' and requested name' : ''} has a symbol review`);
     }
+  }
+
+  // ---------------------------------------------------------------- review-roles
+  {
+    // User 2026-10-07: "With the scene review symbol, also add the role of holder and not holder with action and behavior
+    // like 'Không mua đuổi' with not holder when it exhausted run, and … with holder: 'nếu dưới giá …' thì hạ tỷ trọng & chốt
+    // lời một nửa". A review scene whose symbol review carries `roles` (symbol-reviewer/3, §6b/§6c) ends on a third beat
+    // "Hành động" (the role plates on their lines) and says both roles.
+    const ROLES_SINCE = '2026-10-07';
+    const bySym = new Map([...(F.screener?.leaders?.top ?? []), ...(F.screener?.requested ?? [])].map((L) => [L.symbol, L]));
+    const scenes = reel.scenes.filter((s) => (s.role === 'leader' || s.role === 'pick') && /-fireant\.png$/.test(String(s.visual?.src)));
+    const bad = [];
+    const noRoles = [];
+    let said = 0;
+    for (const s of scenes) {
+      const sym = String(s.visual.src).match(/([a-z0-9]{3})-fireant\.png$/i)?.[1]?.toUpperCase();
+      if (!bySym.get(sym)?.review?.roles) { noRoles.push(sym); continue; }
+      if ((s.visual.shots ?? []).length < 3 || (s.beats ?? []).length < 3) { bad.push(`${s.id}: ${sym}'s review has the two roles but the scene has no action beat (beat 3) — scaffold again and re-write the scene`); continue; }
+      const text = String(s.narration ?? '').normalize('NFC').toLowerCase();
+      if (!text || text.includes('todo')) continue;
+      said++;
+      if (!/đang giữ|đang có hàng/.test(text)) bad.push(`${s.id}: no sentence for the one holding ${sym} ("Đang giữ: …")`);
+      if (!/chưa có hàng|chưa có cổ phiếu|chưa cầm/.test(text)) bad.push(`${s.id}: no sentence for the one without ${sym} ("Chưa có hàng: …")`);
+    }
+    if (!scenes.length) add('review-roles', 'skip', 'no symbol review scene on a FireAnt chart');
+    else if (bad.length) add('review-roles', 'fail', `${bad.length} problem(s) with the holder / not-holder roles`, bad.join('; '));
+    else if (noRoles.length && String(F.session?.date ?? '') >= ROLES_SINCE) add('review-roles', 'warn', `no holder / not-holder roles in the review of ${noRoles.join(', ')}`, 're-run the symbol-reviewer agent (method symbol-reviewer/3, §6b/§6c), then facts.mjs, scaffold and the writer');
+    else if (noRoles.length) add('review-roles', 'skip', `edition before ${ROLES_SINCE}: reviews without roles`);
+    else add('review-roles', 'pass', `${scenes.length} review scene(s) end on the action beat${said ? `, ${said} say both roles` : ''}`);
   }
 
   // ---------------------------------------------------------------- review-outro
@@ -365,5 +437,143 @@ export default function reviewChecks(reel, {root, rules: R}) {
     if (fallback.length) add('review-index', 'warn', `the index chart is the terminal's (FireAnt capture unavailable) in ${fallback.length} scene(s)`, 'the user chose FireAnt photos; re-run node scripts/review/shots.mjs --only=fireant when Chrome is free, then scaffold again');
     else add('review-index', 'pass', scenes.length ? 'index chart photographed on FireAnt' : 'no index chart');
   }
+
+  // ---------------------------------------------------------------- weekly 2026-10-06: VN-Index daily + weekly timeframes
+  // review-timeframes (WARN only): the daily scene ("VN-Index · Khung ngày") and the week scene ("Khung tuần") print the
+  // FireAnt averages the pack read for them (indexDaily.ma / indexWeekly.ma), and the daily scene evaluates — structure
+  // and trend — without the watch scene's if-then branches (user 2026-10-06: "eval the VNIndex as daily and weekly").
+  if (F.indexDaily || F.indexWeekly) {
+    const notes = [];
+    const printed = (s) => (s?.visual?.annotations ?? []).map((a) => `${a.text ?? ''} ${a.label ?? ''}`).join(' ');
+    const has = (text, v) => text.includes(Number(v).toFixed(2).replace('.', ','));
+    const dScene = reel.scenes.find((s) => s.role === 'daily');
+    const wScene = reel.scenes.find((s) => s.role === 'week');
+    if (F.indexDaily && reel.scenes.some((s) => s.role !== 'daily') && !dScene) notes.push('the pack has indexDaily but the reel has no daily scene (scaffold printed why it dropped it)');
+    if (dScene) {
+      for (const [name, m] of Object.entries(F.indexDaily?.ma ?? {})) if (!has(printed(dScene), m.value)) notes.push(`${dScene.id} does not print ${name} ${m.value}`);
+      if (/\bnếu\b[^.?!…]*\bthì\b/i.test(dScene.narration ?? '')) notes.push(`${dScene.id} says a "nếu … thì" branch — the daily timeframe evaluates; the branches are the watch scene's`);
+    }
+    if (wScene && F.indexWeekly) {
+      for (const [name, m] of Object.entries(F.indexWeekly.ma ?? {})) if (!has(printed(wScene), m.value)) notes.push(`${wScene.id} does not print ${name} tuần ${m.value}`);
+      if (!Object.keys(F.indexWeekly.ma ?? {}).length) notes.push(`${wScene.id}: no weekly MA50/MA200 of this week (${F.indexWeekly.maWhy ?? 'vnindex-weekly.ma.json'})`);
+    }
+    if (notes.length) add('review-timeframes', 'warn', `${notes.length} timeframe note(s)`, notes.join('; '));
+    else add('review-timeframes', 'pass', `${[dScene && 'daily', wScene && 'week'].filter(Boolean).join(' and ') || 'no timeframe scene'} print FireAnt's averages${dScene ? '; the daily scene has no if-then branch' : ''}`);
+  }
+
+  // ---------------------------------------------------------------- weekly 2026-10-06: Momentum breakout / breakdown boards
+  // review-momentum: the format's own boards (rules.formats.<format>.screener.scenes — the weekly's Momentum breakout /
+  // breakdown, user 2026-10-06 "eval the filter: Momentum breakout, Momentum breakdown") show the pack's rows in the pack's
+  // order (RS 1M descending, ten at most) with the pack's signal and week, and light only their OWN review pick ("Top of
+  // each filter": the leaders row whose tierScene is the board); with `order: "tier"` review scene k shows top[k]'s chart
+  // and comes after its board. A format without own boards (the daily) = no check.
+  {
+    const fk = reel.format ?? F.format;
+    const own = R.formats?.[fk]?.screener?.scenes ?? {};
+    if (Object.keys(own).length) {
+      const bad = [];
+      const boards = reel.scenes.filter((s) => own[s.role]);
+      for (const s of boards) {
+        const S = F.screener?.[s.role];
+        if (!S) { bad.push(`${s.id}: the fact pack has no screener.${s.role} — run node scripts/review/facts.mjs --format=${fk}`); continue; }
+        const rows = s.visual?.type === 'board' ? s.visual.rows ?? [] : [];
+        const want = (S.top ?? []).slice(0, Math.min(own[s.role].top ?? 10, 10));
+        if (rows.map((r) => r.symbol).join() !== want.map((x) => x.symbol).join()) bad.push(`${s.id}: rows ${rows.map((r) => r.symbol).join(', ') || '—'} are not the pack's ${want.map((x) => x.symbol).join(', ') || '—'}`);
+        for (let i = 1; i < want.length; i++) if ((want[i - 1].rs1m ?? -1) < (want[i].rs1m ?? -1)) { bad.push(`${s.id}: the pack's rows are not in RS 1M order at #${i + 1}`); break; }
+        for (const r of rows) {
+          const x = want.find((w) => w.symbol === r.symbol);
+          if (!x) continue;
+          if ((r.signal ?? null) !== (x.signal ?? null)) bad.push(`${s.id}: ${r.symbol} shows signal ${r.signal ?? '—'}, the pack says ${x.signal ?? '—'}`);
+          if (r.weekChangePercent != null && r.weekChangePercent !== x.weekChangePercent) bad.push(`${s.id}: ${r.symbol} shows ${r.weekChangePercent}% for the week, the pack says ${x.weekChangePercent}`);
+        }
+        const lit = rows.filter((r) => r.focus).map((r) => r.symbol);
+        const mine = (F.screener?.leaders?.top ?? []).filter((x) => x.tierScene === s.role && rows.some((r) => r.symbol === x.symbol)).map((x) => x.symbol);
+        if (lit.join() !== mine.join()) bad.push(`${s.id}: lights ${lit.join(', ') || 'no row'} — its own review pick is ${mine.join(', ') || 'none'}`);
+      }
+      // Tier order: review scene k is top[k] and sits after the board it came from.
+      const L = F.screener?.leaders;
+      if (L?.order === 'tier') {
+        const reviews = reel.scenes.filter((s) => s.role === 'leader');
+        for (const [k, s] of reviews.entries()) {
+          const x = L.top?.[k];
+          if (!x) continue;
+          if (!new RegExp(`/${x.symbol.toLowerCase()}-(fireant|terminal)\\.png$`).test(String(s.visual?.src))) bad.push(`${s.id}: review ${k + 1} should be ${x.symbol} (tier ${x.tier}, ${x.tierScene}) but shows ${s.visual?.src}`);
+          const i = reel.scenes.indexOf(s);
+          const board = x.tierScene ? reel.scenes.findIndex((b) => b.role === x.tierScene) : -1;
+          if (board >= 0 && board !== i - 1) bad.push(`${s.id}: the review of ${x.symbol} should come right after the ${x.tierScene} board`);
+        }
+      }
+      if (bad.length) add('review-momentum', 'fail', `${bad.length} Momentum board problem(s)`, bad.join('; '));
+      else add('review-momentum', 'pass', boards.length ? `${boards.map((s) => s.role).join(' and ')} show the pack's rows in RS 1M order and light their own review pick` : 'no Momentum board built');
+    }
+  }
+
+  // ---------------------------------------------------------------- weekly 2026-10-06: ICB industry groups by RS
+  // review-sectors: the industry board (role sectors, lib/sectors.mjs) shows the pack's ranking as it is — the groups
+  // in rank order from #1, at most ten, each row's label, stock count, median RS 1M, week and share above SMA200 those of
+  // its group, the lit rows at the top. No sectors scene (the daily) = no check.
+  {
+    const s = reel.scenes.find((x) => x.role === 'sectors');
+    if (s) {
+      const G = F.sectors?.groups ?? [];
+      const rows = s.visual?.type === 'board' ? s.visual.rows ?? [] : null;
+      const bad = [];
+      let lit = [];
+      if (!rows) bad.push(`${s.id} is not a board (visual.type ${s.visual?.type})`);
+      else {
+        if (s.visual.mode !== 'sector') bad.push(`${s.id}: board mode is ${s.visual.mode ?? 'ticker'}, not sector`);
+        if (!G.length) bad.push(`the fact pack ranks no ICB group (${F.sectors?.why ?? 'run node scripts/review/facts.mjs --format=weekly'})`);
+        if (rows.length > 10) bad.push(`${s.id}: ${rows.length} rows; the board fits ten`);
+        const FIELDS = ['members', 'rs1m', 'weekChangePercent', 'aboveSma200Share'];
+        rows.forEach((r, i) => {
+          const g = G[i];
+          if (!g) { if (G.length) bad.push(`${s.id}: row ${i + 1} "${r.name}" is past the pack's ${G.length} ranked groups`); return; }
+          if (r.name !== g.short) bad.push(`${s.id}: row ${i + 1} is "${r.name}" but the pack's #${g.rank} is "${g.short}"`);
+          for (const k of FIELDS) if (r[k] != null && r[k] !== g[k]) bad.push(`${s.id}: row ${i + 1} ${g.short} ${k} ${r[k]} ≠ pack ${g[k]}`);
+        });
+        lit = rows.map((r, i) => (r.focus ? i : -1)).filter((i) => i >= 0);
+        if (lit.some((i, k) => i !== k)) bad.push(`${s.id}: the lit rows (${lit.map((i) => i + 1).join(', ')}) are not the top of the board`);
+      }
+      if (bad.length) add('review-sectors', 'fail', `${bad.length} industry board problem(s)`, bad.slice(0, 6).join('; '));
+      else add('review-sectors', 'pass', `industry board = the pack's top ${rows.length} of ${G.length} ICB groups by median RS 1M${lit.length ? `, top ${lit.length} lit` : ''}`);
+    }
+  }
+
+  // ---------------------------------------------------------------- weekly 2026-10-06: stocks above their SMA200
+  // review-breadth: the user asked for the NUMBER (2026-10-06: "amount of stock have price better than its SMA200"). Every
+  // count the breadth scene prints (caption, headlines) is the terminal's (screener.breadth.count); the line under it is
+  // recomputed from SSI closes (scripts/review/breadth.mjs) and may sit a few names off — WARN past
+  // rules.formats.<format>.breadth.maxResidualPercent of the set, or when breadth.json was built on another set. A reel
+  // without a breadth scene (the daily) gets no entry, so its report reads as before.
+  {
+    const s = reel.scenes.find((x) => x.role === 'breadth');
+    const B = F.screener?.breadth;
+    if (!s) { /* no breadth scene: nothing to grade */ }
+    else if (!B) add('review-breadth', 'fail', 'the breadth scene has no screener.breadth in its fact pack', 'node scripts/review/breadth.mjs, then node scripts/review/facts.mjs --format=weekly');
+    else {
+      const K = B.count ?? {above: B.aboveSma200, with: B.withSma200 ?? B.universe, floor: 0};
+      const text = onScreen(s).join(' · ');
+      const bad = [];
+      const notes = [];
+      const shown = [];
+      for (const m of text.matchAll(/(\d+)\s*\/\s*(\d+)\s*(?:mã|MÃ)/gu)) {
+        shown.push(`${m[1]}/${m[2]}`);
+        if (Number(m[1]) !== K.above || Number(m[2]) !== K.with) bad.push(`"${m[0]}" is not the terminal's count ${K.above}/${K.with}`);
+      }
+      for (const m of text.matchAll(/(?<![\d/])(\d+)\s+(?:mã|MÃ)(?:\s+(?:có thanh khoản|CÓ THANH KHOẢN))?\s+(?:trên|TRÊN)\s+S?MA\s?200/gu)) {
+        shown.push(m[1]);
+        if (Number(m[1]) !== K.above) bad.push(`"${m[0]}" is not the terminal's count ${K.above}`);
+      }
+      if (!shown.length) notes.push(`the count the user asked for (${K.above}/${K.with} above SMA200) is not on screen — the caption or the beat-2 headline should print it`);
+      const L = B.line;
+      const maxRes = R.formats?.[reel.format]?.breadth?.maxResidualPercent ?? 2;
+      if (L?.residualSharePercent != null && Math.abs(L.residualSharePercent) > maxRes) notes.push(`the line ends at ${L.countLast}, ${L.residual > 0 ? '+' : ''}${L.residual} names (${L.residualSharePercent}% of the set) off the terminal's ${K.above} — raise rules.formats.${reel.format}.breadth.minVolumeSma20 (5/10: 10 000 shares put them 1 apart), then breadth.mjs, facts.mjs, scaffold`);
+      if (L?.set && (L.set.floor ?? 0) !== (K.floor ?? 0)) notes.push(`content/review/breadth.json was built on another set (${L.set.rule}) than the count (floor ${K.floor ?? 0}) — run node scripts/review/breadth.mjs --date=${session}, then facts.mjs`);
+      if (bad.length) add('review-breadth', 'fail', `${bad.length} count(s) on the breadth scene are not the terminal's`, bad.join('; '));
+      else if (notes.length) add('review-breadth', 'warn', `${notes.length} breadth note(s)`, notes.join('; '));
+      else add('review-breadth', 'pass', `the breadth scene prints the terminal's count ${K.above}/${K.with} (${K.percent ?? B.aboveSma200Percent}%)${L?.residual != null ? `; the line ends ${L.residual > 0 ? '+' : ''}${L.residual} off it` : ''}`);
+    }
+  }
+
   return out;
 }

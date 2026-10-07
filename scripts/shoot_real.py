@@ -269,6 +269,14 @@ def find_tab(page, label: str, tmp: Path):
     return None
 
 
+def same_symbol(shown: str, want: str) -> bool:
+    """The symbol box shows `want`, allowing tesseract's I/L/1 confusion: FireAnt's thin capital I reads back as L
+    (2026-10-06: CII -> 'CLL', VCI -> 'VCL'; both exact tickers, FireAnt's first result). Any other difference still
+    stops the capture, and every photo is then calibrated on the ticker's own /analyze bars, which a wrong stock fails."""
+    norm = lambda t: t.upper().translate(str.maketrans({"L": "I", "1": "I", "|": "I"}))
+    return shown.upper() == want.upper() or (len(shown) == len(want) and norm(shown) == norm(want))
+
+
 def symbol_shown(page, tmp: Path) -> str:
     """The ticker the chart's symbol box shows right now (OCR), '' when unreadable."""
     for w in ocr_words(page, SYMBOL_BOX, tmp):
@@ -521,7 +529,7 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         result list. Returns what the box shows at the end."""
         paste_symbol(symbol, tag)
         shown = symbol_shown(page, tmp)
-        if shown != symbol.upper():
+        if not same_symbol(shown, symbol):
             print(f"symbol box shows {shown!r} after pasting {symbol.upper()} — retrying with a longer wait", file=sys.stderr)
             paste_symbol(symbol, f"{tag}r", settle=5.5)
             shown = symbol_shown(page, tmp)
@@ -557,7 +565,7 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         if a.restore_symbol and state["pasted"]:
             shown = paste_verified(a.restore_symbol, "8")
             print(f"restored the tab's symbol: symbol box shows {shown!r}", file=sys.stderr)
-            if shown != a.restore_symbol.upper():
+            if not same_symbol(shown, a.restore_symbol):
                 print(f"WARNING: the tab still shows {shown!r}, not {a.restore_symbol.upper()} — put it back by hand", file=sys.stderr)
         if a.restore_tab and state["tabbed"] and a.restore_tab.upper() != (a.tab or "").upper():
             click_tab(a.restore_tab, "9")
@@ -573,8 +581,10 @@ def run(a, hit, ref, W, H, out: Path) -> None:
             # matches loosely — first result not the ticker — would photograph the wrong stock).
             shown = paste_verified(a.symbol, "1")
             print(f"symbol box shows {shown!r} after pasting {a.symbol.upper()}", file=sys.stderr)
-            if shown != a.symbol.upper():
+            if not same_symbol(shown, a.symbol):
                 raise RuntimeError(f"the chart shows {shown!r}, not {a.symbol.upper()} — no capture")
+            if shown != a.symbol.upper():
+                print(f"symbol box OCR read {shown!r} for {a.symbol.upper()} — the I/L confusion, accepted", file=sys.stderr)
         else:
             paste_symbol(a.symbol, "1")
     if a.range:

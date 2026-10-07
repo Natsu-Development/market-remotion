@@ -27,6 +27,7 @@ import {fireantLeaderVisual} from './lib/leader-fireant.mjs';
 import {boardOf} from './lib/board.mjs';
 import {FLOW_PHOTO} from './lib/fireant-flow.mjs';
 import {weekVisual, weeklyBars} from './lib/week-fireant.mjs';
+import {sectorBoard} from './lib/sectors.mjs';
 
 const {opt, flag} = cli();
 const R = rules();
@@ -205,7 +206,13 @@ const tickerView = (t, picked, focus) => {
 
 const tag = yymmdd(date);
 const est = (role) => round(targetWords(R, role) / R.narration.wordsPerSecond + R.audio.leadIn + R.audio.tail, 1);
-const todoBeats = (n) => Array.from({length: n}, (_, k) => ({atSentence: k === 0 ? 0 : k + 1, at: round(R.audio.leadIn + k * 3.5, 2), line1: 'TODO', line2: 'TODO', accent: 'gold'}));
+// Placeholder timing until the voice lands (voiceover.mjs writes the real `at`): beats 3,5 s apart — closer when the scene's
+// estimate `dur` would leave the last beat under 3 s, so the review page's still of that beat shows its marks drawn (a review
+// scene's third beat, "Hành động", 2026-10-07: at 7,25 s of 8,4 s its role plates were not drawn yet on the still).
+const todoBeats = (n, dur = null) => {
+  const step = dur && n > 1 ? Math.min(3.5, (dur - 3 - R.audio.leadIn) / (n - 1)) : 3.5;
+  return Array.from({length: n}, (_, k) => ({atSentence: k === 0 ? 0 : k + 1, at: round(R.audio.leadIn + k * step, 2), line1: 'TODO', line2: 'TODO', accent: 'gold'}));
+};
 const status = F.state.status;
 const warnAct = status === 'CORRECTION' || status === 'UNDER_PRESSURE' ? 'maroon' : null;
 const scenes = [];
@@ -291,7 +298,8 @@ const maskOf = (m) => (m?.length ? {masks: m, maskColor: R.shots.maskColor} : {}
 //            the filter: Uptrend and RS Strong, not union it first"); beat 2 lights the names reviewed next
 //   uptrend  the Uptrend board on its own, the same behaviour as rs (user 2026-10-05: "behavior like the RS strong");
 //            it closes on the invitation naming the names reviewed next ("Let's review …", user 2026-10-01)
-//   leader   the symbol reviews — the names of rules.screener.leaders.from, the weaker RS 1M first and the
+//   leader   the symbol reviews — the names of rules.screener.leaders.from (the daily keeps only the names in all
+//            three filters since 2026-10-06, formats.daily.leaders: 0–2 scenes), the weaker RS 1M first and the
 //            highest RS 1M last; one distinct detail each
 // No scene says a name of one filter is also in another (user 2026-10-05: "Not need mentioned the stock on specific
 // filter existed on other filter") — that was the open loop 2 (spike → leader) until then.
@@ -359,6 +367,9 @@ const buildHook = () => {
   const T = F.session.breadthToday;
   const S = F.session;
   const W = FORMAT === 'weekly' ? F.weekly : null;
+  // A weekly built before Friday (user 2026-10-06: "… of this week", run on Tue 6/10) speaks of the week SO FAR: no
+  // "đóng tuần" while the week is still trading.
+  const weekOpen = !!W && new Date(`${date}T00:00:00Z`).getUTCDay() < 5;
   // The weekly hook speaks of the WEEK: its sessions boxed on the daily chart (high to low), not Friday's candle alone.
   const weekBox = () => {
     const xs = daily.filter((b) => b.t >= W.from).map((b) => barX(index, daily, b.t)).filter((x) => x != null);
@@ -371,7 +382,7 @@ const buildHook = () => {
   const marks = [
     W ? weekBox() : todayRing(0),
     W
-      ? lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `Đóng tuần ${vi(W.close)} · ${fmtPct(W.changePercent)}`, W.changePercent >= 0 ? 'green' : 'red', 0, 'end')
+      ? lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `${weekOpen ? 'Tuần này' : 'Đóng tuần'} ${vi(W.close)} · ${fmtPct(W.changePercent)}`, W.changePercent >= 0 ? 'green' : 'red', 0, 'end')
       : lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `Đóng cửa ${vi(S.close)} · ${fmtPct(S.changePercent)}`, S.changePercent >= 0 ? 'green' : 'red', 0, 'end'),
     ...(!W && !flowAfterHook && T?.up != null ? [lab(clamp(lastX - 0.03), clamp(lastY - 0.07), `${T.exchange}: ${T.up} tăng · ${T.down} giảm`, 'white', 0, 'end')] : []),
   ];
@@ -383,9 +394,11 @@ const buildHook = () => {
     beats: todoBeats(2),
     visual: indexPhoto(room.settle(marks, shots)),
     brief: W ? [
-      `Câu đầu là TUẦN (bản tuần, skill weekly-review — người dùng tách 2026-10-05): "Tuần từ ${W.fromDm.replace('/', ' tháng ')} đến ${S.dm.replace('/', ' tháng ')}" đọc thành chữ. Câu hai gọi tên chỉ số rồi ĐIỂM ĐÓNG TUẦN và % của TUẦN (so với đóng cửa tuần trước ${vi(W.prevClose)}): "VN-Index đóng tuần ở" ${vi(W.close)} (đọc tròn ${vi(Math.round(W.close), 0)}), ${fmtPct(W.changePercent)}.${W.volumeVsPriorWeek != null ? ` Khối lượng mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước để scene week nói.` : ''}`,
-      'Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI: "Cùng mình điểm lại tuần qua và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.',
-      `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu hai; số mã tăng/giảm của phiên cuối tuần để scene breadth nói.`,
+      weekOpen
+        ? `Câu đầu là TUẦN NÀY, CHƯA KHÉP LẠI (bản tuần chạy ${S.weekday} — người dùng 2026-10-06: "eval the VNIndex … of this week"): "Tuần này, tính tới ${S.weekday.toLowerCase()} ngày ${S.dm.replace('/', ' tháng ')}" đọc thành chữ (${W.sessions} phiên, từ ${W.fromDm}). Câu hai gọi tên chỉ số rồi ĐIỂM của phiên cuối và % của TUẦN TỚI NAY (so với đóng cửa tuần trước ${vi(W.prevClose)}): "VN-Index đang ở" ${vi(W.close)} (đọc tròn ${vi(Math.round(W.close), 0)}), ${fmtPct(W.changePercent)} so với cuối tuần trước — KHÔNG "đóng tuần" (tuần còn giao dịch).${W.volumeVsPriorWeek != null ? ` Khối lượng mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước để scene week nói.` : ''}`
+        : `Câu đầu là TUẦN (bản tuần, skill weekly-review — người dùng tách 2026-10-05): "Tuần từ ${W.fromDm.replace('/', ' tháng ')} đến ${S.dm.replace('/', ' tháng ')}" đọc thành chữ. Câu hai gọi tên chỉ số rồi ĐIỂM ĐÓNG TUẦN và % của TUẦN (so với đóng cửa tuần trước ${vi(W.prevClose)}): "VN-Index đóng tuần ở" ${vi(W.close)} (đọc tròn ${vi(Math.round(W.close), 0)}), ${fmtPct(W.changePercent)}.${W.volumeVsPriorWeek != null ? ` Khối lượng mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước để scene week nói.` : ''}`,
+      `Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI: "Cùng mình điểm lại ${weekOpen ? 'tuần này' : 'tuần qua'} và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.`,
+      `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu hai; số mã trên MA200 để scene breadth nói.`,
     ] : [
       `Câu đầu là NGÀY của phiên: "${S.weekday}, ngày ${S.dm.replace('/', ' tháng ')}" đọc thành chữ (có chữ "ngày" sau thứ — người dùng 2026-10-01). Câu hai gọi tên chỉ số rồi ĐIỂM SỐ và % của phiên: "VN-Index đóng cửa" ${vi(S.close)} (đọc tròn ${vi(Math.round(S.close), 0)}), ${fmtPct(S.changePercent)}. ${flowAfterHook
         ? `KHÔNG đọc số mã tăng/giảm ở hook (người dùng 2026-10-05: bỏ câu "Chỉ số tăng: … mã tăng, … mã giảm" vì scene 02 — ảnh FireAnt "Biến động thị trường" — đọc chúng); headline beat 1 cũng không in số mã. Chữ do số quyết định của chỉ số: "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang).`
@@ -441,7 +454,7 @@ const buildMarket = () => {
       // session / no breadth counts), where "Nhìn rộng ra thì sao?" would dangle.
       `Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). ${afterMarket === 'breadth' || afterMarket === 'flow'
         ? 'Kết bằng câu dẫn sang độ rộng thị trường, dạng câu hỏi: "Nhìn rộng ra thì sao?".'
-        : `Kết bằng MỘT câu hỏi ngắn trao lời cho các bộ lọc (scene sau là ${afterMarket === 'spike' ? 'bảng Volume spike' : afterMarket}; ${fmt.roles.includes('flow') ? 'scene Biến động thị trường bị bỏ ở bản này vì ảnh FireAnt không phải của phiên này' : fmt.roles.includes('breadth') ? 'scene độ rộng bị bỏ ở bản này vì pack không có số độ rộng' : 'không có scene độ rộng'}), như "${FORMAT === 'weekly' ? 'Bộ lọc cuối tuần bắt được gì?' : 'Bộ lọc hôm nay bắt được gì?'}"; KHÔNG lặp câu "Tiền chảy vào đâu?" của hook.`}`,
+        : `Kết bằng MỘT câu hỏi ngắn trao lời cho các bộ lọc (scene sau là ${afterMarket === 'spike' ? 'bảng Volume spike' : afterMarket}; ${fmt.roles.includes('flow') ? (flowBuilt ? 'scene Biến động thị trường đã đứng ngay sau hook' : 'scene Biến động thị trường bị bỏ ở bản này vì ảnh FireAnt không phải của phiên này') : fmt.roles.includes('breadth') ? 'scene độ rộng bị bỏ ở bản này vì pack không có số độ rộng' : 'không có scene độ rộng'}), như "${FORMAT === 'weekly' ? 'Bộ lọc cuối tuần bắt được gì?' : 'Bộ lọc hôm nay bắt được gì?'}"; KHÔNG lặp câu "Tiền chảy vào đâu?" của hook.`}`,
       ...(FORMAT === 'weekly' && F.weekly ? [`Bản tuần: kể chuyện của TUẦN — phiên phân phối mới trong tuần: ${F.weekly.distributionDays.map((d) => `${d.dm} ${fmtPct(d.changePercent)}`).join('; ') || 'không có'}; đổi trạng thái trong tuần: ${F.weekly.transitions.map((x) => `${x.dm} ${x.from} → ${x.to}`).join('; ') || 'không'}. "Hôm nay" của beat 1 là phiên cuối tuần (${F.session.dm}).`] : []),
     ],
   });
@@ -460,19 +473,37 @@ const buildBreadth = () => {
   // the scene is dropped: the dot-grid fallback went with the drawn panels (user 2026-10-06).
   if (B.line && B.history?.length >= 10) {
     const L = B.line;
+    // The NUMBER (user 2026-10-06: "amount of stock have price better than its SMA200"): the terminal's own count on the
+    // caption and in the beat-2 headline; the bottom pane draws the same count per session, recomputed from SSI closes
+    // (scripts/review/breadth.mjs — the screener keeps no history), so its tip can sit a few names off (line.residual).
+    const K = B.count ?? {above: B.aboveSma200, with: B.withSma200 ?? B.universe, percent: B.aboveSma200Percent, floor: 0};
+    const liquidWord = K.floor > 0 ? ' CÓ THANH KHOẢN' : '';
+    const W = B.week;
     const events = ftd && B.history.some((h) => h.t === ftd.date) ? [{t: ftd.date, label: `FTD ${ftd.dm}`, accent: 'green'}] : [];
+    const countDown = L.countChange < 0;
+    const indexDown = L.indexChangePercent < 0;
+    const story = indexDown === countDown
+      ? (countDown
+        ? `CÙNG CHIỀU: chỉ số giảm ${vi(Math.abs(L.indexChangePercent), 1)}% và số mã trên MA200 cũng giảm (${L.countFirst} → ${L.countLast} trên đường) — điểm yếu lan rộng, không chỉ vài mã trụ`
+        : `CÙNG CHIỀU: chỉ số tăng ${vi(Math.abs(L.indexChangePercent), 1)}% và số mã trên MA200 cũng tăng (${L.countFirst} → ${L.countLast} trên đường) — đà tăng có độ rộng`)
+      : (countDown
+        ? `NGHỊCH LÝ: chỉ số tăng ${vi(Math.abs(L.indexChangePercent), 1)}% mà số mã trên MA200 lại giảm (${L.countFirst} → ${L.countLast} trên đường) — chỉ số được vài mã kéo, phần lớn cổ phiếu yếu đi`
+        : `NGHỊCH LÝ: chỉ số giảm ${vi(Math.abs(L.indexChangePercent), 1)}% mà số mã trên MA200 lại tăng (${L.countFirst} → ${L.countLast} trên đường) — cổ phiếu khỏe hơn chỉ số`);
+    const next = fmt.roles[fmt.roles.indexOf('breadth') + 1];
     push('breadth', {
       beats: todoBeats(2),
       visual: {
         type: 'lines',
+        caption: `TERMINAL: ${K.above}/${K.with} MÃ${liquidWord} TRÊN SMA200 · ${vi(K.percent, 1)}%`,
         top: {label: 'VN-INDEX · ĐÓNG CỬA', points: B.history.map((h) => [h.t, h.indexClose]), unit: 'points'},
-        bottom: {label: '% MÃ TRÊN SMA200', points: B.history.map((h) => [h.t, h.percent]), accent: 'green', unit: 'percent'},
+        bottom: {label: `SỐ MÃ${liquidWord} TRÊN SMA200 · GIÁ SSI`, points: B.history.map((h) => [h.t, h.above]), accent: countDown ? 'red' : 'green', unit: 'points', tag: false},
         events,
       },
       brief: [
-        `NGHỊCH LÝ trên hai đường cùng trục thời gian (${L.sessions} phiên, ${L.fromDm} → ${F.session.dm}): chỉ số ${L.indexChangePercent >= 0 ? 'tăng' : 'giảm'} ${fmtPct(L.indexChangePercent, 1)} (${vi(L.indexFirst)} → ${vi(L.indexLast)}), còn tỉ lệ mã trên MA200 (SMA200 của terminal) đi từ ${vi(L.first, 1)}% xuống ${vi(L.last, 1)}% (đỉnh ${vi(L.peak, 1)}% ngày ${L.peakDm}).`,
-        `Beat 1 = đường chỉ số vẽ ra (câu "chỉ số thì đi lên"); beat 2 = đường độ rộng vẽ ra (câu "nhưng …"). Headline ghi ${Math.round(L.last)}% (số nguyên từ pack: breadth.line.last = ${L.last}).`,
-        `Screener hôm nay đếm ${B.aboveSma200}/${B.withSma200 ?? B.universe} = ${vi(B.aboveSma200Percent, 1)}% (lệch ${fmtPct(L.vsScreener, 1)} so với đường — cách tính SMA khác); hôm nay ${B.up} mã tăng, ${B.down} mã giảm. Kết bằng câu dẫn: vậy tiền đang ở đâu?`,
+        `CON SỐ người dùng hỏi (2026-10-06: "amount of stock have price better than its SMA200"): terminal đếm ${K.above} trên ${K.with} mã${K.floor > 0 ? ` có thanh khoản (KL TB20 ≥ ${K.floor.toLocaleString('vi-VN')} cp)` : ' có SMA200'} đóng cửa trên MA200 = ${vi(K.percent, 1)}% (screener.breadth.count) — ĐỌC con số này ("hai trăm bốn mươi bảy trên chín trăm lẻ một mã" — viết "linh", lexicon đọc "lẻ"; hoặc "chưa tới ba mươi phần trăm"). Headline beat 2 ghi đúng "${K.above}/${K.with} mã${K.floor > 0 ? ' có thanh khoản' : ''} trên SMA200" — caption đã in số này; gọi chỉ báo là MA200 trong lời (người dùng 2026-10-01).`,
+        `${story}. Hai đường cùng trục thời gian (${L.sessions} phiên, ${L.fromDm} → ${F.session.dm}): VN-Index ${vi(L.indexFirst)} → ${vi(L.indexLast)}; số mã trên MA200 đỉnh ${L.countPeak} ngày ${L.countPeakDm}. Beat 1 = đường chỉ số vẽ ra; beat 2 = đường số mã vẽ ra (câu "còn số mã …"). Đường dưới TÍNH LẠI từ giá đóng cửa SSI (terminal không giữ lịch sử) nên điểm cuối ${L.countLast} lệch ${L.residual != null ? `${L.residual > 0 ? '+' : ''}${L.residual}` : '?'} mã so với số của terminal: KHÔNG đọc số của đường, KHÔNG ghép số của đường (${L.countFirst}) với số terminal (${K.above}) trong một câu — chiều của đường nói bằng chữ ("giảm dần từ đầu tháng bảy").`,
+        W ? `Tuần này: ${W.screenerFrom != null ? `terminal ${W.screenerFrom} mã ngày ${W.fromDm} → ${K.above} hôm nay (${W.screenerChange > 0 ? '+' : ''}${W.screenerChange})` : `đường ${W.lineFrom} → ${W.lineTo} mã (${W.lineChange > 0 ? '+' : ''}${W.lineChange})`} — nói bằng chữ (gần như không đổi / thêm / bớt), không thêm số thứ ba.` : 'Không có phiên của tuần trước trên đường — không nói thay đổi trong tuần.',
+        `Tối đa hai số đọc ra lời. Kết bằng câu dẫn sang scene sau${next === 'sectors' ? ' (xếp hạng nhóm ngành): một câu hỏi như "Vậy nhóm ngành nào còn khỏe?"' : `, dạng câu hỏi ngắn ("Bộ lọc tuần này bắt được gì?")`}.`,
       ],
     });
     return;
@@ -555,7 +586,7 @@ const buildFlow = () => {
           : !FL.countLean && FL.moneyLean ? `CHUYỆN CỦA PHIÊN: số mã gần cân bằng (${FL.up} / ${FL.down}) mà ${FL.moneyWord} (×${vi(FL.moneyLeadRatio)}) — tiền đã chọn phía, số mã thì chưa; nói đúng như số.`
             : FL.countLean && !FL.moneyLean ? `${FL.countWord}, mà tiền chia gần đều hai phía — nói đúng như số, không gọi tiền là nghiêng.`
               : 'Cả số mã lẫn dòng tiền đều gần cân bằng — phiên giằng co; nói đúng như số, không gọi là nghiêng.'}`,
-      `Từ của trader: độ rộng, dòng tiền, mã tăng / mã giảm, tỷ đồng. Số trong lời viết bằng chữ, số tiền đọc tới hàng tỷ (${vi(FL.money.up, 1)} → "${Math.round(FL.money.up)} tỷ" bằng chữ), không "khoảng", không "gần"; nhãn và headline giữ số của pack (flow.*): ${FL.up} / ${FL.down} / ${FL.flat}, ${vi(FL.money.up, 1)} tỷ, ${vi(FL.money.down, 1)} tỷ, ×${vi(FL.moneyLeadRatio)}, ${vi(FL.moneyPercent[FL.moneyLead], 1)}% — viết "5801,5" không có dấu chấm nghìn (verify đọc dấu chấm là thập phân). Kết bằng câu dẫn sang bộ lọc: tiền đó nằm ở những mã nào?`,
+      `Từ của trader: độ rộng, dòng tiền, mã tăng / mã giảm, tỷ đồng. Số trong lời viết bằng chữ, số tiền đọc tới hàng tỷ (${vi(FL.money.up, 1)} → "${Math.round(FL.money.up)} tỷ" bằng chữ), không "khoảng", không "gần"; nhãn và headline giữ số của pack (flow.*): ${FL.up} / ${FL.down} / ${FL.flat}, ${vi(FL.money.up, 1)} tỷ, ${vi(FL.money.down, 1)} tỷ, ×${vi(FL.moneyLeadRatio)}, ${vi(FL.moneyPercent[FL.moneyLead], 1)}% — viết "5801,5" không có dấu chấm nghìn (verify đọc dấu chấm là thập phân).${flowAfterHook ? '' : ' Kết bằng câu dẫn sang bộ lọc: tiền đó nằm ở những mã nào?'}`,
     ],
   });
 };
@@ -586,17 +617,27 @@ const buildMovers = () => {
     ? 'xếp theo RS 1M giảm dần'
     : 'cột tăng xếp theo % tăng (mạnh nhất trước), cột giảm theo % giảm (sâu nhất trước) — người dùng 2026-10-01 tối';
   const line = (x) => `${x.symbol} ${fmtPct(x.changePercent)} KL ${volVs20(x)}${x.rs1m != null ? ` (RS 1M ${x.rs1m})` : ''}`;
+  // The names the reel reviews next that this board shows light up on a third beat, as on the RS Strong and Uptrend
+  // boards (user 2026-10-06: "With the volumn spike also have the animation with this scene for me highlight the symbol
+  // must noted"): a gold mark when the row lands, then band, outline, gold ticker and magnifier (src/scenes/Movers.tsx).
+  const shown = [...S.gainers, ...S.losers];
+  const focus = reviewOrder().filter((sym, i, all) => all.indexOf(sym) === i && shown.some((x) => x.symbol === sym));
+  const lit = focus.map((sym) => shown.find((x) => x.symbol === sym));
+  const label = `${R.screener.board?.picksLabel ?? 'Xem kỹ'}: ${focus.join(' · ')}`;
+  const row = (x) => ({...boardRow(x), ...(focus.includes(x.symbol) ? {focus: true} : {})});
   push('spike', {
-    beats: todoBeats(2),
+    beats: todoBeats(focus.length ? 3 : 2),
     visual: {
       type: 'movers',
       caption: `KHỐI LƯỢNG ĐỘT BIẾN · ${S.count} MÃ · ${byRs ? 'XẾP THEO RS 1M' : 'XẾP THEO % THAY ĐỔI'}${S.volumeUnit === 'percentVsSma20' ? ' · KL SO SMA20' : ''}`,
-      left: {title: 'TĂNG', accent: 'green', rows: S.gainers.map(boardRow)},
-      right: {title: 'GIẢM', accent: 'red', rows: S.losers.map(boardRow)},
+      left: {title: 'TĂNG', accent: 'green', rows: S.gainers.map(row)},
+      right: {title: 'GIẢM', accent: 'red', rows: S.losers.map(row)},
+      ...(focus.length ? {emphasis: [{beat: 2, set: 'focus', dim: true, label}]} : {}),
     },
     brief: [
       `Bộ lọc "${S.filter}": ${S.count} mã (${S.up} tăng, ${S.down} giảm${S.flat ? `, ${S.flat} đứng giá — không lên bảng` : ''}), cả bộ lọc lên bảng, mỗi cột tối đa ${R.screener.scenes.spike.movers?.gainers ?? 10} mã, ${order}. Beat 1 = cột TĂNG (${S.gainers.length} mã): ${S.gainers.map(line).join('; ')}.`,
       `Beat 2 = cột GIẢM (${S.losers.length} mã): ${S.losers.map(line).join('; ')}. Khối lượng lớn khi giảm là bán ra.${S.volumeUnit === 'percentVsSma20' ? ' "KL +x%" là khối lượng phiên so với trung bình 20 phiên (VOL/SMA của terminal); headline in cùng đơn vị đó, không "×".' : ''}`,
+      ...(focus.length ? [`Beat 3 = MÃ CẦN CHÚ Ý trên bảng này (sẽ soi ở scene sau): ${lit.map((x) => `${x.symbol} — ${fmtPct(x.changePercent)} hôm nay, KL ${volVs20(x)} so TB20`).join('; ')}. ${lit.length > 1 ? 'Các dòng đó' : 'Dòng đó'} sáng lên (nền vàng quét ngang dòng, viền vàng, mã phóng to và đổi vàng, kính lúp), các dòng khác mờ đi, nhãn "${label}" thay caption — câu ghim beat 3 nói về ${lit.length > 1 ? 'các mã' : 'mã'} đó TRÊN BẢNG NÀY: % thay đổi và khối lượng so trung bình 20 phiên, gọi MÃ, hai mã tách bằng chữ. Không mời "xem kỹ" (lời mời là câu cuối của bảng Uptrend), không "mã dẫn dắt", không nói mã có ở bộ lọc khác.`] : []),
       `Lời đọc gọi MÃ ba chữ cái (voice.letters đánh vần lúc thu), không đọc tên công ty (người dùng 2026-10-01); hai mã liền nhau tách bằng chữ ("GEE và POW"). Không đọc hết bảng: nói số mã mỗi cột và một hai mã đáng chú ý — bảng gánh phần còn lại; tối đa hai số đọc ra lời.`,
       `${NO_OVERLAP} Chỉ kể bảng NÀY: không gợi mã nào là "mã dẫn dắt", không "để cuối", không nói mã nào cũng có ở RS Strong hay Uptrend.`,
     ],
@@ -606,7 +647,8 @@ const buildMovers = () => {
 /**
  * The brief line of the scene that opens the symbol reviews (the board right before the leader scenes).
  * The picks are tiered (rules.screener.leaders, user 2026-10-01): names in all three filters first,
- * then names in RS Strong ∩ Uptrend, ranked by RS 1M inside a tier, at most `top` of them. Since the
+ * then names in RS Strong ∩ Uptrend, ranked by RS 1M inside a tier, at most `top` of them (the daily keeps only the
+ * first tier since 2026-10-06 — formats.daily.leaders — so its board may open no review at all). Since the
  * user's 2026-10-01 night note ("Remove 'Đếm ngược từ hai' => 'Let's review …'") the scene closes on an
  * invitation to review them, not on a countdown; the board's beat 2 lights them under
  * rules.screener.board.picksLabel ("Xem kỹ"), the word the invitation uses. Since 2026-10-05 the speech never says
@@ -619,12 +661,23 @@ const NUM_VI = ['không', 'một', 'hai', 'ba', 'bốn', 'năm'];
 const reviewOrder = () => [...(F.screener.leaders?.top ?? [])].reverse().map((x) => x.symbol).concat((F.screener.requested ?? []).map((x) => x.symbol));
 /** Tickers in speech, separated by WORDS so their spelled letters never run together ("MSR và DGW", "A, rồi B và C"). */
 const sayTickers = (list) => (list.length < 2 ? list.join('') : `${list.slice(0, -1).join(', rồi ')} và ${list[list.length - 1]}`);
-const countdownBrief = () => {
-  const LD = F.screener.leaders ?? {count: 0, filters: [], top: [], tiers: []};
-  const n = LD.top.length;
-  const order = [...LD.top].reverse();
-  const invite = `Cùng mình xem kỹ ${sayTickers(order.map((x) => x.symbol)) || '…'}.`;
-  return `Bảng này MỞ PHẦN SOI MÃ: ${NUM_VI[n] ?? n} mã được soi, mỗi mã một scene chart riêng ngay sau, theo thứ tự ${order.map((x) => `${x.symbol} (RS 1M ${x.rs1m})`).join(' rồi ') || '—'} — vì sao chọn chúng là việc của đạo diễn, KHÔNG lên lời (không tầng, không "cả ba bộ lọc", không "có mặt ở cả …"; người dùng 2026-10-05). Câu ghim beat 2 — câu CUỐI — là LỜI MỜI gọi đúng tên các mã đó, tách bằng chữ: "${invite}" (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' => 'Let's review …'"; "xem kỹ", không "soi kỹ": giọng đọc "soi" thành "xoay", đo 2026-10-04) — KHÔNG "đếm ngược", KHÔNG chữ "review" (TTS đọc tiếng Anh thất thường), KHÔNG "dẫn đầu" (chúng không phải hàng đầu của bảng này), không lặp "điểm lại" của hook. Ngoài lời mời, không kể lại điều scene trước đã nói về các mã đó.`;
+/** A requested name gets its pick scene only with a photo (buildPicks drops it otherwise). */
+const pickHasPhoto = (L) => !!(photo(`${L.symbol.toLowerCase()}-fireant`)?.calib || photo(`${L.symbol.toLowerCase()}-terminal`));
+/**
+ * `beats`: the board's beat count (a drawn board with no focus row has one). The invitation names the leader scenes that
+ * are built (leaderTotal), in the order they play; with none — the daily reviews only the names in all three filters since
+ * 2026-10-06 — it names the picks that get a scene, and with neither the board bridges to the VN-Index scenario.
+ */
+const countdownBrief = (beats = 2, scene = null) => {
+  // Tier order (the weekly, 2026-10-06): the board that feeds a review invites ONLY its own pick (tierScene = the board).
+  const own = tierOrder && scene ? tierPicks.filter((x) => x.tierScene === scene) : null;
+  const leaders = own ?? [...(F.screener.leaders?.top ?? [])].slice(0, leaderTotal).reverse();
+  const order = own ?? (leaders.length ? leaders : (F.screener.requested ?? []).filter(pickHasPhoto));
+  const n = order.length;
+  const pin = beats > 1 ? 'Câu ghim beat 2 — câu CUỐI —' : 'Câu CUỐI (bảng này chỉ một beat)';
+  if (!n) return `Hôm nay KHÔNG có scene soi mã sau bảng này: KHÔNG mời "xem kỹ" mã nào. ${pin} là câu dẫn sang kịch bản VN-Index ("Còn VN-Index thì sao?" là được), không mang mã. KHÔNG nói vì sao không soi mã, không "không mã nào có mặt ở cả ba bộ lọc" — luật chọn mã (rules.formats.${FORMAT}.leaders) là việc của đạo diễn, không lên lời (người dùng 2026-10-05: "Not need mentioned the stock on specific filter existed on other filter").`;
+  const invite = `Cùng mình xem kỹ ${sayTickers(order.map((x) => x.symbol))}.`;
+  return `Bảng này MỞ PHẦN SOI MÃ: ${NUM_VI[n] ?? n} mã được soi, mỗi mã một scene chart riêng ngay sau, theo thứ tự ${order.map((x) => `${x.symbol}${x.rs1m != null ? ` (RS 1M ${x.rs1m})` : ''}`).join(' rồi ')} — vì sao chọn chúng là việc của đạo diễn, KHÔNG lên lời (không tầng, không "cả ba bộ lọc", không "có mặt ở cả …"; người dùng 2026-10-05). ${pin} là LỜI MỜI gọi đúng tên các mã đó, tách bằng chữ: "${invite}" (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' => 'Let's review …'"; "xem kỹ", không "soi kỹ": giọng đọc "soi" thành "xoay", đo 2026-10-04) — KHÔNG "đếm ngược", KHÔNG chữ "review" (TTS đọc tiếng Anh thất thường), KHÔNG "dẫn đầu" (chúng không phải hàng đầu của bảng này), không lặp "điểm lại" của hook. Ngoài lời mời, không kể lại điều scene trước đã nói về các mã đó.`;
 };
 
 /**
@@ -642,7 +695,7 @@ const focusBrief = (S, rows, focus, feeds, columns = []) => {
   const lit = focus.map((sym) => rows.find((x) => x.symbol === sym)).filter(Boolean);
   const meaning = feeds ? ` Điều riêng của ${S.filter}: nghĩa của bộ lọc (${describeFilter(savedFilter(S.filter)) || 'điều kiện đã lưu'} — lời nói "giá trên EMA50, EMA50 trên MA200") và mã đứng đầu bảng này.` : '';
   if (!lit.length) return `${NO_OVERLAP}${meaning} Bảng này không có mã nào sẽ soi ở scene sau — không có beat nhấn mạnh.`;
-  return `${NO_OVERLAP}${meaning} MÃ CẦN CHÚ Ý trên bảng này (sẽ soi ở scene sau): ${lit.map((x) => `${x.symbol} — ${cols(x)}`).join('; ')}. Beat 2 tô và tạo hiệu ứng cho ${lit.length > 1 ? 'các dòng' : 'dòng'} đó (các dòng khác mờ đi, nhãn "${label}: ${lit.map((x) => x.symbol).join(' · ')}")${feeds ? ' — Ở BẢNG NÀY câu ghim beat 2 là LỜI MỜI ở cuối, gọi tên đúng các mã đó (dòng dưới); nó thay cho câu tả hạng của các mã trên bảng' : ` — câu ghim beat 2 nói về ${lit.length > 1 ? 'các mã' : 'mã'} đó TRÊN BẢNG NÀY: hạng, % hôm nay, cột riêng của bảng; gọi MÃ, hai mã tách bằng chữ. Kết bằng một câu mở đường sang bảng sau, không mang mã ("Còn bộ lọc Uptrend thì sao?" là được)`}.`;
+  return `${NO_OVERLAP}${meaning} MÃ CẦN CHÚ Ý trên bảng này (sẽ soi ở scene sau): ${lit.map((x) => `${x.symbol} — ${cols(x)}`).join('; ')}. Beat 2 tô và tạo hiệu ứng cho ${lit.length > 1 ? 'các dòng' : 'dòng'} đó (các dòng khác mờ đi, nhãn "${label}: ${lit.map((x) => x.symbol).join(' · ')}")${feeds ? ' — Ở BẢNG NÀY câu ghim beat 2 là LỜI MỜI ở cuối, đúng câu của dòng "Bảng này MỞ PHẦN SOI MÃ" bên dưới (nó có thể gọi cả mã không có trên bảng này); nó thay cho câu tả hạng của các mã trên bảng' : ` — câu ghim beat 2 nói về ${lit.length > 1 ? 'các mã' : 'mã'} đó TRÊN BẢNG NÀY: hạng, % hôm nay, cột riêng của bảng; gọi MÃ, hai mã tách bằng chữ. Kết bằng một câu mở đường sang bảng sau, không mang mã ("Còn bộ lọc Uptrend thì sao?" là được)`}.`;
 };
 
 // rs and uptrend — one saved filter each, ranked by RS 1M (user 2026-10-01: "listing 10 symbols with RS strong …
@@ -681,8 +734,49 @@ const buildBoard = (scene) => {
       `Lời không đọc hết bảng: số mã của bộ lọc, một hai mã đứng đầu (gọi MÃ, tách bằng chữ), và một nhận xét từ cột % (bao nhiêu mã giảm hôm nay dù RS cao). Tối đa hai số đọc ra lời. Gọi đúng tên bộ lọc: "bộ lọc ${S.filter}" (người dùng 2026-10-01: "keep the RS strong verb" — không "RS mạnh", không "bộ lọc xu hướng tăng").`,
       focusBrief(S, rows, focus, feeds, table?.visual?.columns ?? spec.board?.columns ?? []),
       feeds
-        ? `${countdownBrief()} KHÔNG gộp hai bộ lọc thành một bảng trong lời: bảng này vẫn là ${S.filter} một mình.`
+        ? `${countdownBrief(table ? table.beats : right.length ? 2 : 1)} KHÔNG gộp hai bộ lọc thành một bảng trong lời: bảng này vẫn là ${S.filter} một mình.`
         : `Một lát cắt riêng, KHÔNG gộp với ${others.join(' / ') || 'bộ lọc khác'} (người dùng tách mỗi bộ lọc một scene, 2026-09-30): kể bộ lọc này đếm gì và mã nào đứng đầu. Chưa soi mã ở đây.`,
+    ],
+  });
+};
+
+// The format's own boards (rules.formats.<format>.screener.scenes — the weekly's Momentum breakout / breakdown, user
+// 2026-10-06: "eval the filter: Momentum breakout, Momentum breakdown"; picked "Replace" and "Top of each filter"): the
+// drawn board of rs/uptrend (lib/board.mjs → FilterBoard.tsx) with the WEEK's change and the terminal's trendline signal
+// as columns. Beat 2 lights the board's OWN review pick (its leaders row carries tierScene = this scene) and closes on the
+// invitation to it — the leader scene comes right after. A builder of its own, so the daily boards' briefs stay as they were.
+const SIGNAL_VI = {has_breakout_confirmed: 'breakout xác nhận', has_breakout_potential: 'breakout tiềm năng', has_breakdown_confirmed: 'breakdown xác nhận', has_breakdown_potential: 'breakdown tiềm năng', has_bullish_rsi: 'RSI tăng', has_bearish_rsi: 'RSI giảm'};
+/** "(breakout xác nhận hoặc breakout tiềm năng)" — the saved filter's condition groups, for the brief only. */
+const describeGroups = (f) => (f?.groups ?? []).map((g) => `(${(g.conditions ?? []).map((c) => SIGNAL_VI[c.field] ?? `${c.field} ${c.op} ${c.value}`).join(g.match === 'or' ? ' hoặc ' : ' và ')})`).join(' và ');
+const OWN_MEANING = {
+  breakout: 'breakout = giá vượt trendline giảm (kháng cự xiên) mà terminal tự vẽ trên chart ngày; "xác nhận" = đã vượt, "tiềm năng" = đang áp sát trendline (terminal ghi "đang theo dõi"), chưa vượt',
+  breakdown: 'breakdown = giá thủng trendline tăng (hỗ trợ xiên) mà terminal tự vẽ trên chart ngày; "xác nhận" = đã thủng, "tiềm năng" = đang áp sát trendline, chưa thủng',
+};
+const buildOwnBoard = (scene) => {
+  const S = F.screener[scene];
+  if (!S?.top?.length) {
+    console.log(`  ${scene}: dropped — ${!S ? `${FACTS} has no screener.${scene} (pull.mjs pulls rules.formats.${FORMAT}.screener.scenes since 2026-10-06, then facts.mjs)` : `no stock passed "${S.filter}" this session`}`);
+    return;
+  }
+  const table = boardOf({scene, F, R, roles: fmt.roles});
+  const kind = S.signalKind;
+  const f = savedFilter(S.filter);
+  const rs1mMin = (f?.conditions ?? []).find((c) => c.field === 'rs_1m')?.value;
+  const others = Object.keys(fmt.screener?.scenes ?? {}).filter((k) => k !== scene).map((k) => F.screener[k]?.filter).filter(Boolean);
+  const shared = S.top.filter((x) => (x.filters ?? []).some((n) => others.includes(n))).map((x) => x.symbol);
+  // The board opens a review when a leader role follows it and its own pick gets that scene (the leader loop's test).
+  const feeds = fmt.roles[fmt.roles.indexOf(scene) + 1] === 'leader' && (tierOrder ? tierPicks.some((x) => x.tierScene === scene) : table.focus.length > 0);
+  push(scene, {
+    beats: todoBeats(table.beats),
+    visual: table.visual,
+    brief: [
+      `Bộ lọc "${S.filter}" của terminal (${[describeFilter(f), describeGroups(f)].filter(Boolean).join(' · ') || 'điều kiện đã lưu'}): ${S.count} mã — ${S.confirmed} ${kind ?? ''} xác nhận, ${S.potential} tiềm năng; tuần này (từ thứ Hai ${S.weekOf ? S.weekOf.slice(8, 10).replace(/^0/, '') + '/' + Number(S.weekOf.slice(5, 7)) : '—'}) ${S.weekUp} mã tăng, ${S.weekDown} mã giảm. Bảng vẽ ${table.visual.rows.length} mã xếp theo RS 1M giảm dần, mỗi dòng: ${table.visual.columns.map((c) => ({...BOARD_COLUMN_VI, weekChange: '% tuần', signal: 'tín hiệu (xác nhận / tiềm năng)', rs3m: 'RS 3M'})[c] ?? c).join(' · ')} — ${table.rowLines.join('; ')}. ${table.beatLine}`,
+      `Nghĩa của bộ lọc, nói như trader: cổ phiếu đang có sức mạnh giá (RS 1M từ ${rs1mMin ?? '—'}, RS 3M và RS 52W từ 70, thanh khoản trung bình hai mươi phiên từ một triệu cổ phiếu) và ${OWN_MEANING[kind] ?? 'tín hiệu đã lưu'}.${kind === 'breakdown' ? ' Đây là danh sách CẢNH BÁO: mã đang mạnh mà gãy hoặc sắp gãy hỗ trợ — nói là phải canh rủi ro, KHÔNG phải lời khuyên bán.' : ' Đây là danh sách để THEO DÕI, không phải lời khuyên mua.'}`,
+      `Lời không đọc hết bảng: số mã của bộ lọc, một hai mã đầu bảng (gọi MÃ, tách bằng chữ), một nhận xét từ cột % TUẦN hoặc cột tín hiệu (bao nhiêu mã đã xác nhận). Tối đa hai số đọc ra lời. Gọi đúng tên bộ lọc: "bộ lọc ${S.filter}" (tên trader của terminal, lexicon đọc — không dịch thành "đà tăng", "động lượng phá vỡ"). Đây là bản TUẦN: nói "tuần này", không "hôm nay".`,
+      `${NO_OVERLAP}${shared.length ? ` (Chỉ cho đạo diễn, KHÔNG lên lời: ${shared.join(', ')} cũng qua bộ lọc ${others.join(' / ')} — không nói ra, không gọi tên bộ lọc kia trong câu có mã.)` : ''}`,
+      feeds
+        ? `${countdownBrief(table.beats, scene)} Bản tuần: mỗi bộ lọc MỘT mã soi (người dùng chọn "Top of each filter") — lời mời CHỈ gọi mã của bảng này, KHÔNG gọi mã soi của bảng Momentum kia.`
+        : `Bảng này không mở scene soi mã: KHÔNG mời "xem kỹ" mã nào. Câu cuối dẫn sang scene sau (${fmt.roles[fmt.roles.indexOf(scene) + 1] ?? '—'}), không mang mã.`,
     ],
   });
 };
@@ -759,7 +853,17 @@ const buildTable = (scene) => {
 // fireant_ma.py, carried in the pack as leaders.top[i].fireant). The terminal photo is the fallback when FireAnt could
 // not be shot. A symbol review (.claude/agents/symbol-reviewer.md → content/review/symbols/<date>/<SYM>.json) decides
 // the marks and the detail when there is one.
-const ORD_VI = ['', 'Mã đầu tiên', 'Mã thứ hai', 'Mã thứ ba'];
+// Up to four leader scenes since 2026-10-06 (user: "… the number i want is 4").
+const ORD_VI = ['', 'Mã đầu tiên', 'Mã thứ hai', 'Mã thứ ba', 'Mã thứ tư'];
+/** Opens the leader brief's template line when the reel has ONE leader scene (no sibling to match); asPick drops it. */
+const LONE_LEADER = 'Scene soi mã duy nhất từ bộ lọc hôm nay';
+/** The opener when the whole reel has ONE symbol review (one leader and no pick, or one pick and no leader): "Mã đầu
+ * tiên" would promise a second name that never comes. */
+const LONE_REVIEW = 'Mã đáng chú ý hôm nay';
+/** The requested names that get a pick scene (a photo); with the leader scenes they are the reel's symbol reviews. */
+const pickTotal = () => (F.screener.requested ?? []).filter(pickHasPhoto).length;
+/** The opener of leader scene `rank` (rank 1 = top[0], played last): "Mã đầu tiên" / "Mã thứ hai", or LONE_REVIEW. */
+const ordOf = (rank) => (leaderTotal + pickTotal() === 1 ? LONE_REVIEW : ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo');
 /** Why the name was picked (its filters, its tier) is the director's, never the speech's (user 2026-10-05: "Not need
  * mentioned the stock on specific filter existed on other filter"): the brief keeps it as context only. */
 const leaderNoFilters = (L, ord = ORD_VI[1]) => `(Chỉ cho đạo diễn, KHÔNG lên lời: qua bộ lọc hôm nay ${(L.filters ?? []).join(' · ') || '—'}${L.tier != null ? `, tầng ${L.tier} của phần soi mã` : ''}.) Scene KHÔNG nói mã này có ở bộ lọc nào, không "cả ba / cả hai bộ lọc", không "cũng ở …", không nhắc bảng của scene trước (người dùng 2026-10-05: "Not need mentioned the stock on specific filter existed on other filter"; verify \`review-overlap\` FAIL) — câu đầu gọi thứ tự và mã ("${ord} là ${L.symbol}.") rồi vào price action.`;
@@ -769,21 +873,27 @@ const noLeaderTag = (detail) => String(detail ?? '').replace(/ — mã vừa đ�
 // review beside existed symbol on 3 filter"; screener.requested) is built like a leader and pushed as a `pick` scene:
 // the leader brief's ordinal line gives way to the pick's own (built with rank 0).
 const asPick = (brief, L, n) => [
-  `SOI THÊM — mã thứ ${n} người dùng chọn trên trang duyệt, sau các mã của bộ lọc: ${L.symbol} (${L.name ?? '—'}, ${L.exchange ?? '—'}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m ?? '—'}, RS 52W ${L.rs52w ?? '—'}${L.volumeVsSma20Percent != null ? `, KL ${fmtPct(L.volumeVsSma20Percent, 0)} so TB20` : ''}. (Chỉ cho đạo diễn: ${L.filters?.length ? `có mặt ở bộ lọc ${L.filters.join(', ')}` : 'không nằm trong ba bộ lọc hôm nay'}.) Lời KHÔNG nói mã này có hay không có ở bộ lọc nào (người dùng 2026-10-05: "Not need mentioned the stock on specific filter existed on other filter"; verify \`review-overlap\` FAIL), KHÔNG nói "bạn chọn" / "theo yêu cầu".`,
+  `SOI THÊM — mã thứ ${n} người dùng chọn trên trang duyệt, ${leaderTotal ? 'sau các mã của bộ lọc' : 'hôm nay không có scene soi mã từ bộ lọc nên mã chọn đầu tiên mở phần soi mã'}: ${L.symbol} (${L.name ?? '—'}, ${L.exchange ?? '—'}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m ?? '—'}, RS 52W ${L.rs52w ?? '—'}${L.volumeVsSma20Percent != null ? `, KL ${fmtPct(L.volumeVsSma20Percent, 0)} so TB20` : ''}. (Chỉ cho đạo diễn: ${L.filters?.length ? `có mặt ở bộ lọc ${L.filters.join(', ')}` : 'không nằm trong ba bộ lọc hôm nay'}.) Lời KHÔNG nói mã này có hay không có ở bộ lọc nào (người dùng 2026-10-05: "Not need mentioned the stock on specific filter existed on other filter"; verify \`review-overlap\` FAIL), KHÔNG nói "bạn chọn" / "theo yêu cầu".`,
   // A pick is not a leader: the brief's first line (the leader's ordinal and context) gives way to the line above.
-  ...brief.slice(1).filter((l) => !String(l).startsWith('Cùng khuôn câu')).map(noLeaderTag),
-  `Câu đầu: "Thêm một mã đáng chú ý là ${L.symbol}, …" — chữ "là" tách cụm khỏi chữ cái đầu (voice.letters đánh vần); eyebrow "Soi mã · ${L.symbol}"; cùng phương pháp với scene soi mã của bộ lọc: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá.`,
+  ...brief.slice(1).filter((l) => !String(l).startsWith('Cùng khuôn câu') && !String(l).startsWith(LONE_LEADER)).map(noLeaderTag),
+  // No leader scene before it (the daily reviews only the names in all three filters since 2026-10-06): the first pick
+  // opens the reviews like a first leader would.
+  `Câu đầu: "${!leaderTotal && n === 1 ? `${pickTotal() === 1 ? LONE_REVIEW : 'Mã đầu tiên'} là ${L.symbol}.` : `Thêm một mã đáng chú ý là ${L.symbol}, …`}" — chữ "là" tách cụm khỏi chữ cái đầu (voice.letters đánh vần); eyebrow "Soi mã · ${L.symbol}"; cùng phương pháp với scene soi mã của bộ lọc: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá.`,
 ];
 const pushLeader = (pick, L, spec) => push(pick ? 'pick' : 'leader', pick ? {...spec, brief: asPick(spec.brief, L, pick)} : spec);
 /** The pick scenes, right after the last leader scene; a name with no photo is dropped with the reason printed. */
-const buildPicks = () => (F.screener.requested ?? []).forEach((L, i) => {
-  const sym = L.symbol.toLowerCase();
-  if (!photo(`${sym}-fireant`)?.calib && !photo(`${sym}-terminal`)) {
-    console.log(`  pick ${L.symbol}: dropped — no photo public/${DIR}/${sym}-fireant.png (calibrated) or ${sym}-terminal.png (node scripts/review/shots.mjs --format=${FORMAT} --only=requested, or --only=requested-terminal)`);
-    return;
+// `n` counts the picks that get a scene, so the first BUILT pick is pick 1 even when an earlier request had no photo.
+const buildPicks = () => {
+  let n = 0;
+  for (const L of F.screener.requested ?? []) {
+    const sym = L.symbol.toLowerCase();
+    if (!pickHasPhoto(L)) {
+      console.log(`  pick ${L.symbol}: dropped — no photo public/${DIR}/${sym}-fireant.png (calibrated) or ${sym}-terminal.png (node scripts/review/shots.mjs --format=${FORMAT} --only=requested, or --only=requested-terminal)`);
+      continue;
+    }
+    buildLeader(L, 0, ++n);
   }
-  buildLeader(L, 0, i + 1);
-});
+};
 const buildLeader = (L, rank, pick = 0) => {
   const sym = L.symbol.toLowerCase();
   const fa = photo(`${sym}-fireant`);
@@ -828,11 +938,11 @@ const buildLeader = (L, rank, pick = 0) => {
       shots: [{beat: 0, x: clamp(crop.x + crop.w / 2), y: clamp(crop.y + crop.h / 2), zoom: 1.0, move: 'push_in'}, {beat: 1, x: clamp(closeX - 0.05), y: clamp(closeY), zoom: 1.8, move: 'pull_out'}],
     }),
     brief: [
-      `${ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo'} (RS 1M xếp #${rank} trong ${leaderTotal} mã được soi; # chỉ cho đạo diễn, không lên màn hình) — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}; trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}. ${leaderNoFilters(L, ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo')}`,
+      `${ordOf(rank)} (RS 1M xếp #${rank} trong ${leaderTotal} mã được soi; # chỉ cho đạo diễn, không lên màn hình) — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}; trên EMA50 ${vi(L.ema50)} ${fmtPct(L.aboveEma50Percent, 1)}, trên SMA200 ${vi(L.sma200)} ${fmtPct(L.aboveSma200Percent, 1)}. ${leaderNoFilters(L, ordOf(rank))}`,
       `Chi tiết riêng của mã này: ${noLeaderTag(detail) || 'không có'}.`,
       ...(dangerNow ? [`Thị trường đang ở MỨC NGUY HIỂM của hệ thống người dùng (${F.distribution.count} phiên phân phối ≥ ${F.distribution.dangerAt}): thêm MỘT câu nhắc rủi ro của chính mã này — mức nó đang giữ (EMA50 ${vi(L.ema50)}) — như bước "${DG.action}", không gọi mua bán.`] : []),
       L.signal ? `Tín hiệu mới nhất trên terminal: ${L.signal.type} ở ${vi(L.signal.price)} ngày ${L.signal.dm} — chỉ nhắc nếu khớp với chart đang chiếu.` : 'Terminal chưa có tín hiệu cho mã này.',
-      `Cùng khuôn câu với scene leader kia; câu đầu "${ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo'} là ${L.symbol}, …" — chữ "là" tách thứ tự khỏi chữ cái đầu (voice.letters đánh vần); KHÔNG "Số ${['', 'một', 'hai', 'ba'][rank] ?? rank} là", KHÔNG "đếm ngược", eyebrow "Soi mã · ${L.symbol}" (người dùng 2026-10-01: "Let's review …"); không đọc tên công ty; mã giữ trên màn hình.`,
+      `${leaderTotal > 2 ? 'Cùng khuôn câu với các scene leader khác' : leaderTotal > 1 ? 'Cùng khuôn câu với scene leader kia' : LONE_LEADER}; câu đầu "${ordOf(rank)} là ${L.symbol}, …" — chữ "là" tách thứ tự khỏi chữ cái đầu (voice.letters đánh vần); KHÔNG "Số ${['', 'một', 'hai', 'ba'][rank] ?? rank} là", KHÔNG "đếm ngược", eyebrow "Soi mã · ${L.symbol}" (người dùng 2026-10-01: "Let's review …"); không đọc tên công ty; mã giữ trên màn hình.`,
     ],
   });
 };
@@ -870,19 +980,24 @@ const buildLeaderFireant = (L, rank, p, pick = 0) => {
   const level = FA.ma50 != null ? `MA50 ${vi(FA.ma50)} của FireAnt` : `EMA50 ${vi(L.ema50)} của terminal`;
   const cond = (t) => String(t).replace(/^\s*nếu\s+/i, '');
   const then = (t) => String(t).replace(/^\s*thì\s+/i, '');
+  // The two roles (symbol-reviewer.md §6b/§6c, user 2026-10-07: "add the role of holder and not holder with action and
+  // behavior"): a third beat "Hành động" with the role plates on their lines; the two role sentences close the scene and take
+  // the place of the "nếu … thì" branch and of the danger level's risk sentence.
+  const roles = out.visual.shots.length > 2 && review?.roles?.holder && review?.roles?.notHolder ? review.roles : null;
+  const roleSay = (r, who) => r.say ?? `${who}: ${r.if ? `${cond(r.if)}, ` : ''}${then(r.then)}.`;
   pushLeader(pick, L, {
     eyebrow: `Soi mã · ${L.symbol}`,
-    beats: todoBeats(2),
+    beats: todoBeats(roles ? 3 : 2, est('leader')),
     visual: out.visual,
     brief: [
-      `${ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo'} (RS 1M xếp #${rank} trong ${leaderTotal} mã được soi; # chỉ cho đạo diễn, không lên màn hình) — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}. ${leaderNoFilters(L, ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo')}`,
+      `${ordOf(rank)} (RS 1M xếp #${rank} trong ${leaderTotal} mã được soi; # chỉ cho đạo diễn, không lên màn hình) — ${L.symbol} (${L.name}, ${L.exchange}): giá ${vi(L.price)} nghìn đồng, ${fmtPct(L.changePercent)} hôm nay, RS 1M ${L.rs1m}, RS 52W ${L.rs52w}. ${leaderNoFilters(L, ordOf(rank))}`,
       `Chart: ảnh FireAnt nến ngày của ${L.symbol} (không còn ảnh terminal có trendline)${(ma?.asOf?.back ?? 0) > 0 ? `; ảnh chụp sau phiên ${F.session.dm} nên các phiên sau đó được che — chart dừng ở nến ${F.session.dm}` : ''}. ${maLine}.`,
-      ...(L.review ? [`Bản soi của symbol-reviewer (${L.review.path}, bản đọc .md cùng tên): thế giá ${L.review.setup} — ${L.review.verdict}${L.review.priceAction?.read ? ` Price action (${L.review.priceAction.structure}): ${L.review.priceAction.read} — nói bằng động từ của trader (vượt đỉnh, bị bán từ đỉnh, rút chân, kiểm định, giữ hỗ trợ, thủng trendline, chạm kháng cự), giá đọc ra lời tối đa hai mức, nhãn trên chart mang phần còn lại.` : ''}${(review?.branches ?? []).length ? ` Nhánh: ${review.branches.map((b) => `nếu ${cond(b.if)} thì ${then(b.then)}`).join('; ')}.` : ''} Lời mọc từ bản soi: price action → chi tiết của bản soi → mức của một nhánh (câu về bộ lọc trong verdict là cho đạo diễn, KHÔNG lên lời — người dùng 2026-10-05); số đọc ra lời lấy từ leaders.top[].review.numbers${L.review.pending.length ? `; ô còn chờ (${L.review.pending.join(', ')}) thì không nói tới` : ''}.`] : exists(reviewFile) ? [`Có ${reviewFile} nhưng pack không mang nó (lỗi soát, hoặc facts.mjs chưa chạy lại sau bản soi): scene dùng mark và chi tiết mặc định.`] : []),
+      ...(L.review ? [`Bản soi của symbol-reviewer (${L.review.path}, bản đọc .md cùng tên): thế giá ${L.review.setup} — ${L.review.verdict}${L.review.priceAction?.read ? ` Price action (${L.review.priceAction.structure}): ${L.review.priceAction.read} — nói bằng động từ của trader (vượt đỉnh, bị bán từ đỉnh, rút chân, kiểm định, giữ hỗ trợ, thủng trendline, chạm kháng cự), giá đọc ra lời tối đa hai mức, nhãn trên chart mang phần còn lại.` : ''}${(review?.branches ?? []).length ? ` Nhánh: ${review.branches.map((b) => `nếu ${cond(b.if)} thì ${then(b.then)}`).join('; ')}.` : ''} Lời mọc từ bản soi: price action → chi tiết của bản soi → ${roles ? 'HAI VAI (beat 3)' : 'mức của một nhánh'} (câu về bộ lọc trong verdict là cho đạo diễn, KHÔNG lên lời — người dùng 2026-10-05); số đọc ra lời lấy từ leaders.top[].review.numbers${L.review.pending.length ? `; ô còn chờ (${L.review.pending.join(', ')}) thì không nói tới` : ''}.`] : exists(reviewFile) ? [`Có ${reviewFile} nhưng pack không mang nó (lỗi soát, hoặc facts.mjs chưa chạy lại sau bản soi): scene dùng mark và chi tiết mặc định.`] : []),
       `Chi tiết riêng của mã này: ${noLeaderTag(out.detail) || 'không có'}.`,
-      ...(dangerNow ? [`Thị trường đang ở MỨC NGUY HIỂM của hệ thống người dùng (${F.distribution.count} phiên phân phối ≥ ${F.distribution.dangerAt}): thêm MỘT câu nhắc rủi ro của chính mã này — mức nó đang giữ (${level}) — như bước "${DG.action}", không gọi mua bán.`] : []),
+      ...(roles ? [`HAI VAI — BEAT 3 "Hành động" (người dùng 2026-10-07: "add the role of holder and not holder with action and behavior like 'Không mua đuổi' with not holder when it exhausted run, and … with holder: 'nếu dưới giá …' thì hạ tỷ trọng & chốt lời một nửa"; bản soi §6b/§6c): máy lùi về nến cuối và đường giá của từng vai; plate đỏ "${roles.holder.plate}"${Number.isFinite(roles.holder.price) ? ` trên đường ${vi(roles.holder.price)}` : ' cạnh nến cuối'}, plate trắng "${roles.notHolder.plate}"${Number.isFinite(roles.notHolder.price) ? ` trên đường ${vi(roles.notHolder.price)}` : ' cạnh nến cuối'}. Vai đang giữ — case ${roles.holder.case}: ${roles.holder.if ? `${roles.holder.if} → ` : ''}${roles.holder.then}; vai chưa có hàng — case ${roles.notHolder.case}: ${roles.notHolder.if ? `${roles.notHolder.if} → ` : ''}${roles.notHolder.then}. Lời: HAI CÂU CUỐI của scene, theo thứ tự — "${roleSay(roles.holder, 'Đang giữ')}" rồi "${roleSay(roles.notHolder, 'Chưa có hàng')}" (đọc số thành chữ; nắn chữ cho tự nhiên được, giữ giá và hành động của bản soi; mỗi câu tối đa MỘT số; tên chỉ báo không đứng sát số). Câu ghim beat 3 là câu của người đang giữ. Headline beat 3: "${roles.holder.headline ?? 'Đang giữ: …'}" / "${roles.notHolder.headline ?? 'Chưa mua: …'}" (mỗi dòng ≤ 26 ký tự, số có trong pack). Hai câu này THAY nhánh "nếu … thì" và câu rủi ro${dangerNow ? ' của mức nguy hiểm (bảng của bản soi đã tính mức nguy hiểm vào hai vai)' : ''}.`] : dangerNow ? [`Thị trường đang ở MỨC NGUY HIỂM của hệ thống người dùng (${F.distribution.count} phiên phân phối ≥ ${F.distribution.dangerAt}): thêm MỘT câu nhắc rủi ro của chính mã này — mức nó đang giữ (${level}) — như bước "${DG.action}", không gọi mua bán.`] : []),
       ...(carrier(L) ? [`MÃ GÁNH CHỈ SỐ hôm nay: ${L.symbol} ${fmtPct(F.flow.impact.lead.points).replace('%', '')} điểm trong ${fmtPct(F.flow.impact.indexChange).replace('%', '')} điểm của VN-Index (${vi(F.flow.impact.leadShare, 1)}%). Người dùng 2026-10-05: "combine into the ${L.symbol} symbol review scene not separate scene, the purpose is warning the trader monitor the behavior of ${L.symbol}, not compare it with the market VNIndex" — thêm MỘT câu cảnh báo, câu CUỐI của scene: theo dõi sát hành động giá của mã này vì nó đang gánh chỉ số ("${L.symbol} gánh chỉ số, cần theo dõi sát."), không so sánh với VN-Index, không gọi mua bán; headline beat 1 mang số điểm (flow.impact.lead.points): "${L.symbol} ${fmtPct(L.changePercent)} · ${fmtPct(F.flow.impact.lead.points).replace('%', '')} điểm" / "Trụ đang gánh VN-Index".`] : []),
       L.signal ? `Tín hiệu mới nhất trên terminal: ${L.signal.type} ở ${vi(L.signal.price)} ngày ${L.signal.dm} — chart FireAnt không vẽ tín hiệu này; chỉ nhắc nếu khớp với nến đang chiếu.` : 'Terminal chưa có tín hiệu cho mã này.',
-      `Cùng khuôn câu với scene leader kia; câu đầu "${ORD_VI[leaderTotal - rank + 1] ?? 'Mã tiếp theo'} là ${L.symbol}, …" — chữ "là" tách thứ tự khỏi chữ cái đầu (voice.letters đánh vần); KHÔNG "Số ${['', 'một', 'hai', 'ba'][rank] ?? rank} là", KHÔNG "đếm ngược", eyebrow "Soi mã · ${L.symbol}" (người dùng 2026-10-01: "Let's review …"); không đọc tên công ty; mã giữ trên màn hình.`,
+      `${leaderTotal > 2 ? 'Cùng khuôn câu với các scene leader khác' : leaderTotal > 1 ? 'Cùng khuôn câu với scene leader kia' : LONE_LEADER}; câu đầu "${ordOf(rank)} là ${L.symbol}, …" — chữ "là" tách thứ tự khỏi chữ cái đầu (voice.letters đánh vần); KHÔNG "Số ${['', 'một', 'hai', 'ba'][rank] ?? rank} là", KHÔNG "đếm ngược", eyebrow "Soi mã · ${L.symbol}" (người dùng 2026-10-01: "Let's review …"); không đọc tên công ty; mã giữ trên màn hình.`,
     ],
   });
 };
@@ -947,15 +1062,127 @@ const buildWeek = () => {
     return;
   }
   const weeks = weeklyBars(readJson(PATHS.daily)).filter((b) => b.t <= (wk.calib.last_bar ?? W.from));
-  const out = weekVisual({W, toDm: F.session.dm, p: wk, ma: tryJson(`public/${DIR}/vnindex-weekly.ma.json`), weeks, spec: {...R.shots.fireantStock, ...R.shots.fireantWeekly}, maskColor: R.shots.maskColor});
+  // The weekly timeframe's evaluation (F.indexWeekly, user 2026-10-06: "eval the VNIndex as daily and weekly"): beat 1
+  // the candle in close-up, beat 2 the wide with the structure, the nearest zones and FireAnt's weekly averages.
+  const out = weekVisual({W, toDm: F.session.dm, p: wk, ma: tryJson(`public/${DIR}/vnindex-weekly.ma.json`), weeks, spec: {...R.shots.fireantStock, ...R.shots.fireantWeekly}, maskColor: R.shots.maskColor,
+    E: F.indexWeekly ?? null, provisional: !!F.indexDaily?.weekSessions?.at(-1)?.volumeProvisional});
   if (out.why) { console.log(`  week: dropped — ${out.why}`); return; }
   const wroom = plateRoom({photo: wk, bars: weeks, unit: 1, crop: out.visual.crop, volumeBand: R.shots.fireantDaily.volumeBand ?? 0});
   const {annotations, shots} = wroom.settle(out.visual.annotations, out.visual.shots);
   for (const line of wroom.report) console.log(`  plate (week): ${line}`);
   push('week', {
+    ...(F.indexWeekly ? {eyebrow: 'VN-Index · Khung tuần'} : {}),
     beats: todoBeats(2),
     visual: imageOf(wk, 'fireant.vn', {...out.visual, annotations, shots}),
     brief: out.brief,
+  });
+};
+
+// ------------------------------------------------------------------ weekly edition scenes (2026-10-06)
+// daily — VN-Index · Khung ngày; sectors — the ICB industry groups ranked by RS (rules.formats.weekly._why). Each
+// builder prints why when its material is missing, like the others.
+// daily — VN-Index · Khung ngày (user 2026-10-06: "eval the VNIndex as daily and weekly of this week"), on the FireAnt
+// daily photo the market scene uses: STRUCTURE on beat 1 — the last two swing highs joined and the last two swing lows
+// joined (a dashed line per pair, red when the second swing is lower, green when higher), each swing priced, the week's
+// sessions boxed — and TREND on beat 2: FireAnt's MA50 / MA200 priced at their lines by the last candle, how far the close
+// sits from each, the last candle ringed. No distribution day or FTD (market comes next), no if-then (watch's job).
+const buildDaily = () => {
+  const D = F.indexDaily;
+  if (!D) { console.log(`  daily: dropped — ${FACTS} has no indexDaily block (facts.mjs --format=${FORMAT})`); return; }
+  if (indexSource !== 'fireant.vn') { console.log('  daily: dropped — the index photo is the terminal fallback, not FireAnt (no MA50/MA200 legend)'); return; }
+  const mas = Object.entries(D.ma ?? {});
+  if (!mas.length) { console.log(`  daily: dropped — no FireAnt MA50/MA200 of this session (${D.maWhy ?? 'vnindex-daily.ma.json'})`); return; }
+  const S = D.structure;
+  const inView = (x) => x != null && x > C.x + 0.01 && x < C.x + C.w - 0.01;
+  const pts = [...S.highs.map((p) => ({...p, side: 'high'})), ...S.lows.map((p) => ({...p, side: 'low'}))]
+    .map((p) => ({...p, x: barX(index, daily, p.t), y: priceY(index, p.price, indexUnit)}))
+    .filter((p) => inView(p.x));
+  const marks = [];
+  // One plate per pair, by its line (a plate per swing point landed 170 px from its candle in the dense September
+  // swings — 5/10 test): the highs' plate over the highs line, the lows' under the lows line.
+  for (const side of ['high', 'low']) {
+    const [a, b] = pts.filter((p) => p.side === side);
+    if (!a || !b) continue;
+    marks.push({kind: 'line', from: [clamp(a.x), clamp(a.y)], to: [clamp(b.x), clamp(b.y)], dashed: true, accent: b.price > a.price ? 'up' : 'down', beat: 0});
+    const y = side === 'high' ? Math.min(a.y, b.y) - 0.04 : Math.max(a.y, b.y) + 0.045;
+    marks.push({...lab((a.x + b.x) / 2, clamp(y), `${side === 'high' ? 'Đỉnh' : 'Đáy'} ${a.dm} ${vi(a.price)} → ${b.dm} ${vi(b.price)}`, b.price > a.price ? 'green' : 'red', 0, 'middle'), until: 0});
+  }
+  // The week's sessions, high to low (the weekly hook boxes the same sessions; here they stand against the swings).
+  const wk = D.weekSessions.map((s) => ({x: barX(index, daily, s.t), b: barOf(s.t)})).filter((s) => s.x != null && s.b);
+  if (wk.length) {
+    const half = (index.calib.d * 0.7) / index.W;
+    const top = priceY(index, Math.max(...wk.map((s) => s.b.h)), indexUnit);
+    const bottom = priceY(index, Math.min(...wk.map((s) => s.b.l)), indexUnit);
+    const x0 = Math.min(...wk.map((s) => s.x)) - half;
+    marks.push({kind: 'box', x: clamp(x0), y: clamp(top - 0.012), w: clamp(Math.max(...wk.map((s) => s.x)) + half - x0), h: clamp(bottom - top + 0.024), accent: 'gold', beat: 0, until: 0});
+  }
+  // Beat 2: the last candle ringed and the averages as a two-line header (FireAnt draws the lines and prints their
+  // values in coloured tags on its price scale; plates by the lines were pushed off them by the candles around the
+  // close, which sits between the two averages — 5/10 test).
+  const MA_ACCENT = {MA50: 'green', MA200: 'gold'};
+  marks.push(todayRing(1));
+  mas.forEach(([name, m], k) => marks.push(lab(...inC(0.5, 0.06 + 0.04 * k), `${m.closeVsPercent < 0 ? 'Dưới' : 'Trên'} ${name} ${vi(m.value)} (${fmtPct(m.closeVsPercent)})`, MA_ACCENT[name] ?? 'white', 1, 'middle')));
+  const xs = pts.map((p) => p.x);
+  const first = xs.length ? Math.min(...xs) : (lastX ?? 0.85) - 0.25;
+  const ys = [...pts.map((p) => p.y), lastY];
+  const maYs = mas.map(([, m]) => priceY(index, m.value, indexUnit));
+  const shots = [
+    {beat: 0, x: clamp((first + (lastX ?? 0.85)) / 2), y: clamp((Math.min(...ys) + Math.max(...ys)) / 2), zoom: 1.45, move: 'pan'},
+    {beat: 1, x: clamp((lastX ?? 0.85) - 0.07), y: clamp((Math.min(lastY, ...maYs) + Math.max(lastY, ...maYs)) / 2), zoom: 2.0, move: 'push_in'},
+  ];
+  // The verdict the numbers allow (the writer may phrase it): a structure that is not up, under both averages, is weak.
+  const below = D.maPosition === 'dưới cả MA50 và MA200';
+  const verdict = S.kind === 'up' && D.maPosition === 'trên cả MA50 và MA200' ? 'khung ngày khỏe: đỉnh, đáy cao dần và giá trên cả hai đường trung bình'
+    : S.kind === 'down' && below ? 'khung ngày yếu: đỉnh, đáy thấp dần và giá dưới cả hai đường trung bình'
+      : below ? `khung ngày đang yếu: ${S.broke?.side === 'low' ? `cấu trúc ${S.word} nhưng đã thủng đáy ${S.broke.dm}` : `cấu trúc ${S.word}`}, giá dưới cả MA50 và MA200`
+        : `khung ngày giằng co: cấu trúc ${S.word}, giá ${D.maPosition}`;
+  const sessionText = D.weekSessions.map((s) => `${s.weekday} ${s.dm} ${fmtPct(s.changePercent)}${s.volumeProvisional ? ' (KL của SSI còn là số tạm — không đọc tỉ lệ KL)' : `, KL ×${vi(s.volumeVsPrior)} phiên trước`}`).join('; ');
+  const H = S.highs, L = S.lows;
+  push('daily', {
+    eyebrow: 'VN-Index · Khung ngày',
+    beats: todoBeats(2),
+    visual: indexPhoto(room.settle(marks, shots)),
+    brief: [
+      `VN-INDEX · KHUNG NGÀY (người dùng 2026-10-06: "eval the VNIndex as daily and weekly of this week") — đánh giá CẤU TRÚC và XU HƯỚNG trên chart ngày của FireAnt (${D.window} phiên). KHÔNG nói phiên phân phối hay FTD (scene market ngay sau), KHÔNG nhánh nếu … thì (scene watch "Kịch bản VN-Index" cuối video).`,
+      `Beat 1 — cấu trúc (hai đường đứt nối hai đỉnh, hai đáy): đỉnh ${H.map((p) => `${p.dm} ${vi(p.price)}`).join(' → ') || '—'}, đáy ${L.map((p) => `${p.dm} ${vi(p.price)}`).join(' → ') || '—'}: ${S.text}.${S.broke ? ` Giá đóng ${vi(D.close)} đã ${S.broke.side === 'low' ? 'ở DƯỚI đáy' : 'ở TRÊN đỉnh'} ${S.broke.dm} (${vi(S.broke.price)}) — ${S.broke.side === 'low' ? 'đáy cao dần đã bị phá' : 'đỉnh gần nhất đã bị vượt'}.` : ''} Khung vàng = các phiên của tuần: ${sessionText || '—'}.`,
+      `Beat 2 — xu hướng: giá ${D.maPosition ?? '—'} của FireAnt (${mas.map(([name, m]) => `${name} ${vi(m.value)}, giá ${fmtPct(m.closeVsPercent)}`).join('; ')})${D.ma50AboveMa200 != null ? `; MA50 ${D.ma50AboveMa200 ? 'trên' : 'dưới'} MA200` : ''}. Kết luận do số quyết định: "${verdict}" — viết bằng chữ của trader (cấu trúc, đỉnh, đáy, MA50, MA200), không ví von.`,
+      'Tối đa hai số đọc ra lời; số đọc thành chữ, mức điểm đọc tròn. Gọi MA50 / MA200 như trader (lexicon đọc). Nhãn giữ số lẻ của pack (indexDaily.*). Câu cuối trao lời cho scene market — trạng thái theo quy tắc của hệ thống — dạng câu hỏi ngắn, không lặp câu hỏi của hook.',
+    ],
+  });
+};
+// sectors — the ICB industry groups ranked by the median RS 1M of their liquid stocks (lib/sectors.mjs; user 2026-10-06:
+// "Also include major ranking", picked "ICB groups by RS"). A drawn board in FilterBoard's sector mode: up to ten groups,
+// the strongest three lit on beat 2. Dropped with the reason when facts.mjs could not rank (no universe cache for the
+// session, no content/review/industries.json).
+const buildSectors = () => {
+  const S = F.sectors;
+  if (!S?.ok || !S.groups?.length) {
+    console.log(`  sectors: dropped — ${S?.why ?? (S ? `no ICB group has ${S.minMembers} stocks with KL TB20 ≥ ${S.minVolumeSma20}` : `${FACTS} has no sectors block (facts.mjs --format=${FORMAT})`)}`);
+    return;
+  }
+  const {visual, rowLines, top, focus, label} = sectorBoard({S, R});
+  const last = top[top.length - 1];
+  const tail = S.groups.slice(top.length);
+  const shares = top.filter((g) => g.aboveSma200Share != null);
+  const lowShare = [...shares].sort((a, b) => a.aboveSma200Share - b.aboveSma200Share)[0];
+  const bestWeek = [...top].filter((g) => g.weekChangePercent != null).sort((a, b) => b.weekChangePercent - a.weekChangePercent)[0];
+  const W = F.weekly;
+  const weekNote = W && W.sessions < 5 ? ` Cột % TUẦN là tuần tới phiên ${F.session.dm} (${W.sessions} phiên), chưa trọn tuần.` : '';
+  const moves = S.comparedWith
+    ? top.filter((g) => g.prevRank != null && Math.abs(g.prevRank - g.rank) >= 2).map((g) => `${g.name} ${g.prevRank} → ${g.rank}`).join('; ') || 'không nhóm nào trong bảng đổi từ hai hạng trở lên'
+    : null;
+  push('sectors', {
+    eyebrow: 'Xếp hạng ngành',
+    beats: todoBeats(2),
+    visual,
+    brief: [
+      `XẾP HẠNG NHÓM NGÀNH (người dùng 2026-10-06: "Also include major ranking", chọn "ICB groups by RS"): ${S.groups.length} nhóm ngành ICB cấp 2 (bản đồ ngành công khai của VNDirect — terminal không có trường ngành) có từ ${S.minMembers} mã thanh khoản (KL TB20 ≥ ${vi(S.minVolumeSma20 / 1000, 0)} nghìn cổ phiếu) trở lên, xếp theo RS 1M TRUNG VỊ của các mã đó trên terminal — cách xếp hạng nhóm ngành của O'Neil. Bảng in ${top.length} nhóm đầu${S.unranked.length ? `; ${S.unranked.length} nhóm quá ít mã thanh khoản nên không xếp (${S.unranked.map((g) => `${g.name}: ${g.members} mã`).join(', ')})` : ''}.`,
+      `Các dòng (SỐ MÃ · RS 1M trung vị · % TUẦN trung vị · % mã trên SMA200): ${rowLines.join('; ')}.`,
+      `Beat 1 = bảng hiện dần từ trên xuống (RS 1M trung vị thành thanh); beat 2 = ${focus.map((g) => g.name).join(', ')} sáng lên, các dòng khác mờ, nhãn "${label}" thay caption — câu ghim beat 2 nói về ${focus.length > 1 ? 'các nhóm đó' : 'nhóm đó'}.`,
+      `Lời: nói thước đo bằng chữ của trader ("RS 1M trung vị của các mã có thanh khoản trong nhóm"), gọi nhóm bằng tên tiếng Việt đầy đủ (bảng in tên gọn), hai ba nhóm dẫn đầu và nhóm yếu nhất TRÊN BẢNG (#${last.rank} ${last.name}, RS 1M ${last.rs1m}); một nhận xét từ cột % > SMA200 hoặc % TUẦN (${[lowShare ? (lowShare.aboveSma200Share === 0 ? `${lowShare.name}: không mã nào trên SMA200` : `${lowShare.name} chỉ ${lowShare.aboveSma200Share}% mã trên SMA200`) : null, bestWeek ? `tuần này ${bestWeek.name} ${signed(bestWeek.weekChangePercent)}%` : null, top[0].aboveSma200Share != null && top[0].aboveSma200Share < 50 ? `ngay nhóm đứng đầu cũng chỉ ${top[0].aboveSma200Share}% mã trên SMA200` : null].filter(Boolean).join('; ')}); tối đa hai số đọc ra lời.${weekNote}`,
+      `Không cần đọc mã. Nếu gọi một mã thì chỉ là mã mạnh nhất của nhóm (ghi "mạnh nhất" ở các dòng trên), và KHÔNG nói mã đó có ở bộ lọc nào (người dùng 2026-10-05: "Not need mentioned the stock on specific filter existed on other filter"). Không khuyên mua bán nhóm ngành nào.`,
+      `${tail.length ? `Cuối bảng xếp hạng (không lên bảng — chỉ nói tên nếu cần, không đọc số): ${tail.slice(-3).map((g) => `#${g.rank} ${g.name}`).join(', ')}. ` : ''}${moves != null ? `So bảng tuần trước (${S.comparedWith}): ${moves}.` : 'Chưa có bảng xếp hạng tuần trước để so (bản đầu tiên): không nói "tăng hạng / tụt hạng".'}`,
+    ],
   });
 };
 
@@ -968,20 +1195,38 @@ const buildOutro = () => push('outro', {
   brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
 });
 
-const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, flow: buildFlow, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), watch: buildWatch, week: buildWeek, outro: buildOutro};
+const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, flow: buildFlow, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), watch: buildWatch, week: buildWeek, daily: buildDaily, sectors: buildSectors, outro: buildOutro};
 // Every other scene of the screener (rs, uptrend — one saved filter each): a drawn board of its top rows
 // when rules say `visual: "board"`, else the Screener photographed with those rows boxed.
 for (const [k, spec] of Object.entries(R.screener.scenes)) builders[k] ??= () => (spec.visual === 'board' || spec.visual === 'columns' ? buildBoard(k) : buildTable(k));
-const leaderTotal = fmt.roles.filter((r) => r === 'leader').length;
+// The format's own screener scenes (rules.formats.<format>.screener.scenes — the weekly's Momentum boards, 2026-10-06).
+for (const k of Object.keys(fmt.screener?.scenes ?? {})) builders[k] ??= () => buildOwnBoard(k);
+const leaderRoles = fmt.roles.filter((r) => r === 'leader').length;
+// The leader scenes actually built. A day can have fewer names than leader roles — the daily reviews only the names in
+// all three filters since 2026-10-06 (formats.daily.leaders) — and the ranks, ordinals and the board's invitation count
+// these: one name is "Mã đầu tiên", never "Mã thứ hai".
+// Tier order (the weekly's one review per Momentum filter, 2026-10-06, "Top of each filter"): each pick is reviewed in the
+// leader role right after ITS OWN board (top[].tierScene), so a pick counts only when that board is built (it has rows —
+// buildOwnBoard's own test) and a leader role follows it.
+const tierOrder = F.screener.leaders?.order === 'tier';
+const tierPicks = tierOrder ? (F.screener.leaders?.top ?? []).filter((x) => x.tierScene && F.screener[x.tierScene]?.top?.length && fmt.roles[fmt.roles.indexOf(x.tierScene) + 1] === 'leader') : null;
+const leaderTotal = Math.min(leaderRoles, tierPicks ? tierPicks.length : F.screener.leaders?.top?.length ?? 0);
 let leaderIdx = 0;
-for (const role of fmt.roles) {
+let tierBuilt = 0;
+for (const [ri, role] of fmt.roles.entries()) {
   if (role === 'leader') {
-    // top[] is ranked by RS 1M, strongest first. The countdown shows the weakest of the three first
-    // and the strongest last, so scene k takes top[total - 1 - k] and wears rank total - k.
-    const L = F.screener.leaders.top[leaderTotal - 1 - leaderIdx];
-    if (L) buildLeader(L, leaderTotal - leaderIdx);
+    if (tierOrder) {
+      // The leader role right after a board reviews that board's pick — scene k is top[k], in tier order — or nothing;
+      // ordinals by position (ordOf: rank leaderTotal - k → "Mã đầu tiên", "Mã thứ hai").
+      const L = tierPicks.find((x) => x.tierScene === fmt.roles[ri - 1]);
+      if (L && tierBuilt < leaderTotal) buildLeader(L, leaderTotal - tierBuilt++);
+    } else if (leaderIdx < leaderTotal) {
+      // top[] is ranked by RS 1M, strongest first. The reviews show the weakest first and the strongest
+      // last, so scene k takes top[total - 1 - k] and wears rank total - k.
+      buildLeader(F.screener.leaders.top[leaderTotal - 1 - leaderIdx], leaderTotal - leaderIdx);
+    }
     leaderIdx++;
-    if (leaderIdx === leaderTotal) buildPicks();
+    if (leaderIdx === leaderRoles) buildPicks();
     continue;
   }
   if (!builders[role]) die(`rules.formats.${FORMAT}.roles names "${role}", which scaffold.mjs cannot build`);

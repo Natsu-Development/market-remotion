@@ -1,0 +1,24 @@
+{
+  "_note": "One artifact per DAILY market-review edition (user 2026-10-06: \"With each review daily, create another daily file .mp4 and its artifact respective for me\"). Written by node scripts/review/artifacts.mjs set daily <edition> --url=<link> right after the FIRST publish of an edition (its review page is out/review/daily-<edition>/index.html, its video out/review/daily-<edition>.mp4); re-review rounds of the same edition republish that link, and a link never moves to another edition. The weekly keeps its one link (weekly-review SKILL.md).",
+  "daily": {
+    "2026-10-05": {
+      "url": "https://claude.ai/artifact/4JnuezakLbzxCZdZ926MoR",
+      "page": "out/review/review-daily",
+      "video": "out/review/daily-2026-10-05.mp4",
+      "updatedAt": "2026-10-06T04:47:00.157Z",
+      "note": "The one shared DailyReview artifact every edition from 29/9 to 5/10 was republished over; v41 shows the 5/10 edition with its video. Its page folder was deleted in the 6/10 cleanup. From 6/10 each edition gets its own artifact."
+    },
+    "2026-10-06": {
+      "url": "https://claude.ai/artifact/X1MaSjCzNh9iqi26SVFroK",
+      "page": "out/review/daily-2026-10-06",
+      "video": "out/review/daily-2026-10-06.mp4",
+      "updatedAt": "2026-10-06T12:18:14.642Z"
+    },
+    "2026-10-07": {
+      "url": "https://claude.ai/artifact/JpLNCm6hjJWKvSFLJdFT4r",
+      "page": "out/review/daily-2026-10-07",
+      "video": "out/review/daily-2026-10-07.mp4",
+      "updatedAt": "2026-10-07T10:19:47.526Z"
+    }
+  }
+}

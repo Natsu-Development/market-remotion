@@ -21,15 +21,19 @@ import {readdirSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {PATHS, ROOT, exists, round, tryJson} from './common.mjs';
+import {indicatorValues, onTick, pricesIn, toTick} from './tick.mjs';
 
 export const REVIEW_DIR = 'content/review/symbols';
 /**
  * Method version. /2 (user, 2026-10-03: "include the price action … trendline & resistance and each price must be
  * noted"): the review reads the price action first — swing structure, the nearest support and resistance, the active
  * trendline, the last candles — and its chart carries a support, a resistance and a candle read, every one priced.
- * /1 reviews (2026-10-01/02, before price action) still validate under the old rules.
+ * /3 (user, 2026-10-07: "add the role of holder and not holder with action and behavior like 'Không mua đuổi' with not
+ * holder when it exhausted run, and … with holder: 'nếu dưới giá …' thì hạ tỷ trọng & chốt lời một nửa"): the review ends
+ * on `roles` — what the one holding the stock and the one without it do (symbol-reviewer.md §6b/§6c), decided by the
+ * method (`rolesOf`) from the measured numbers. /1 reviews (2026-10-01/02) still validate under the old rules.
  */
-export const METHOD = 'symbol-reviewer/2';
+export const METHOD = 'symbol-reviewer/3';
 export const MARK_KINDS = ['level', 'ma', 'pointer', 'zone', 'volume', 'trendline', 'candle'];
 /**
  * In the method's priority order (symbol-reviewer.md, "Thế giá"): the day's price-action event first (a breakout that
@@ -44,6 +48,27 @@ export const ROLES = ['support', 'resistance'];
 const FOCUS = /^(all|last|zone|(level|ma):[a-z0-9]+)$/i;
 /** Beat 0 carries the structure (MA50, MA200, trendline, resistance, support): five; the close-up stays light. */
 const MAX_MARKS_PER_BEAT = 5;
+/** The first edition held to the price step and the cross lines (tick.mjs; user 2026-10-06). */
+const STEP_SINCE = '2026-10-06';
+/** The first edition whose reviews carry the two roles (method /3, user 2026-10-07). */
+export const ROLES_SINCE = '2026-10-07';
+/**
+ * The two roles' thresholds (symbol-reviewer.md §6b/§6c; designed 2026-10-07 on O'Neil and Minervini, one constant each):
+ * a stock this far above FireAnt's MA50 has run — the method's `extended` setup, the holder takes half off ("chốt lời"
+ * only from here: MA50 stands in for the typical holder's cost), the one without it does not chase.
+ */
+export const EXTENDED_MA50 = 25;
+/** Under MA200 by this much the typical holder is at a loss: the holder's word is "cắt lỗ", not "thoát hết". */
+export const LOSS_MA200 = -10;
+/** O'Neil's buy zone: up to 5% over the breakout's pivot; further is chasing. */
+export const BUY_ZONE = 5;
+/** The holder's second line counts as a step only this far (%) under the first (27,60 then 27,42 is one step, not two). */
+export const STEP_GAP = 1.5;
+/** A climax run: +25% in 15 sessions, or +15% with a climax mark on the session (upper wick ≥ 40%, range ≥ 2× its average, gap ≥ 3%). */
+export const RUN_EXHAUSTED = 25;
+export const RUN_CLIMAX = 15;
+/** Words the roles never use: no target, no certainty, no leverage, no position size but "một nửa". */
+export const ROLE_FORBIDDEN = ['mục tiêu', 'target', 'lên tới', 'mua ngay', 'chắc chắn', 'margin', 'ký quỹ', 'vay', 'all in', 'all-in', 'tất tay', 'take profit', 'stop loss', 'một phần ba', 'phần trăm'];
 /** Bars FireAnt shows after interval D + reset view (VNINDEX 1D tab, calibrated 2026-10-01: 142 bars). */
 const DEFAULT_WINDOW = 142;
 /** A level may sit a little outside the candles it is drawn over (a pivot just above the last highs). */
@@ -397,8 +422,10 @@ const packOf = (date, format = 'daily', factsPath = null) => {
     return {F: F?.asOf === date ? F : null, factsPath};
   }
   const own = `content/review-${format}.facts.json`;
-  const names = [own, ...['daily', 'weekly'].filter((f) => f !== format).map((f) => `content/review-${f}.facts.json`)];
-  if (exists(PATHS.archive)) names.push(...readdirSync(resolve(ROOT, PATHS.archive)).filter((f) => f.startsWith(date) && f.endsWith('.facts.json')).map((f) => `${PATHS.archive}/${f}`));
+  // The format's own pack of that session first — live, then archived — and only then another format's: once the daily moved
+  // on to 7/10, the 6/10 VCI pick was measured against the weekly's live 6/10 pack (no such pick there, no 52-week high).
+  const archived = exists(PATHS.archive) ? readdirSync(resolve(ROOT, PATHS.archive)).filter((f) => f.startsWith(date) && f.endsWith('.facts.json')).map((f) => `${PATHS.archive}/${f}`) : [];
+  const names = [own, ...archived.filter((f) => f.endsWith(`-${format}.facts.json`)), ...['daily', 'weekly'].filter((f) => f !== format).map((f) => `content/review-${f}.facts.json`), ...archived.filter((f) => !f.endsWith(`-${format}.facts.json`))];
   for (const p of names) {
     const F = tryJson(p);
     if (F?.asOf === date) return {F, factsPath: p};
@@ -411,6 +438,137 @@ const packOf = (date, format = 'daily', factsPath = null) => {
  * classes that match — the starting point of a review. The agent's judgment (which detail, which marks,
  * what the branches say) is not here.
  */
+/**
+ * The two roles of a review (method /3; symbol-reviewer.md §6b, §6c — user 2026-10-07: "add the role of holder and not holder
+ * with action and behavior like 'Không mua đuổi' with not holder when it exhausted run, and some meaning with holder: 'nếu dưới
+ * giá …' thì hạ tỷ trọng & chốt lời một nửa"). Two tables designed the same day (one agent per role) on O'Neil and Minervini,
+ * read top-down: the FIRST case that matches. Every price is a line the scene draws (a level on the price step, FireAnt's MA,
+ * the trendline's value at the last bar); `plate` goes on that line on the action beat, `say` is the scene's sentence (digits —
+ * the writer speaks them), `headline` the action beat's line (≤ 26 characters). At the user's danger level (five distribution
+ * days, `danger`) both tables tighten. Pure: the numbers of `measure`, its setup classes, the close, the danger flag.
+ */
+export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}) => {
+  const has = (k) => classes.some((c) => c.kind === k);
+  const INDICATOR = new Set(['ma50', 'ma200', 'trendlineSupport', 'trendlineSupportBroken']);
+  const printed = (key) => {
+    const x = num(key);
+    return x == null ? null : INDICATOR.has(key) ? round(x, 2) : toTick(x, exchange);
+  };
+  const f = (x) => x.toFixed(2).replace('.', ',');
+  const fit = (...plates) => plates.find((s) => [...s].length <= 30) ?? plates.at(-1);
+  const a50 = num('aboveMa50Percent');
+  const a200 = num('aboveMa200Percent');
+  const cvp = num('closeVsPivotPercent');
+  const MA_NAME = {ma50: 'MA50', ma200: 'MA200'};
+  // The line the price is named by in a sentence: "MA50 ở 13,41", "trendline ở 23,94", or the price itself.
+  const said = (line) => (MA_NAME[line.key] ? `${MA_NAME[line.key]} ở ${f(line.price)}` : /^trendline/.test(line.key) ? `trendline ở ${f(line.price)}` : f(line.price));
+  // The holder's two lines under the close: P1 the nearest drawn line, P2 the next one at least STEP_GAP % under it.
+  const below = (keys, cap) => keys.map((key) => ({key, price: printed(key)})).filter((x) => x.price != null && x.price < cap).sort((a, b) => b.price - a.price)[0] ?? null;
+  const P1 = below(['pivot', 'support1', 'trendlineSupport', 'ma50'], price);
+  const P2 = P1 ? below(['support1', 'support2', 'trendlineSupport', 'ma50'], P1.price * (1 - STEP_GAP / 100) + 1e-9) : null;
+  const line = (key) => (printed(key) == null ? null : {key, price: printed(key)});
+
+  // ---- §6b, the one holding the stock
+  const holder = (() => {
+    const at = (L, then, plate, headline, sayThen, extra = {}) => ({priceKey: L?.key ?? null, price: L?.price ?? null, then, plate, headline, say: L ? `Đang giữ, thủng ${said(L)} thì ${sayThen}.` : `Đang giữ thì ${sayThen}.`, ...extra});
+    const half = {then: 'hạ tỷ trọng một nửa', plate: (L) => `Đang giữ: dưới ${f(L.price)} hạ 1/2`, headline: 'Đang giữ: hạ tỷ trọng 1/2', say: 'hạ một nửa'};
+    const take = {then: 'hạ tỷ trọng, chốt lời một nửa', plate: (L) => `Đang giữ: dưới ${f(L.price)} chốt 1/2`, headline: 'Đang giữ: chốt lời 1/2', say: 'chốt lời một nửa'};
+    const out = {then: 'thoát hết', plate: (L) => fit(`Đang giữ: dưới ${f(L.price)} thoát hết`, `Đang giữ: dưới ${f(L.price)} thoát`), headline: 'Đang giữ: thoát hết', say: 'thoát hết'};
+    const step = (L, s, ifText, keys) => ({if: L ? (ifText ?? `Nếu đóng cửa dưới ${said(L)}`) : null, ...at(L, s.then, L ? s.plate(L) : `Đang giữ: ${s.headline.replace('Đang giữ: ', '')}`, s.headline, s.say), keys});
+    if (a50 != null && a200 != null && a50 < 0 && a200 < 0) {
+      const loss = a200 <= LOSS_MA200;
+      return {case: 'exit-downtrend', if: 'Đã đóng cửa dưới MA50 và MA200', priceKey: null, price: null, then: loss ? 'cắt lỗ, không chờ hồi' : 'thoát hết, không chờ hồi', plate: loss ? 'Đang giữ: cắt lỗ' : 'Đang giữ: thoát hết', headline: loss ? 'Đang giữ: cắt lỗ' : 'Đang giữ: thoát hết', say: loss ? 'Đang giữ thì cắt lỗ, giá đã dưới MA200.' : 'Đang giữ thì thoát hết, giá đã dưới MA200.', keys: ['aboveMa50Percent', 'aboveMa200Percent']};
+    }
+    if (a50 != null && a50 < 0) {
+      const L = line('ma50');
+      const s = danger ? out : half;
+      return {case: 'below-ma50', ...step(L, s, L ? `Đã đóng cửa dưới ${said(L)}` : null, ['aboveMa50Percent', 'ma50']), say: `Đang giữ, giá đã thủng MA50, ${s.say}.`};
+    }
+    if (a200 != null && a200 < 0) {
+      const L = danger && P1 && line('ma50') && P1.price > line('ma50').price ? P1 : line('ma50');
+      return {case: 'below-ma200', ...step(L, out, null, ['aboveMa200Percent', 'aboveMa50Percent', L?.key].filter(Boolean))};
+    }
+    if (has('trendline-break')) {
+      const L = line('trendlineSupportBroken');
+      return {case: 'trendline-broken', ...step(L, danger ? out : half, L ? `Đã thủng trendline ở ${f(L.price)}` : null, ['trendlineSupportBroken', 'price']), say: `Đang giữ, trendline đã gãy, ${danger ? 'thoát hết' : 'hạ một nửa'}.`};
+    }
+    if (has('breakout-failed') || (has('breakout-rejected') && cvp != null && cvp < 0)) {
+      return {case: 'failed-breakout', ...step(P1, danger ? out : a50 != null && a50 > EXTENDED_MA50 ? take : half, null, ['closeVsPivotPercent', P1?.key].filter(Boolean))};
+    }
+    if (a50 != null && a50 > EXTENDED_MA50) {
+      return {case: 'extended', ...step(P1, take, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, ['aboveMa50Percent', P1?.key].filter(Boolean))};
+    }
+    if (has('breakout-rejected') || has('trendline-test') || has('pullback-to-support') || has('ma50-test')) {
+      return {case: 'warning', ...step(P1, danger ? out : half, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, [P1?.key, 'closeRangePercent'].filter(Boolean))};
+    }
+    // The trend holds: the stop goes up to the structure's line — at the danger level half the position leaves at the nearer one.
+    if (danger || !P2) return {case: 'trend-intact', ...step(P1, half, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, ['aboveMa50Percent', P1?.key].filter(Boolean))};
+    const viaMa = P2.key === 'ma50';
+    return {
+      case: 'trend-intact', if: null, priceKey: P2.key, price: P2.price,
+      then: viaMa ? `giữ, cắt lỗ khi đóng cửa dưới MA50 ở ${f(P2.price)}` : `giữ, dời điểm cắt lỗ lên ${f(P2.price)}`,
+      plate: `Đang giữ: dời cắt lỗ lên ${f(P2.price)}`, headline: 'Đang giữ: giữ, dời cắt lỗ',
+      say: viaMa ? `Đang giữ, cắt lỗ khi thủng MA50 ở ${f(P2.price)}.` : `Đang giữ, dời điểm cắt lỗ lên ${f(P2.price)}.`, keys: ['aboveMa50Percent', P2.key],
+    };
+  })();
+
+  // ---- §6c, the one without it
+  const notHolder = (() => {
+    const stay = (L, ifText, sayWhy, keys, caseId) => ({case: caseId, if: L ? ifText : null, priceKey: L?.key ?? null, price: L?.price ?? null, then: 'đứng ngoài', plate: L ? `Chưa mua: dưới ${f(L.price)} đứng ngoài` : 'Chưa mua: đứng ngoài', headline: 'Chưa mua: đứng ngoài', say: `Chưa có hàng thì đứng ngoài, ${sayWhy}.`, keys});
+    const m50 = line('ma50'), m200 = line('ma200');
+    if ((m50 && price < m50.price) || (m200 && price < m200.price)) {
+      const L = [m50, m200].filter((x) => x && x.price > price).sort((a, b) => a.price - b.price)[0];
+      return stay(L, `Khi giá còn dưới ${said(L)}`, `giá dưới ${MA_NAME[L.key]}`, ['price', 'ma50', 'ma200'].filter((k) => num(k) != null), 'below-ma');
+    }
+    if (has('trendline-break')) {
+      const L = line('trendlineSupportBroken');
+      return stay(L, `Khi giá còn dưới trendline vừa thủng, ở ${L ? f(L.price) : ''}`, 'trendline đã thủng', ['trendlineSupportBroken', 'price'], 'trend-broken');
+    }
+    if (has('breakout-failed') || (has('breakout-rejected') && cvp != null && cvp < 0)) {
+      const L = line('failedBreakoutLevel') ?? line('pivot');
+      return {...stay(L, `Khi giá còn dưới ${L ? f(L.price) : ''}`, 'vượt đỉnh đã thất bại', [L?.key, 'closeVsPivotPercent'].filter(Boolean), 'failed-breakout'), then: 'đứng ngoài, vượt đỉnh đã thất bại'};
+    }
+    const run = num('run15Percent');
+    const climax = run != null && run >= RUN_CLIMAX && ((num('upperWickPercent') ?? 0) >= 40 || (num('rangeVsAvg20') ?? 0) >= 2 || (num('gapPercent') ?? 0) >= 3);
+    if ((a50 != null && a50 > EXTENDED_MA50) || (run != null && run >= RUN_EXHAUSTED) || climax) {
+      return {case: 'exhausted', if: null, priceKey: null, price: null, then: 'không mua đuổi', plate: 'Chưa mua: không mua đuổi', headline: 'Chưa mua: không mua đuổi', say: 'Chưa có hàng thì không mua đuổi, giá đã kéo xa.', keys: ['aboveMa50Percent', 'run15Percent', 'upperWickPercent', 'rangeVsAvg20', 'gapPercent'].filter((k) => num(k) != null)};
+    }
+    const BP = line('breakoutPivot');
+    const cvb = num('closeVsBreakoutPivotPercent');
+    if (BP && cvp != null && cvp > 0 && cvb != null && cvb > BUY_ZONE) {
+      return {case: 'beyond-zone', if: null, priceKey: BP.key, price: BP.price, then: `không mua đuổi, chờ nhịp chỉnh về ${f(BP.price)}`, plate: `Chưa mua: chờ về ${f(BP.price)}`, headline: 'Chưa mua: không mua đuổi', say: `Chưa có hàng thì không mua đuổi, chờ về ${f(BP.price)}.`, keys: ['closeVsPivotPercent', 'breakoutPivot', 'closeVsBreakoutPivotPercent']};
+    }
+    const zoneLine = BP ?? line('pivot');
+    if (has('breakout') && (cvb == null || cvb <= BUY_ZONE) && zoneLine) {
+      const L = zoneLine;
+      return danger
+        ? {case: 'breakout-zone', if: `Khi giá còn giữ trên ${f(L.price)}`, priceKey: L.key, price: L.price, then: 'chỉ giải ngân nhỏ', plate: `Chưa mua: trên ${f(L.price)} mua nhỏ`, headline: 'Chưa mua: giải ngân nhỏ', say: 'Chưa có hàng thì chỉ giải ngân nhỏ.', keys: [L.key, 'closeVsBreakoutPivotPercent', 'volumeVsSma20Percent'].filter((k) => num(k) != null)}
+        : {case: 'breakout-zone', if: `Khi giá còn giữ trên ${f(L.price)}`, priceKey: L.key, price: L.price, then: 'còn trong vùng mua, chỉ mua khi giá giữ được mức đó', plate: `Chưa mua: vùng mua ${f(L.price)}`, headline: fit(`Chưa mua: vùng mua ${f(L.price)}`), say: 'Chưa có hàng, chỉ mua khi còn trên đỉnh vừa vượt.', keys: [L.key, 'closeVsBreakoutPivotPercent', 'volumeVsSma20Percent'].filter((k) => num(k) != null)};
+    }
+    const waitOn = (caseId, keys) => {
+      const L = line('resistance1');
+      if (!L) return stay(null, null, 'chưa có điểm mua', keys, caseId);
+      return {case: caseId, if: `Nếu đóng cửa vượt ${f(L.price)} với khối lượng lớn`, priceKey: L.key, price: L.price, then: danger ? 'mới giải ngân nhỏ, chưa vượt thì chờ' : 'mới mua, chưa vượt thì chờ', plate: `Chưa mua: chờ vượt ${f(L.price)}`, headline: `Chưa mua: chờ vượt ${f(L.price)}`, say: danger ? `Chưa có hàng, vượt ${f(L.price)} mới giải ngân nhỏ.` : `Chưa có hàng, chờ vượt ${f(L.price)}.`, keys};
+    };
+    const rejectedAbove = has('breakout-rejected') && cvp != null && cvp >= 0;
+    if (rejectedAbove || has('near-high') || has('base') || (cvp != null && cvp >= -BUY_ZONE && cvp <= 0)) {
+      // Sold from its high at the danger level: the holder exits under it, so the one without it stays out (2026-10-07).
+      if (danger && rejectedAbove) return {...stay(null, null, 'chưa mở vị thế mới', ['closeRangePercent', 'upperWickPercent'], 'wait-breakout'), then: 'đứng ngoài, chưa mở vị thế mới'};
+      return waitOn('wait-breakout', ['resistance1', 'closeVsPivotPercent']);
+    }
+    const tested = [['trendline-test', 'trendlineSupport'], ['pullback-to-support', 'support1'], ['ma50-test', 'ma50']].find(([k]) => has(k));
+    if (tested) {
+      if (danger) return {...stay(null, null, 'chưa mở vị thế mới', [tested[1]], 'test'), then: 'đứng ngoài, chưa mở vị thế mới'};
+      const L = line(tested[1]);
+      if (L) return {case: 'test', if: `Nếu kiểm định ${said(L)} giữ được`, priceKey: L.key, price: L.price, then: 'mới mua, thủng thì đứng ngoài', plate: fit(`Chưa mua: chờ kiểm định ${f(L.price)}`, `Chưa mua: chờ test ${f(L.price)}`), headline: 'Chưa mua: chờ kiểm định', say: `Chưa có hàng, chờ kiểm định ${MA_NAME[L.key] ?? (/^trendline/.test(L.key) ? 'trendline' : 'hỗ trợ')}.`, keys: [L.key]};
+    }
+    if (danger) return {...stay(null, null, 'chưa mở vị thế mới', ['distributionCount'], 'default'), then: 'đứng ngoài, chưa mở vị thế mới'};
+    return waitOn('default', ['resistance1', 'price']);
+  })();
+
+  return {holder, notHolder};
+};
+
 export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   const SYM = sym.toUpperCase();
   const {F, factsPath} = packOf(date, format, facts);
@@ -419,8 +577,10 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
     numbers.push({key, value: value == null || !Number.isFinite(value) ? null : round(value, 2), source, path, ...extra});
   };
 
-  // The row: a leader of the edition, else any board row of the pack, else the session's universe cache.
+  // The row: a leader of the edition, else any board row of the pack, else the session's universe cache. Any other
+  // screener table of the pack counts as a board (the weekly's Momentum breakout / breakdown, 2026-10-06).
   const tables = ['leaders', 'rs', 'uptrend', 'spike'];
+  for (const [k, t] of Object.entries(F?.screener ?? {})) if (!tables.includes(k) && Array.isArray(t?.top)) tables.push(k);
   let row = null;
   let rowPath = null;
   for (const t of tables) {
@@ -525,6 +685,23 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   const num = (k) => numbers.find((n) => n.key === k)?.value ?? null;
   if (num('low52w') != null) add('aboveLow52wPercent', (price / num('low52w') - 1) * 100, 'derived', 'price / low52w − 1', {formula: 'price / low52w − 1'});
   if (num('pivot') != null) add('closeVsPivotPercent', (price / num('pivot') - 1) * 100, 'derived', 'price / pivot − 1', {formula: 'price / pivot − 1'});
+  // Method /3 (§6c): the run of the last three weeks, and the breakout the stock still holds — `pivot` drifts up with each new
+  // high, so from the second day of a breakout the 5% buy zone is measured from the high it first closed over.
+  if (bars.length >= 15) {
+    const lo15 = Math.min(...bars.slice(-15).map((b) => b.l));
+    add('run15Percent', (price / lo15 - 1) * 100, 'derived', at('close / min(l) of the last 15 sessions − 1'), {formula: 'price / min(l of the last 15 sessions) − 1'});
+  }
+  if (bars.length >= PIVOT_SESSIONS + 10) {
+    for (let k = bars.length - 10; k < bars.length; k++) {
+      const P = Math.max(...bars.slice(k - PIVOT_SESSIONS, k).map((b) => b.h));
+      if (bars[k].c > P && bars.slice(k).every((b) => b.c >= P)) {
+        add('breakoutPivot', P, 'analyze', at(`max(h) of the ${PIVOT_SESSIONS} sessions before ${bars[k].t}, closed above on ${bars[k].t} and held on every close since`), {date: bars[k].t});
+        add('closeVsBreakoutPivotPercent', (price / P - 1) * 100, 'derived', 'price / breakoutPivot − 1', {formula: 'price / breakoutPivot − 1'});
+        dates.breakoutPivot = bars[k].t;
+        break;
+      }
+    }
+  }
 
   // FireAnt's MA50 / MA200 — read off the photo by the fireant-leaders step, never computed here.
   const maPath = `${photoBase(date, SYM)}.ma.json`;
@@ -669,6 +846,9 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   cls('far-from-high', fromHigh != null && fromHigh < -15, `cách đỉnh 52 tuần ${fromHigh}%`);
   cls('trend', true, 'mặc định');
 
+  // The two roles (§6b/§6c): decided here, from the numbers, so every review of the same session says the same thing.
+  const roles = rolesOf({num, classes, price, danger: D?.danger === true, exchange: row.exchange ?? 'HOSE'});
+
   return {
     symbol: SYM, date, method: METHOD,
     inputs: {
@@ -677,7 +857,7 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
       ma: MA ? maPath : null,
     },
     window: W ? {source: W.source, bars: W.bars, from: W.from, to: W.to, low: W.low, high: W.high} : null,
-    dates, flags, numbers, checks, classes,
+    dates, flags, numbers, checks, classes, roles,
     priceAction: pa,
     filters: row.filters ?? [], tier: row.tier ?? null,
     market: F?.state ? {status: F.state.status, label: F.state.label, danger: D?.danger ?? null, toDanger: D?.toDanger ?? null} : null,
@@ -694,7 +874,12 @@ const lower = (s) => String(s ?? '').normalize('NFC').toLowerCase();
  * setups are taken — "#1 keeps its setup; the other avoids it". Unknown ranks hold nothing.
  */
 const othersAbove = (date, sym, format = 'daily') => {
-  const top = (packOf(date, format).F?.screener?.leaders?.top ?? []).map((x) => x.symbol);
+  const S = packOf(date, format).F?.screener ?? {};
+  // The leaders in their ranking, then the names the user asked for (screener.requested), the higher RS 1M first: the rule
+  // "the higher RS 1M keeps the setup, the other avoids it" holds for the picks too (2026-10-06: VCI, RS 22, keeps
+  // far-from-high; CII, RS 16, takes its next setup). Before, a pick ranked nowhere and had to take its first setup.
+  const picks = [...(S.requested ?? [])].sort((a, b) => (b.rs1m ?? -1) - (a.rs1m ?? -1)).map((x) => x.symbol);
+  const top = [...(S.leaders?.top ?? []).map((x) => x.symbol), ...picks];
   const mine = top.indexOf(sym);
   if (mine < 0) return [];
   return top.slice(0, mine).map((o) => loadReview(date, o)).filter((o) => o?.detail?.kind).map((o) => ({symbol: o.symbol, setup: o.detail.kind}));
@@ -709,6 +894,8 @@ export const validateReview = (r, ctx = {}) => {
   const e = (m) => errs.push(m);
   if (!r || typeof r !== 'object') return ['not an object'];
   const SYM = r.symbol;
+  // The exchange whose price step the review prints on (HOSE unless the review or the caller says otherwise).
+  const EX = ctx.exchange ?? r.exchange ?? 'HOSE';
   if (typeof SYM !== 'string' || !/^[A-Z0-9]{3}$/.test(SYM)) e(`symbol "${SYM}" is not a three-character ticker`);
   if (!isDate(r.date)) e(`date "${r.date}" is not YYYY-MM-DD`);
   if (typeof r.method !== 'string' || !r.method.startsWith('symbol-reviewer/')) e(`method "${r.method}" is not symbol-reviewer/<n>`);
@@ -816,6 +1003,8 @@ export const validateReview = (r, ctx = {}) => {
           e(`${at}: anchors ${A[0].date} ${A[0].price} → ${A[1].date} ${A[1].price} are not a ${m.role} trendline the method fits on the bars the photo shows (measured: ${offered})`);
           break;
         }
+        // A trendline is an indicator: it prints its value at the last bar as measured, never rounded to the price step (user
+        // 2026-10-06: "I mean with the price, not with indicator MA50/MA200 and drawed trendline").
         if (!Number.isFinite(m.price) || Math.abs(m.price - line.price) > 0.006) e(`${at}: price ${m.price} is not the line's value at the last bar (${round(line.price, 2)})`);
         if (!priced(m.label, line.price)) e(`${at}: label "${m.label}" does not print the line's price at the last bar (${round(line.price, 2)})`);
         if (!inPrice(line.price)) e(`${at}: ${priceMsg(line.price)}`);
@@ -832,7 +1021,7 @@ export const validateReview = (r, ctx = {}) => {
         const k = candleOf(wlist, ix);
         const reads = candleReads(k);
         if (!reads.some((x) => x.id === m.read)) e(`${at}: read "${m.read}" was not measured on ${k.t} (measured: ${reads.map((x) => x.id).join(', ')})`);
-        if (!Number.isFinite(m.price) || ![k.o, k.h, k.l, k.c].some((v) => Math.abs(v - m.price) <= 0.006)) e(`${at}: price ${m.price} is not the open, high, low or close of ${k.t}`);
+        if (!Number.isFinite(m.price) || ![k.o, k.h, k.l, k.c].some((v) => Math.abs(v - m.price) <= 0.006 || Math.abs(toTick(v, EX) - m.price) < 1e-6)) e(`${at}: price ${m.price} is not the open, high, low or close of ${k.t}`);
         else if (!priced(m.label, m.price)) e(`${at}: label "${m.label}" does not print its price ${m.price}`);
         if (m.side != null && !['above', 'below'].includes(m.side)) e(`${at}: side must be above|below`);
         break;
@@ -841,7 +1030,7 @@ export const validateReview = (r, ctx = {}) => {
         if (!MA_REFS.includes(m.ref)) e(`${at}: ref "${m.ref}" not one of ${MA_REFS.join('|')}`);
         else if (byKey.get(m.ref)?.source !== 'fireant' || byKey.get(m.ref)?.value == null) e(`${at}: ${m.ref} has no FireAnt value — a plate on FireAnt's line needs the number FireAnt shows`);
         else if (!inPrice(byKey.get(m.ref).value)) e(`${at}: ${priceMsg(byKey.get(m.ref).value)}`);
-        else if (v2 && typeof m.label === 'string' && !priced(m.label, byKey.get(m.ref).value)) e(`${at}: label "${m.label}" does not print FireAnt's ${m.ref} ${byKey.get(m.ref).value}`);
+        else if (v2 && typeof m.label === 'string' && !priced(m.label, byKey.get(m.ref).value)) e(`${at}: label "${m.label}" does not print FireAnt's ${m.ref} ${byKey.get(m.ref).value} — an indicator prints as FireAnt shows it, never rounded`);
         break;
       case 'pointer':
         if (!(m.date === 'last' || isDate(m.date))) e(`${at}: date must be "last" or YYYY-MM-DD`);
@@ -870,6 +1059,23 @@ export const validateReview = (r, ctx = {}) => {
     }
   }
   for (const [b, n] of Object.entries(perBeat)) if (n > MAX_MARKS_PER_BEAT) e(`beat ${b} has ${n} marks — at most ${MAX_MARKS_PER_BEAT}`);
+  // User 2026-10-06: "Round the number with its price increment on the scene review the stock", then "the cross line with
+  // any price must be considered": from that edition on, every printed price is on the price step (tick.mjs) and every price a
+  // branch names inside the photo's window has a line — a level (cross line), the trendline, a candle read or FireAnt's MA.
+  if (isDate(r.date) && r.date >= STEP_SINCE) {
+    const f2 = (v) => v.toFixed(2).replace('.', ',');
+    const printed = [...marks.map((m, i) => [`marks[${i}].label`, m?.label]), ['detail.text', r.detail?.text], ...(r.branches ?? []).flatMap((b, i) => [[`branches[${i}].if`, b?.if], [`branches[${i}].then`, b?.then]]), ...roleTexts(r)];
+    const indicators = indicatorValues(r);
+    for (const [where, text] of printed) {
+      const off = pricesIn(text).filter((v) => !onTick(v, EX) && !indicators.has(v.toFixed(2)));
+      if (off.length) e(`${where}: ${off.map((v) => `${f2(v)} → ${f2(toTick(v, EX))}`).join(', ')} — every price is printed on the price step (bước giá)`);
+    }
+    for (const m of marks) if (m?.kind === 'level' && Number.isFinite(m.price) && !onTick(m.price, EX)) e(`${m.kind} ${m.price}: not on the price step — ${toTick(m.price, EX)}`);
+    const lined = new Set([...marks.map((m) => m?.price).filter(Number.isFinite).map((v) => v.toFixed(2)), ...indicators]);
+    for (const [i, b] of (r.branches ?? []).entries()) {
+      for (const p of pricesIn(`${b?.if ?? ''} ${b?.then ?? ''}`)) if (inPrice(p) && !lined.has(p.toFixed(2)) && !lined.has(toTick(p, EX).toFixed(2))) e(`branches[${i}]: ${f2(p)} has no line on the chart — every price a branch asks the viewer to watch is a cross line (a level mark on beat 1), or the trendline, MA or candle that carries it`);
+    }
+  }
   if (!marks.some((m) => m?.beat === 0)) e('no mark on beat 0 (the wide shot)');
   if (v2) {
     const roled = (role) => marks.some((m) => (m?.kind === 'level' || m?.kind === 'trendline') && m.role === role);
@@ -933,11 +1139,13 @@ export const validateReview = (r, ctx = {}) => {
   // Every number in the texts the screen or the writer uses traces to numbers[], at the precision shown.
   const patterns = exemptPatterns();
   const values = [...byKey.values()].map((n) => n.value).filter((v) => v != null);
-  const traced = (n, dp) => values.some((v) => Number(Math.abs(v).toFixed(dp)) === Number(n.toFixed(dp)));
+  // A printed price may be a measured price rounded to the price step (tick.mjs, user 2026-10-06): 20,87 measured, 20,85 printed.
+  const traced = (n, dp) => values.some((v) => Number(Math.abs(v).toFixed(dp)) === Number(n.toFixed(dp)) || (Number.isFinite(v) && Number(toTick(Math.abs(v), EX).toFixed(dp)) === Number(n.toFixed(dp))));
   const texts = [
     ['verdict', r.verdict], ['detail.text', r.detail?.text], ['priceAction.read', r.priceAction?.read],
     ...marks.map((m, i) => [`marks[${i}].label`, m?.label]),
     ...branches.flatMap((b, i) => [[`branches[${i}].if`, b?.if], [`branches[${i}].then`, b?.then]]),
+    ...roleTexts(r),
   ];
   for (const [where, text] of texts) {
     if (typeof text !== 'string') continue;
@@ -947,11 +1155,39 @@ export const validateReview = (r, ctx = {}) => {
       e(`${where}: "${raw}" in "${text}" is not in numbers[] at that precision`);
     }
   }
-  // No call words anywhere a reader sees.
+  // No call words anywhere a reader sees — except the two roles, the one place an action is said (method /3).
   const all = [r.verdict, r.detail?.text, r.priceAction?.read, ...marks.map((m) => m?.label), ...branches.flatMap((b) => [b?.if, b?.then]), ...checks.map((c) => c?.label)].map(lower).join(' \n ');
-  for (const w of FORBIDDEN) if (all.includes(w)) e(`call word "${w}" — a review states what the chart and the rules say, never what to do`);
+  for (const w of FORBIDDEN) if (all.includes(w)) e(`call word "${w}" — a review states what the chart and the rules say, never what to do (actions belong in roles, §6b/§6c)`);
+
+  // Method /3 (user 2026-10-07: "add the role of holder and not holder with action and behavior"): from that edition on the
+  // review carries both roles, AS THE METHOD DECIDES THEM (rolesOf, listed by measure): same case, same price, same words.
+  if (isDate(r.date) && r.date >= ROLES_SINCE) {
+    const RS = r.roles;
+    if (!RS?.holder || !RS?.notHolder) e('roles missing — the review ends on roles.holder and roles.notHolder (symbol-reviewer.md §6b/§6c; copy them from measure)');
+    else {
+      for (const who of ['holder', 'notHolder']) {
+        const x = RS[who];
+        const want = M?.roles?.[who];
+        const at = `roles.${who}`;
+        if (want) {
+          for (const k of ['case', 'priceKey', 'if', 'then', 'plate']) if ((x?.[k] ?? null) !== (want[k] ?? null)) e(`${at}.${k} ${JSON.stringify(x?.[k] ?? null)} — the method's is ${JSON.stringify(want[k] ?? null)} (copy measure's roles)`);
+          const same = (x?.price == null && want.price == null) || (Number.isFinite(x?.price) && Number.isFinite(want.price) && Math.abs(x.price - want.price) <= 0.006);
+          if (!same) e(`${at}.price ${x?.price ?? null} — the method's is ${want.price ?? null}`);
+        }
+        const prefix = who === 'holder' ? 'Đang giữ:' : 'Chưa mua:';
+        if (typeof x?.plate !== 'string' || !x.plate.startsWith(prefix)) e(`${at}.plate must open with "${prefix}"`);
+        else if ([...x.plate].length > 32) e(`${at}.plate "${x.plate}" is ${[...x.plate].length} characters — at most 32`);
+        if (typeof x?.then !== 'string' || !x.then.trim()) e(`${at}.then missing — the action`);
+        const words = [x?.if, x?.then, x?.plate, x?.say, x?.headline].map(lower).join(' \n ');
+        for (const w of ROLE_FORBIDDEN) if (words.includes(w)) e(`${at}: "${w}" — a role names a line and an action, never a target, a certainty, leverage or a size but "một nửa"`);
+      }
+    }
+  }
   return errs;
 };
+
+/** The roles' texts, labelled for the number checks (method /3). */
+const roleTexts = (r) => ['holder', 'notHolder'].flatMap((who) => ['if', 'then', 'plate', 'say', 'headline'].map((k) => [`roles.${who}.${k}`, r?.roles?.[who]?.[k]]));
 
 /**
  * The numbers a review actually cites — in its mark labels, detail, branches and verdict — as {key: value}.
@@ -962,13 +1198,18 @@ export const citedNumbers = (r) => {
   const patterns = exemptPatterns();
   const nums = (r?.numbers ?? []).filter((n) => n.value != null);
   const out = {};
-  const texts = [r?.verdict, r?.detail?.text, r?.priceAction?.read, ...(r?.marks ?? []).map((m) => m?.label), ...(r?.branches ?? []).flatMap((b) => [b?.if, b?.then])];
+  const texts = [r?.verdict, r?.detail?.text, r?.priceAction?.read, ...(r?.marks ?? []).map((m) => m?.label), ...(r?.branches ?? []).flatMap((b) => [b?.if, b?.then]), ...roleTexts(r).map(([, s]) => s)];
   // One key per cited figure: the key of an object the chart draws (a mark's ref, or a mark at that price) when there is
   // one, else the first key with that value — keys of objects without a mark (an unrelated swing or level that happens to
   // round to the same figure) stay out of the pack (verify 4/10: every match widened the facts gate).
   const markedRefs = new Set((r?.marks ?? []).map((m) => m?.ref).filter(Boolean));
   const markPrices = (r?.marks ?? []).flatMap((m) => [m?.price, m?.low, m?.high]).filter(Number.isFinite);
   const isMarked = (n) => markedRefs.has(n.key) || markPrices.some((p) => Math.abs(p - n.value) <= 0.006);
+  // Since 2026-10-06 a review prints its prices on the price step (lib/tick.mjs: "Round the number with its price
+  // increment"): a printed 45,95 is the measured 45,97 on the step. Such a figure enters the pack as `<key>@step` with the
+  // value printed, so verify's facts check traces it (the weekly's DGW and MSB labels FAILed facts until this).
+  const onStep = (n, value, dp) => [toTick(n.value, r?.exchange ?? 'HOSE'), toTick(n.value, 'UPCOM')]
+    .some((s) => Number.isFinite(s) && Number(Math.abs(s).toFixed(dp)) === Number(value.toFixed(dp)));
   for (const text of texts) {
     if (typeof text !== 'string') continue;
     const exempt = exemptIn(text, patterns);
@@ -976,7 +1217,10 @@ export const citedNumbers = (r) => {
       if (exempt.has(value)) continue;
       const hits = nums.filter((n) => Number(Math.abs(n.value).toFixed(dp)) === Number(value.toFixed(dp)));
       const pick = hits.find((n) => markedRefs.has(n.key)) ?? hits.find(isMarked) ?? hits[0];
-      if (pick) out[pick.key] = pick.value;
+      if (pick) { out[pick.key] = pick.value; continue; }
+      const stepped = nums.filter((n) => onStep(n, value, dp));
+      const near = stepped.find((n) => markedRefs.has(n.key)) ?? stepped.find(isMarked) ?? stepped[0];
+      if (near) out[`${near.key}@step`] = Number(value.toFixed(dp));
     }
   }
   // A plate on FireAnt's own line prints that line's value.

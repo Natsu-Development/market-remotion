@@ -62,9 +62,13 @@ export type LinePane = {
   label: string;
   points: [string, number][];
   accent?: AccentName;
-  unit?: 'points' | 'percent';
+  /** 'count' = a whole number of stocks (the weekly's "số mã trên SMA200"), printed like 'points'. */
+  unit?: 'points' | 'percent' | 'count';
   /** A dashed reference level, drawn when inside the fitted range. */
   ref?: number;
+  /** false: no value plate at the line's end — the weekly count line, whose on-screen figure is the terminal's count in
+   * the caption, not the recomputed line's last point (2026-10-06). */
+  tag?: boolean;
   min?: number;
   max?: number;
 };
@@ -82,7 +86,8 @@ export type MoverColumn = {
   metric?: 'change' | 'rs';
   /** Rank printed on the first row (default 1): a right column that continues a ranking starts at 6. */
   startRank?: number;
-  rows: {symbol: string; name?: string; changePercent: number; volumeRatio?: number; volumeVsSma20Percent?: number; price?: number; rs1m?: number}[];
+  /** `focus`: a name the reel reviews next — it gets a gold mark when it lands and lights up on the panel's emphasis beat. */
+  rows: {symbol: string; name?: string; changePercent: number; volumeRatio?: number; volumeVsSma20Percent?: number; price?: number; rs1m?: number; focus?: boolean}[];
 };
 
 /**
@@ -90,7 +95,15 @@ export type MoverColumn = {
  * day's change, RS 1M (figure + bar), then up to two of the rest. RS Strong shows RS 52W and volume vs its
  * 20-session average; Uptrend shows how far price sits above EMA50 and SMA200 — what that filter tests.
  */
-export type BoardColumn = 'price' | 'change' | 'rs1m' | 'rs52w' | 'volume' | 'aboveEma50' | 'aboveSma200';
+export type BoardColumn =
+  | 'price' | 'change' | 'rs1m' | 'rs52w' | 'volume' | 'aboveEma50' | 'aboveSma200'
+  /**
+   * The weekly boards (2026-10-06): `weekChange` = the week's % change (a pill in the slot of `change` when the
+   * board has no day column, else a plain figure), `signal` = the filter's breakout/breakdown flag as a pill
+   * (XÁC NHẬN / TIỀM NĂNG, coloured by the board's `signalKind`), `rs3m` = RS 3M. Sector boards: `members` = how many
+   * stocks the group counts, `aboveSma200Share` = the share of them closing above SMA200, whole %.
+   */
+  | 'weekChange' | 'signal' | 'rs3m' | 'members' | 'aboveSma200Share';
 
 /**
  * One row of a filter board: the terminal's own figures, from the fact pack. `focus` = a name the reel reviews
@@ -110,8 +123,30 @@ export type BoardRow = {
   volumeVsSma20Percent?: number;
   aboveEma50Percent?: number;
   aboveSma200Percent?: number;
+  /** The edition week's % change (close vs the last close before its Monday). */
+  weekChangePercent?: number;
+  rs3m?: number;
+  /** The filter's signal: the terminal's has_<signalKind>_confirmed (confirmed) or _potential (potential). */
+  signal?: 'confirmed' | 'potential';
   focus?: boolean;
 };
+
+/**
+ * One row of a sector board (`mode: 'sector'` — the weekly's ICB industry groups ranked by RS, 2026-10-06): the
+ * group's short Vietnamese name instead of a ticker, how many stocks it counts, its median RS 1M (the same 0–99 bar),
+ * the week's median % change and the share of its stocks above SMA200.
+ */
+export type SectorRow = {
+  name: string;
+  members?: number;
+  rs1m: number;
+  weekChangePercent?: number;
+  aboveSma200Share?: number;
+  focus?: boolean;
+};
+
+/** What every board shares; a sector board (`mode: 'sector'`) carries SectorRow rows. */
+type BoardBase = {type: 'board'; caption?: string; columns: BoardColumn[]; startRank?: number; emphasis?: BoardEmphasis[]};
 
 /**
  * What a later beat brings forward: `set: 'focus'` lights the rows marked `focus`, `dim` fades the rest, `label` is
@@ -126,13 +161,19 @@ export type Visual =
    * indicators are FireAnt/terminal photos (`image`). `lines` stays — the weekly breadth line has no FireAnt page.
    */
   | {type: 'lines'; caption?: string; top: LinePane; bottom: LinePane; events?: {t: string; label?: string; accent?: AccentName}[]}
-  | {type: 'movers'; caption?: string; left: MoverColumn; right: MoverColumn}
+  /**
+   * Two ranked columns (market-review's Volume spike board). `emphasis` (user 2026-10-06: "With the volumn spike also have
+   * the animation with this scene for me highlight the symbol must noted") lights the `focus` rows on its beat, as the
+   * filter boards do.
+   */
+  | {type: 'movers'; caption?: string; left: MoverColumn; right: MoverColumn; emphasis?: BoardEmphasis[]}
   /**
    * One saved screener filter as a ranked table (market-review rs/uptrend, user 2026-10-01 evening: "must have
    * the RS1M column, price change & more info"): up to ten rows in the chart panel's box. Beat 1 the rows come in
    * and the focus rows get their mark; the `emphasis` lights the focus rows on its beat.
    */
-  | {type: 'board'; caption?: string; columns: BoardColumn[]; rows: BoardRow[]; startRank?: number; emphasis?: BoardEmphasis[]}
+  | (BoardBase & {mode?: 'ticker'; rows: BoardRow[]; signalKind?: 'breakout' | 'breakdown'})
+  | (BoardBase & {mode: 'sector'; rows: SectorRow[]})
   /**
    * A photograph of a live page (scripts/shoot.mjs), path under public/.
    * `source` is shown as a chip so the viewer knows the picture is quoted.

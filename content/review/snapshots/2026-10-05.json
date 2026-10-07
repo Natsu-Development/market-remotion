@@ -2,12 +2,16 @@
   "date": "2026-10-05",
   "cachedAt": "2026-10-05T08:00:23.670277681Z",
   "fetchedAt": "2026-10-05T09:40:52.187Z",
+  "rebuiltAt": "2026-10-06T05:18:17.040Z",
+  "_rebuilt": "picks re-ranked offline from the cached universe and the server lists below (pull.mjs --rebuild)",
   "universe": 1490,
   "volumeVsSmaUnit": "percent",
   "agreement": {
     "Volume spike": 1,
     "RS Strong": 1,
-    "Uptrend": 1
+    "Uptrend": 1,
+    "Momentum breakout": 1,
+    "Momentum breakdown": 1
   },
   "_agreement": "share of symbols the server and a local evaluation of the same saved conditions agree on (1 = identical lists)",
   "filters": {
@@ -67,6 +71,28 @@
         "HDB",
         "VIC"
       ]
+    },
+    "Momentum breakout": {
+      "count": 4,
+      "symbols": [
+        "HAH",
+        "PVS",
+        "MSB",
+        "ABB"
+      ]
+    },
+    "Momentum breakdown": {
+      "count": 8,
+      "symbols": [
+        "MSR",
+        "BSR",
+        "DGW",
+        "HHP",
+        "PVS",
+        "ABB",
+        "HDB",
+        "PLX"
+      ]
     }
   },
   "members": {
@@ -118,6 +144,22 @@
       "HDB",
       "VIC"
     ],
+    "breakout": [
+      "HAH",
+      "PVS",
+      "MSB",
+      "ABB"
+    ],
+    "breakdown": [
+      "MSR",
+      "BSR",
+      "DGW",
+      "HHP",
+      "PVS",
+      "ABB",
+      "HDB",
+      "PLX"
+    ],
     "leaders": [
       "DGW",
       "MSR",
@@ -158,6 +200,22 @@
       "MSB",
       "HDB"
     ],
+    "breakout": [
+      "HAH",
+      "PVS",
+      "MSB",
+      "ABB"
+    ],
+    "breakdown": [
+      "MSR",
+      "BSR",
+      "DGW",
+      "HHP",
+      "PVS",
+      "ABB",
+      "HDB",
+      "PLX"
+    ],
     "leaders": [
       "DGW",
       "MSR"
@@ -185,6 +243,58 @@
       "VPB": 2,
       "MSB": 2,
       "HDB": 2
+    }
+  },
+  "leadersByFormat": {
+    "weekly": {
+      "from": [
+        [
+          "breakout"
+        ],
+        [
+          "breakdown"
+        ]
+      ],
+      "perTier": 1,
+      "sortBy": "rs_1m",
+      "top": 2,
+      "order": "tier",
+      "members": [
+        "HAH",
+        "PVS",
+        "MSB",
+        "ABB",
+        "MSR",
+        "BSR",
+        "DGW",
+        "HHP",
+        "HDB",
+        "PLX"
+      ],
+      "picks": [
+        "HAH",
+        "MSR"
+      ],
+      "tierOf": {
+        "HAH": 1,
+        "MSR": 2
+      },
+      "poolTierOf": {
+        "HAH": 1,
+        "PVS": 1,
+        "MSB": 1,
+        "ABB": 1,
+        "MSR": 2,
+        "BSR": 2,
+        "DGW": 2,
+        "HHP": 2,
+        "HDB": 2,
+        "PLX": 2
+      },
+      "tierScene": {
+        "HAH": "breakout",
+        "MSR": "breakdown"
+      }
     }
   },
   "breadth": {
@@ -235,6 +345,28 @@
     "matchesSession": true
   },
   "rows": {
+    "ABB": {
+      "name": "Ngân hàng Thương mại cổ phần An Bình",
+      "exchange": "UPCOM",
+      "price": 17.8,
+      "changePercent": 0.565,
+      "volume": 371900,
+      "volumeSma20": 1021335,
+      "volumeRatio": 0.3641,
+      "rs_1m": 80,
+      "rs_3m": 86,
+      "rs_6m": 95,
+      "rs_9m": 94,
+      "rs_52w": 97,
+      "ema_9": 17.73293361584788,
+      "ema_21": 17.57435588430232,
+      "ema_50": 17.1445722240298,
+      "sma_200": 14.309365000000014,
+      "signals": {
+        "has_breakout_confirmed": true,
+        "has_breakdown_potential": true
+      }
+    },
     "BSR": {
       "name": "Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam",
       "exchange": "HOSE",
@@ -379,6 +511,27 @@
         "has_breakdown_potential": true
       }
     },
+    "HAH": {
+      "name": "Công ty Cổ phần Vận tải và Xếp dỡ Hải An",
+      "exchange": "HOSE",
+      "price": 51.5,
+      "changePercent": 0.5859,
+      "volume": 786600,
+      "volumeSma20": 1048005,
+      "volumeRatio": 0.7506,
+      "rs_1m": 88,
+      "rs_3m": 79,
+      "rs_6m": 63,
+      "rs_9m": 48,
+      "rs_52w": 71,
+      "ema_9": 50.96406309884391,
+      "ema_21": 49.58801506306729,
+      "ema_50": 48.640800735880376,
+      "sma_200": 52.206815000000006,
+      "signals": {
+        "has_breakout_confirmed": true
+      }
+    },
     "HDB": {
       "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
       "exchange": "HOSE",
@@ -398,6 +551,28 @@
       "sma_200": 26.703279999999996,
       "signals": {
         "has_breakdown_potential": true
+      }
+    },
+    "HHP": {
+      "name": "Công ty cổ phần HHP GLOBAL",
+      "exchange": "HOSE",
+      "price": 17.95,
+      "changePercent": 0.2793,
+      "volume": 697900,
+      "volumeSma20": 1059460,
+      "volumeRatio": 0.6587,
+      "rs_1m": 86,
+      "rs_3m": 94,
+      "rs_6m": 96,
+      "rs_9m": 97,
+      "rs_52w": 98,
+      "ema_9": 17.64361093732373,
+      "ema_21": 17.19506091783174,
+      "ema_50": 16.194680904824523,
+      "sma_200": 13.410894999999996,
+      "signals": {
+        "has_breakdown_confirmed": true,
+        "has_bearish_rsi": true
       }
     },
     "HPG": {

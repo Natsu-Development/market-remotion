@@ -598,11 +598,11 @@ print(r['text'])"
 # 1a. Nhịp đọc — voice.pace trong content-rules (tốc độ gốc OmniVoice theo câu, khoảng lặng sau câu); đổi rồi:
 node scripts/voiceover.mjs --reassemble --retime      # thu câu có khoá mới, ghép lại mọi scene với khoảng lặng mới
 
-# 1b. Số thập phân và thuật ngữ có được ĐỌC không — phiên âm thường ở trên không bắt được (nó đoán 43,13% và
-#     MACD theo ngữ cảnh). Thu N lượt, nghe với token chữ số bị chặn, giữ lượt rõ nhất, rồi dựng lại track:
-../video-factory/.venv/bin/python scripts/tts_takes.py --dry-run            # xếp hạng, không chép gì
-../video-factory/.venv/bin/python scripts/tts_takes.py --takes=8            # chép lượt tốt nhất vào .tts-cache
-node scripts/voiceover.mjs --reassemble --only=<id in ra ở cuối> --retime   # dựng lại, không thu lại
+# 1b. Số, mã và thuật ngữ có được ĐỌC đủ chữ không — phiên âm thường ở trên không bắt được (nó đoán 43,13% và
+#     MACD theo ngữ cảnh). Nghe MỌI câu với token chữ số bị chặn, giữ lượt rõ, thu thêm tới 18 lượt, dựng lại track.
+#     render.mjs tự chạy bước này và từ chối render khi verify `voice-heard` FAIL (người dùng 2026-10-06).
+../video-factory/.venv/bin/python scripts/tts_takes.py --content=content/<tên>.json --listen-only   # track đang nói gì
+../video-factory/.venv/bin/python scripts/tts_takes.py --content=content/<tên>.json --rebuild       # chọn lượt rõ + dựng lại
 
 # 2. Tốc độ đọc — ngưỡng ở narration.syllableRateWarn / syllableRateFail
 node -e "/* số âm tiết / (thời lượng - 1.15) */"

@@ -146,7 +146,7 @@ Chặn (exit 1) khi:
 - reel chưa `reviewed`: người dùng chưa duyệt nó trên trang duyệt (market-video §2c / market-review),
   và đăng bản chưa duyệt là bỏ qua đúng điểm dừng họ đã chốt. Hoặc verify còn lỗi: đây là lần verify
   đầu tiên SAU khi có giọng, vì `approve` chạy trước lồng tiếng và các check âm thanh lúc đó là SKIP;
-- thiếu `out/<id>.mp4`, hoặc nó cũ hơn content hay bất kỳ file nào reel trỏ tới (giọng, ảnh, logo).
+- thiếu video của reel (`out/<id>.mp4`; bản phiên/tuần có ngày: `out/review/<format>-<edition>.mp4`, file `render.mjs` ghi — mỗi bản một file từ 2026-10-06), hoặc nó cũ hơn content hay bất kỳ file nào reel trỏ tới (giọng, ảnh, logo).
   Một lần `approve` sau render cũng tính: file không chứng minh được nó dựng từ đúng lời đã duyệt.
   Render lại bằng `npm run build -- --id=<Id>`;
 - có scene không có track giọng; thiếu hình hoặc tiếng; ngắn hơn 10 giây (sàn duy nhất còn lại của
@@ -160,7 +160,7 @@ số trong caption không tìm thấy ở fact pack hay trên màn hình; captio
 số hashtag, đuôi, tag có dấu; codec không phải h264/aac; khung không phải 1080×1920.
 
 Nó KHÔNG chép file và không hạ cỡ: canvas của repo đã là 1080×1920 h264/aac, đúng thứ Reels muốn.
-Nó in ra ĐÚNG MỘT đường dẫn để tải lên (`out/<id>.mp4`), Page và caption. Đọc dòng
+Nó in ra ĐÚNG MỘT đường dẫn để tải lên (`out/<id>.mp4`, hay `out/review/daily-<ngày>.mp4` cho bản phiên), Page và caption. Đọc dòng
 `PAGE` rồi mới đi tiếp.
 
 ## 3. Vào đúng Page

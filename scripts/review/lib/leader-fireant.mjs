@@ -161,6 +161,18 @@ export const fireantLeaderVisual = (args) => {
   const focus = review?.camera?.find((c) => c.beat === 1)?.focus;
   if (focus === 'all') Object.assign(close, {x: wide.x, y: wide.y, zoom: 1.0});
   const shots = [wide, close];
+  // Beat 3 "Hành động" (user 2026-10-07: "add the role of holder and not holder with action and behavior"): when the review
+  // carries `roles` (symbol-reviewer.md §6b/§6c), a third shot frames the last candle and the price each role acts on; the
+  // two role plates sit on those lines (house rule 2026-09-28: "danh sách việc là nhãn gắn vào đúng mức giá").
+  const roles = review?.roles?.holder && review?.roles?.notHolder ? review.roles : null;
+  const ACTION_B = 2;
+  if (roles) {
+    const ys = [highY, lowY, ...[roles.holder.price, roles.notHolder.price].filter(Number.isFinite).map(priceY)].filter((v) => v != null && inside(v, 0.005));
+    const yTop = Math.min(...ys) - 0.05, yBot = Math.max(...ys) + 0.05;
+    const za = Math.max(1, Math.min(z1, round(BOX_H / ((yBot - yTop) * ky * DRIFT), 2)));
+    const vwa = Math.min(crop.w, BOX_W / (za * DRIFT) / kx);
+    shots.push({beat: ACTION_B, x: clamp(Math.min(closeX + 0.05, crop.x + crop.w) - vwa / 2), y: clamp((yTop + yBot) / 2), zoom: za, move: close.move === 'push_in' ? 'pull_out' : 'push_in'});
+  }
   const views = shots.map(viewOf);
 
   // ---- what a plate must not cover
@@ -280,6 +292,8 @@ export const fireantLeaderVisual = (args) => {
 
   const marks = [];
   const add = (m) => { if (m) marks.push(m); return m; };
+  const roleMarks = new Set();                  // the action beat's own marks (the two roles)
+  const MA_KEYS = new Set(['ma50', 'ma200']);
   // The levels this scene will draw, known before any plate is placed, so no plate lands on one of them.
   const useHigh = !(spiking && volLabel && ma?.volumeBar) && L.high52w != null && inside(priceY(L.high52w), 0.03);
   for (const {price: p, beat: b} of review?.marks?.length ? review.marks.filter((m) => m.kind === 'level').map((m) => ({price: m.price, beat: m.beat ?? 0})) : useHigh ? [{price: L.high52w, beat: 0}] : []) {
@@ -354,7 +368,8 @@ export const fireantLeaderVisual = (args) => {
     for (const e of order) {
       if (e.line && e.line.until !== undefined && e.line.until < e.beat) continue;   // never shown: no price, no line
       let cur = e.lab;
-      for (let b = e.beat + 1; b <= lastB; b++) {
+      // The action beat shows the roles alone: the earlier beats' plates are not carried into it.
+      for (let b = e.beat + 1; b <= (roles && e.beat < ACTION_B ? ACTION_B - 1 : lastB); b++) {
         if (e.coveredFrom != null && b >= e.coveredFrom) { cur = null; continue; }   // another plate prints this price here
         if (!e.shown(b)) { cur = null; continue; }
         if (cur?._rec && cur._rec.until === b - 1) {
@@ -412,7 +427,18 @@ export const fireantLeaderVisual = (args) => {
       if (!shown(b)) return null;
       const v = views[b];
       const tx = Math.max(v.x0, Math.min(closeX - (0.2 + 0.17 * (k % 3)) / v.z, v.x1));
-      return placeNear(text, {x: tx, y}, b, accent, side, distPx, steps);
+      let got = placeNear(text, {x: tx, y}, b, accent, side, distPx, steps);
+      // A cross line keeps its price when its full plate finds no room (user 2026-10-06: "the cross line with any price must be
+      // considered"; HDB's 27,10 line vanished on the close-up): a short tag right of the last bar, over the price scale's edge if
+      // it must — the role and the price, else the price alone — instead of hiding the line.
+      if (!got && Number.isFinite(price)) {
+        const roleWord = role === 'support' ? 'Hỗ trợ' : role === 'resistance' ? 'Kháng cự' : '';
+        for (const t of [`${roleWord} ${vi(price)}`.trim(), vi(price)]) {
+          got = add(place(t, {x: closeX + 0.03, y}, b, accent, 'near', {...(b < lastB ? {until: b} : {}), within: (r) => pxRectPoint(r, b, closeX + 0.03, y) <= NEAR_PX * 2, blockOpts: {lines: false, scale: false}}));
+          if (got) break;
+        }
+      }
+      return got;
     };
     const lab = coveredFrom != null && coveredFrom <= beat ? null : own(beat);
     if (!lab && !(coveredFrom != null && coveredFrom <= beat)) { line.until = beat - 1; }   // no plate in its own beat: no line
@@ -565,7 +591,11 @@ export const fireantLeaderVisual = (args) => {
       // in the line's colour at its end, right of the last bar — over the edge of the price scale if it must.
       if (!got) {
         const [ex, ey] = pts.at(-1);
-        got = add(place(vi(m.price), {x: ex + 0.03, y: ey}, bt, accent, 'near', {...(bt < lastB ? {until: bt} : {}), within: (r) => pxRectPoint(r, bt, ex, ey) <= NEAR_PX, blockOpts: {lines: false, scale: false}}));
+        const tagOpts = {...(bt < lastB ? {until: bt} : {}), within: (r) => pxRectPoint(r, bt, ex, ey) <= NEAR_PX, blockOpts: {lines: false, scale: false}};
+        // The tag keeps the line's name with its price (user 2026-10-06: "include the trendline with this price to easy
+        // visualize"; HDB and CII showed a bare "27,42" / "13,36"); the bare price only when even that finds no room.
+        const wideOpts = {...tagOpts, within: (r) => pxRectPoint(r, bt, ex, ey) <= NEAR_PX * 2};
+        got = add(place(`Trendline · ${vi(m.price)}`, {x: ex + 0.03, y: ey}, bt, accent, 'near', wideOpts)) ?? add(place(vi(m.price), {x: ex + 0.03, y: ey}, bt, accent, 'near', tagOpts));
       }
       return got;
     };
@@ -622,6 +652,44 @@ export const fireantLeaderVisual = (args) => {
       else if (m.kind === 'candle') candle(m);
       else if (m.kind === 'pointer') pointer(m.label, m.accent ?? 'green', beat, m.date ?? 'last', m.side ?? 'below');
     }
+    // The two roles on the action beat: each plate on the line of the price it acts on — the review's trendline (its value at
+    // the last bar), FireAnt's MA curve, else a cross line at that price; a role without a price stands by the last candle.
+    // The holder's plate (a break that cuts the position) is red under its line, the not-holder's white above it.
+    if (roles) {
+      for (const [who, accent, side] of [['holder', 'red', 'support'], ['notHolder', 'white', 'resistance']]) {
+        const r = roles[who];
+        const at = marks.length;
+        const tl = Number.isFinite(r.price) ? review.marks.find((m) => m.kind === 'trendline' && Math.abs(m.price - r.price) <= 0.006) : null;
+        const maKey = Number.isFinite(r.price) && MA_KEYS.has(r.priceKey) ? r.priceKey : null;
+        let got = null;
+        if (tl) {
+          const sg = segOf(tl);
+          if (sg) {
+            const [a, b] = sg;
+            const path = Array.from({length: 61}, (_, k) => [a[0] + ((b[0] - a[0]) * k) / 60, a[1] + ((b[1] - a[1]) * k) / 60]);
+            const pts = inViewPts(ACTION_B, path.slice(49));
+            if (pts.length) {
+              marks.push({kind: 'line', from: [clamp(a[0]), clamp(a[1])], to: [clamp(b[0]), clamp(b[1])], accent: tl.accent ?? 'green', beat: ACTION_B});
+              got = placeNear(r.plate, {x: pts.at(-1)[0], path: pts}, ACTION_B, accent, 'path', (q, bt) => pxRectLine(q, bt, pts)) ?? leadered(r.plate, pts, ACTION_B, accent, pts.at(-1));
+            }
+          }
+        } else if (maKey && MA[maKey]?.path?.length) {
+          const pts = inViewPts(ACTION_B, MA[maKey].path);
+          if (pts.length) got = placeNear(r.plate, {x: views[ACTION_B].x1, path: pts}, ACTION_B, accent, 'path', (q, bt) => pxRectLine(q, bt, pts)) ?? leadered(r.plate, pts, ACTION_B, accent);
+        }
+        if (!got && Number.isFinite(r.price) && inside(priceY(r.price), 0.03)) {
+          level(r.price, r.plate, accent, ACTION_B, side);
+          got = marks.slice(at).find((m) => m.kind === 'label');
+        }
+        if (!got) {
+          const cy = who === 'holder' ? lowY + 0.04 : highY - 0.04;
+          got = add(place(r.plate, {x: closeX - 0.08, y: cy}, ACTION_B, accent, 'near', {within: (q) => pxRectPoint(q, ACTION_B, closeX, cy) <= CANDLE_PX * 3}))
+            ?? add(place(r.plate, {x: closeX - 0.08, y: cy}, ACTION_B, accent, 'near', {blockOpts: {lines: false}}));
+        }
+        if (!got) console.warn(`${L.symbol}: the ${who} plate "${r.plate}" found no room on the action beat`);
+        for (const m of marks.slice(at)) roleMarks.add(m);
+      }
+    }
     detail = review.detail?.text ?? '';
     for (const n of review.numbers ?? []) note(n.key, n.value, n.text ?? null, n.source ?? 'review');
   } else {
@@ -653,8 +721,17 @@ export const fireantLeaderVisual = (args) => {
   extendAll();
   // A line that must keep its price in every beat (the trendline, FireAnt's MA curves) and found no room in the close-up:
   // frame the close-up wider and lay the scene out again (coordinator 4/10: "cap the zoom") — down to 1,2×.
-  const starved = later.some((e) => e.always && e.line && e.line.until !== undefined && e.line.until < lastB);
+  const starved = later.some((e) => e.always && e.line && e.line.until !== undefined && e.line.until < (roles ? ACTION_B - 1 : lastB));
   if (starved && z1 > 1.25) return fireantLeaderVisual({...args, spec: {...spec, closeZoom: round(Math.max(1.2, z1 - 0.2), 2)}});
+  // The action beat holds the roles alone: every earlier mark (plates, cross lines, boxes, arrows, the trendline unless a role
+  // acts on it — that one is redrawn on the action beat) clears when the camera moves to it.
+  if (roles) {
+    for (const m of marks) {
+      if (roleMarks.has(m) || (m.beat ?? 0) >= ACTION_B) continue;
+      if (m.until === undefined || m.until >= ACTION_B) m.until = ACTION_B - 1;
+      if (m._rec && (m._rec.until === undefined || m._rec.until >= ACTION_B)) m._rec.until = ACTION_B - 1;
+    }
+  }
 
   const missing = marks.filter((m) => m.kind === 'label').length;
   return {
@@ -662,7 +739,9 @@ export const fireantLeaderVisual = (args) => {
       type: 'image', src: p.rel, source: 'fireant.vn', fit: 'contain',
       // A legend mask left of a narrower crop clips to zero width — verify rejects an empty rect, and it hides nothing.
       crop, masks: masks.filter((m) => m.w > 0 && m.h > 0), ...(maskColor ? {maskColor} : {}),
-      annotations: marks.map(({_rect, _rec, _finalUntil, ...m}) => m), shots,
+      // A line whose plate found no room is hidden with `until` before its own beat ("never shown: no price, no line"); it is
+      // left out here — verify's schema refuses until < beat (2026-10-06: the CII and VCI pick scenes had three such lines).
+      annotations: marks.filter((m) => m.until === undefined || m.until >= (m.beat ?? 0)).map(({_rect, _rec, _finalUntil, ...m}) => m), shots,
     },
     detail,
     numbers,

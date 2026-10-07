@@ -43,7 +43,7 @@ npm run studio         # live preview, scrub the timeline, edit props
 ### Useful variations
 
 ```bash
-npm run build -- --id=<Id>       # another registered reel: its content, its output file
+npm run build -- --id=<Id>       # another registered reel: its content, its output file (a dated edition → out/review/<format>-<edition>.mp4)
 npm run build -- --retime        # stretch/shrink each scene to fit its narration
 npm run build -- --no-voice      # silent render
 npm run build -- --revoice       # re-synthesize the voice first (narration changed); --revoice=<sceneId,...> for some scenes
@@ -51,8 +51,10 @@ npm run build -- --frames=0-450  # render one scene while iterating
 npm run review-page -- Channel   # review page + stills → out/review/channel/, published as an Artifact for approval
 npm run voiceover -- --force     # re-synthesize after editing narration text
 npm run voiceover -- --force --only=channel-evidence-4   # ...only that scene; the rest keep their track
-../video-factory/.venv/bin/python scripts/tts_takes.py   # key lines, decimals ("phẩy") and acronyms (MACD): record N takes,
-                                                        # keep the clearest, most expressive one (voice.pace marks the key lines)
+../video-factory/.venv/bin/python scripts/tts_takes.py --content=content/channel.json --rebuild
+                                  # listen to EVERY sentence (digits suppressed): keep a take where every figure, ticker and
+                                  # term is heard, up to 18 takes, rebuild the tracks; npm run build runs it and refuses to
+                                  # render while verify's voice-heard fails (--unheard: throwaway renders only)
 npm run voiceover -- --reassemble --only=channel-evidence-4   # rebuild that track from the picked takes, no re-synthesis
 npm run voiceover -- --voice=Linh --rate=150
 ```

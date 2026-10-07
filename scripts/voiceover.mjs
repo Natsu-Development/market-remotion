@@ -43,7 +43,7 @@
 import {execFileSync} from 'node:child_process';
 import {existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {dirname, resolve} from 'node:path';
+import {basename, dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {lexiconOf, loadRules, spellerOf, TICKER_RE} from './lib/rules.mjs';
 
@@ -360,23 +360,29 @@ for (const [i, scene] of reel.scenes.entries()) {
 /**
  * Every sentence of every scene with the cache file it is read from — what scripts/tts_takes.py
  * reads to re-take a sentence and put a clearer take at the same path. Written before synthesis
- * so it is there even when the TTS job fails.
+ * so it is there even when the TTS job fails. `_sentences.json` is the latest run's; the same
+ * manifest also goes to manifests/<reel>.json, which scripts/lib/heard.mjs (verify `voice-heard`,
+ * render.mjs) reads to know which takes a reel's tracks are built from — another reel's run must
+ * not overwrite that.
  */
 if (ENGINE === 'omnivoice') {
-  writeFileSync(
-    resolve(CACHE_DIR, '_sentences.json'),
-    JSON.stringify(
-      {
-        content: CONTENT.replace(ROOT + '/', ''),
-        model: MODEL, device: DEVICE, ref_audio: REF_AUDIO, ref_text: REF_TEXT, speed: SPEED,
-        scenes: plan
-          .filter((p) => p.parts)
-          .map((p) => ({id: p.scene.id, wav: p.wav, sentences: p.parts.map(({text, file, speed, pauseAfter, key}) => ({text, file, speed, pauseAfter, key}))})),
-      },
-      null,
-      1,
-    ),
+  const manifest = JSON.stringify(
+    {
+      content: CONTENT.replace(ROOT + '/', ''),
+      model: MODEL, device: DEVICE, ref_audio: REF_AUDIO, ref_text: REF_TEXT, speed: SPEED,
+      scenes: plan
+        .filter((p) => p.parts)
+        .map((p) => ({
+          id: p.scene.id, wav: p.wav, narration: p.scene.narration,
+          sentences: p.parts.map(({text, file, speed, pauseAfter, key}) => ({text, file, speed, pauseAfter, key})),
+        })),
+    },
+    null,
+    1,
   );
+  writeFileSync(resolve(CACHE_DIR, '_sentences.json'), manifest);
+  mkdirSync(resolve(CACHE_DIR, 'manifests'), {recursive: true});
+  writeFileSync(resolve(CACHE_DIR, 'manifests', `${basename(CONTENT, '.json')}.json`), manifest);
 }
 
 // ---------------------------------------------------------------- synthesize

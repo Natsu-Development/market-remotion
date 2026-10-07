@@ -14,7 +14,8 @@
  * Blocks (exit 1):
  *   - the reel is not "reviewed" (npm run approve), or verify reports errors — this is the first
  *     verify after the voice exists; approve ran before it, with the audio checks skipped
- *   - out/<id>.mp4 missing, or older than anything it was rendered from: content/<reel>.json and
+ *   - the reel's video missing (out/<id>.mp4; a dated market-review edition out/review/<format>-<edition>.mp4,
+ *     scripts/lib/outputs.mjs — the file render.mjs wrote), or older than anything it was rendered from: content/<reel>.json and
  *     every asset the reel names (voice, screenshots, logo) — a stale render shows old numbers
  *   - a scene with no voice track, no video/audio stream, shorter than the Reels floor
  *   - the name on screen (footer, outro brand, channel.name) is not the Page's name
@@ -26,6 +27,7 @@ import {spawnSync} from 'node:child_process';
 import {existsSync, readFileSync, statSync} from 'node:fs';
 import {dirname, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {videoOut} from '../lib/outputs.mjs';
 import {reels} from '../lib/reels.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -51,7 +53,9 @@ const walk = (x, visit) => (x && typeof x === 'object' ? Object.values(x).forEac
 
 const contentPath = resolve(ROOT, CONTENT[id]);
 const reel = readJson(CONTENT[id]);
-const mp4 = resolve(ROOT, opt('file', `out/${id.toLowerCase()}.mp4`));
+// The file render.mjs wrote: out/<id>.mp4, or out/review/<format>-<edition>.mp4 for a dated edition (one video per daily
+// edition, user 2026-10-06 — out/dailyreview.mp4 no longer exists).
+const mp4 = resolve(ROOT, opt('file', videoOut({id, reel}).out));
 const captionPath = resolve(ROOT, opt('caption', `out/${id.toLowerCase()}.caption.txt`));
 const bad = [];
 const warn = [];

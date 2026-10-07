@@ -13,10 +13,17 @@
  *   beat 1  the wide, the week's candle boxed, its change on a plate
  *   beat 2  a close-up on the last weeks: the week's range and close, and the volume against the week before
  *
+ * With the pack's `indexWeekly` (user 2026-10-06: "eval the VNIndex as daily and weekly of this week" — the scene is
+ * "VN-Index · Khung tuần", an EVALUATION of the weekly timeframe, not only the candle) the beats become:
+ *   beat 1  a close-up on the week's candle: boxed, its change, range and close, the volume against the week before
+ *   beat 2  the wide: the weekly structure (the last two swing highs joined, the last two swing lows joined, dashed),
+ *           the nearest weekly zone overhead and underneath (swing levels and FireAnt's WEEKLY MA50/MA200 within 0,5%,
+ *           as hlines priced), and the weekly MA200 / MA50 priced at their lines when no zone carries them
+ *
  * Pure. Plates are settled by the caller's plateRoom (scaffold), which moves them off candles and volume bars.
- * Every number printed is in the fact pack's `weekly` block.
+ * Every number printed is in the fact pack's `weekly` / `indexWeekly` blocks.
  */
-import {round, signed, vi} from './common.mjs';
+import {dm, round, signed, vi} from './common.mjs';
 
 const clamp = (n) => Math.min(1, Math.max(0, round(n, 4)));
 const pct = (n) => `${signed(n, 2)}%`;
@@ -50,9 +57,11 @@ export const closeWord = (W) => {
  * @param ma     vnindex-weekly.ma.json (legendRows, tags, volumeBar) or null
  * @param weeks  Monday-keyed weekly bars, oldest first, ending at the photo's last candle (calib.last_bar)
  * @param spec   rules.shots.fireantStock merged with rules.shots.fireantWeekly
+ * @param E      the fact pack's `indexWeekly` block (the weekly timeframe's evaluation), or null for the candle alone
+ * @param provisional  the last session's volume is SSI's same-day figure (the week's volume ratio is provisional too)
  * @returns {visual, brief, after} or {why} when the calibration does not reach the edition's week
  */
-export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor}) => {
+export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor, E = null, provisional = false}) => {
   const S = {...DEFAULT, ...spec};
   const C = p.calib;
   const vis = weeks.slice(-C.n);
@@ -108,11 +117,16 @@ export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor}) => {
   const bw = Math.max(half * 2 + 0.012, 0.016);
   const down = W.changePercent < 0;
   const CW = closeWord(W);
+  // With the evaluation (E) the candle's plates all come on beat 1 (the close-up) and leave for beat 2 (the wide).
+  const candleBeat = E ? 0 : 1;
+  const candleUntil = E ? {until: 0} : {};
   const annotations = [
     {kind: 'box', x: clamp(cx - bw / 2), y: clamp(top - 0.012), w: clamp(bw), h: clamp(bottom - top + 0.024), accent: down ? 'down' : 'up', beat: 0},
-    {kind: 'label', x: clamp(cx - 0.03), y: clamp(top - 0.05), text: `Tuần ${W.fromDm} → ${toDm} · ${pct(W.changePercent)}`, accent: down ? 'red' : 'green', beat: 0, anchor: 'end'},
-    {kind: 'label', x: clamp(cx - 0.03), y: clamp(bottom + 0.04), text: `Cao ${vi(W.high)} · thấp ${vi(W.low)} · đóng ${vi(W.close)}`, accent: 'white', beat: 1, anchor: 'end'},
-    ...(W.volumeVsPriorWeek != null ? [{kind: 'label', x: clamp(cx - 0.03), y: clamp(bottom + 0.08), text: `KL mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước`, accent: 'white', beat: 1, anchor: 'end'}] : []),
+    {kind: 'label', x: clamp(cx - 0.03), y: clamp(top - 0.05), text: `Tuần ${W.fromDm} → ${toDm} · ${pct(W.changePercent)}`, accent: down ? 'red' : 'green', beat: 0, anchor: 'end', ...candleUntil},
+    {kind: 'label', x: clamp(cx - 0.03), y: clamp(bottom + 0.04), text: `Cao ${vi(W.high)} · thấp ${vi(W.low)} · đóng ${vi(W.close)}`, accent: 'white', beat: candleBeat, anchor: 'end', ...candleUntil},
+    // Not while the last session's volume is SSI's same-day figure: the skill never prints today's volume ratio (SKILL.md
+    // market-review §9 — 1/10: 260M at 15:47, 449M on FireAnt), and the week's ratio carries it.
+    ...(W.volumeVsPriorWeek != null && !provisional ? [{kind: 'label', x: clamp(cx - 0.03), y: clamp(bottom + 0.08), text: `KL mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước`, accent: 'white', beat: candleBeat, anchor: 'end', ...candleUntil}] : []),
   ];
 
   // ---- camera: the wide (the weekly trend), then the last weeks up to the edition's candle
@@ -124,18 +138,87 @@ export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor}) => {
   const z1 = 2.0;
   const vw1 = crop.w / (z1 * 1.06);
   const edge = Math.min(crop.x + crop.w, S.scaleX - 0.004);
-  const shots = [
+  const closeUp = {x: clamp(Math.max(edge - vw1 / 2, cx + 0.03 - vw1 + 0.02)), y: clamp((hiY + loY) / 2 + 0.02), zoom: z1};
+  let shots = [
     {beat: 0, x: clamp(crop.x + crop.w / 2), y: clamp(crop.y + crop.h / 2), zoom: 1.0, move: 'push_in'},
-    {beat: 1, x: clamp(Math.max(edge - vw1 / 2, cx + 0.03 - vw1 + 0.02)), y: clamp((hiY + loY) / 2 + 0.02), zoom: z1, move: 'pull_out'},
+    {beat: 1, ...closeUp, move: 'pull_out'},
   ];
 
+  const photoLine = `Ảnh FireAnt nến TUẦN (tab VNINDEX của người dùng ở khung W), ${vis.filter((b, i) => i <= at && xOf(i) >= crop.x).length} tuần trong khung (từ tuần ${vis.find((b, i) => xOf(i) >= crop.x)?.t ?? '?'})${after > 0 ? `; ảnh chụp sau tuần này nên ${after} tuần sau đó bị che — chart dừng ở tuần ${W.fromDm} → ${toDm}` : ''}.`;
+  const candleLine = `tuần ${W.fromDm} → ${toDm}${E?.openThrough ? ` (tuần CHƯA khép lại: mới tới ${E.openThrough.toLowerCase()} — nói "tuần này tới ${E.openThrough.toLowerCase()}", không "cả tuần")` : ''} ${down ? 'giảm' : 'tăng'} ${vi(Math.abs(W.changePercent))}% so với đóng cửa tuần trước (${vi(W.prevClose)}); cao ${vi(W.high)}, thấp ${vi(W.low)}, đóng ${vi(W.close)} — đóng cửa ${CW.word} (${CW.at}% biên tuần, tính từ đáy)${W.volumeVsPriorWeek != null ? `; khối lượng mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước (${W.volumeVsPriorWeek >= 1 ? 'cao hơn' : 'thấp hơn'})${provisional ? ' — KL phiên cuối của SSI còn là số tạm (đủ sau 15:00 hôm sau): không đọc tỉ lệ KL ra lời' : ''}` : ''}`;
+  if (!E) {
+    return {
+      after,
+      visual: {crop, masks, ...(masks.length ? {maskColor} : {}), annotations, shots},
+      brief: [
+        `${photoLine} Hai đường trên chart là MA50/MA200 TUẦN của FireAnt (không phải MA ngày): lời không nhắc tới.`,
+        `Beat 1 = cây nến tuần (khung ${down ? 'đỏ' : 'xanh'}). Beat 2 = cận cảnh: ${candleLine}.`,
+        'Tối đa hai số đọc ra lời (writer.md, bản tuần). Từ của trader: nến tuần, biên tuần, đóng cửa sát đáy / sát đỉnh, khối lượng. Nhãn giữ số của pack (weekly.*).',
+      ],
+    };
+  }
+
+  // ---- the evaluation (beat 2): structure, the nearest zone each side, the weekly averages
+  const idx = (t) => vis.findIndex((b) => b.t === t);
+  const inX = (x) => x > crop.x + 0.01 && x < crop.x + crop.w - 0.01;
+  const inY = (y) => y > crop.y + 0.02 && y < crop.y + crop.h - 0.02;
+  const ptOf = (s) => ({...s, i: idx(s.t)});
+  const evalMarks = [];
+  const xsEval = [cx];
+  const ysEval = [yOf(W.close)];
+  for (const side of ['highs', 'lows']) {
+    const [a, b] = (E.structure?.[side] ?? []).map(ptOf).filter((s) => s.i >= 0 && s.i <= at && inX(xOf(s.i)));
+    if (a && b) {
+      evalMarks.push({kind: 'line', from: [clamp(xOf(a.i)), clamp(yOf(a.price))], to: [clamp(xOf(b.i)), clamp(yOf(b.price))], dashed: true, accent: b.price > a.price ? 'up' : 'down', beat: 1});
+      xsEval.push(xOf(a.i), xOf(b.i));
+      ysEval.push(yOf(a.price), yOf(b.price));
+    }
+  }
+  // A level from an earlier year keeps its year ("1/9/2025"): "1/9" alone reads as this September.
+  const when = (m) => (m.t ? (m.t.slice(0, 4) === W.to?.slice(0, 4) ? dm(m.t) : `${dm(m.t)}/${m.t.slice(0, 4)}`) : null);
+  const memberText = (m) => (m.kind === 'ma' ? `${m.name} ${vi(m.price)}` : `${m.name.charAt(0).toUpperCase()}${m.name.slice(1)} ${vi(m.price)}${when(m) ? ` (tuần ${when(m)})` : ''}`);
+  const zoneText = (z) => z.members.map(memberText).join(' · ');
+  const zones = [...(E.up ?? []).slice(0, 1).map((z) => ({z, up: true})), ...(E.down ?? []).slice(0, 1).map((z) => ({z, up: false}))];
+  for (const {z, up} of zones) {
+    const y = yOf(z.at);
+    if (!inY(y)) continue;
+    evalMarks.push({kind: 'hline', y: clamp(y), accent: up ? 'red' : 'green', beat: 1, label: zoneText(z), labelSide: 'left'});
+    ysEval.push(y);
+  }
+  const inZone = (name) => zones.some(({z}) => z.members.some((m) => m.kind === 'ma' && m.name.startsWith(name)));
+  const MA_ACCENT = {MA50: 'green', MA200: 'gold'};
+  for (const [name, m] of Object.entries(E.ma ?? {})) {
+    const y = yOf(m.value);
+    if (inZone(name) || !inY(y)) continue;
+    // A ring on the line at the edition's week holds the plate beside it (a lone plate is a free caption to the plate
+    // room and goes to the top of the frame — the MA200 plate landed 364 px above its line, 6/10).
+    evalMarks.push({kind: 'circle', x: clamp(cx), y: clamp(y), r: 0.014, accent: MA_ACCENT[name] ?? 'white', beat: 1});
+    evalMarks.push({kind: 'label', x: clamp(cx - 0.035), y: clamp(y), text: `${name} tuần ${vi(m.value)}`, accent: MA_ACCENT[name] ?? 'white', beat: 1, anchor: 'end'});
+    ysEval.push(y);
+  }
+  annotations.push(...evalMarks);
+  // Beat 1 the close-up on the candle; beat 2 widens to hold the structure, the zones and the averages it prints.
+  const span = {x0: Math.min(...xsEval) - 0.06, x1: Math.max(...xsEval) + 0.06, y0: Math.min(...ysEval) - 0.05, y1: Math.max(...ysEval) + 0.05};
+  const zw = Math.max(1, Math.min(1.6, crop.w / Math.max(0.05, span.x1 - span.x0), crop.h / Math.max(0.05, span.y1 - span.y0)));
+  shots = [
+    {beat: 0, ...closeUp, move: 'push_in'},
+    {beat: 1, x: clamp(Math.min(edge, (span.x0 + span.x1) / 2)), y: clamp((span.y0 + span.y1) / 2), zoom: round(zw, 2), move: 'pull_out'},
+  ];
+  const st = E.structure ?? {};
+  const maText = Object.entries(E.ma ?? {}).map(([name, m]) => `${name} tuần ${vi(m.value)} (giá ${pct(m.closeVsPercent)})`).join('; ');
+  const verdict = st.kind === 'down'
+    ? `khung tuần đang ${E.ma?.MA200?.closeVsPercent > 0 ? 'điều chỉnh: đỉnh, đáy thấp dần nhưng giá vẫn trên MA200 tuần — xu hướng dài hạn chưa gãy' : 'giảm: đỉnh, đáy thấp dần và giá dưới MA200 tuần'}`
+    : st.kind === 'up'
+      ? `khung tuần tăng: đỉnh, đáy cao dần${E.ma?.MA50?.closeVsPercent < 0 ? ', nhưng giá đang dưới MA50 tuần' : ''}`
+      : `khung tuần đi ngang: ${st.text ?? '—'}`;
   return {
     after,
     visual: {crop, masks, ...(masks.length ? {maskColor} : {}), annotations, shots},
     brief: [
-      `Ảnh FireAnt nến TUẦN (tab VNINDEX của người dùng ở khung W), ${vis.filter((b, i) => i <= at && xOf(i) >= crop.x).length} tuần trong khung (từ tuần ${vis.find((b, i) => xOf(i) >= crop.x)?.t ?? '?'})${after > 0 ? `; ảnh chụp sau tuần này nên ${after} tuần sau đó bị che — chart dừng ở tuần ${W.fromDm} → ${toDm}` : ''}. Hai đường trên chart là MA50/MA200 TUẦN của FireAnt (không phải MA ngày): lời không nhắc tới.`,
-      `Beat 1 = cây nến tuần (khung ${down ? 'đỏ' : 'xanh'}): tuần ${W.fromDm} → ${toDm} ${down ? 'giảm' : 'tăng'} ${vi(Math.abs(W.changePercent))}% so với đóng cửa tuần trước (${vi(W.prevClose)}). Beat 2 = cận cảnh: cao ${vi(W.high)}, thấp ${vi(W.low)}, đóng ${vi(W.close)} — đóng cửa ${CW.word} (${CW.at}% biên tuần, tính từ đáy)${W.volumeVsPriorWeek != null ? `; khối lượng mỗi phiên ×${vi(W.volumeVsPriorWeek)} tuần trước (${W.volumeVsPriorWeek >= 1 ? 'cao hơn' : 'thấp hơn'})` : ''}.`,
-      'Tối đa hai số đọc ra lời (writer.md, bản tuần). Từ của trader: nến tuần, biên tuần, đóng cửa sát đáy / sát đỉnh, khối lượng. Nhãn giữ số của pack (weekly.*).',
+      `VN-INDEX · KHUNG TUẦN (người dùng 2026-10-06: "eval the VNIndex as daily and weekly of this week") — ĐÁNH GIÁ khung tuần, không chỉ cây nến. ${photoLine} Hai đường trên chart là MA50 / MA200 TUẦN của FireAnt: gọi "MA50 tuần", "MA200 tuần" (không lẫn với MA ngày của scene sau).`,
+      `Beat 1 = cận cảnh cây nến tuần (khung ${down ? 'đỏ' : 'xanh'}): ${candleLine}.`,
+      `Beat 2 = toàn cảnh khung tuần (${E.window} tuần): ${st.text ?? '—'} (hai đường đứt: đỉnh ${(st.highs ?? []).map((s) => `${s.dm} ${vi(s.price)}`).join(' → ') || '—'}; đáy ${(st.lows ?? []).map((s) => `${s.dm} ${vi(s.price)}`).join(' → ') || '—'}). Giá ${E.maPosition ?? '—'} tuần${maText ? ` (${maText})` : E.maWhy ? ` — không có MA tuần của tuần này: ${E.maWhy}` : ''}. Vùng gần nhất phía trên: ${(E.up ?? []).slice(0, 1).map(zoneText).join('') || '—'}; phía dưới: ${(E.down ?? []).slice(0, 1).map(zoneText).join('') || '—'}. Kết luận do số quyết định: "${verdict}".`,
+      'Tối đa hai số đọc ra lời; số đọc thành chữ, mức điểm đọc tròn. Từ của trader: nến tuần, biên tuần, đỉnh, đáy, kháng cự, hỗ trợ, MA50 tuần, MA200 tuần. Nhãn giữ số lẻ của pack (weekly.*, indexWeekly.*). Không nhánh nếu … thì (để scene watch).',
     ],
   };
 };

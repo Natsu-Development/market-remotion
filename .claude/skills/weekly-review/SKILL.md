@@ -1,5 +1,5 @@
 ---
-description: Làm reel TỔNG KẾT TUẦN của VNINDEX (WeeklyReview) sau phiên cuối tuần — cây nến tuần, trạng thái thị trường theo quy tắc phiên phân phối và FTD (O'Neil, dùng trong hệ thống Minervini), độ rộng thị trường (đường % mã trên SMA200 dưới đường chỉ số — scene này CHỈ có ở bản tuần; ảnh FireAnt "Biến động thị trường" là của bản phiên), ba bộ lọc đã lưu trên terminal zionle.io.vn mỗi bộ lọc một scene, rồi soi tối đa hai mã dẫn dắt — kéo số, chụp ảnh, dựng khung, một người viết lời, chấm điểm, đăng TRANG DUYỆT (artifact) rồi mới lồng tiếng và render. Dùng khi người dùng muốn tổng kết tuần, review tuần, bản tuần, nhìn lại tuần qua, thị trường cuối tuần ra sao, độ rộng thị trường tuần này. KHÔNG dùng cho tổng kết phiên hằng ngày (đó là market-review) hay reel theo một chủ đề, một mã, một chỉ báo (market-video).
+description: Làm reel TỔNG KẾT TUẦN của VNINDEX (WeeklyReview) sau phiên cuối tuần — VN-Index ở khung TUẦN (nến tuần, MA50/MA200 tuần, hỗ trợ/kháng cự tuần) và khung NGÀY (cấu trúc giá, MA50/MA200), trạng thái thị trường theo quy tắc phiên phân phối và FTD (O'Neil, dùng trong hệ thống Minervini), SỐ MÃ có giá trên SMA200 (số của terminal + đường tính lại dưới đường chỉ số), xếp hạng nhóm ngành ICB theo RS 1M trung vị, hai bộ lọc đã lưu Momentum breakout và Momentum breakdown của terminal zionle.io.vn (mỗi bộ lọc một bảng, rồi soi mã RS 1M cao nhất của bộ lọc đó), kịch bản VN-Index — kéo số, chụp ảnh, dựng khung, một người viết lời, chấm điểm, đăng TRANG DUYỆT (artifact) rồi mới lồng tiếng và render. Dùng khi người dùng muốn tổng kết tuần, review tuần, bản tuần, nhìn lại tuần qua, thị trường cuối tuần ra sao, độ rộng thị trường tuần này, ngành nào mạnh tuần này, Momentum breakout/breakdown của tuần. KHÔNG dùng cho tổng kết phiên hằng ngày (đó là market-review, với Volume spike / RS Strong / Uptrend) hay reel theo một chủ đề, một mã, một chỉ báo (market-video).
 argument-hint: "[--date=YYYY-MM-DD]"
 allowed-tools: Read, Write, Edit, Artifact, Agent, Bash(node *), Bash(npm run *), Bash(npx remotion *), Bash(npx tsc *), Bash(../video-factory/.venv/bin/python *), Bash(ffmpeg *), Bash(ffprobe *), Bash(ps *), Bash(ls *), Bash(cat *), Bash(open *)
 ---
@@ -23,6 +23,14 @@ máy, không chép:
 khung scene → MỘT người viết → chấm điểm → TRANG DUYỆT (artifact) → người dùng duyệt → lồng tiếng, render**. Không
 hỏi giữa đường.
 
+**Từ 2026-10-06 bản tuần có nội dung riêng** (người dùng: "With weekly artifact, eval the VNIndex as daily and weekly of
+this week, eval the filter: Momentum breakout, Momentum breakdown. Also include major ranking and amount of stock have
+price better than its SMA200."; trả lời ba câu hỏi: Replace · ICB groups by RS · Top of each filter). 12 scene:
+hook → week (VN-Index · Khung tuần) → daily (VN-Index · Khung ngày) → market → breadth (SỐ mã trên SMA200) → sectors
+(nhóm ngành ICB theo RS) → breakout → soi mã của nó → breakdown → soi mã của nó → watch → outro. Volume spike, RS Strong
+và Uptrend là của bản PHIÊN, bản tuần không có. Hai bộ lọc của bản tuần nằm ở `rules.formats.weekly.screener` (khoá
+riêng của format, để bản phiên, hộp "Soi thêm mã" và tầng soi mã của bản phiên không đổi); bảng ngành ở `rules.sectors`.
+
 ## 0. Khi nào chạy
 
 1. **Sau phiên cuối tuần**, 15:00 ICT, và sau khi terminal làm mới bộ lọc (~15:04). Tuần có ngày nghỉ thì phiên cuối
@@ -44,13 +52,33 @@ node scripts/review/pull.mjs            # phiên cuối tuần — cùng lệnh,
 Bản tuần so các snapshot trong tuần (`content/review/snapshots/<ngày>.json`). Phiên nào đã có bản phiên thì đã có
 snapshot; phiên thiếu snapshot thì phần tuần chỉ dựa vào nến SSI (`weekly.snapshots` liệt kê những phiên có).
 
+`pull.mjs` cũng kéo hai bộ lọc của bản tuần (`rules.formats.weekly.screener.scenes`: Momentum breakout, Momentum
+breakdown) vào snapshot của MỌI phiên (`members.breakout` / `members.breakdown`, hai POST đọc của cùng endpoint đã duyệt)
+và chọn mã soi của bản tuần (`snapshot.leadersByFormat.weekly`: RS 1M cao nhất của mỗi bộ lọc, mã đã chọn ở bộ lọc trước
+thì bỏ qua) + GET `/analyze` cho chúng. Snapshot kéo trước 6/10 không có hai danh sách đó: `pull.mjs --rebuild
+--as-of=<ngày>` lấy được khi `.review-cache/<ngày>-filters-server.json` có danh sách server cùng cache stamp (chỉ 5/10 có,
+chụp 11:50 ngày 6/10 trước lượt làm mới 12:00 — terminal không giữ lịch sử).
+
 ## 2. Fact pack tuần
 
 ```bash
-node scripts/review/breadth.mjs                            # đường độ rộng: GET /analyze ~900 mã, ~1 phút, cache theo phiên ở .review-cache/analyze-all/
-node scripts/review/facts.mjs --format=weekly --print      # -> content/review-weekly.facts.json (screener.breadth có line/history khi breadth.json có)
+node scripts/review/breadth.mjs                            # đường SỐ mã trên SMA200: ~900 GET tới SSI (KHÔNG tới terminal), ~1 phút lần đầu, vài giây khi có cache .review-cache/stock-bars/<ngày>/
+node scripts/review/industries.mjs                         # bản đồ ngành ICB cấp 2 (VNDirect, GET, không auth) → content/review/industries.json; dùng lại khi chưa quá rules.sectors.maxAgeDays (7) ngày, --refresh để kéo lại
+node scripts/review/facts.mjs --format=weekly --print      # -> content/review-weekly.facts.json
 node --test scripts/review/lib/market-state.test.mjs
 ```
+
+- **Số mã trên SMA200** (`screener.breadth`): số in lên màn hình là số của TERMINAL (mã có `sma_200` > 0 và giá đóng cửa
+  trên nó — 247/901 ngày 5/10, đúng con số người dùng lọc "giá > SMA200" trên terminal). Đường lịch sử tính lại từ giá
+  đóng cửa SSI (`lib/stock-bars.mjs`; SMA200 của SSI trùng `sma_200` của terminal tới chữ số thứ ba với mã có thanh
+  khoản), ngày không khớp lệnh mang giá trước sang; ngày 5/10 đường cuối ở 237/899, lệch −10 mã (−1,1%), trong ngưỡng
+  `formats.weekly.breadth.maxResidualPercent` (2%) nên không cần sàn thanh khoản (`minVolumeSma20: 0`; sàn 10 000 cp
+  đưa đường và terminal về lệch 1 mã nếu một ngày cần). 174 mã gần như không giao dịch có SMA200 của terminal không
+  dựng lại được từ SSI — lý do của độ lệch đó.
+- **Nhóm ngành** (`sectors`, `lib/sectors.mjs`): 19 nhóm ICB cấp 2 của VNDirect; mỗi nhóm xếp theo RS 1M TRUNG VỊ của các
+  mã có KL TB20 ≥ `rules.sectors.minVolumeSma20` (100 000 cp) trên universe của terminal phiên đó; nhóm dưới
+  `minMembers` (5) mã như vậy không xếp hạng (5/10: Ô tô, Viễn thông, Truyền thông, Bảo hiểm). Cột % tuần là trung vị %
+  thay đổi trong tuần, đọc từ nến SSI mà `breadth.mjs` đã kéo — chạy `breadth.mjs` TRƯỚC `facts.mjs`.
 
 Máy trạng thái là của bản phiên (market-review §2), tính tới phiên cuối tuần. Khối `weekly` của pack mang tuần
 (`from` → `to`, `sessions`), mở/cao/thấp/đóng, `changePercent` so với đóng cửa tuần trước, `volumeVsPriorWeek` (khối
@@ -83,23 +111,30 @@ cây nến tuần, nhãn % tuần, cận cảnh cao/thấp/đóng và khối lư
 che các tuần sau đó, thẻ giá và đường giá cuối chấm chấm. Các công thức chụp FireAnt khác giống hệt bản phiên, xem
 market-review §3.
 
-### Độ rộng thị trường: đường % mã trên SMA200, CHỈ có ở bản tuần
+### Số mã trên SMA200: CHỈ có ở bản tuần
 
-Người dùng 2026-10-05 ('Daily; old chart → weekly'): bản tuần giữ scene "Độ rộng thị trường" cũ — panel `lines` vẽ hai
-đường cùng trục thời gian, VN-INDEX đóng cửa ở trên, % mã đứng trên SMA200 (của terminal) ở dưới, ~60 phiên, mốc FTD —
-còn ảnh FireAnt "Biến động thị trường" (số mã tăng/giảm và phân bổ dòng tiền của MỘT phiên) là scene `flow` của bản phiên.
+Người dùng 2026-10-05 ('Daily; old chart → weekly') giữ scene "Độ rộng thị trường" cho bản tuần; 2026-10-06 ("amount of
+stock have price better than its SMA200") nó nói SỐ MÃ: panel `lines` vẽ hai đường cùng trục thời gian, VN-INDEX đóng
+cửa ở trên, SỐ mã đóng cửa trên SMA200 ở dưới (~60 phiên, mốc FTD), caption in số của terminal ("TERMINAL: 247/901 MÃ
+TRÊN SMA200 · 27,4%"). Ảnh FireAnt "Biến động thị trường" là scene `flow` của bản phiên.
 
-- Số của đường: `node scripts/review/breadth.mjs` (§2) tính lại % mã trên SMA200 theo từng phiên từ `GET /analyze` của
-  ~900 mã → `content/review/breadth.json`; `facts.mjs --format=weekly` đưa vào `screener.breadth` (`history[]`, `line`:
-  đầu/cuối/đỉnh, % chỉ số cùng đoạn, `vsScreener` — độ lệch so với số đếm của Screener).
-- Scene: beat 1 đường chỉ số vẽ ra, beat 2 đường độ rộng vẽ ra; nghịch lý là chỉ số đi một đằng mà phần lớn mã đi một nẻo.
-  Thiếu lịch sử độ rộng (`breadth.json`) hay pack thiếu `screener.breadth` thì scaffold bỏ scene và in `breadth: dropped — <lý do>`
-  (lưới chấm `pictogram` dự phòng đã bỏ cùng các panel vẽ, người dùng 2026-10-06), market trao lời thẳng cho các bộ lọc.
+- Số: `node scripts/review/breadth.mjs` (§2) → `content/review/breadth.json` {set, terminal count, residual, 60 dòng
+  `{t, above, with, percent}`}; `facts.mjs --format=weekly` đưa vào `screener.breadth` (`count` = số của terminal,
+  `history[]`, `line` với số mã đầu/cuối/đỉnh và độ lệch, `week` = số mã đầu tuần → cuối tuần).
+- Lời nói số của TERMINAL, không đọc số của đường. Beat 1 đường chỉ số vẽ ra, beat 2 đường số mã vẽ ra: chỉ số đi một
+  đằng mà số mã khỏe đi một nẻo (5/10: đường 300 → 237 trong 60 phiên khi VN-Index −4,8%). Verify `review-breadth`:
+  số in trên màn hình phải là số của terminal (FAIL), độ lệch đường > 2% thì WARN.
+- Thiếu `breadth.json` hay pack thiếu `screener.breadth` thì scaffold bỏ scene và in `breadth: dropped — <lý do>`.
 
-## 4. Soi từng mã dẫn dắt
+## 4. Soi mã của từng bộ lọc
+
+Bản tuần soi MỘT mã mỗi bộ lọc (người dùng 2026-10-06: "Top of each filter"): `screener.leaders.top` của pack TUẦN là
+mã RS 1M cao nhất của Momentum breakout (tier 1, `tierScene: breakout`) rồi của Momentum breakdown (tier 2, mã đã chọn ở
+breakout thì bỏ qua), `order: 'tier'` — mỗi scene soi mã chiếu ngay sau bảng của bộ lọc nó. Mã ở Momentum breakdown là
+mã MẠNH đang thủng hỗ trợ: soi để cảnh báo, không gọi bán.
 
 Giống market-review §3 ("Soi từng mã dẫn dắt — agent `symbol-reviewer`"), với ngày là phiên cuối tuần và format là
-`weekly`: chạy `node scripts/review/lib/symbol-review.mjs measure <ngày> <MÃ>` cho từng mã trong
+`weekly`: chạy `node scripts/review/lib/symbol-review.mjs measure <ngày> <MÃ> --format=weekly` cho từng mã trong
 `screener.leaders.top`, mỗi mã một agent `symbol-reviewer` chạy song song, rồi `facts.mjs --format=weekly` lần nữa.
 Bộ lọc là của phiên cuối tuần, vì terminal không giữ lịch sử. Bản soi nằm theo NGÀY (`content/review/symbols/<ngày>/`),
 nên tối thứ Sáu bản tuần dùng lại bản soi của bản phiên: `node scripts/review/lib/symbol-review.mjs <ngày>` báo hợp lệ
@@ -115,12 +150,33 @@ npm run review-page -- WeeklyReview --out=out/review/draft-weekly
 node scripts/frame-audit.mjs WeeklyReview --check    # mọi khung hình — phải 'no defects'
 ```
 
-Scene theo `rules.formats.weekly.roles`, 11 scene, 70–110 giây: **hook** (tuần qua: chỉ số đóng tuần ở đâu, tăng hay giảm bao nhiêu, rồi câu hỏi và lời mời) → **week** (cây nến tuần
-trên ảnh FireAnt tuần: tuần tăng/giảm bao nhiêu, khối lượng so với tuần trước, đóng cửa ở đâu trong biên tuần) →
-**market** (trạng thái theo quy tắc tới phiên cuối tuần, phiên phân phối, FTD, đồng hồ, mức nguy hiểm, kết bằng câu dẫn
-sang độ rộng) → **breadth** (đường % mã trên SMA200, §3) → **spike** → **rs** → **uptrend** → **leader** ×2 → **watch** (payoff,
-các nhánh nếu … thì cho tuần sau) → **outro** (hứa "mỗi cuối tuần"). Các scene bộ lọc, soi mã và watch dựng y như
-bản phiên. Id mang ngày phiên cuối tuần (`rw-261009-hook`).
+Scene theo `rules.formats.weekly.roles`, 12 scene, 80–120 giây (từ 2026-10-06):
+
+1. **hook** — tuần qua: chỉ số đóng tuần ở đâu, tăng hay giảm bao nhiêu, rồi câu hỏi và lời mời.
+2. **week** — VN-Index · Khung tuần, trên ảnh FireAnt tuần: beat 1 cận cảnh cây nến tuần (%, biên, KL — nhãn KL ẩn khi
+   KL phiên cuối của SSI còn tạm); beat 2 toàn cảnh: cấu trúc đỉnh/đáy tuần (đường đứt nối hai đỉnh, hai đáy gần nhất),
+   MA50/MA200 TUẦN của FireAnt (đọc từ `vnindex-weekly.ma.json`, chỉ khi legend đọc đúng tuần của bản), vùng kháng
+   cự/hỗ trợ tuần gần nhất mỗi phía — pack `indexWeekly`, `lib/week-fireant.mjs`. Thiếu MA tuần thì scene vẫn dựng với
+   cấu trúc và vùng giá.
+3. **daily** — VN-Index · Khung ngày, trên ảnh FireAnt ngày: beat 1 hai đỉnh, hai đáy dao động gần nhất nối nhau + các
+   phiên của tuần; beat 2 giá so với MA50/MA200 của FireAnt (nhãn "Dưới MA50 1774,79 (−1,22%)") — pack `indexDaily`.
+   Không phiên phân phối/FTD (của market), không nhánh nếu … thì (của watch); verify `review-timeframes` (WARN).
+4. **market** — trạng thái theo quy tắc tới phiên cuối tuần, phiên phân phối, FTD, đồng hồ, mức nguy hiểm, câu dẫn sang
+   độ rộng.
+5. **breadth** — SỐ mã trên SMA200 (§3).
+6. **sectors** — Xếp hạng ngành: bảng tối đa 10 nhóm ngành ICB xếp theo RS 1M trung vị (SỐ MÃ · TRUNG VỊ RS 1M · % TUẦN ·
+   % MÃ TRÊN SMA200), beat 2 tô ba nhóm dẫn đầu; verify `review-sectors`.
+7. **breakout** — bộ lọc Momentum breakout: bảng một cột xếp RS 1M (GIÁ · % TUẦN · RS 1M · TÍN HIỆU xác nhận/tiềm năng ·
+   RS 52W); beat 2 tô mã soi của CHÍNH bảng và kết bằng lời mời gọi tên nó.
+8. **leader** — soi mã đó (FireAnt ngày + `symbol-reviewer`).
+9. **breakdown** — bộ lọc Momentum breakdown, cùng khuôn bảng; danh sách CẢNH BÁO (mã mạnh đang thủng hỗ trợ/trendline
+   tăng), không gọi bán.
+10. **leader** — soi mã của bảng breakdown.
+11. **watch** — Kịch bản VN-Index, các nhánh nếu … thì cho tuần sau.
+12. **outro** — hứa "mỗi cuối tuần".
+
+Không scene nào nói một mã có ở bộ lọc kia (5/10: PVS, ABB ở cả hai) — verify `review-overlap`, `review-momentum`. Id
+mang ngày phiên cuối tuần (`rw-261009-hook`).
 
 **Lần scaffold ĐẦU TIÊN**: đăng ký `WeeklyReview` trong `src/Root.tsx` NGAY SAU lệnh scaffold (import
 `../content/review-weekly.json`, thêm một dòng vào `REELS`). File phải có trước khi đăng ký; đăng ký khi thiếu file thì
@@ -159,12 +215,22 @@ rộng có khớp phiên không, và các lựa chọn duyệt · sửa · bỏ.
 ```bash
 npm run approve -- WeeklyReview
 node scripts/voiceover.mjs --content=content/review-weekly.json --retime
+../video-factory/.venv/bin/python scripts/tts_takes.py --content=content/review-weekly.json --rebuild   # cửa nghe (market-review §8)
 npx tsc --noEmit && node scripts/render.mjs --id=WeeklyReview --out=out/review/weekly-<ngày>.mp4
 ```
 
-Soát sau render như market-review §8 (Whisper cho FTD và các mã đánh vần; `tts_takes.py` cho số thập phân và thuật ngữ).
+Soát sau render như market-review §8 (Whisper cho FTD và các mã đánh vần; `tts_takes.py` nghe mọi câu — số, mã, thuật ngữ —
+và `render.mjs` từ chối render khi `voice-heard` FAIL).
 
 ## 10. Chưa từng chạy: soát kỹ ở bản đầu tiên
+
+Bản tuần đầu tiên chạy trên tuần dở dang 5/10 → 6/10 (người dùng 2026-10-06: "of this week"). Nhìn tận mắt thêm: bảng
+ngành (tên nhóm dài, nhóm ít mã), hai bảng Momentum (bảng 4 dòng nằm giữa khung với nhiều khoảng trống — hành vi cũ của
+FilterBoard), chữ đọc "Momentum", "breakout", "breakdown" (`voice.lexicon` CHƯA đo — chạy `tts_takes.py` sau khi lồng
+tiếng), và hộp "Soi thêm mã" của trang duyệt bản tuần: nó liệt kê mã của Momentum breakout / breakdown (mã có ở cả hai
+gắn "cả hai") và lưu vào doc `requests/<ngày>-weekly` của artifact TUẦN (`lib/requested.mjs` `requestKey`); đạo diễn
+đọc doc đó (ArtifactData get trên artifact tuần) vào `content/review/requests/<ngày>-weekly.json` — bản phiên cùng ngày
+giữ `requests/<ngày>` riêng, nên bản tuần không còn nhận mã người dùng gõ cho bản phiên (bản thử 5/10 từng dựng nhầm VIC).
 
 Tới 2026-10-05 chưa có bản tuần nào. Đường `--format=weekly` mới chỉ được dựng thử ra file nháp, nên bản đầu tiên
 phải nhìn tận mắt những chỗ sau:

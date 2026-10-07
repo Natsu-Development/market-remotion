@@ -310,7 +310,11 @@ async function fireantStocks(list) {
     }
   }
 }
-const stockList = ONLY.has('leaders') ? [...facts.screener.leaders.top, ...REQUESTED] : ONLY.has('requested') ? REQUESTED : [];
+// --symbols=HDB,…: shoot only these of the leaders/requested names — a name another edition of the same date already
+// photographed (the weekly's pick, 2026-10-06) keeps its photo and the marks calibrated on it.
+const SYMBOLS = opt('symbols') ? new Set(opt('symbols').split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)) : null;
+const onlySymbols = (list) => (SYMBOLS ? list.filter((l) => SYMBOLS.has(l.symbol)) : list);
+const stockList = onlySymbols(ONLY.has('leaders') ? [...facts.screener.leaders.top, ...REQUESTED] : ONLY.has('requested') ? REQUESTED : []);
 if (stockList.length) await fireantStocks(stockList);
 else if (ONLY.has('requested')) console.log(`\nno requested names in the pack (content/review/requests/${date}.json, then facts.mjs)`);
 

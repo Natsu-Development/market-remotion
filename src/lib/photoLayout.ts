@@ -562,10 +562,10 @@ export const framePlates = (
     .map((st) => obstacleOf(st.a, st.k, g, ui, Math.max(reserve(st), st.a.kind === 'arrow' ? Math.min(1, st.s * 1.6) : st.s)))
     .filter((o): o is Obstacle => !!o && o.alpha > 0);
   const laid = layoutPlates(specs, view, obstacles, g.shown);
-  for (const spec of ghost) {
-    const one = layoutPlates([spec], view, [], g.shown).get(spec.key);
-    if (one) laid.set(spec.key, one);
-  }
+  // The clearing plates are laid out together, against the same obstacles, so each keeps the place it held while
+  // live: laid out one by one, a plate that had been pushed off a neighbour snapped back for a frame as both cleared
+  // ("MA200 1796,12" over "MA50 1775,98 · Kháng cự 1776,85" in the weekly's watch, frame-audit jump, 2026-10-06).
+  for (const [key, one] of layoutPlates(ghost, view, obstacles, g.shown)) laid.set(key, one);
   const out = new Map<number, {spec: PlateSpec; placed: Placed; alpha: number}>();
   for (const spec of [...specs, ...ghost]) {
     const st = byKey.get(spec.key)!;

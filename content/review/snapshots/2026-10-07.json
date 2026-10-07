@@ -1,0 +1,1016 @@
+{
+  "date": "2026-10-07",
+  "cachedAt": "2026-10-07T08:00:23.969232709Z",
+  "fetchedAt": "2026-10-07T09:44:55.068Z",
+  "universe": 1491,
+  "volumeVsSmaUnit": "percent",
+  "agreement": {
+    "Volume spike": 1,
+    "RS Strong": 1,
+    "Uptrend": 1,
+    "Momentum breakout": 1,
+    "Momentum breakdown": 1
+  },
+  "_agreement": "share of symbols the server and a local evaluation of the same saved conditions agree on (1 = identical lists)",
+  "filters": {
+    "Volume spike": {
+      "count": 17,
+      "symbols": [
+        "MSR",
+        "PVT",
+        "MSB",
+        "NAB",
+        "MSN",
+        "MWG",
+        "GVR",
+        "VIB",
+        "VSC",
+        "BAF",
+        "KHG",
+        "VIC",
+        "ACB",
+        "HHV",
+        "STB",
+        "NVL",
+        "PNJ"
+      ]
+    },
+    "RS Strong": {
+      "count": 16,
+      "symbols": [
+        "MSR",
+        "PVT",
+        "DGW",
+        "BSR",
+        "MSB",
+        "MSN",
+        "MWG",
+        "VPB",
+        "GVR",
+        "PVS",
+        "DCM",
+        "HAG",
+        "HDB",
+        "VIB",
+        "PLX",
+        "VSC"
+      ]
+    },
+    "Uptrend": {
+      "count": 15,
+      "symbols": [
+        "PVP",
+        "MSR",
+        "NVB",
+        "PVT",
+        "DGW",
+        "BSR",
+        "MSB",
+        "DRI",
+        "NAB",
+        "VPB",
+        "HDB",
+        "SBT",
+        "BAF",
+        "AAA",
+        "VIC"
+      ]
+    },
+    "Momentum breakout": {
+      "count": 4,
+      "symbols": [
+        "MSB",
+        "MWG",
+        "GVR",
+        "PVS"
+      ]
+    },
+    "Momentum breakdown": {
+      "count": 6,
+      "symbols": [
+        "DGW",
+        "PVS",
+        "HDB",
+        "HHP",
+        "ABB",
+        "PLX"
+      ]
+    }
+  },
+  "members": {
+    "spike": [
+      "MSR",
+      "PVT",
+      "MSB",
+      "NAB",
+      "MSN",
+      "MWG",
+      "GVR",
+      "VIB",
+      "VSC",
+      "BAF",
+      "KHG",
+      "VIC",
+      "ACB",
+      "HHV",
+      "STB",
+      "NVL",
+      "PNJ"
+    ],
+    "rs": [
+      "MSR",
+      "PVT",
+      "BSR",
+      "DGW",
+      "MSB",
+      "MSN",
+      "MWG",
+      "VPB",
+      "GVR",
+      "PVS",
+      "DCM",
+      "HAG",
+      "HDB",
+      "VIB",
+      "PLX",
+      "VSC"
+    ],
+    "uptrend": [
+      "MSR",
+      "PVP",
+      "NVB",
+      "PVT",
+      "BSR",
+      "DGW",
+      "DRI",
+      "MSB",
+      "NAB",
+      "VPB",
+      "HDB",
+      "SBT",
+      "BAF",
+      "AAA",
+      "VIC"
+    ],
+    "breakout": [
+      "MSB",
+      "MWG",
+      "GVR",
+      "PVS"
+    ],
+    "breakdown": [
+      "DGW",
+      "PVS",
+      "HDB",
+      "HHP",
+      "ABB",
+      "PLX"
+    ],
+    "leaders": [
+      "MSR",
+      "PVT",
+      "MSB",
+      "BSR",
+      "DGW",
+      "VPB",
+      "HDB"
+    ]
+  },
+  "picks": {
+    "spike": [
+      "MSR",
+      "PVT",
+      "MSB"
+    ],
+    "rs": [
+      "MSR",
+      "PVT",
+      "BSR",
+      "DGW",
+      "MSB",
+      "MSN",
+      "MWG",
+      "VPB",
+      "GVR",
+      "PVS"
+    ],
+    "uptrend": [
+      "MSR",
+      "PVP",
+      "NVB",
+      "PVT",
+      "BSR",
+      "DGW",
+      "DRI",
+      "MSB",
+      "NAB",
+      "VPB"
+    ],
+    "breakout": [
+      "MSB",
+      "MWG",
+      "GVR",
+      "PVS"
+    ],
+    "breakdown": [
+      "DGW",
+      "PVS",
+      "HDB",
+      "HHP",
+      "ABB",
+      "PLX"
+    ],
+    "leaders": [
+      "MSR",
+      "PVT",
+      "MSB",
+      "BSR"
+    ]
+  },
+  "leaders": {
+    "from": [
+      [
+        "spike",
+        "rs",
+        "uptrend"
+      ],
+      [
+        "rs",
+        "uptrend"
+      ]
+    ],
+    "sortBy": "rs_1m",
+    "top": 4,
+    "tierOf": {
+      "MSR": 1,
+      "PVT": 1,
+      "MSB": 1,
+      "BSR": 2,
+      "DGW": 2,
+      "VPB": 2,
+      "HDB": 2
+    }
+  },
+  "leadersByFormat": {
+    "weekly": {
+      "from": [
+        [
+          "breakout"
+        ],
+        [
+          "breakdown"
+        ]
+      ],
+      "perTier": 1,
+      "sortBy": "rs_1m",
+      "top": 2,
+      "order": "tier",
+      "members": [
+        "MSB",
+        "MWG",
+        "GVR",
+        "PVS",
+        "DGW",
+        "HDB",
+        "HHP",
+        "ABB",
+        "PLX"
+      ],
+      "picks": [
+        "MSB",
+        "DGW"
+      ],
+      "tierOf": {
+        "MSB": 1,
+        "DGW": 2
+      },
+      "poolTierOf": {
+        "MSB": 1,
+        "MWG": 1,
+        "GVR": 1,
+        "PVS": 1,
+        "DGW": 2,
+        "HDB": 2,
+        "HHP": 2,
+        "ABB": 2,
+        "PLX": 2
+      },
+      "tierScene": {
+        "MSB": "breakout",
+        "DGW": "breakdown"
+      }
+    }
+  },
+  "breadth": {
+    "universe": 1491,
+    "withEma50": 1482,
+    "aboveEma50": 498,
+    "withSma200": 904,
+    "aboveSma200": 250,
+    "up": 510,
+    "down": 510
+  },
+  "analyze": {
+    "MSR": "content/review/analyze/2026-10-07/MSR.json",
+    "PVT": "content/review/analyze/2026-10-07/PVT.json",
+    "MSB": "content/review/analyze/2026-10-07/MSB.json",
+    "BSR": "content/review/analyze/2026-10-07/BSR.json",
+    "DGW": "content/review/analyze/2026-10-07/DGW.json"
+  },
+  "fireant": {
+    "url": "https://fireant.vn/thi-truong",
+    "fetchedAt": "2026-10-07T09:45:06.563Z",
+    "exchanges": {
+      "HSX": {
+        "index": 1753.39,
+        "change": -5.69,
+        "changePercent": -0.32,
+        "up": 150,
+        "flat": 64,
+        "down": 151,
+        "total": 365
+      },
+      "HNX": {
+        "index": 259.82,
+        "change": -5.71,
+        "changePercent": -2.15,
+        "up": 84,
+        "flat": 51,
+        "down": 66,
+        "total": 201
+      },
+      "UPCOM": {
+        "index": 125.19,
+        "change": -0.04,
+        "changePercent": -0.03,
+        "up": 111,
+        "flat": 93,
+        "down": 95,
+        "total": 299
+      }
+    },
+    "matchesSession": true
+  },
+  "rows": {
+    "AAA": {
+      "name": "Công ty cổ phần Nhựa An Phát Xanh",
+      "exchange": "HOSE",
+      "price": 7.2,
+      "changePercent": 2.4182,
+      "volume": 1133500,
+      "volumeSma20": 2368745,
+      "volumeRatio": 0.4785,
+      "rs_1m": 48,
+      "rs_3m": 72,
+      "rs_6m": 82,
+      "rs_9m": 58,
+      "rs_52w": 58,
+      "ema_9": 7.176292646443163,
+      "ema_21": 7.226329374178776,
+      "ema_50": 7.178441538831942,
+      "sma_200": 7.114955000000002,
+      "signals": {
+        "has_breakdown_potential": true,
+        "has_breakdown_confirmed": true
+      }
+    },
+    "ABB": {
+      "name": "Ngân hàng Thương mại cổ phần An Bình",
+      "exchange": "UPCOM",
+      "price": 17.5,
+      "changePercent": -1.1299,
+      "volume": 391300,
+      "volumeSma20": 1024530,
+      "volumeRatio": 0.3819,
+      "rs_1m": 74,
+      "rs_3m": 81,
+      "rs_6m": 94,
+      "rs_9m": 93,
+      "rs_52w": 97,
+      "ema_9": 17.681077514142643,
+      "ema_21": 17.57798006967517,
+      "ema_50": 17.179434610555617,
+      "sma_200": 14.361395000000014,
+      "signals": {
+        "has_breakout_confirmed": true,
+        "has_breakdown_confirmed": true
+      }
+    },
+    "ACB": {
+      "name": "Ngân hàng TMCP Á Châu",
+      "exchange": "HOSE",
+      "price": 20.65,
+      "changePercent": 0.2427,
+      "volume": 9378200,
+      "volumeSma20": 7595795,
+      "volumeRatio": 1.2347,
+      "rs_1m": 28,
+      "rs_3m": 40,
+      "rs_6m": 74,
+      "rs_9m": 66,
+      "rs_52w": 60,
+      "ema_9": 21.046657573810066,
+      "ema_21": 21.472373435562698,
+      "ema_50": 21.843063518267584,
+      "sma_200": 21.28263500000001,
+      "signals": {}
+    },
+    "BAF": {
+      "name": "Công ty cổ phần Nông nghiệp BAF Việt Nam",
+      "exchange": "HOSE",
+      "price": 31.5,
+      "changePercent": 1.1236,
+      "volume": 2047300,
+      "volumeSma20": 1577920,
+      "volumeRatio": 1.2975,
+      "rs_1m": 49,
+      "rs_3m": 80,
+      "rs_6m": 81,
+      "rs_9m": 70,
+      "rs_52w": 80,
+      "ema_9": 31.36499620973377,
+      "ema_21": 31.56405314337894,
+      "ema_50": 31.362568407866874,
+      "sma_200": 30.384485000000023,
+      "signals": {
+        "has_breakdown_confirmed": true
+      }
+    },
+    "BSR": {
+      "name": "Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam",
+      "exchange": "HOSE",
+      "price": 31.75,
+      "changePercent": 2.09,
+      "volume": 6691100,
+      "volumeSma20": 14012980,
+      "volumeRatio": 0.4775,
+      "rs_1m": 91,
+      "rs_3m": 93,
+      "rs_6m": 91,
+      "rs_9m": 98,
+      "rs_52w": 98,
+      "ema_9": 31.097810677303578,
+      "ema_21": 30.27335506379711,
+      "ema_50": 28.652169903219114,
+      "sma_200": 25.89262,
+      "signals": {}
+    },
+    "DCM": {
+      "name": "Công ty Cổ phần - Tổng Công ty Phân bón Dầu khí Cà Mau",
+      "exchange": "HOSE",
+      "price": 34.2,
+      "changePercent": 1.4837,
+      "volume": 2140500,
+      "volumeSma20": 3213710,
+      "volumeRatio": 0.6661,
+      "rs_1m": 80,
+      "rs_3m": 59,
+      "rs_6m": 30,
+      "rs_9m": 82,
+      "rs_52w": 72,
+      "ema_9": 33.65937983938735,
+      "ema_21": 33.369985958791375,
+      "ema_50": 33.01810832364984,
+      "sma_200": 35.974295000000005,
+      "signals": {
+        "has_breakout_confirmed": true
+      }
+    },
+    "DGW": {
+      "name": "Công ty Cổ phần Thế Giới Số",
+      "exchange": "HOSE",
+      "price": 47.2,
+      "changePercent": -1.1518,
+      "volume": 902500,
+      "volumeSma20": 2126625,
+      "volumeRatio": 0.4244,
+      "rs_1m": 91,
+      "rs_3m": 92,
+      "rs_6m": 86,
+      "rs_9m": 89,
+      "rs_52w": 88,
+      "ema_9": 45.8524622938765,
+      "ema_21": 44.55875344761869,
+      "ema_50": 42.54757132145262,
+      "sma_200": 41.49757000000002,
+      "signals": {
+        "has_breakdown_potential": true,
+        "has_breakdown_confirmed": true,
+        "has_bearish_rsi": true
+      }
+    },
+    "DRI": {
+      "name": "CTCP Đầu tư Cao su Đắk Lắk",
+      "exchange": "UPCOM",
+      "price": 16,
+      "changePercent": -2.439,
+      "volume": 2569000,
+      "volumeSma20": 1419899,
+      "volumeRatio": 1.8093,
+      "rs_1m": 90,
+      "rs_3m": 93,
+      "rs_6m": 94,
+      "rs_9m": 92,
+      "rs_52w": 94,
+      "ema_9": 15.782130946617805,
+      "ema_21": 14.967658297382332,
+      "ema_50": 13.995005291313337,
+      "sma_200": 12.703219999999995,
+      "signals": {}
+    },
+    "GVR": {
+      "name": "Tập đoàn Công nghiệp Cao su Việt Nam – Công ty cổ phần",
+      "exchange": "HOSE",
+      "price": 34,
+      "changePercent": 3.6585,
+      "volume": 3469100,
+      "volumeSma20": 2718235,
+      "volumeRatio": 1.2762,
+      "rs_1m": 83,
+      "rs_3m": 84,
+      "rs_6m": 81,
+      "rs_9m": 91,
+      "rs_52w": 89,
+      "ema_9": 32.955809691839846,
+      "ema_21": 32.471872929021686,
+      "ema_50": 31.946061701727757,
+      "sma_200": 33.14925,
+      "signals": {
+        "has_breakout_confirmed": true
+      }
+    },
+    "HAG": {
+      "name": "Công ty Cổ phần Hoàng Anh Gia Lai",
+      "exchange": "HOSE",
+      "price": 14.5,
+      "changePercent": -0.3436,
+      "volume": 1186100,
+      "volumeSma20": 2148045,
+      "volumeRatio": 0.5522,
+      "rs_1m": 79,
+      "rs_3m": 57,
+      "rs_6m": 52,
+      "rs_9m": 33,
+      "rs_52w": 51,
+      "ema_9": 14.403734076913972,
+      "ema_21": 14.240732992382299,
+      "ema_50": 14.263590884312444,
+      "sma_200": 15.559000000000008,
+      "signals": {
+        "has_breakdown_potential": true
+      }
+    },
+    "HDB": {
+      "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
+      "exchange": "HOSE",
+      "price": 28.1,
+      "changePercent": 0.1783,
+      "volume": 10183500,
+      "volumeSma20": 11679105,
+      "volumeRatio": 0.8719,
+      "rs_1m": 76,
+      "rs_3m": 75,
+      "rs_6m": 84,
+      "rs_9m": 69,
+      "rs_52w": 86,
+      "ema_9": 27.92682083104462,
+      "ema_21": 27.67737234628195,
+      "ema_50": 27.26351557271355,
+      "sma_200": 26.745185000000003,
+      "signals": {
+        "has_breakdown_potential": true
+      }
+    },
+    "HHP": {
+      "name": "Công ty cổ phần HHP GLOBAL",
+      "exchange": "HOSE",
+      "price": 17.6,
+      "changePercent": -0.8451,
+      "volume": 592900,
+      "volumeSma20": 1009400,
+      "volumeRatio": 0.5874,
+      "rs_1m": 76,
+      "rs_3m": 92,
+      "rs_6m": 96,
+      "rs_9m": 97,
+      "rs_52w": 98,
+      "ema_9": 17.65191099988719,
+      "ema_21": 17.27773629572674,
+      "ema_50": 16.308393156726996,
+      "sma_200": 13.485529999999997,
+      "signals": {
+        "has_breakdown_confirmed": true,
+        "has_bearish_rsi": true
+      }
+    },
+    "HHV": {
+      "name": "CTCP Đầu tư hạ tầng giao thông Đèo Cả",
+      "exchange": "HOSE",
+      "price": 8.91,
+      "changePercent": -0.7795,
+      "volume": 2282300,
+      "volumeSma20": 2105865,
+      "volumeRatio": 1.0838,
+      "rs_1m": 24,
+      "rs_3m": 25,
+      "rs_6m": 27,
+      "rs_9m": 21,
+      "rs_52w": 22,
+      "ema_9": 8.99799234211762,
+      "ema_21": 9.229137456108297,
+      "ema_50": 9.652072726327354,
+      "sma_200": 11.071540000000006,
+      "signals": {}
+    },
+    "KHG": {
+      "name": "Công ty Cổ phần Tập đoàn Khải Hoàn Land",
+      "exchange": "HOSE",
+      "price": 4.52,
+      "changePercent": -0.4405,
+      "volume": 1906800,
+      "volumeSma20": 1680835,
+      "volumeRatio": 1.1344,
+      "rs_1m": 34,
+      "rs_3m": 42,
+      "rs_6m": 36,
+      "rs_9m": 14,
+      "rs_52w": 28,
+      "ema_9": 4.587044972942671,
+      "ema_21": 4.6344204974722985,
+      "ema_50": 4.7277761759158246,
+      "sma_200": 5.498099999999994,
+      "signals": {
+        "has_breakout_potential": true
+      }
+    },
+    "MSB": {
+      "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
+      "exchange": "HOSE",
+      "price": 14.65,
+      "changePercent": 1.7361,
+      "volume": 18733900,
+      "volumeSma20": 8749790,
+      "volumeRatio": 2.1411,
+      "rs_1m": 90,
+      "rs_3m": 85,
+      "rs_6m": 96,
+      "rs_9m": 94,
+      "rs_52w": 91,
+      "ema_9": 14.155629401450158,
+      "ema_21": 13.81527077923291,
+      "ema_50": 13.455415250990546,
+      "sma_200": 11.644325000000022,
+      "signals": {
+        "has_breakout_confirmed": true
+      }
+    },
+    "MSN": {
+      "name": "Công ty Cổ phần Tập đoàn MaSan",
+      "exchange": "HOSE",
+      "price": 75.2,
+      "changePercent": 4.4444,
+      "volume": 15563400,
+      "volumeSma20": 4748030,
+      "volumeRatio": 3.2779,
+      "rs_1m": 87,
+      "rs_3m": 85,
+      "rs_6m": 68,
+      "rs_9m": 63,
+      "rs_52w": 59,
+      "ema_9": 71.41090071871623,
+      "ema_21": 70.11036540988195,
+      "ema_50": 69.44000432625319,
+      "sma_200": 73.59400000000001,
+      "signals": {
+        "has_breakout_potential": true,
+        "has_breakout_confirmed": true
+      }
+    },
+    "MSR": {
+      "name": "Công ty Cổ phần Masan High-Tech Materials",
+      "exchange": "UPCOM",
+      "price": 65,
+      "changePercent": 5.6911,
+      "volume": 3763600,
+      "volumeSma20": 2224698,
+      "volumeRatio": 1.6917,
+      "rs_1m": 97,
+      "rs_3m": 98,
+      "rs_6m": 95,
+      "rs_9m": 99,
+      "rs_52w": 99,
+      "ema_9": 58.86682997400733,
+      "ema_21": 54.24724728244453,
+      "ema_50": 48.3127745773729,
+      "sma_200": 39.67212500000001,
+      "signals": {}
+    },
+    "MWG": {
+      "name": "Công ty Cổ phần Đầu tư Thế Giới Di Động",
+      "exchange": "HOSE",
+      "price": 76.9,
+      "changePercent": 2.5388,
+      "volume": 5356500,
+      "volumeSma20": 2714302,
+      "volumeRatio": 1.9734,
+      "rs_1m": 86,
+      "rs_3m": 72,
+      "rs_6m": 70,
+      "rs_9m": 47,
+      "rs_52w": 74,
+      "ema_9": 73.45801313073792,
+      "ema_21": 72.50926567044033,
+      "ema_50": 72.44184927796809,
+      "sma_200": 78.057235,
+      "signals": {
+        "has_breakout_confirmed": true
+      }
+    },
+    "NAB": {
+      "name": "Ngân hàng Thương mại cổ phần Nam Á",
+      "exchange": "HOSE",
+      "price": 12.7,
+      "changePercent": -1.5504,
+      "volume": 2254400,
+      "volumeSma20": 1835955,
+      "volumeRatio": 1.2279,
+      "rs_1m": 89,
+      "rs_3m": 50,
+      "rs_6m": 87,
+      "rs_9m": 78,
+      "rs_52w": 74,
+      "ema_9": 12.477383105623097,
+      "ema_21": 12.197497462086158,
+      "ema_50": 12.067797867238239,
+      "sma_200": 11.913440000000007,
+      "signals": {}
+    },
+    "NVB": {
+      "name": "Ngân hàng TMCP Quốc Dân",
+      "exchange": "HNX",
+      "price": 15.9,
+      "changePercent": -3.6364,
+      "volume": 2641800,
+      "volumeSma20": 1454325,
+      "volumeRatio": 1.8165,
+      "rs_1m": 96,
+      "rs_3m": 81,
+      "rs_6m": 95,
+      "rs_9m": 85,
+      "rs_52w": 80,
+      "ema_9": 15.001159217874603,
+      "ema_21": 13.914839757441964,
+      "ema_50": 13.003803874692197,
+      "sma_200": 12.220499999999994,
+      "signals": {}
+    },
+    "NVL": {
+      "name": "Công ty Cổ phần Tập đoàn Đầu tư Địa ốc No Va",
+      "exchange": "HOSE",
+      "price": 10.3,
+      "changePercent": -0.9615,
+      "volume": 27777100,
+      "volumeSma20": 21570493,
+      "volumeRatio": 1.2877,
+      "rs_1m": 11,
+      "rs_3m": 23,
+      "rs_6m": 21,
+      "rs_9m": 31,
+      "rs_52w": 32,
+      "ema_9": 10.714545627355212,
+      "ema_21": 11.386340057987422,
+      "ema_50": 12.120866381182873,
+      "sma_200": 12.871815000000005,
+      "signals": {}
+    },
+    "PLX": {
+      "name": "Tập đoàn Xăng dầu Việt Nam",
+      "exchange": "HOSE",
+      "price": 36.2,
+      "changePercent": 0,
+      "volume": 2046700,
+      "volumeSma20": 5184190,
+      "volumeRatio": 0.3948,
+      "rs_1m": 72,
+      "rs_3m": 82,
+      "rs_6m": 60,
+      "rs_9m": 77,
+      "rs_52w": 82,
+      "ema_9": 36.03792777943515,
+      "ema_21": 36.10975338721019,
+      "ema_50": 36.08770268773352,
+      "sma_200": 40.417435,
+      "signals": {
+        "has_breakdown_potential": true
+      }
+    },
+    "PNJ": {
+      "name": "Công ty CP Vàng bạc Đá quý Phú Nhuận",
+      "exchange": "HOSE",
+      "price": 18.9,
+      "changePercent": -6.2035,
+      "volume": 51811600,
+      "volumeSma20": 8378900,
+      "volumeRatio": 6.1836,
+      "rs_1m": 2,
+      "rs_3m": 2,
+      "rs_6m": 2,
+      "rs_9m": 2,
+      "rs_52w": 2,
+      "ema_9": 24.62939713353441,
+      "ema_21": 29.679045347010575,
+      "ema_50": 35.88296779094525,
+      "sma_200": 59.48285,
+      "signals": {
+        "has_breakdown_confirmed": true
+      }
+    },
+    "PVP": {
+      "name": "CTCP Vận tải Dầu khí Thái Bình Dương",
+      "exchange": "HOSE",
+      "price": 24.6,
+      "changePercent": 2.9289,
+      "volume": 2326200,
+      "volumeSma20": 1404718,
+      "volumeRatio": 1.656,
+      "rs_1m": 97,
+      "rs_3m": 97,
+      "rs_6m": 98,
+      "rs_9m": 97,
+      "rs_52w": 97,
+      "ema_9": 22.28710230947415,
+      "ema_21": 20.62503034950772,
+      "ema_50": 18.930374295207525,
+      "sma_200": 16.097529999999995,
+      "signals": {}
+    },
+    "PVS": {
+      "name": "Tổng CTCP Dịch Vụ Kỹ Thuật Dầu Khí Việt Nam",
+      "exchange": "HNX",
+      "price": 33.6,
+      "changePercent": 0,
+      "volume": 3276300,
+      "volumeSma20": 3989710,
+      "volumeRatio": 0.8212,
+      "rs_1m": 81,
+      "rs_3m": 85,
+      "rs_6m": 80,
+      "rs_9m": 85,
+      "rs_52w": 91,
+      "ema_9": 33.416756828931824,
+      "ema_21": 33.00775738695481,
+      "ema_50": 32.18028091481225,
+      "sma_200": 32.628059999999984,
+      "signals": {
+        "has_breakout_potential": true,
+        "has_breakdown_potential": true
+      }
+    },
+    "PVT": {
+      "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+      "exchange": "HOSE",
+      "price": 24.85,
+      "changePercent": 1.4286,
+      "volume": 10565500,
+      "volumeSma20": 8207455,
+      "volumeRatio": 1.2873,
+      "rs_1m": 93,
+      "rs_3m": 93,
+      "rs_6m": 92,
+      "rs_9m": 95,
+      "rs_52w": 95,
+      "ema_9": 24.013853290234835,
+      "ema_21": 23.15722615135823,
+      "ema_50": 21.755988525231444,
+      "sma_200": 20.067579999999992,
+      "signals": {}
+    },
+    "SBT": {
+      "name": "Công ty Cổ phần Thành Thành Công-Biên Hòa",
+      "exchange": "HOSE",
+      "price": 22.8,
+      "changePercent": -0.4367,
+      "volume": 1099900,
+      "volumeSma20": 1217645,
+      "volumeRatio": 0.9033,
+      "rs_1m": 54,
+      "rs_3m": 83,
+      "rs_6m": 83,
+      "rs_9m": 65,
+      "rs_52w": 71,
+      "ema_9": 22.713559897646512,
+      "ema_21": 22.745066143710876,
+      "ema_50": 22.485659699240408,
+      "sma_200": 21.78728500000001,
+      "signals": {
+        "has_breakout_potential": true,
+        "has_breakdown_confirmed": true,
+        "has_bearish_rsi": true
+      }
+    },
+    "STB": {
+      "name": "Ngân hàng Thương mại Cổ phần Sài Gòn Tài Lộc",
+      "exchange": "HOSE",
+      "price": 66.8,
+      "changePercent": -1.3294,
+      "volume": 4327100,
+      "volumeSma20": 3149970,
+      "volumeRatio": 1.3737,
+      "rs_1m": 19,
+      "rs_3m": 47,
+      "rs_6m": 81,
+      "rs_9m": 82,
+      "rs_52w": 84,
+      "ema_9": 70.5872722486239,
+      "ema_21": 73.00614998911048,
+      "ema_50": 73.57259626274626,
+      "sma_200": 67.45075000000003,
+      "signals": {
+        "has_breakdown_confirmed": true
+      }
+    },
+    "VIB": {
+      "name": "Ngân hàng Thương mại cổ phần Quốc tế Việt Nam",
+      "exchange": "HOSE",
+      "price": 13.9,
+      "changePercent": 2.963,
+      "volume": 10279800,
+      "volumeSma20": 4103835,
+      "volumeRatio": 2.5049,
+      "rs_1m": 73,
+      "rs_3m": 46,
+      "rs_6m": 58,
+      "rs_9m": 50,
+      "rs_52w": 43,
+      "ema_9": 13.508431591216514,
+      "ema_21": 13.475070486956342,
+      "ema_50": 13.581931039350037,
+      "sma_200": 14.469095000000005,
+      "signals": {
+        "has_breakout_potential": true,
+        "has_breakdown_confirmed": true
+      }
+    },
+    "VIC": {
+      "name": "Tập đoàn Vingroup – Công ty CP",
+      "exchange": "HOSE",
+      "price": 230,
+      "changePercent": -0.8621,
+      "volume": 3995000,
+      "volumeSma20": 3635490,
+      "volumeRatio": 1.0989,
+      "rs_1m": 31,
+      "rs_3m": 79,
+      "rs_6m": 97,
+      "rs_9m": 94,
+      "rs_52w": 99,
+      "ema_9": 230.21239212380715,
+      "ema_21": 231.62387224308364,
+      "ema_50": 227.37816797218932,
+      "sma_200": 191.391,
+      "signals": {
+        "has_breakout_potential": true
+      }
+    },
+    "VPB": {
+      "name": "Ngân hàng Thương mại cổ phần Việt Nam Thịnh Vượng",
+      "exchange": "HOSE",
+      "price": 23.4,
+      "changePercent": 0.8621,
+      "volume": 15444500,
+      "volumeSma20": 22021233,
+      "volumeRatio": 0.7013,
+      "rs_1m": 85,
+      "rs_3m": 82,
+      "rs_6m": 86,
+      "rs_9m": 76,
+      "rs_52w": 70,
+      "ema_9": 23.01833550560212,
+      "ema_21": 22.521152790600873,
+      "ema_50": 21.801193226237736,
+      "sma_200": 21.343159999999997,
+      "signals": {}
+    },
+    "VSC": {
+      "name": "Công ty cổ phần Container Việt Nam",
+      "exchange": "HOSE",
+      "price": 13.5,
+      "changePercent": 4.2471,
+      "volume": 12140000,
+      "volumeSma20": 7245355,
+      "volumeRatio": 1.6756,
+      "rs_1m": 67,
+      "rs_3m": 18,
+      "rs_6m": 5,
+      "rs_9m": 16,
+      "rs_52w": 8,
+      "ema_9": 13.182923695109956,
+      "ema_21": 13.368104868597689,
+      "ema_50": 14.198547258085233,
+      "sma_200": 19.39775,
+      "signals": {
+        "has_breakout_confirmed": true
+      }
+    }
+  }
+}

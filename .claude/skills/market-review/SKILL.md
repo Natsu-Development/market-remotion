@@ -1,5 +1,5 @@
 ---
-description: Làm reel TỔNG KẾT PHIÊN (hằng ngày) cho VNINDEX (DailyReview) — trạng thái thị trường theo quy tắc phiên phân phối và FTD (O'Neil, dùng trong hệ thống Minervini) cộng ba bộ lọc đã lưu trên terminal zionle.io.vn, mỗi bộ lọc một scene (Volume spike; RS Strong; Uptrend), biến động thị trường của phiên trên ảnh FireAnt "Thống kê sàn" (số mã tăng/giảm/đứng giá và phân bổ dòng tiền), rồi soi tối đa hai mã (mã có mặt ở cả ba bộ lọc trước, rồi mã ở cả RS Strong lẫn Uptrend, theo RS 1M) — kéo số, chụp ảnh, dựng khung, một người viết lời, chấm điểm, đăng TRANG DUYỆT (artifact) rồi mới lồng tiếng và render. Dùng khi người dùng muốn bản tổng kết phiên hôm nay, review phiên, review thị trường hôm nay, trạng thái thị trường, phiên phân phối, FTD hay cổ phiếu dẫn dắt từ bộ lọc. KHÔNG dùng cho tổng kết TUẦN (đó là weekly-review — cùng luật và script, scene độ rộng % mã trên SMA200 chỉ có ở đó) hay reel theo một chủ đề, một mã, một chỉ báo (đó là market-video).
+description: Làm reel TỔNG KẾT PHIÊN (hằng ngày) cho VNINDEX (DailyReview) — trạng thái thị trường theo quy tắc phiên phân phối và FTD (O'Neil, dùng trong hệ thống Minervini) cộng ba bộ lọc đã lưu trên terminal zionle.io.vn, mỗi bộ lọc một scene (Volume spike; RS Strong; Uptrend), biến động thị trường của phiên trên ảnh FireAnt "Thống kê sàn" (số mã tăng/giảm/đứng giá và phân bổ dòng tiền), rồi soi tối đa bốn mã có mặt ở CẢ BA bộ lọc (theo RS 1M; từ 6/10 không còn tầng RS Strong ∩ Uptrend dự phòng — ngày không có mã nào thì không có scene soi mã) — kéo số, chụp ảnh, dựng khung, một người viết lời, chấm điểm, đăng TRANG DUYỆT (artifact) rồi mới lồng tiếng và render. Dùng khi người dùng muốn bản tổng kết phiên hôm nay, review phiên, review thị trường hôm nay, trạng thái thị trường, phiên phân phối, FTD hay cổ phiếu dẫn dắt từ bộ lọc. KHÔNG dùng cho tổng kết TUẦN (đó là weekly-review — cùng luật và script, scene độ rộng % mã trên SMA200 chỉ có ở đó) hay reel theo một chủ đề, một mã, một chỉ báo (đó là market-video).
 argument-hint: "[--date=YYYY-MM-DD]"
 allowed-tools: Read, Write, Edit, Artifact, Agent, Bash(node *), Bash(npm run *), Bash(npx remotion *), Bash(npx tsc *), Bash(../video-factory/.venv/bin/python *), Bash(ffmpeg *), Bash(ffprobe *), Bash(ps *), Bash(ls *), Bash(cat *), Bash(open *)
 ---
@@ -125,9 +125,15 @@ agent to define the method to review each symbols". Phương pháp nằm ở
 MA50/MA200 **của FireAnt** — không bao giờ tự tính MA —, đỉnh/đáy 52 tuần, RS, khối lượng so TB20, đỉnh 20 phiên),
 và từ `symbol-reviewer/2` (người dùng 2026-10-03: "include the price action … trendline & resistance and each price must
 be noted") PRICE ACTION đọc trước khi chọn thế giá: cấu trúc đỉnh/đáy dao động, kháng cự và hỗ trợ gần nhất, trendline đang
-hiệu lực, cây nến cuối (`measure` → `priceAction`); MỘT thế giá → MỘT chi tiết, mark theo giá/ngày (2 beat, tối đa 5 mark
+hiệu lực, cây nến cuối (`measure` → `priceAction`); GIÁ in theo bước giá (chỉ báo MA50/MA200 và trendline in đúng số đo), mỗi giá một nhánh nhắc tới là một đường ngang trên chart (người dùng 2026-10-06, `lib/tick.mjs`, agent mục 2a); MỘT thế giá → MỘT chi tiết, mark theo giá/ngày (2 beat, tối đa 5 mark
 một beat: beat 1 cấu trúc — MA50/MA200, trendline, kháng cự, hỗ trợ; beat 2 read của nến cuối), MỌI nhãn mang giá của
-nó, nhánh nếu … thì không gọi giá.
+nó, nhánh nếu … thì không gọi giá. Từ `symbol-reviewer/3` (người dùng 2026-10-07: "add the role of holder and not holder with
+action and behavior like 'Không mua đuổi' with not holder when it exhausted run, and … with holder: 'nếu dưới giá …' thì hạ tỷ
+trọng & chốt lời một nửa"; hai agent thiết kế hai bảng, agent mục 6b/6c) bản soi KẾT bằng HAI VAI: người đang giữ (hạ tỷ trọng /
+chốt lời một nửa / thoát hết / dời điểm cắt lỗ dưới một đường đang vẽ) và người chưa có hàng (không mua đuổi khi đã chạy cạn
+sức, chờ vượt, chờ về, giải ngân nhỏ, đứng ngoài) — `measure` tính `roles` (`rolesOf`, tất định, siết lại ở mức nguy hiểm), agent
+chép nguyên, validator đòi khớp; scene soi mã thêm BEAT 3 "Hành động" (plate của hai vai trên đúng đường giá) và hai câu cuối;
+verify `review-roles` FAIL khi scene thiếu một trong hai câu. Đây là chỗ DUY NHẤT reel nói hành động; verdict, nhánh, nhãn vẫn mô tả.
 
 ```bash
 node scripts/review/lib/symbol-review.mjs measure <ngày> <MÃ>     # số + bảng kiểm + thế giá khớp của một mã
@@ -135,8 +141,9 @@ node scripts/review/lib/symbol-review.mjs <ngày>                  # soát mọi
 node scripts/review/facts.mjs --format=<format>                   # CHẠY LẠI: pack mang leaders.top[i].review
 ```
 
-1. Đạo diễn chạy `measure` cho từng mã trong `screener.leaders.top`. Hai mã có cùng thế giá đầu tiên (`classes[0]`)
-   thì mã #1 (`top[0]`) giữ nó, mã kia được dặn tránh thế đó — hai scene không bao giờ cùng một chi tiết.
+1. Đạo diễn chạy `measure` cho từng mã trong `screener.leaders.top` (bản phiên: 0–4 mã ở cả ba bộ lọc; rỗng thì bỏ qua bước
+   này, `facts.mjs` in "no name in … — no leader scene"). Các mã có cùng thế giá đầu tiên (`classes[0]`):
+   mã RS 1M cao hơn (gần `top[0]` hơn) giữ nó, mã sau được dặn tránh thế đó — không hai scene nào cùng một chi tiết (tới bốn mã từ 6/10).
 2. MỖI mã một agent, chạy SONG SONG trong một lượt: Agent tool, `subagent_type: "symbol-reviewer"`. Prompt: ngày, mã,
    format, thế giá phải tránh nếu có. Agent ghi `content/review/symbols/<ngày>/<MÃ>.json` + `.md` và tự soát tới 0 lỗi.
 3. `facts.mjs` lần nữa: pack mang `screener.leaders.top[i].review` (thế giá, chi tiết, và ĐÚNG những số bản soi trích)
@@ -153,7 +160,9 @@ Người dùng 2026-10-05: "With this skill, edit for me i can choosen and fill 
 symbol on 3 filter". Trang duyệt có ô "Soi thêm mã": mã người dùng gõ được lưu trong db của artifact, doc `requests/<ngày>`
 (`{edition, symbols, updatedAt}`). Mỗi lượt chạy (và khi người dùng nói "tiếp" sau khi thêm mã trên trang):
 
-1. Đọc doc đó bằng ArtifactData (`get`, url của artifact DailyReview, path `requests/<ngày>`) và ghi
+1. Đọc doc đó bằng ArtifactData (`get`, url của artifact CỦA CHÍNH BẢN ĐÓ — `node scripts/review/artifacts.mjs get daily <ngày>`, mỗi bản phiên một artifact từ 6/10 —, path `requests/<ngày>`; bản tuần dùng khoá riêng `<ngày>-weekly` — doc `requests/<ngày>-weekly`,
+   file `content/review/requests/<ngày>-weekly.json`, `requestKey` ở `scripts/review/lib/requested.mjs` — để hai reel cùng ngày không đọc
+   mã của nhau) và ghi
    `content/review/requests/<ngày>.json` = `{edition, symbols, source: "artifact db requests/<ngày>", readAt}`. Không có doc
    thì không có mã thêm. Tối đa `rules.screener.requested.max` (3) mã; mã đã là leader bị bỏ qua (đã có scene), mã không có
    trong universe của phiên bị báo và bỏ.
@@ -161,7 +170,9 @@ symbol on 3 filter". Trang duyệt có ô "Soi thêm mã": mã người dùng g�
 3. `node scripts/review/facts.mjs --format=daily` → `screener.requested[]` (dòng universe, bộ lọc nó có, MA FireAnt, bản soi).
 4. `node scripts/review/shots.mjs --format=daily --only=requested` — chart FireAnt từng mã như leader (Chrome thật, dặn người
    dùng đừng đụng chuột ~40 giây mỗi mã); Chrome bận thì `--only=requested-terminal` (headless).
-5. Mỗi mã một agent `symbol-reviewer` (như leader, chạy song song), rồi `facts.mjs` lần nữa.
+5. Mỗi mã một agent `symbol-reviewer` (như leader, chạy song song), rồi `facts.mjs` lần nữa. Mã chọn xếp hạng SAU các leader, trong nhóm
+   thì RS 1M cao trước: thế giá trùng thì mã xếp trên giữ, mã sau tránh (`othersAbove` ở `lib/symbol-review.mjs`, 2026-10-06: VCI RS 22 giữ
+   far-from-high, CII RS 16 sang trend) — dặn điều đó trong prompt của agent.
 6. `scaffold.mjs --format=daily --force` — scene `pick` (id `rd-<ngày>-pick-<n>`) sau scene leader cuối; mã thiếu ảnh bị bỏ và
    in lý do. `--force` dựng lại MỌI scene: gộp lại thư mục người viết (`merge.mjs --from=…`) sau đó, và người viết viết thêm
    scene pick (writer.md, mục pick).
@@ -169,7 +180,7 @@ symbol on 3 filter". Trang duyệt có ô "Soi thêm mã": mã người dùng g�
    (người dùng 2026-10-05: "combine into the VIC symbol review scene … warning the trader monitor the behavior of VIC, not compare
    it with the market VNIndex") — brief của chính scene soi mã đó đòi một câu cảnh báo cuối và số điểm ở headline beat 1.
 7. `npm run verify -- DailyReview` (review-picks và review-symbols soi cả pick) → trang duyệt.
-8. Đăng lại trang duyệt (cùng link, giữ `capabilities: {db: {}, user: {}}` — bỏ trống trường đó khi đăng lại là giữ nguyên), rồi ghi
+8. Đăng lại trang duyệt (link của bản đó trong `content/review/artifacts.json`, giữ `capabilities: {db: {}, user: {}}` — bỏ trống trường đó khi đăng lại là giữ nguyên), rồi ghi
    `done: [<MÃ đã có scene>]` vào doc `requests/<ngày>` (ArtifactData `update`, pin `if_version` của lần `get`): ô của mã trên trang
    chuyển từ "chờ soi" sang "đã có scene". Ô "Soi thêm mã" chỉ có trên reel của market-review (`scripts/review-page.mjs`).
 
@@ -188,11 +199,16 @@ old chart → weekly', rồi 'move it into the scene 02': ảnh FireAnt "Biến 
 beat 1 thẻ dòng tiền — biểu đồ tròn số mã tăng/giảm/đứng giá (đọc số mã thành chữ) và cột phân bổ dòng tiền cùng lúc —,
 beat 2 máy lia xuống thẻ "Top cổ phiếu tác động" — mã kéo / đẩy chỉ số bao nhiêu điểm, khoanh mã dẫn đầu —, kết bằng câu dẫn sang
 market; ảnh lệch phiên thì scene bị bỏ và hook đọc lại số mã) → market (bối cảnh, đồng hồ, trao lời cho các bộ lọc — câu
-"Bộ lọc hôm nay bắt được gì?" mở spike khi market chạm trần chữ) → spike (bảng `movers` CẢ bộ lọc: cột tăng và cột giảm, mỗi cột tối đa 10 mã theo % thay đổi — tăng mạnh nhất / giảm sâu nhất trên đầu, khối lượng in là % so với SMA20 "KL +92%" (người dùng tối 2026-10-01), chỉ kể bảng của nó) → rs (bảng vẽ RS Strong: tối đa 10 mã
+"Bộ lọc hôm nay bắt được gì?" mở spike khi market chạm trần chữ) → spike (bảng `movers` CẢ bộ lọc: cột tăng và cột giảm, mỗi cột tối đa 10 mã theo % thay đổi — tăng mạnh nhất / giảm sâu nhất trên đầu, khối lượng in là % so với SMA20 "KL +92%" (người dùng tối 2026-10-01), chỉ kể bảng của nó; mã sẽ soi ngay sau mà bảng có được tô và tạo hiệu ứng ở beat 3 như bảng rs/uptrend — người dùng 2026-10-06: "With the volumn spike also have the animation with this scene for me highlight the symbol must noted" —, `review-picks` soát từ `screener.scenes.spike.movers.focusSince`) → rs (bảng vẽ RS Strong: tối đa 10 mã
 theo RS 1M giảm dần, MỘT cột, MỘT MÌNH; beat 2 tô và tạo hiệu ứng cho mã sẽ soi ngay sau — `focus`) → uptrend (bảng vẽ Uptrend
-y như rs, kết bằng lời mời gọi tên mã sẽ soi) →
-leader #2 → #1 (TỐI ĐA HAI mã, người dùng chốt 2026-10-01: mã có mặt ở cả ba bộ lọc trước, không đủ thì mã ở cả RS Strong
-lẫn Uptrend, trong một tầng xếp theo RS 1M — `rules.screener.leaders.from` là danh sách tầng; **#1 là RS 1M cao nhất và
+y như rs, kết bằng lời mời gọi tên mã sẽ soi — không có mã nào để soi thì câu cuối dẫn sang kịch bản VN-Index) →
+leader … → #1 (TỐI ĐA BỐN mã — người dùng 2026-10-06: "I want change and allow for the at most 2 with review stock, the number i want is 4"; trước là hai. Bản phiên từ 2026-10-06 CHỈ soi mã có mặt ở CẢ BA bộ lọc, theo RS 1M — người dùng: "remove the
+stock not in all 3 filter, only keep the stock on all 3 filters", chọn "All 3 filters only"; `rules.formats.daily.leaders`, có
+`since` nên bản trước ngày đó giữ luật cũ: không còn tầng RS Strong ∩ Uptrend dự phòng, mã soi hôm trước được soi lại khi còn ở
+cả ba, ngày không có mã nào thì không có scene leader — mã gõ ở "Soi thêm mã" vẫn có scene pick, mã chọn đầu tiên mở bằng
+"Mã đầu tiên là …"; reel chỉ có MỘT scene soi mã (một leader không pick, hay một pick không leader) thì câu đầu là "Mã đáng chú
+ý hôm nay là …", vì "Mã đầu tiên" hứa một mã thứ hai không tới. Luật chung `rules.screener.leaders.from` là danh sách tầng, người dùng chốt 2026-10-01: mã có mặt ở cả ba
+bộ lọc trước, không đủ thì mã ở cả RS Strong lẫn Uptrend, trong một tầng xếp theo RS 1M; **#1 là RS 1M cao nhất và
 chiếu sau cùng** (sửa 2026-09-30; bản 29/9 đánh số ngược, không lộ vì ba mã cùng 94), mỗi mã một chi tiết riêng) → watch ("Kịch bản VN-Index", payoff — người dùng 2026-10-05: beat 1 kịch bản tích cực, beat 2 kịch bản tiêu cực, mốc từ price action của chính chỉ số và MA50/MA200 FireAnt — `scenario` của fact pack — cộng các mốc luật; máy đứng yên ở beat 2) → outro — 10 scene, ~80 giây. Đường độ rộng cũ (% mã trên SMA200)
 chỉ còn ở bản tuần, skill [`weekly-review`](../weekly-review/SKILL.md), cùng với scene `week` sau hook. Người dùng tách RS Strong và
 Uptrend thành hai scene 2026-09-30 ("not union it first"): mỗi scene bảng là MỘT bộ lọc đã lưu (`rules.screener.scenes`),
@@ -234,14 +250,21 @@ FAIL khi scene `market` thiếu "nếu". Tối đa 4 vòng sửa; còn FAIL thì
 
 ## 7. Trang duyệt — điểm dừng duy nhất
 
-Viết `out/review/review-daily/notes.json` (kết luận: trạng thái, tiền đề nào số đỡ, verify còn gì), rồi:
+Viết `out/review/daily-<ngày>/notes.json` (kết luận: trạng thái, tiền đề nào số đỡ, verify còn gì), rồi:
 
 ```bash
-npm run review-page -- DailyReview
+npm run review-page -- DailyReview                       # -> out/review/daily-<ngày>/ (mỗi bản phiên một thư mục)
+node scripts/review/artifacts.mjs get daily <ngày>       # link của bản này, nếu đã đăng; exit 1 = chưa có
 ```
 
-Đăng bằng tool Artifact (`file_path=out/review/review-daily/index.html`, `root`, `files` từ `files.json`,
-icon `chart`). Bản phiên có MỘT link (bản tuần có link riêng, skill weekly-review): bản sau đăng lại cùng file (hoặc kèm `url` cũ). Trả lời ngắn: trạng
+Đăng bằng tool Artifact (`file_path=out/review/daily-<ngày>/index.html`, `root`, `files` từ `files.json`,
+icon `chart`). **Mỗi bản phiên MỘT artifact riêng** (người dùng 2026-10-06: "With each review daily, create another daily
+file .mp4 and its artifact respective for me" — tới 5/10 mọi bản đăng đè lên một link nên trang của phiên trước mất): lần
+đăng ĐẦU của một bản là artifact MỚI — không kèm `url`, không bao giờ đăng lên link của bản trước — rồi ghi link ngay
+(link chỉ hiện trong kết quả của tool Artifact): `node scripts/review/artifacts.mjs set daily <ngày> --url=<link>`
+(sổ `content/review/artifacts.json`; `set` từ chối link đã thuộc bản khác). Các vòng duyệt lại của CÙNG bản đăng lại link
+đó (cuộc hội thoại mới thì `read` link trước rồi đăng kèm `url`); dòng `publish:` của review-page in sẵn lệnh nào đúng. Đầu
+trang có link "Bản trước" về artifact của bản phiên trước. Bản tuần vẫn một link riêng (skill weekly-review). Trả lời ngắn: trạng
 thái theo quy tắc, verify còn WARN gì, `unsupported`, ảnh chỉ số là FireAnt hay terminal, và lựa chọn duyệt ·
 sửa · bỏ. Không lồng tiếng khi chưa có câu trả lời.
 
@@ -250,11 +273,27 @@ sửa · bỏ. Không lồng tiếng khi chưa có câu trả lời.
 ```bash
 npm run approve -- DailyReview
 node scripts/voiceover.mjs --content=content/review-daily.json --retime
-npx tsc --noEmit && node scripts/render.mjs --id=DailyReview --out=out/review/daily-<ngày>.mp4
+../video-factory/.venv/bin/python scripts/tts_takes.py --content=content/review-daily.json --rebuild   # NGHE từng câu, giữ lượt rõ
+npx tsc --noEmit && node scripts/render.mjs --id=DailyReview     # -> out/review/daily-<ngày>.mp4 (mặc định theo edition)
+npm run review-page -- DailyReview --no-stills --video=out/review/daily-<ngày>.mp4   # bản xem 540×960 -> out/review/daily-<ngày>/video/
 ```
 
+Mỗi bản phiên một file mp4 riêng, `out/review/daily-<ngày>.mp4` (người dùng 2026-10-06): `render.mjs` tự đặt tên theo
+`edition` của reel và từ chối `--out` mang ngày của bản khác (`scripts/lib/outputs.mjs`); render lại CÙNG bản thì ghi đè
+file của bản đó; lát `--frames` không kèm `--out` ra file riêng. Rồi đăng lại artifact của CHÍNH bản đó (`url` = `node
+scripts/review/artifacts.mjs get daily <ngày>`) để trang mang video của bản — không bao giờ đăng trang này lên link của bản
+trước.
+
+**Cửa nghe** (người dùng 2026-10-06: "The pronounce of the number on this video is not clear … ensure it not happened
+again" — bản 6/10 ra video với 1759 đọc "bảy trăm năm chín" và 0,58 của FPT bị nuốt): `tts_takes.py` nghe MỌI câu với token
+chữ số bị chặn, giữ lượt mà mọi số, mã, thuật ngữ đều nghe đủ chữ, thu thêm tới 18 lượt cho câu chưa rõ, rồi dựng lại track
+(`--rebuild`); `render.mjs` tự chạy bước này và TỪ CHỐI render khi `voice-heard` của verify FAIL. Câu `✗ … UNRESOLVED`
+(exit 3) là giọng không đọc nổi câu đó: tách câu (tối đa hai số mỗi câu, mỗi mã đứng cạnh số của nó), `voiceover.mjs
+--reassemble --only=<id> --retime` (chỉ thu câu đổi chữ), rồi chạy lại. Đừng dùng `--unheard` cho bản sẽ đăng. Báo cho
+người dùng dòng `N/N sentence(s) clear` cùng trang duyệt.
+
 Id có ngày nên không cần `--force` cho bản mới; sửa lời một scene thì `--force --only=<id>` như market-video.
-Soát sau render như market-video §5 (Whisper cho FTD và các MÃ đánh vần qua `voice.letters` + `voice.letterJoin` — người dùng 2026-10-01: lời gọi mã, không tên công ty, đọc liền một cụm, không rời từng chữ; `tts_takes.py` đã chọn lượt đủ chữ, không ngắt giữa mã; nghe lệch thì đổi cách đọc trong `rules.json`,
+Soát sau render như market-video §5 (Whisper cho FTD và các MÃ đánh vần qua `voice.letters` + `voice.letterJoin` — người dùng 2026-10-01: lời gọi mã, không tên công ty, đọc liền một cụm, không rời từng chữ; `tts_takes.py` đã chọn lượt đủ chữ, không ngắt giữa mã — và cửa nghe ở trên đã chặn lượt thiếu chữ; nghe lệch thì đổi cách đọc trong `rules.json`,
 khoảng lặng, khung hai bên mốc beat). Không lồng tiếng hai reel cùng lúc (chung `.tts-cache`).
 
 ## 9. Những điều đã đo — đừng đo lại

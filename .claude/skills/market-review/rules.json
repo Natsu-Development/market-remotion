@@ -99,6 +99,8 @@
       "losers": "asc"
      },
      "volume": "percentVsSma20",
+    "focusSince": "2026-10-06",
+    "_focus": "User 2026-10-06: 'With the volumn spike also have the animation with this scene for me highlight the symbol must noted' — the board lights the names the reel reviews next that its two columns show (rows `focus`, the leaders in play order then the requested names), as the RS Strong and Uptrend boards do: a gold mark when the row lands, then on a THIRD beat (`emphasis`, beat index 2) the other rows dim and the focus rows get the gold band, outline, gold ticker and magnifier, with the plate '<board.picksLabel>: DGW' in the caption's place (src/scenes/Movers.tsx, scaffold buildMovers). No such name on the board → two beats as before. checks.mjs review-picks grades it from `focusSince` on, so the editions before it are not failed for a beat they never had.",
      "_sortBy": "User 2026-10-01 evening: 'With volume spike, sort by the price change percent: DESC and ASC for both column. The volumn must be the percent with its volumn avg 20.' The gainers column runs from the biggest gain down, the losers column from the deepest fall up (scripts/review/facts.mjs; sortBy \"rs_1m\" brings back the RS 1M board of earlier that day). volume \"percentVsSma20\" prints each row's volume as the terminal's VOL/SMA, (volume − SMA20) / SMA20 × 100 in whole percent ('KL +92%' where the ratio is ×1,92); the leader chart's volume box and any spike headline use the same unit. The RS Strong and Uptrend boards keep RS 1M descending."
     }
    },
@@ -157,9 +159,9 @@
     ]
    ],
    "sortBy": "rs_1m",
-   "top": 2
+   "top": 4
   },
-  "_leaders": "The chart countdown (#2 → #1). `from` is a list of TIERS, each a list of scene keys a name must be in; names are taken tier by tier, ranked by `sortBy` inside a tier, until `top` is reached. User 2026-10-01: 'analyze the symbol existed on 3 filters, if don't have continue in 2 filter: uptrend and RS strong (sort by RS1M), maximum 2 symbols' — tier 1 = Volume spike ∩ RS Strong ∩ Uptrend, tier 2 = RS Strong ∩ Uptrend (the countdown the user picked on 2026-09-29, strong AND in an uptrend). The tiers are the director's selection rule, never spoken (user 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'); the fact pack says which tier each pick came from. A flat list or a single key is one tier. An Uptrend name is above its EMA50 with EMA50 above SMA200, so the EMA50 line and the '% trên EMA50' arrow on each chart mean what they say. Rows whose moving average is 0 are dropped whichever tier feeds them.",
+  "_leaders": "The chart countdown (#2 → #1). `from` is a list of TIERS, each a list of scene keys a name must be in; names are taken tier by tier, ranked by `sortBy` inside a tier, until `top` is reached. User 2026-10-01: 'analyze the symbol existed on 3 filters, if don't have continue in 2 filter: uptrend and RS strong (sort by RS1M), maximum 2 symbols' — tier 1 = Volume spike ∩ RS Strong ∩ Uptrend, tier 2 = RS Strong ∩ Uptrend (the countdown the user picked on 2026-09-29, strong AND in an uptrend). The tiers are the director's selection rule, never spoken (user 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'); the fact pack says which tier each pick came from. A flat list or a single key is one tier. An Uptrend name is above its EMA50 with EMA50 above SMA200, so the EMA50 line and the '% trên EMA50' arrow on each chart mean what they say. Rows whose moving average is 0 are dropped whichever tier feeds them. A format can keep only the first tier(s) of this list (formats.<fmt>.leaders.from, with `since`): since 2026-10-06 the daily reviews only tier 1, the names in all three filters (formats.daily._leaders). Later that day the user raised `top` from 2 to 4 ('I want change and allow for the at most 2 with review stock, the number i want is 4'): pull.mjs keeps four picks and the daily has four leader roles.",
   "dropZeroMa": true,
   "_dropZeroMa": "The server sends 0 for a moving average it cannot compute yet (new listings), so 'ema_50 > sma_200' passes for them. Rows with ema_50 or sma_200 at 0 are dropped.",
   "_spike": "User 2026-09-30: the spike scene is a two-column board — the filter's 5 biggest gainers (by % change, descending) and 5 biggest losers (ascending), each with its volume ratio — drawn with the `movers` panel; `visual: \"photo\"` brings back the boxed Screener table. 2026-10-01: each row carries only the ticker — scaffold no longer passes the company name (user: list the symbol, not the company name). 2026-10-05: the scene talks about its own board only — no 'a leader is on this board, kept for the end' (the old loop 2; user: 'Not need mentioned the stock on specific filter existed on other filter').",
@@ -180,6 +182,17 @@
    "content": "content/review-daily.json",
    "brief": "brief/review-daily.md",
    "idPrefix": "rd",
+   "leaders": {
+    "from": [
+     [
+      "spike",
+      "rs",
+      "uptrend"
+     ]
+    ],
+    "since": "2026-10-06"
+   },
+   "_leaders": "User 2026-10-06: 'When i trigger the daily review with review market daily, remove the stock not in all 3 filter, only keep the stock on all 3 filters' — asked which rule that meant, the user picked 'All 3 filters only': the daily's symbol reviews (role leader) come ONLY from the names in Volume spike ∩ RS Strong ∩ Uptrend, ranked by RS 1M, at most four (screener.leaders.top and the four leader roles above; two until the user raised it later that day); no RS Strong ∩ Uptrend fallback; a name reviewed the edition before is reviewed again whenever it is still in all three; a day without such a name has no leader scene (the names typed in 'Soi thêm mã' keep their pick scenes). `from` must be the first tier(s) of screener.leaders.from: pull.mjs ranks ONE pool per session for every format and facts.mjs keeps this format's tiers (formats.<fmt>.leaders is per format — this one is daily-only). `since` = the first edition it applies to: an edition before it, rebuilt with --date, keeps the tiers it was published with (5/10: MSR and DGW), and checks.mjs review-picks grades the tier guard only from it on.",
    "roles": [
     "hook",
     "flow",
@@ -189,14 +202,16 @@
     "uptrend",
     "leader",
     "leader",
+    "leader",
+    "leader",
     "watch",
     "outro"
    ],
    "totalSeconds": [
-    60,
-    90
+    70,
+    160
    ],
-   "_why": "User picked a chart for each of the top 3 leaders (2026-09-29). Restructured the same day for retention (vox-director hook_payoff + a listicle countdown): breadth = the paradox after the count, watch = the payoff before the outro. 2026-09-30: the RS Strong ∩ Uptrend table became two scenes, rs then uptrend (user: 'separate the filter … not union it first'). 2026-10-01: at most TWO leader charts, the names in all three filters first (screener.leaders tiers). 2026-10-05: the old breadth scene (share above SMA200) left the daily for the weekly, and FireAnt's 'Biến động thị trường' (the session's advancers/decliners + money flow, role `flow`) took its place right after market — the user's answer that afternoon: 'Daily; old chart → weekly' (a first reading had put FireAnt in the weekly). 10 scenes, about 80 s. Later that afternoon the user moved it to scene 02, right after the hook ('move it into the scene 02'), and the hook stopped reading the advancers/decliners ('optimize scene 1 by removing \"Chỉ số tăng: … mã giảm\" since it be mentioned on the updated scene 02'): hook, flow, market, …"
+   "_why": "User picked a chart for each of the top 3 leaders (2026-09-29). Restructured the same day for retention (vox-director hook_payoff + a listicle countdown): breadth = the paradox after the count, watch = the payoff before the outro. 2026-09-30: the RS Strong ∩ Uptrend table became two scenes, rs then uptrend (user: 'separate the filter … not union it first'). 2026-10-01: at most TWO leader charts, the names in all three filters first (screener.leaders tiers). 2026-10-05: the old breadth scene (share above SMA200) left the daily for the weekly, and FireAnt's 'Biến động thị trường' (the session's advancers/decliners + money flow, role `flow`) took its place right after market — the user's answer that afternoon: 'Daily; old chart → weekly' (a first reading had put FireAnt in the weekly). 10 scenes, about 80 s. Later that afternoon the user moved it to scene 02, right after the hook ('move it into the scene 02'), and the hook stopped reading the advancers/decliners ('optimize scene 1 by removing \"Chỉ số tăng: … mã giảm\" since it be mentioned on the updated scene 02'): hook, flow, market, … 2026-10-06: the leader scenes review only the names in all three filters (formats.daily.leaders, user: 'All 3 filters only'), so a day has 0–2 of them. Later on 2026-10-06 the user raised the cap to four ('I want change and allow for the at most 2 with review stock, the number i want is 4'): four leader roles, 0–4 review scenes, up to ~160 s with picks (totalSeconds is the director's guide; arc.totalSecondsWarn still warns past 110 s)."
   },
   "weekly": {
    "composition": "WeeklyReview",
@@ -206,23 +221,127 @@
    "roles": [
     "hook",
     "week",
+    "daily",
     "market",
     "breadth",
-    "spike",
-    "rs",
-    "uptrend",
+    "sectors",
+    "breakout",
     "leader",
+    "breakdown",
     "leader",
     "watch",
     "outro"
    ],
    "totalSeconds": [
-    70,
-    110
+    80,
+    120
    ],
+   "screener": {
+    "scenes": {
+     "breakout": {
+      "filters": [
+       "Momentum breakout"
+      ],
+      "photo": "Momentum breakout",
+      "sortBy": "rs_1m",
+      "top": 10,
+      "visual": "board",
+      "board": {
+       "signal": "breakout",
+       "columns": [
+        "price",
+        "weekChange",
+        "rs1m",
+        "signal",
+        "rs52w"
+       ]
+      }
+     },
+     "breakdown": {
+      "filters": [
+       "Momentum breakdown"
+      ],
+      "photo": "Momentum breakdown",
+      "sortBy": "rs_1m",
+      "top": 10,
+      "visual": "board",
+      "board": {
+       "signal": "breakdown",
+       "columns": [
+        "price",
+        "weekChange",
+        "rs1m",
+        "signal",
+        "rs52w"
+       ]
+      }
+     }
+    },
+    "leaders": {
+     "from": [
+      [
+       "breakout"
+      ],
+      [
+       "breakdown"
+      ]
+     ],
+     "perTier": 1,
+     "sortBy": "rs_1m",
+     "top": 2,
+     "order": "tier"
+    },
+    "_screener": "User 2026-10-06: 'With weekly artifact, eval the VNIndex as daily and weekly of this week, eval the filter: Momentum breakout, Momentum breakdown' — picked 'Replace': the weekly's filter boards are these two saved filters of the terminal, NOT Volume spike / RS Strong / Uptrend (those stay in the daily). Format-scoped on purpose: rules.screener.scenes (the daily's three) is what the daily, its review page box and its leader tiers read; these scenes are pulled by pull.mjs into the same session snapshot (members.breakout / members.breakdown) but only the weekly builds them. `leaders`: the user picked 'Top of each filter' — ONE review per filter (perTier 1), the highest RS 1M of Momentum breakout, then the highest RS 1M of Momentum breakdown not already picked; order 'tier' = the scenes play in tier order, each right after its own board (breakout → leader → breakdown → leader)."
+   },
+   "breadth": {
+    "minVolumeSma20": 0,
+    "maxResidualPercent": 2,
+    "_breadth": "User 2026-10-06: 'Also include … amount of stock have price better than its SMA200'. The breadth scene says the terminal's own COUNT (stocks with an SMA200 whose price closes above it — 247/901 on 5/10, what the user gets filtering price > SMA200 on the terminal); scripts/review/breadth.mjs redraws its history from SSI closes (SMA200 of closes carried forward over market sessions), because the screener keeps none. minVolumeSma20 0 = the terminal's whole set; above 0 the count AND the line are both taken on stocks with volume_sma20 ≥ it and the scene says 'mã có thanh khoản'. Measured 5/10: whole set line 237/899 vs terminal 247/901 (residual −10, −1,1% of the set — the ~170 near-untradable names whose SMA200 SSI's bars do not reproduce); ≥ 10 000 shares 100 vs 99 of 454; ≥ 50 000 72 vs 71 of 294. checks.mjs WARNs when the line's last point is more than maxResidualPercent of the set away from the count."
+   },
    "skill": ".claude/skills/weekly-review/SKILL.md",
-   "_why": "The weekly edition is its own skill since 2026-10-05 (user: 'init this weekly skill … after remove it entirely from the daily market'); it shares these rules, writer.md and scripts/review/ with the daily. `week` (the week's candle) follows the hook; `breadth` is weekly only — the old 'Độ rộng thị trường' line (share of stocks above SMA200 under the index line, scripts/review/breadth.mjs); FireAnt's 'Biến động thị trường' is the daily's `flow` (user 2026-10-05: 'Daily; old chart → weekly'). 11 scenes."
+   "_why": "The weekly edition is its own skill since 2026-10-05 (user: 'init this weekly skill … after remove it entirely from the daily market'); it shares these rules, writer.md and scripts/review/ with the daily. `week` (the week's candle) follows the hook; `breadth` is weekly only — the old 'Độ rộng thị trường' line (share of stocks above SMA200 under the index line, scripts/review/breadth.mjs); FireAnt's 'Biến động thị trường' is the daily's `flow` (user 2026-10-05: 'Daily; old chart → weekly'). 11 scenes. 2026-10-06 (user: 'With weekly artifact, eval the VNIndex as daily and weekly of this week, eval the filter: Momentum breakout, Momentum breakdown. Also include major ranking and amount of stock have price better than its SMA200.'; answers: Replace · ICB groups by RS · Top of each filter): hook → week (VN-Index · Khung tuần) → daily (VN-Index · Khung ngày) → market → breadth (how MANY stocks close above their SMA200) → sectors (ICB industry groups ranked by RS) → breakout → its review → breakdown → its review → watch → outro. 12 scenes, ~110 s."
   }
+ },
+ "sectors": {
+  "source": "VNDirect finfo ICB classification, level 2",
+  "url": "https://api-finfo.vndirect.com.vn/v4/industry_classification?q=industryLevel:2&size=100",
+  "map": "content/review/industries.json",
+  "maxAgeDays": 7,
+  "sortBy": "medianRs1m",
+  "minVolumeSma20": 100000,
+  "minMembers": 5,
+  "top": 10,
+  "focus": 3,
+  "columns": [
+   "members",
+   "rs1m",
+   "weekChange",
+   "aboveSma200Share"
+  ],
+  "short": {
+   "0500": "Dầu khí",
+   "1300": "Hóa chất",
+   "1700": "Tài nguyên cơ bản",
+   "2300": "Xây dựng & vật liệu",
+   "2700": "Hàng & DV công nghiệp",
+   "3300": "Ô tô & phụ tùng",
+   "3500": "Thực phẩm & đồ uống",
+   "3700": "Đồ cá nhân & gia dụng",
+   "4500": "Y tế",
+   "5300": "Bán lẻ",
+   "5500": "Truyền thông",
+   "5700": "Du lịch & giải trí",
+   "6500": "Viễn thông",
+   "7500": "Điện, nước & khí đốt",
+   "8300": "Ngân hàng",
+   "8500": "Bảo hiểm",
+   "8600": "Bất động sản",
+   "8700": "Dịch vụ tài chính",
+   "9500": "Công nghệ"
+  },
+  "_sectors": "User 2026-10-06: 'Also include major ranking' ('major' = ngành); picked 'ICB groups by RS' over HOSE's ten sector indices: the 19 ICB level-2 groups (VNDirect's public classification: Ngân hàng, Dịch vụ tài chính, Dầu khí, …), each ranked by the median RS 1M of its stocks on the session's terminal universe — the IBD/Minervini industry-group idea. Weekly only (role `sectors`): scripts/review/industries.mjs keeps the map (refetched when older than maxAgeDays), scripts/review/lib/sectors.mjs ranks (facts.mjs pack key `sectors`) and draws the board (mode 'sector' of src/scenes/FilterBoard.tsx).",
+  "_members": "A group's members are its stocks on the terminal universe with volume_sma20 ≥ minVolumeSma20 (100 000 shares: below it the RS of a stock that barely trades is noise) and an RS 1M. A group with fewer than minMembers members is listed, never ranked: on 5/10 Bảo hiểm had one such stock (BVH, RS 92) and Phương tiện truyền thông one (YEG) — with no minimum they would have topped the table; 15 of 19 groups were ranked. At 200 000 shares Y tế kept two stocks and jumped to second (measured 2026-10-06), so the floor stays at 100 000.",
+  "_short": "The board's labels (≤ 22 characters, the name cell of FilterBoard's sector mode); the narration says the group's full Vietnamese name from the map (`name`). 1700 is VNDirect's 'Tài nguyên' (ICB Basic Resources: steel, mining, wood), 7500 its 'Dịch vụ tiện ích' (ICB Utilities: power, water, gas), 2700 'Hàng hóa và dịch vụ công nghiệp' (ICB Industrial Goods & Services: ports, logistics, machinery)."
  },
  "shots": {
   "_shots": "Photo recipes. Sizes, crops, masks and calibration panes are measured on the first run and written here; scripts/review/shots.mjs reads them.",
@@ -529,7 +648,7 @@
  },
  "arc": {
   "minScenes": 7,
-  "maxScenes": 12,
+  "maxScenes": 15,
   "totalSecondsWarn": [
    55,
    110
@@ -545,10 +664,46 @@
     ]
    },
    "week": {
-    "job": "Cây nến tuần: tuần tăng hay giảm bao nhiêu, khối lượng so với tuần trước, đóng cửa ở đâu trong biên của tuần.",
+    "job": "VN-Index · Khung tuần — ĐÁNH GIÁ khung tuần trên ảnh FireAnt W (người dùng 2026-10-06: 'eval the VNIndex as daily and weekly of this week'), không chỉ cây nến. Beat 1 cận cảnh cây nến tuần: tuần tăng hay giảm bao nhiêu, đóng cửa ở đâu trong biên tuần, khối lượng so với tuần trước (không đọc khi KL phiên cuối của SSI còn là số tạm); tuần chưa khép lại thì nói 'tuần này tới thứ …'. Beat 2 toàn cảnh: cấu trúc đỉnh/đáy tuần (hai đường đứt), giá so với MA50 / MA200 TUẦN của FireAnt, vùng kháng cự và hỗ trợ tuần gần nhất (fact pack `indexWeekly`). Không nhánh nếu … thì (để watch).",
     "act": "blue",
     "pace": "mid",
     "shots": [
+     "pull_out"
+    ]
+   },
+   "daily": {
+    "job": "VN-Index · Khung ngày — đánh giá CẤU TRÚC và XU HƯỚNG trên ảnh FireAnt ngày (người dùng 2026-10-06: 'eval the VNIndex as daily and weekly of this week'). Beat 1 cấu trúc: hai đỉnh dao động gần nhất nối nhau, hai đáy nối nhau (đỉnh sau cao/thấp hơn, đáy sau cao/thấp hơn → tăng, giảm hay đi ngang; giá đã thủng đáy hay vượt đỉnh gần nhất chưa), các phiên của tuần trong khung vàng. Beat 2 xu hướng: giá so với MA50 / MA200 của FireAnt (bao nhiêu phần trăm), MA50 trên hay dưới MA200, kết luận khung ngày khỏe / yếu / giằng co do số quyết định (fact pack `indexDaily`). KHÔNG phiên phân phối, FTD (scene market ngay sau), KHÔNG nhánh nếu … thì (scene watch).",
+    "act": "blue",
+    "pace": "mid",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "sectors": {
+    "job": "XẾP HẠNG NHÓM NGÀNH — chỉ bản tuần (người dùng 2026-10-06: 'Also include major ranking', chọn 'ICB groups by RS'): bảng tối đa mười nhóm ngành ICB cấp 2 (bản đồ VNDirect) xếp theo RS 1M TRUNG VỊ của các mã có thanh khoản trong nhóm — cách xếp hạng nhóm ngành của O'Neil trên RS của terminal (fact pack `sectors`). Nói thước đo bằng chữ của trader, gọi nhóm bằng tên tiếng Việt đầy đủ, hai ba nhóm dẫn đầu (beat 2 làm chúng sáng lên) và nhóm yếu nhất TRÊN BẢNG, một nhận xét từ cột % trên SMA200 hoặc % tuần; tối đa hai số đọc ra lời. Không đọc mã (nếu gọi một mã thì đó là mã mạnh nhất của nhóm, không nói mã đó ở bộ lọc nào); không khuyên mua bán nhóm ngành nào; chưa có bảng tuần trước thì không nói tăng/tụt hạng.",
+    "act": "amber",
+    "pace": "mid",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "breakout": {
+    "job": "Bộ lọc Momentum breakout của terminal — chỉ bản tuần (người dùng 2026-10-06: 'eval the filter: Momentum breakout, Momentum breakdown', thay ba bộ lọc của bản phiên): cổ phiếu đang có sức mạnh giá (RS 1M từ 80, RS 3M và RS 52W từ 70, thanh khoản) mà vượt trendline giảm — breakout xác nhận — hoặc đang áp sát nó — tiềm năng. Gọi đúng tên 'bộ lọc Momentum breakout'. MỘT bảng một cột xếp theo RS 1M, cột % TUẦN và cột tín hiệu: bao nhiêu mã, mấy mã đã xác nhận, một hai mã đầu bảng, một nhận xét từ cột % tuần; danh sách để theo dõi, không lời khuyên mua. Beat 2 tô và tạo hiệu ứng cho MÃ SOI CỦA CHÍNH BẢNG NÀY (RS 1M cao nhất — người dùng chọn 'Top of each filter') và câu cuối là lời mời 'Cùng mình xem kỹ <MÃ>.'; scene soi mã đó ngay sau. Không nói mã nào cũng ở bộ lọc Momentum breakdown (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter').",
+    "act": "amber",
+    "pace": "short",
+    "shots": [
+     "push_in",
+     "pull_out"
+    ]
+   },
+   "breakdown": {
+    "job": "Bộ lọc Momentum breakdown của terminal — chỉ bản tuần (người dùng 2026-10-06): cổ phiếu đang mạnh (RS 1M, RS 3M, RS 52W từ 70, thanh khoản) mà thủng trendline tăng — breakdown xác nhận — hoặc đang áp sát nó — tiềm năng. Gọi đúng tên 'bộ lọc Momentum breakdown'. Bảng như Momentum breakout. Đây là danh sách CẢNH BÁO: mã mạnh đang gãy hoặc sắp gãy hỗ trợ — nói là phải canh rủi ro, KHÔNG phải lời khuyên bán. Beat 2 tô mã soi của chính bảng này (RS 1M cao nhất chưa được soi ở bảng breakout) và câu cuối là lời mời 'Cùng mình xem kỹ <MÃ>.'; scene soi mã đó ngay sau. Không nói mã nào cũng ở bộ lọc Momentum breakout.",
+    "act": "amber",
+    "pace": "short",
+    "shots": [
+     "push_in",
      "pull_out"
     ]
    },
@@ -563,7 +718,7 @@
     ]
    },
    "breadth": {
-    "job": "Nghịch lý độ rộng (chỉ bản tuần — người dùng 2026-10-05: 'Daily; old chart → weekly'): chỉ số ở trạng thái nào mà bao nhiêu phần trăm mã đứng trên MA200 (gọi đúng tên chỉ báo, không 'đường trung bình hai trăm phiên' — người dùng 2026-10-01); hôm nay bao nhiêu mã tăng, bao nhiêu giảm. Kết bằng câu dẫn sang bộ lọc.",
+    "job": "Độ rộng thị trường (chỉ bản tuần — người dùng 2026-10-05: 'Daily; old chart → weekly'): BAO NHIÊU MÃ có giá đóng cửa trên MA200 — con số của terminal, '<n> trên <tổng> mã', và tỉ lệ (người dùng 2026-10-06: 'amount of stock have price better than its SMA200'; gọi đúng tên chỉ báo, không 'đường trung bình hai trăm phiên' — người dùng 2026-10-01), trong tuần nhiều lên hay ít đi; hai đường cùng trục — chỉ số và số mã trên MA200 tính lại từ giá SSI — cùng chiều hay nghịch chiều. Không đọc số của đường (lệch vài mã so với terminal). Kết bằng câu dẫn sang scene sau.",
     "act": "maroon",
     "pace": "short"
    },
@@ -577,7 +732,7 @@
     ]
    },
    "spike": {
-    "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, mã tăng mạnh nhất và giảm sâu nhất trên khối lượng đột biến — cột tăng xếp % giảm dần, cột giảm xếp % tăng dần. Chỉ kể bảng NÀY: không nói mã nào có ở bộ lọc khác, không gieo 'mã dẫn dắt ở bảng này — để cuối' (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter').",
+    "job": "Bộ lọc Volume spike của terminal: bao nhiêu mã, mã tăng mạnh nhất và giảm sâu nhất trên khối lượng đột biến — cột tăng xếp % giảm dần, cột giảm xếp % tăng dần. Chỉ kể bảng NÀY: không nói mã nào có ở bộ lọc khác, không gieo 'mã dẫn dắt ở bảng này — để cuối' (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'). Mã sẽ soi ngay sau mà bảng này có (người dùng 2026-10-06: 'With the volumn spike also have the animation with this scene for me highlight the symbol must noted') được tô và tạo hiệu ứng như bảng RS Strong/Uptrend, ở beat 3: câu ghim beat 3 nói về mã đó TRÊN BẢNG NÀY (% thay đổi, khối lượng so trung bình 20 phiên), không mời 'xem kỹ', không 'mã dẫn dắt'.",
     "act": "amber",
     "pace": "mid",
     "shots": [
@@ -595,7 +750,7 @@
     ]
    },
    "uptrend": {
-    "job": "Bộ lọc Uptrend của terminal, MỘT MÌNH, gọi đúng tên 'bộ lọc Uptrend', bảng y như RS Strong (người dùng 2026-10-05: 'uptrend … behavior like the RS strong'): nghĩa của bộ lọc (giá trên EMA50, EMA50 trên SMA200 — lời nói MA200), bao nhiêu mã, mã đứng đầu bảng này; beat 2 tô và tạo hiệu ứng cho mã sẽ soi ngay sau. Không nói mã nào có ở bộ lọc khác, không kể lại điều scene rs đã nói. Câu cuối là lời mời gọi tên các mã sẽ soi ('Cùng mình xem kỹ MSR và DGW.' — người dùng 2026-10-01: \"Remove 'Đếm ngược từ hai' => 'Let's review …'\"): không 'đếm ngược', không chữ 'review', không 'dẫn đầu'.",
+    "job": "Bộ lọc Uptrend của terminal, MỘT MÌNH, gọi đúng tên 'bộ lọc Uptrend', bảng y như RS Strong (người dùng 2026-10-05: 'uptrend … behavior like the RS strong'): nghĩa của bộ lọc (giá trên EMA50, EMA50 trên SMA200 — lời nói MA200), bao nhiêu mã, mã đứng đầu bảng này; beat 2 tô và tạo hiệu ứng cho mã sẽ soi ngay sau. Không nói mã nào có ở bộ lọc khác, không kể lại điều scene rs đã nói. Khi scene soi mã theo ngay sau, câu cuối là lời mời gọi tên các mã sẽ soi ('Cùng mình xem kỹ MSR và DGW.' — người dùng 2026-10-01: \"Remove 'Đếm ngược từ hai' => 'Let's review …'\"): không 'đếm ngược', không chữ 'review', không 'dẫn đầu'. Không có mã nào để soi (bản phiên chỉ soi mã ở cả ba bộ lọc từ 2026-10-06) thì không mời: câu cuối dẫn sang kịch bản VN-Index ('Còn VN-Index thì sao?'), không nói vì sao hôm nay không soi mã.",
     "act": "amber",
     "pace": "short",
     "shots": [
@@ -604,17 +759,16 @@
     ]
    },
    "leader": {
-    "job": "Soi một mã dẫn dắt — TỐI ĐA HAI scene, không còn đếm ngược (người dùng 2026-10-01: \"Remove 'Đếm ngược từ hai' => 'Let's review …'\"): đạo diễn chọn mã có mặt ở cả BA bộ lọc (Volume spike, RS Strong, Uptrend) trước, không đủ thì tới mã ở cả RS Strong lẫn Uptrend, trong một tầng xếp theo RS 1M — mã RS thấp hơn chiếu trước, mã RS 1M cao nhất chiếu sau cùng; lời KHÔNG nói mã ở bộ lọc nào (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'). Eyebrow 'Soi mã · <MÃ>'; câu đầu 'Mã đầu tiên là …' / 'Mã thứ hai là …' (không 'Số hai là', không '#'). Cùng khuôn câu (price action → chi tiết riêng → mức phải canh), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). Thị trường đang ở mức nguy hiểm (từ distribution.dangerAt phiên phân phối) thì thêm MỘT câu nhắc rủi ro của chính mã đó (mức nó đang giữ), không gọi mua bán.",
+    "job": "Soi một mã dẫn dắt — TỐI ĐA BỐN scene (người dùng 2026-10-06: 'I want change and allow for the at most 2 with review stock, the number i want is 4'; trước đó hai), không còn đếm ngược (người dùng 2026-10-01: \"Remove 'Đếm ngược từ hai' => 'Let's review …'\"): đạo diễn chọn theo các tầng của screener.leaders (mã có mặt ở cả BA bộ lọc Volume spike, RS Strong, Uptrend trước, rồi mã ở cả RS Strong lẫn Uptrend, trong một tầng xếp theo RS 1M), và bản phiên từ 2026-10-06 CHỈ giữ tầng đầu (formats.daily.leaders, người dùng chọn 'All 3 filters only'): 0 đến 4 scene, ngày không có mã ở cả ba bộ lọc thì không có scene soi mã, mã soi hôm trước vẫn được soi lại khi còn ở cả ba; mã RS thấp hơn chiếu trước, mã RS 1M cao nhất chiếu sau cùng (cả reel chỉ MỘT scene soi mã thì 'Mã đáng chú ý hôm nay là …' — 'Mã đầu tiên' hứa một mã thứ hai không tới); lời KHÔNG nói mã ở bộ lọc nào (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'). Eyebrow 'Soi mã · <MÃ>'; câu đầu 'Mã đầu tiên là …' / 'Mã thứ hai là …' / 'Mã thứ ba là …' / 'Mã thứ tư là …' (không 'Số hai là', không '#'). Cùng khuôn câu (price action → chi tiết riêng → mức phải canh), mỗi mã một chi tiết riêng (còn xa đỉnh / sát đỉnh / khối lượng hôm nay). Thị trường đang ở mức nguy hiểm (từ distribution.dangerAt phiên phân phối) thì thêm MỘT câu nhắc rủi ro của chính mã đó (mức nó đang giữ), không gọi mua bán. Từ 2026-10-07 scene KẾT bằng HAI VAI ở beat 3 \"Hành động\" (người dùng: \"add the role of holder and not holder with action and behavior like 'Không mua đuổi' with not holder when it exhausted run, and … with holder: 'nếu dưới giá …' thì hạ tỷ trọng & chốt lời một nửa\"): câu người đang giữ rồi câu người chưa có hàng, đúng `roles` của bản soi (symbol-reviewer/3, §6b/§6c — rolesOf tính từ số đo), plate trên đúng đường giá; hai câu này thay nhánh nếu … thì và câu rủi ro.",
     "act": "amber",
     "pace": "mid",
     "shots": [
      "push_in",
      "pull_out"
-    ],
-    "minRun": 2
+    ]
    },
    "pick": {
-    "job": "Soi thêm mã người dùng chọn trên trang duyệt (người dùng 2026-10-05: '… i can choose and fill the symbol on the artifact to review beside existed symbol on 3 filter') — sau các scene soi mã của bộ lọc, cùng phương pháp soi mã: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá. Không nói mã có hay không có ở bộ lọc nào (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'); KHÔNG nói 'bạn chọn' / 'theo yêu cầu' trong lời. Eyebrow 'Soi mã · <MÃ>'; câu đầu 'Thêm một mã đáng chú ý là <MÃ>, …'.",
+    "job": "Soi thêm mã người dùng chọn trên trang duyệt (người dùng 2026-10-05: '… i can choose and fill the symbol on the artifact to review beside existed symbol on 3 filter') — sau các scene soi mã của bộ lọc, cùng phương pháp soi mã: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá. Không nói mã có hay không có ở bộ lọc nào (người dùng 2026-10-05: 'Not need mentioned the stock on specific filter existed on other filter'); KHÔNG nói 'bạn chọn' / 'theo yêu cầu' trong lời. Eyebrow 'Soi mã · <MÃ>'; câu đầu 'Thêm một mã đáng chú ý là <MÃ>, …' — reel không có scene leader (bản phiên chỉ soi mã ở cả ba bộ lọc từ 2026-10-06) thì mã chọn ĐẦU TIÊN mở bằng 'Mã đầu tiên là <MÃ>.' (mã chọn duy nhất: 'Mã đáng chú ý hôm nay là <MÃ>.'). Từ 2026-10-07 scene KẾT bằng HAI VAI ở beat 3 \"Hành động\" (người dùng: \"add the role of holder and not holder with action and behavior like 'Không mua đuổi' with not holder when it exhausted run, and … with holder: 'nếu dưới giá …' thì hạ tỷ trọng & chốt lời một nửa\"): câu người đang giữ rồi câu người chưa có hàng, đúng `roles` của bản soi (symbol-reviewer/3, §6b/§6c — rolesOf tính từ số đo), plate trên đúng đường giá; hai câu này thay nhánh nếu … thì và câu rủi ro.",
     "act": "amber",
     "pace": "mid",
     "shots": [
@@ -641,7 +795,7 @@
     "pace": "short"
    }
   },
-  "_roles": "Same shape as content-rules.json arc.roles so scripts/lib/roles.mjs, verify, merge and review-page read it unchanged. watch's mustSay keeps the condition an if-then branch, never a call (moved from market on 2026-09-29, when the payoff scene was added); leader's minRun keeps the leader charts together (two at most since 2026-10-01).",
+  "_roles": "Same shape as content-rules.json arc.roles so scripts/lib/roles.mjs, verify, merge and review-page read it unchanged. watch's mustSay keeps the condition an if-then branch, never a call (moved from market on 2026-09-29, when the payoff scene was added); the leader charts sit together because scaffold builds them in one run (two at most since 2026-10-01, four since 2026-10-06); leader has no minRun since 2026-10-06, when the daily began reviewing only the names in all three filters and a single leader scene became a normal day.",
   "firstRole": "hook",
   "lastRole": "outro",
   "severity": {
@@ -801,9 +955,12 @@
    "Uptrend": "áp tren",
    "một nghìn": "một ngàn,",
    "nghìn": "ngàn",
-   "trăm linh": "trăm lẻ"
+   "trăm linh": "trăm lẻ",
+   "Momentum": "mô men tầm",
+   "breakout": "bờ rếch ao",
+   "breakdown": "bờ rếch đao"
   },
-  "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name). FTD → 'ép tê đi' added 2026-09-30 when the user asked the market scene to say 'phiên FTD' — the letter pattern of their MACD choice (Vietnamese letter names, D said 'đi'); NOT yet measured with Whisper: check the first take and change the reading here if it is misheard. 2026-09-30 evening: commas added between the letters of both terms after the Channel measurement (content-rules.json `_lexicon`): OmniVoice glues space-separated letters into one short word ('a' held 0.06–0.10 s), while 'em, a, cê, đi' held 'a' 0.06–0.18 s and 'em, a, xê, đê' 0.12–0.18 s, with no audible gap between the letters — the user's letters are kept here, only the commas are new. FTD's comma form is by analogy, still unmeasured. Whisper writing 'MACD' back proves nothing (it infers the acronym); after voicing, run scripts/tts_takes.py, which listens letter by letter and keeps the clearest take. 2026-10-01: tickers are no longer kept off the narration — the user wants the ticker said, not the company name; `letters` below spells every three-capital token the lexicon did not catch (scripts/lib/rules.mjs spellerOf), unmeasured until the first take. 2026-10-01: 'phẩy' → 'chấm' for the same reason as content-rules.json (OmniVoice drops 'phẩy' after a number word in ~90% of takes; 'chấm' survives 6/6). 2026-10-01 evening, user: 'Not change the verb or the indicator of trading pattern, hai trăm phiên => MA200' — the narration now writes the indicator as the trader says it (MA200, EMA50, RS; the written form keeps its digits and verify's digit rule runs on the spoken form), and these entries read them: letter names as the user's MACD entry says them (A = 'ây', the Channel's choice; M 'em', E 'e', S 'ét'), then the number in words. Written WITHOUT commas, as the user chose for MACD in content-rules.json on 2026-10-01 afternoon (commas held each letter twice as long; they wanted the quicker read) — and the same evening the user asked for MACD here to drop its commas too and follow the Channel's lexicon ('refer lexicon of channel video'): MACD is now 'em ây xê đê', byte-identical to src/shared/content-rules.json, and FTD 'ép tê đi' for the same pace reason (its comma form was only by analogy). Ticker spelling (`letters` + `letterJoin` below) dropped its commas the same evening too (user: \"solid and clearly not separate\"). SMA200 is here only so a stray written SMA200 is still read; the narration says MA200. None of the four is measured yet: after voicing, scripts/tts_takes.py listens for each spoken form and keeps the clearest take. 2026-10-01 night, user: 'keep the RS strong verb not change it since it's trading verb' — the two filters are said by their terminal names ('bộ lọc RS Strong', 'bộ lọc Uptrend', no longer 'RS mạnh' / 'xu hướng tăng'). 'Strong' → 'xờ trong' and 'Uptrend' → 'áp tren' are first guesses (alternatives: 'sờ trông' / 'ắp tren', or no entry so OmniVoice reads the English word), UNMEASURED: after voicing run scripts/tts_takes.py --only=<the rs and uptrend ids> and keep the reading whose takes are heard whole. 2026-10-03: MA50 → 'em ây năm mươi' for FireAnt's MA50 in the leader scenes (the user: 'The FireAnt also have the MA50 and MA200 … refer it'), the pattern of MA200, unmeasured. 2026-10-03: \"một nghìn\" → \"một nghìn,\" (TTS only): OmniVoice slurred every VN-Index price — 2/10 hook \"một nghìn bảy trăm ba mươi tám\" spoken in 0,42 s and watch \"một nghìn sáu trăm năm mươi mốt\" in 0,74 s (plain Whisper word timings), strict transcripts \"một bảy ba tám\" / \"mốt sáu năm mươi mốt\" in 7 of 7 takes. The comma gives the voice a breath after \"nghìn\" so the hundreds and tens are said; measured with tts_takes.py on the same two sentences before keeping it. 2026-10-05 (user: 'Some voice relate to the number and symbol not correctly'): the reference voice (ThanhBinh) is southern and slurs the northern number words — flow's 'năm nghìn tám trăm linh hai tỷ' came back 'năm tám không hai tỷ' with 'nghìn' gone in 3 of 3 takes, the hook's 'một nghìn, bảy trăm năm mươi ba' as 'một nghìn, bảy năm ba' in every readable take; spoken 'ngàn' and 'lẻ' gave 5.802 / 3.982 tỷ heard whole 3 of 3 and 'một ngàn, bảy trăm năm mươi ba' 2 of 3 strict (scripts/voice-checks/num_test.py). So the voice says 'ngàn' for 'nghìn' and 'trăm lẻ' for 'trăm linh' (TTS only; the narration and headlines keep 'nghìn', 'linh'); 'một nghìn' keeps its comma and comes first so the generic entry does not pre-empt it.",
+  "_lexicon": "How the voice SAYS a written term (scripts/voiceover.mjs respells whole words right before synthesis). MACD is the user's own choice from 2026-09-28. Add FTD, RS or a ticker only after measuring it with OmniVoice + Whisper as market-video SKILL.md section 3 does; until then writer.md keeps them off the narration (phiên xác nhận, sức mạnh giá, the company's name). FTD → 'ép tê đi' added 2026-09-30 when the user asked the market scene to say 'phiên FTD' — the letter pattern of their MACD choice (Vietnamese letter names, D said 'đi'); NOT yet measured with Whisper: check the first take and change the reading here if it is misheard. 2026-09-30 evening: commas added between the letters of both terms after the Channel measurement (content-rules.json `_lexicon`): OmniVoice glues space-separated letters into one short word ('a' held 0.06–0.10 s), while 'em, a, cê, đi' held 'a' 0.06–0.18 s and 'em, a, xê, đê' 0.12–0.18 s, with no audible gap between the letters — the user's letters are kept here, only the commas are new. FTD's comma form is by analogy, still unmeasured. Whisper writing 'MACD' back proves nothing (it infers the acronym); after voicing, run scripts/tts_takes.py, which listens letter by letter and keeps the clearest take. 2026-10-01: tickers are no longer kept off the narration — the user wants the ticker said, not the company name; `letters` below spells every three-capital token the lexicon did not catch (scripts/lib/rules.mjs spellerOf), unmeasured until the first take. 2026-10-01: 'phẩy' → 'chấm' for the same reason as content-rules.json (OmniVoice drops 'phẩy' after a number word in ~90% of takes; 'chấm' survives 6/6). 2026-10-01 evening, user: 'Not change the verb or the indicator of trading pattern, hai trăm phiên => MA200' — the narration now writes the indicator as the trader says it (MA200, EMA50, RS; the written form keeps its digits and verify's digit rule runs on the spoken form), and these entries read them: letter names as the user's MACD entry says them (A = 'ây', the Channel's choice; M 'em', E 'e', S 'ét'), then the number in words. Written WITHOUT commas, as the user chose for MACD in content-rules.json on 2026-10-01 afternoon (commas held each letter twice as long; they wanted the quicker read) — and the same evening the user asked for MACD here to drop its commas too and follow the Channel's lexicon ('refer lexicon of channel video'): MACD is now 'em ây xê đê', byte-identical to src/shared/content-rules.json, and FTD 'ép tê đi' for the same pace reason (its comma form was only by analogy). Ticker spelling (`letters` + `letterJoin` below) dropped its commas the same evening too (user: \"solid and clearly not separate\"). SMA200 is here only so a stray written SMA200 is still read; the narration says MA200. None of the four is measured yet: after voicing, scripts/tts_takes.py listens for each spoken form and keeps the clearest take. 2026-10-01 night, user: 'keep the RS strong verb not change it since it's trading verb' — the two filters are said by their terminal names ('bộ lọc RS Strong', 'bộ lọc Uptrend', no longer 'RS mạnh' / 'xu hướng tăng'). 'Strong' → 'xờ trong' and 'Uptrend' → 'áp tren' are first guesses (alternatives: 'sờ trông' / 'ắp tren', or no entry so OmniVoice reads the English word), UNMEASURED: after voicing run scripts/tts_takes.py --only=<the rs and uptrend ids> and keep the reading whose takes are heard whole. 2026-10-03: MA50 → 'em ây năm mươi' for FireAnt's MA50 in the leader scenes (the user: 'The FireAnt also have the MA50 and MA200 … refer it'), the pattern of MA200, unmeasured. 2026-10-03: \"một nghìn\" → \"một nghìn,\" (TTS only): OmniVoice slurred every VN-Index price — 2/10 hook \"một nghìn bảy trăm ba mươi tám\" spoken in 0,42 s and watch \"một nghìn sáu trăm năm mươi mốt\" in 0,74 s (plain Whisper word timings), strict transcripts \"một bảy ba tám\" / \"mốt sáu năm mươi mốt\" in 7 of 7 takes. The comma gives the voice a breath after \"nghìn\" so the hundreds and tens are said; measured with tts_takes.py on the same two sentences before keeping it. 2026-10-05 (user: 'Some voice relate to the number and symbol not correctly'): the reference voice (ThanhBinh) is southern and slurs the northern number words — flow's 'năm nghìn tám trăm linh hai tỷ' came back 'năm tám không hai tỷ' with 'nghìn' gone in 3 of 3 takes, the hook's 'một nghìn, bảy trăm năm mươi ba' as 'một nghìn, bảy năm ba' in every readable take; spoken 'ngàn' and 'lẻ' gave 5.802 / 3.982 tỷ heard whole 3 of 3 and 'một ngàn, bảy trăm năm mươi ba' 2 of 3 strict (scripts/voice-checks/num_test.py). So the voice says 'ngàn' for 'nghìn' and 'trăm lẻ' for 'trăm linh' (TTS only; the narration and headlines keep 'nghìn', 'linh'); 'một nghìn' keeps its comma and comes first so the generic entry does not pre-empt it. 2026-10-06 (the weekly's Momentum boards, user: 'eval the filter: Momentum breakout, Momentum breakdown'): the two filters are said by their terminal names like RS Strong / Uptrend — 'Momentum' → 'mô men tầm', 'breakout' → 'bờ rếch ao', 'breakdown' → 'bờ rếch đao' (Vietnamese syllables for the trader's English; 'br' is no Vietnamese onset, so not 'brếch'). First guesses, UNMEASURED: after voicing run scripts/tts_takes.py --only=<the breakout and breakdown ids> and keep the reading whose takes are heard whole (alternative: no entry, OmniVoice reads the English word).",
   "letters": {
    "A": "a",
    "B": "bê",

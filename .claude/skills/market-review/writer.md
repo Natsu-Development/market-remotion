@@ -119,7 +119,10 @@ trước, mã RS 1M cao nhất sau cùng — người dùng 2026-10-01 bỏ lờ
 trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi scene phải có lý do để xem tiếp.
 
 - **Hook, KHÔNG chữ của hệ thống** (người dùng chốt 30/9: không phiên phân phối, không FTD, không "theo
-  quy tắc", không tên trạng thái). Khuôn người dùng đặt: (0) ngày của phiên, một câu ngắn — thứ, rồi chữ "ngày", rồi ngày tháng: "Thứ Ba,
+  quy tắc", không tên trạng thái) — trừ MỘT câu mở ở phiên FTD bị mất (người dùng 2026-10-08: "Start with hook: Thị trường
+  đã mất phiên FTD 3/8 & đang trong trạng thái nguy hiểm - append with existed content"): brief của hook ghi câu đó
+  (`rules.followThrough.lost.say`), nó đứng TRƯỚC câu ngày, ngày FTD đọc thành chữ, "và" thay "&", phần còn lại của khuôn giữ
+  nguyên. Khuôn người dùng đặt: (0) ngày của phiên, một câu ngắn — thứ, rồi chữ "ngày", rồi ngày tháng: "Thứ Ba,
   ngày hai mươi chín tháng chín." (`session.weekday`, `session.dm`; người dùng thêm "ngày" 2026-10-01 — không
   "Thứ Ba, hai mươi chín tháng chín."); (1) điểm số và % của phiên, gọi tên chỉ số —
   "VN-Index đóng cửa một nghìn bảy trăm bảy mươi tám, giảm không phẩy mười bảy phần trăm." (viết "VN-Index"
@@ -145,7 +148,10 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   rồi nói câu người dùng chốt 2026-10-05 (`rules.distribution.danger.say`) THAY câu đếm tới điều chỉnh ("Thêm một phiên nữa là
   điều chỉnh." của bản 2/10): "Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa." — được nắn cho hợp
   scene, nhưng giữ cả hai ý và chữ "khỏe"; ngưỡng điều chỉnh để nhãn beat 3 và scene watch nói; đồng hồ (phiên cũ nhất hết hạn sau mấy phiên) để
-  nhãn trên chart và scene watch nói; (4) câu dẫn sang scene sau, dạng câu hỏi ngắn. Bản PHIÊN: ảnh FireAnt "Biến động
+  nhãn trên chart và scene watch nói; ở trạng thái ĐIỀU CHỈNH (người dùng 2026-10-08) không đồng hồ, không ngưỡng, không đọc luật
+  FTD ("ngày một", "ngày thứ tư" — "Not need mention the rule of FTD"): phiên FTD đã thất bại, phải tìm một phiên FTD mới, rồi câu
+  `rules.status.CORRECTION.say` — "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao."; phiên mất FTD thì thêm "Thị trường
+  đang rất nguy hiểm."; (4) câu dẫn sang scene sau, dạng câu hỏi ngắn. Bản PHIÊN: ảnh FireAnt "Biến động
   thị trường" (`flow`) đã là scene 02, trước market (người dùng 2026-10-05: 'move it into the scene 02'), nên market trao
   lời thẳng cho bảng Volume spike — câu hỏi trao lời cho các bộ lọc, như "Bộ lọc hôm nay bắt được gì?" (đặt làm câu đầu của
   spike khi market chạm trần chữ), KHÔNG lặp câu "Tiền chảy vào đâu?" của hook. Bản TUẦN sang đường độ rộng (`breadth`):
@@ -376,7 +382,7 @@ Kèm `_script.md`: bài nói liền mạch để đạo diễn đọc như ngư�
 - [ ] Từ năm phiên phân phối (`distribution.danger`): market có "nguy hiểm" + "rà lại từng mã và rủi ro" + câu người dùng chốt 5/10
   "Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa." (không đếm "thêm … nữa là điều chỉnh"), watch giữ lời cảnh báo,
   mỗi leader một câu nhắc rủi ro (từ 7/10: câu người đang giữ của hai vai); chưa tới năm thì mức nguy hiểm là ngưỡng kế của market và nhánh của watch.
-- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái); câu đầu "Thứ …, ngày …" (có chữ "ngày"); điểm số + % trước, hai chữ theo `breadthToday` (bản phiên có scene 02 `flow`: hook không đọc số mã — người dùng 2026-10-05), câu hỏi, lời mời "cùng mình điểm lại…". `market` đếm bằng "hiện tại đang có <n> phiên phân phối" (không "đếm lại còn …") và gọi tên trạng thái. `spike` chỉ kể bảng của nó, không móc sang nhóm dẫn dắt (bỏ 2026-10-05).
+- [ ] Hook: không chữ hệ thống (phân phối/FTD/quy tắc/trạng thái), trừ câu mở của phiên FTD bị mất (`followThrough.lost.say`, 2026-10-08); câu đầu "Thứ …, ngày …" (có chữ "ngày"); điểm số + % trước, hai chữ theo `breadthToday` (bản phiên có scene 02 `flow`: hook không đọc số mã — người dùng 2026-10-05), câu hỏi, lời mời "cùng mình điểm lại…". `market` đếm bằng "hiện tại đang có <n> phiên phân phối" (không "đếm lại còn …") và gọi tên trạng thái. `spike` chỉ kể bảng của nó, không móc sang nhóm dẫn dắt (bỏ 2026-10-05).
 - [ ] `rs` và `uptrend` là hai bộ lọc RIÊNG, gọi đúng tên "RS Strong" / "Uptrend" (không "RS mạnh", không "bộ lọc xu hướng tăng"); câu ghim beat 2 của `rs` nói về mã cần chú ý trên bảng; `uptrend` kể nghĩa của bộ lọc và mã đầu bảng, rồi kết bằng lời mời gọi tên mã sẽ soi ("Cùng mình xem kỹ MSR và DGW.", không "đếm ngược"); KHÔNG câu nào nói mã có ở bộ lọc khác (`review-overlap`).
 - [ ] Tối đa bốn scene leader (soi mã) cùng khuôn (bản phiên: chỉ mã ở cả ba bộ lọc, từ không tới bốn scene), mỗi mã một chi tiết riêng; không nói mã có ở bộ lọc nào; eyebrow `Soi mã · <MÃ>`; câu đầu "Mã đầu tiên là …" / "Mã thứ hai là …" / "Mã thứ ba là …" / "Mã thứ tư là …" (scene soi mã duy nhất của reel: "Mã đáng chú ý hôm nay là …"); không "số một / số hai", không "đếm ngược".
 - [ ] Leader có `review` trong pack: chi tiết là `review.detail`, số đọc ra lời có trong `review.numbers`, ô `pending` không nói tới.

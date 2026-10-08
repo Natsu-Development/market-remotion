@@ -229,7 +229,7 @@ Người đang có hàng nghe MỘT câu: đóng cửa dưới đường nào th
 `support2`, `trendlineSupport`, `ma50` mà thấp hơn P1 ít nhất 1,5% (`STEP_GAP` — 27,60 rồi 27,42 không phải hai bậc). `priceKey`
 ghi key nguồn. Mức ngang in theo bước giá (§2a); MA50 và trendline in đúng số đo.
 
-| # | `case` | Điều kiện | Giá | Thường | Ở mức nguy hiểm (`context.danger`) |
+| # | `case` | Điều kiện | Giá | Thường | Ở mức nguy hiểm (`market.tight` — năm phiên phân phối, HOẶC thị trường điều chỉnh: từ 2026-10-08 điều chỉnh siết y như mức nguy hiểm) |
 |---|---|---|---|---|---|
 | 1 | `exit-downtrend` | dưới MA50 VÀ dưới MA200 | — (nhãn cạnh nến cuối) | "cắt lỗ, không chờ hồi" (≤ −10% dưới MA200), không thì "thoát hết, không chờ hồi" | như cũ |
 | 2 | `below-ma50` | dưới MA50 | MA50 | "Đã đóng cửa dưới MA50 ở …" → hạ tỷ trọng một nửa | thoát hết |

@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-10-07T09:44:55.068Z",
+  "fetchedAt": "2026-10-08T09:43:19.542Z",
   "_note": "names and conditions only, taken from GET /api/config/{id}.metrics_filter",
   "filters": [
     {

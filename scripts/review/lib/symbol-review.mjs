@@ -847,7 +847,10 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   cls('trend', true, 'mặc định');
 
   // The two roles (§6b/§6c): decided here, from the numbers, so every review of the same session says the same thing.
-  const roles = rolesOf({num, classes, price, danger: D?.danger === true, exchange: row.exchange ?? 'HOSE'});
+  // A correction (six distribution days) is past the danger tier, so the tables stay tightened there too (2026-10-08, the
+  // first correction since the roles: facts' `danger` is false outside an uptrend).
+  const tight = D?.danger === true || F?.state?.status === 'CORRECTION';
+  const roles = rolesOf({num, classes, price, danger: tight, exchange: row.exchange ?? 'HOSE'});
 
   return {
     symbol: SYM, date, method: METHOD,
@@ -860,7 +863,7 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
     dates, flags, numbers, checks, classes, roles,
     priceAction: pa,
     filters: row.filters ?? [], tier: row.tier ?? null,
-    market: F?.state ? {status: F.state.status, label: F.state.label, danger: D?.danger ?? null, toDanger: D?.toDanger ?? null} : null,
+    market: F?.state ? {status: F.state.status, label: F.state.label, danger: D?.danger ?? null, tight, toDanger: D?.toDanger ?? null} : null,
   };
 };
 

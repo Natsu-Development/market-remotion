@@ -417,7 +417,9 @@ export default function reviewChecks(reel, {root, rules: R}) {
       const bad = [];
       const level = F.state.rallyLow ?? F.state.correctionLow;
       if (level != null && !text.includes(Number(level).toFixed(2).replace('.', ','))) bad.push(`the level ${Number(level).toFixed(2)} that changes the state is not on screen`);
-      if (!/phân phối/i.test(text)) bad.push('the distribution-day tripwire is not on screen');
+      // Out of an uptrend the count no longer moves the state: a correction (or an attempt) ends on an FTD (2026-10-08).
+      const outOfUptrend = F.state.status === 'CORRECTION' || F.state.status === 'RALLY_ATTEMPT';
+      if (outOfUptrend ? !/FTD/.test(text) : !/phân phối/i.test(text)) bad.push(outOfUptrend ? 'the FTD rule — the way out of the correction — is not on screen' : 'the distribution-day tripwire is not on screen');
       // The user's danger level: the payoff names it while it is the next threshold, and keeps the warning once reached.
       const notes = [];
       const said = /nguy hiểm/i.test(`${w.narration ?? ''} ${text}`);

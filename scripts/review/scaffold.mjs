@@ -319,7 +319,20 @@ const recentTop = Math.min(...daily.slice(-15).map((b) => priceY(index, b.h, ind
 const ddLeft = ddXs.length ? Math.min(...ddXs.map((d) => d.x)) : null;
 const ddCentre = ddLeft != null ? (ddLeft + (lastX ?? 0.9)) / 2 : inC(0.75, 0)[0];
 const biggest = [...ddXs].sort((a, b) => a.changePercent - b.changePercent)[0];
-const nextExp = F.distribution.nextExpiry;
+// A correction (six DDs, or an undercut FTD) is left only by a rally attempt and its FTD: the DD clock and the countdown
+// no longer move the state there (2026-10-08, the first correction on this scaffold), so the market and watch scenes say
+// the attempt's rule instead.
+const inCorrection = F.state.status === 'CORRECTION';
+const ftdRule = `FTD từ ngày ${F.rules.ftdMinDay}, +${vi(F.rules.ftdMinChangePercent)}%`;
+// The FTD failed (the correction ended its uptrend): its plate says so (user 2026-10-08: "Emphasize the failure FTD"). On the
+// session it is lost, the daily hook opens with the user's line on the FTD candle (rules.followThrough.lost: "Start with
+// hook: Thị trường đã mất phiên FTD 3/8 & đang trong trạng thái nguy hiểm - append with existed content") and the market
+// scene adds that the market is very dangerous ("mention the market is so dangerous right now on scene 1 and 3").
+const ftdFailed = inCorrection && !!ftd?.ended;
+const FL = R.followThrough.lost ?? null;
+const ftdLostToday = FORMAT === 'daily' && !!FL && ftdFailed && ftd.ended.date === F.session.date;
+const lostLine = (t) => t.replaceAll('{dm}', ftd?.dm ?? '');
+const nextExp = inCorrection ? null : F.distribution.nextExpiry;
 const nextExpDd = nextExp ? ddXs.find((d) => d.date === nextExp.date) : null;
 // The user's danger level (rules.distribution.dangerAt, 2026-10-01: five DDs "is dangerous and must warning and
 // re-check the symbol and risk"): a warning tier while the uptrend stands, not a state of the machine. Below it,
@@ -335,7 +348,9 @@ const ladder = [
 const nextState = ladder[0] ?? {n: F.distribution.toCorrection, name: R.status.CORRECTION.short};
 // The market scene's beat-3 plate: the thresholds still ahead ("5 phiên → nguy hiểm · 6 phiên → điều chỉnh" at four DDs),
 // or the warning itself once the danger level is reached.
-const ladderText = dangerNow
+const ladderText = inCorrection
+  ? `Phiên tăng → ngày 1 · ${ftdRule}`
+  : dangerNow
   ? `${DG.short}: ${DG.action.split(' và ')[0]} · ${R.distribution.correctionAt} phiên → ${R.status.CORRECTION.short.toLowerCase()}`
   : ladder.length
     ? ladder.map((s, i) => `${s.at}${i === 0 || ladder.length < 3 ? ' phiên' : ''} → ${s.name.toLowerCase()}`).join(' · ')
@@ -346,7 +361,7 @@ const ddLabel = (beat) => (ddLeft != null
   ? [lab(ddLeft - 0.012, clamp(Math.min(ddTop(), recentTop - GAP - ARROW) + 0.01), `${F.distribution.count} phiên phân phối`, 'red', beat, 'end')]
   : []);
 const ftdMarks = (beat) => (ftdVisible
-  ? [ftdArrow(ftd, ftdX, beat), lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}`, 'green', beat, 'middle')]
+  ? [ftdArrow(ftd, ftdX, beat), lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} ${fmtPct(ftd.changePercent)}${ftdFailed ? ' · thất bại' : ''}`, ftdFailed ? 'red' : 'green', beat, 'middle')]
   : []);
 
 /** The role built right after market: flow only when its photo is this session's (the same test as buildFlow), breadth
@@ -379,19 +394,25 @@ const buildHook = () => {
     const bottom = priceY(index, W.low, indexUnit);
     return {kind: 'box', x: clamp(Math.min(...xs) - half), y: clamp(top - 0.012), w: clamp(Math.max(...xs) - Math.min(...xs) + 2 * half), h: clamp(bottom - top + 0.024), accent: W.changePercent >= 0 ? 'up' : 'down', beat: 0};
   };
+  // The session the FTD is lost (rules.followThrough.lost, user 2026-10-08): the daily hook opens WIDE on the FTD candle
+  // with the user's line, then today's candle and the question as always — one beat more.
+  const lost = !W && ftdLostToday && ftdVisible;
+  const b0 = lost ? 1 : 0;
   const marks = [
-    W ? weekBox() : todayRing(0),
+    ...(lost ? [ftdArrow(ftd, ftdX, 0), lab(ftdX, clamp(ftdBase(ftd) + 0.03), `FTD ${ftd.dm} thất bại`, 'red', 0, 'middle')] : []),
+    W ? weekBox() : todayRing(b0),
     W
       ? lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `${weekOpen ? 'Tuần này' : 'Đóng tuần'} ${vi(W.close)} · ${fmtPct(W.changePercent)}`, W.changePercent >= 0 ? 'green' : 'red', 0, 'end')
-      : lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `Đóng cửa ${vi(S.close)} · ${fmtPct(S.changePercent)}`, S.changePercent >= 0 ? 'green' : 'red', 0, 'end'),
-    ...(!W && !flowAfterHook && T?.up != null ? [lab(clamp(lastX - 0.03), clamp(lastY - 0.07), `${T.exchange}: ${T.up} tăng · ${T.down} giảm`, 'white', 0, 'end')] : []),
+      : lab(clamp(lastX - 0.03), clamp(lastY - 0.11), `Đóng cửa ${vi(S.close)} · ${fmtPct(S.changePercent)}`, S.changePercent >= 0 ? 'green' : 'red', b0, 'end'),
+    ...(!W && !flowAfterHook && T?.up != null ? [lab(clamp(lastX - 0.03), clamp(lastY - 0.07), `${T.exchange}: ${T.up} tăng · ${T.down} giảm`, 'white', b0, 'end')] : []),
   ];
   const shots = [
-    {beat: 0, x: clamp((lastX ?? 0.85) - 0.07), y: clamp(lastY), zoom: 2.0, move: 'push_in'},
-    {beat: 1, x: clamp((lastX ?? 0.85) - 0.1), y: clamp(lastY + 0.02), zoom: 1.6, move: 'pull_out'},
+    ...(lost ? [{beat: 0, x: clamp((ftdX + (lastX ?? 0.85)) / 2), y: clamp(((ftdY ?? lastY) + lastY) / 2 + 0.03), zoom: 1.3, move: 'pan'}] : []),
+    {beat: b0, x: clamp((lastX ?? 0.85) - 0.07), y: clamp(lastY), zoom: 2.0, move: 'push_in'},
+    {beat: b0 + 1, x: clamp((lastX ?? 0.85) - 0.1), y: clamp(lastY + 0.02), zoom: 1.6, move: 'pull_out'},
   ];
   push('hook', {
-    beats: todoBeats(2),
+    beats: lost ? todoBeats(3, est('hook')) : todoBeats(2),
     visual: indexPhoto(room.settle(marks, shots)),
     brief: W ? [
       weekOpen
@@ -400,11 +421,14 @@ const buildHook = () => {
       `Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI: "Cùng mình điểm lại ${weekOpen ? 'tuần này' : 'tuần qua'} và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.`,
       `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu hai; số mã trên MA200 để scene breadth nói.`,
     ] : [
+      ...(lost ? [`MỞ BẰNG CÂU CỦA NGƯỜI DÙNG (2026-10-08: "On scene 1: Start with hook: Thị trường đã mất phiên FTD 3/8 & đang trong trạng thái nguy hiểm - append with existed content for me"): "${lostLine(FL.say)}" — ngày của phiên FTD đọc thành chữ ("${ftd.dm.replace('/', ' tháng ')}"), "và" thay "&". Beat 1 ghim vào câu này: headline "${lostLine(FL.headline[0])}" / "${lostLine(FL.headline[1])}" (đỏ); máy mở rộng trên nến FTD ${ftd.dm} (mũi tên, nhãn "FTD ${ftd.dm} thất bại") rồi mới vào nến hôm nay. Sau câu mở là phần cũ của hook, GIỮ NGUYÊN khuôn dưới đây — mỗi câu lùi một: beat 2 ghim vào câu ngày (headline điểm số và %), beat 3 vào câu hỏi.`] : []),
       `Câu đầu là NGÀY của phiên: "${S.weekday}, ngày ${S.dm.replace('/', ' tháng ')}" đọc thành chữ (có chữ "ngày" sau thứ — người dùng 2026-10-01). Câu hai gọi tên chỉ số rồi ĐIỂM SỐ và % của phiên: "VN-Index đóng cửa" ${vi(S.close)} (đọc tròn ${vi(Math.round(S.close), 0)}), ${fmtPct(S.changePercent)}. ${flowAfterHook
         ? `KHÔNG đọc số mã tăng/giảm ở hook (người dùng 2026-10-05: bỏ câu "Chỉ số tăng: … mã tăng, … mã giảm" vì scene 02 — ảnh FireAnt "Biến động thị trường" — đọc chúng); headline beat 1 cũng không in số mã. Chữ do số quyết định của chỉ số: "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang).`
         : `Câu hai là hai chữ mà SỐ quyết định: chỉ số "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang), ${T?.breadthWord ?? '—'} (HOSE ${T?.up ?? '?'} tăng · ${T?.down ?? '?'} giảm · ${T?.flat ?? '?'} đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).`}`,
-      'Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI (người dùng chốt 30/9, thay lời hứa "cuối video"): "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat 2 ghim vào câu hỏi.',
-      `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.`,
+      `Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI (người dùng chốt 30/9, thay lời hứa "cuối video"): "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat ${lost ? 3 : 2} ghim vào câu hỏi.`,
+      lost
+        ? 'Ngoài câu mở của người dùng, KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống kể ở scene market. Hai số đọc ra lời là hai số của câu điểm số (ngày FTD trong câu mở là ngày, không tính).'
+        : `KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống bắt đầu từ scene market. Hai số đọc ra lời là hai số của câu đầu.`,
     ],
   });
 };
@@ -419,8 +443,12 @@ const buildMarket = () => {
   marks.push(...ftdMarks(1));
   if (holdVisible) marks.push({kind: 'hline', y: clamp(holdY), accent: 'gold', beat: 1, label: `${holdName} ${vi(holdLow)}`, labelSide: 'left'});
   if (nextExpDd) marks.push(lab(nextExpDd.x - 0.012, clamp(priceY(index, barOf(nextExpDd.date).h, indexUnit) - GAP - ARROW - 0.04), `${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên`, 'white', 2, 'end'));
-  marks.push(lab(...inC(0.5, 0.06), ladderText, dangerNow ? 'red' : 'gold', 2));
-  const thresholdBrief = F.distribution.toUnderPressure > 0
+  // A correction shows no rule plate (user 2026-10-08: "Not need mention the rule of FTD"): beat 3 keeps the correction low,
+  // the low the first rally attempt has to hold (rules.status.CORRECTION.say).
+  if (!inCorrection) marks.push(lab(...inC(0.5, 0.06), ladderText, dangerNow ? 'red' : 'gold', 2));
+  const thresholdBrief = inCorrection
+    ? `trạng thái ${F.state.since === F.session.date ? 'ĐỔI HÔM NAY' : 'đã là'}: "${F.state.label}" từ ${F.state.sinceDm} theo quy tắc (${F.distribution.count} ≥ ${R.distribution.correctionAt} phiên phân phối${F.state.lastFtd?.ended ? `; phiên FTD ${F.state.lastFtd.dm} thất bại, kết thúc ${F.state.lastFtd.ended.dm}` : ''}) — nói rõ bằng lời người. Ở trạng thái điều chỉnh số phiên phân phối KHÔNG còn đổi trạng thái: KHÔNG đồng hồ hết hạn, KHÔNG đếm tới ngưỡng nào, KHÔNG câu "${DG.say ?? 'mức nguy hiểm'}" (đó là câu của mức nguy hiểm khi xu hướng tăng còn đứng). Điều kiện kế: phải TÌM MỘT PHIÊN FTD MỚI (người dùng 2026-10-08: "find the another FTD" — nói thành lời, như "Giờ phải tìm một phiên FTD mới."; từ ${ftd?.dm ?? '—'} tới nay không có phiên FTD nào khác), nhưng KHÔNG đọc luật của nó (ngày 1, FTD từ ngày ${F.rules.ftdMinDay} — người dùng 2026-10-08: "Not need mention the rule of FTD … Replace it with something meaningful"); thay vào đó là câu người dùng chốt: "${R.status.CORRECTION.say ?? ''}" — chữ của người dùng, "đáy" là đáy mà nỗ lực phục hồi đầu tiên phải giữ: đáy điều chỉnh ${vi(F.state.correctionLow)} (đường vàng beat 3). Headline beat 3 mang hai ý: tìm phiên FTD mới, nguy cơ thủng đáy rất cao. Thủng ${vi(F.state.correctionLow)} là đáy điều chỉnh mới (để scene watch nói)`
+    : F.distribution.toUnderPressure > 0
     ? `"chỉ cần thêm ${F.distribution.toUnderPressure} phiên phân phối nữa là xu hướng bắt đầu ${R.status.UNDER_PRESSURE.short.toLowerCase()}"${inUptrend && F.distribution.toDanger > 0 ? `; mức nguy hiểm của hệ thống người dùng (${F.distribution.dangerAt} phiên) để nhãn nói` : ''}`
     : dangerNow
       ? `ĐANG Ở MỨC NGUY HIỂM của hệ thống người dùng (${F.distribution.count} ≥ ${F.distribution.dangerAt} phiên phân phối, người dùng 2026-10-01) — scene PHẢI CẢNH BÁO: nói "mức nguy hiểm" và "${DG.action}" như một bước quản trị rủi ro của hệ thống ("theo hệ thống của mình"), không gọi mua bán; verify FAIL nếu market không có chữ "nguy hiểm". Trạng thái vẫn là "${F.state.label}" từ ${F.state.sinceDm}; ${DG.say
@@ -442,13 +470,17 @@ const buildMarket = () => {
     visual: indexPhoto(room.settle(marks, shots)),
     brief: [
       `Beat 1 — mở bằng HÔM NAY: ${F.session.isDistribution ? 'LÀ phiên phân phối' : 'KHÔNG phải phiên phân phối'} (${fmtPct(F.session.changePercent)}, KL ×${vi(F.session.volumeRatio)}), rồi ĐẾM theo khuôn người dùng chốt 1/10: "${countSentence}" (số đọc thành chữ; KHÔNG "đếm lại còn …") — ${F.distribution.count}/${F.distribution.window} phiên: ${dd.map((d) => `${d.dm} ${fmtPct(d.changePercent)} KL ×${vi(d.volumeRatio)}`).join('; ') || 'không có'}. Không kể phiên nặng nhất (người dùng chốt 30/9). Phân phối = giảm từ ${F.rules.ddMaxChangePercent}% với KL cao hơn phiên trước.`,
-      ftdVisible
+      inCorrection
+        ? `Beat 2 — ${ftdVisible ? `phiên FTD ${ftd.dmy} (ngày ${ftd.day}, ${fmtPct(ftd.changePercent)}) ${ftd.ended ? `ĐÃ THẤT BẠI — kết thúc ${ftd.ended.dm}${ftd.ended.why === 'distribution' ? ' vì phiên phân phối thứ ' + F.distribution.count : ' vì thủng đáy nhịp hồi'}; nói đúng chữ "phiên FTD … đã thất bại" (người dùng 2026-10-08: "Emphasize the failure FTD"), nhãn trên chart "FTD ${ftd.dm} ${fmtPct(ftd.changePercent)} · thất bại"` : ''}; ` : ''}${ftdLostToday ? 'rồi MỘT câu ngắn, không số: thị trường đang RẤT NGUY HIỂM (người dùng 2026-10-08: "mention the market is so dangerous right now on scene 1 and 3"); headline beat 2 mang cả hai ý (FTD thất bại, nguy hiểm); ' : ''}${holdName.toLowerCase()} ${holdLow != null ? vi(holdLow) : '—'} (đường vàng${holdLow === F.session.low ? ' — đáy của chính phiên hôm nay' : ''}).`
+        : ftdVisible
         ? `Beat 2 — neo của xu hướng: FTD ${ftd.dmy} (ngày ${ftd.day}, ${fmtPct(ftd.changePercent)}, KL ×${vi(ftd.volumeRatio)}) và đáy nhịp hồi ${vi(ftd.rallyLow)} (đường vàng).`
         : `Beat 2 — ${holdName.toLowerCase()} ${holdLow != null ? vi(holdLow) : '—'}.`,
       // A state's on-screen headline (rules.status.<state>.headline, user 2026-10-05) replaces the state's name in
       // beat 2's headline; the narration still names the state "theo quy tắc".
       ...(R.status[F.state.status]?.headline ? [`Headline beat 2 (line2): "${R.status[F.state.status].headline}" — người dùng 2026-10-05 thay tên trạng thái "${R.status[F.state.status].vi}" trên màn hình bằng câu này ("something like": được chỉnh chữ, giữ ý sức khỏe thị trường đang yếu, viết "khỏe"); KHÔNG in "${R.status[F.state.status].vi}" làm headline nữa. Lời vẫn gọi trạng thái theo quy tắc.`] : []),
-      `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; ngưỡng kế nói bằng lời người — ${thresholdBrief} — KHÔNG kiểu "thêm một là…, thêm ba là…" (người dùng bác 30/9); ngưỡng còn lại để nhãn và scene watch nói. Gọi "phiên FTD" (lexicon đọc "ép tê đi").`,
+      inCorrection
+        ? `Beat 3 — điều kiện kế: ${thresholdBrief}. Gọi "phiên FTD" (lexicon đọc "ép tê đi").`
+        : `Beat 3 — đồng hồ: ${nextExp ? `phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên` : 'không phiên nào sắp hết hạn'}; ngưỡng kế nói bằng lời người — ${thresholdBrief} — KHÔNG kiểu "thêm một là…, thêm ba là…" (người dùng bác 30/9); ngưỡng còn lại để nhãn và scene watch nói. Gọi "phiên FTD" (lexicon đọc "ép tê đi").`,
       // The bridge follows the scene that really comes next: the daily hands over to FireAnt's "Biến động thị trường"
       // (flow), the weekly to the breadth line — and to the filter boards when that scene is dropped (no photo of this
       // session / no breadth counts), where "Nhìn rộng ra thì sao?" would dangle.
@@ -1026,7 +1058,7 @@ const buildWatch = () => {
   }
   // The rally low when the scenario block did not carry it (an older pack), as the scene always did.
   if (!downs.some(({z}) => z.rally) && holdVisible) marks.push({kind: 'hline', y: clamp(holdY), accent: 'gold', beat: 1, label: `Thủng ${vi(holdLow)} → ${F.state.rallyLow != null ? 'FTD thất bại' : 'đáy mới'}`, labelSide: 'left'});
-  marks.push(lab(clamp(lastX - 0.03), clamp(lastY - 0.1), `Thêm ${nextState.n} phiên phân phối → ${nextState.name.toLowerCase()}`, 'red', 1, 'end'));
+  marks.push(lab(clamp(lastX - 0.03), clamp(lastY - 0.1), inCorrection ? `Chờ ${ftdRule}` : `Thêm ${nextState.n} phiên phân phối → ${nextState.name.toLowerCase()}`, 'red', 1, 'end'));
   if (dangerNow) marks.push(lab(clamp(lastX - 0.03), clamp(lastY - 0.14), `${DG.vi}: ${DG.action}`, 'red', 1, 'end'));
   // Beat 1 frames the last candle and the bull path's lines; beat 2 (static: the payoff) widens to reach the bear path.
   const topY = ups.length ? Math.min(...ups.map(({y}) => y)) : lastY - 0.1;
@@ -1044,7 +1076,9 @@ const buildWatch = () => {
     brief: [
       `KỊCH BẢN VN-INDEX — payoff (người dùng 2026-10-05: "also include the scene relate to the scenario of the market VN-Index", chọn nâng cấp scene cuối): hai nhánh NẾU … THÌ theo price action của chính chỉ số (đóng cửa ${vi(F.session.close)}), không gọi giá, không lời khuyên.`,
       `Beat 1 — kịch bản tích cực: các mốc phía trên, gần trước: ${upText}. Khuôn: "Kịch bản tích cực: nếu VN-Index vượt <mốc 1> thì <mốc 2> là mốc kế." Gọi tên MA50 / MA200 (của FireAnt) và "kháng cự" như trader.`,
-      `Beat 2 — kịch bản tiêu cực: các mốc phía dưới, gần trước: ${downText}. Khuôn: "Kịch bản tiêu cực: nếu thủng <mốc 1> thì chỉ số về <mốc 2>; thủng đáy nhịp hồi là phiên FTD thất bại." Rồi luật: thêm ${nextState.n} phiên phân phối là ${nextState.name.toLowerCase()}${nextState.danger ? ' (MỨC NGUY HIỂM của hệ thống người dùng)' : ''}${nextExp ? `; phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên (để nhãn nói hoặc bỏ nếu chật)` : ''}.`,
+      inCorrection
+        ? `Beat 2 — kịch bản tiêu cực: các mốc phía dưới, gần trước: ${downText}${holdLow != null ? `; đáy điều chỉnh ${vi(holdLow)} (thủng là đáy mới — đường vàng)` : ''}. Khuôn: "Kịch bản tiêu cực: nếu thủng <mốc 1> thì chỉ số về <mốc 2>." — KHÔNG "thủng … là FTD thất bại" (phiên FTD ${ftd?.dm ?? ''} đã thất bại${ftd?.ended ? ` hôm ${ftd.ended.dm}` : ''}; scene market nói điều đó). Rồi luật của trạng thái điều chỉnh (theo quy tắc): một phiên đóng cửa tăng là ngày 1 của nỗ lực hồi phục, phiên FTD từ ngày ${F.rules.ftdMinDay}, tăng từ ${vi(F.rules.ftdMinChangePercent)}% với khối lượng cao hơn — nhãn "Chờ ${ftdRule}". KHÔNG đếm phiên phân phối, KHÔNG đồng hồ hết hạn.`
+        : `Beat 2 — kịch bản tiêu cực: các mốc phía dưới, gần trước: ${downText}. Khuôn: "Kịch bản tiêu cực: nếu thủng <mốc 1> thì chỉ số về <mốc 2>; thủng đáy nhịp hồi là phiên FTD thất bại." Rồi luật: thêm ${nextState.n} phiên phân phối là ${nextState.name.toLowerCase()}${nextState.danger ? ' (MỨC NGUY HIỂM của hệ thống người dùng)' : ''}${nextExp ? `; phiên ${nextExp.dm} hết hạn sau ${nextExp.sessionsLeft} phiên (để nhãn nói hoặc bỏ nếu chật)` : ''}.`,
       ...(dangerNow ? [`ĐANG Ở MỨC NGUY HIỂM (${F.distribution.count} phiên phân phối ≥ ${F.distribution.dangerAt}, hệ thống người dùng 2026-10-01): giữ lời cảnh báo — một câu "${DG.action}", không gọi mua bán.`] : []),
       'Máy đứng yên ở beat 2. Câu ngắn, chậm. Số đọc thành chữ (điểm tròn: "một nghìn bảy trăm bảy mươi lăm"); nhãn giữ số lẻ của pack (scenario.*).',
       `Số lấy từ scenario.up / scenario.down và watch[] của fact pack (${F.watch.map((w) => `nếu ${w.if} → ${w.then}`).join('; ')}).`,

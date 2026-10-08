@@ -1,14 +1,31 @@
 {
-  "source": "ssi",
-  "sourceLabel": "SSI iBoard",
-  "symbol": "VNINDEX",
-  "resolution": "daily",
-  "reconstructed": false,
-  "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400",
-  "from": "2013-01-02",
-  "to": "2026-10-07",
-  "bars": 3410,
-  "fetchedAt": "2026-10-07T09:44:55.068Z",
-  "droppedIntraday": null,
-  "volumeUnit": "matched shares per session"
+ "source": "ssi",
+ "sourceLabel": "SSI iBoard",
+ "symbol": "VNINDEX",
+ "resolution": "daily",
+ "reconstructed": false,
+ "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400",
+ "from": "2013-01-02",
+ "to": "2026-10-08",
+ "bars": 3411,
+ "fetchedAt": "2026-10-08T09:43:19.542Z",
+ "droppedIntraday": null,
+ "volumeUnit": "matched shares per session",
+ "sameDayVolume": {
+  "date": "2026-10-08",
+  "v": 490571000,
+  "source": "FireAnt VNINDEX 1D legend \"Volume - Khối lượng 490.571M\" at 15:03:55 ICT (public/shots/review/2026-10-08/vnindex-daily.png), read by eye — OCR garbled it",
+  "basis": "matched shares: FireAnt same-day 7/10 read 485.848M = SSI final 485,847,590",
+  "ssiProvisional": {
+   "15:02": 430936098,
+   "15:09": 388792998,
+   "16:44": 388792998
+  },
+  "entradeTotal": {
+   "2026-10-07": 588608512,
+   "2026-10-08": 634491648
+  },
+  "note": "SKILL.md market-review §9: same-day SSI volume is provisional; both like-for-like bases say 8/10 > 7/10. The next pull.mjs replaces this with SSI final — re-pull before approve.",
+  "reapplied": "after the pre-approve re-pull at 16:44 ICT — SSI still provisional (unchanged since 15:09); FireAnt matched 490.571M is post-ATC"
+ }
 }

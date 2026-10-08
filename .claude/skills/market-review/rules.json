@@ -50,7 +50,12 @@
    1.5,
    1.7
   ],
-  "backtestForwardSessions": 25
+  "backtestForwardSessions": 25,
+  "lost": {
+   "say": "Thị trường đã mất phiên FTD {dm} và đang trong trạng thái nguy hiểm.",
+   "headline": ["Mất phiên FTD {dm}", "Thị trường đang nguy hiểm"]
+  },
+  "_lost": "User 2026-10-08, the session the 3/8 FTD was lost to the sixth distribution day: 'Emphasize about the failure of FTD 3/8 and mention the market is so dangerous right now on scene 1 and 3. On scene 1: Start with hook: Thị trường đã mất phiên FTD 3/8 & đang trong trạng thái nguy hiểm - append with existed content for me. On scene 3 also Emphasize the failure FTD and find the another FTD.' On the session the FTD is lost (state.lastFtd.ended is that session), the daily hook OPENS with `say` ({dm} = the FTD's day/month; 'và' for the user's '&') on the FTD candle, then the usual hook follows unchanged; the market scene says the FTD failed, the market is very dangerous, and a new FTD has to be found. scripts/review/scaffold.mjs (ftdLostToday) writes both briefs; the FTD plate reads 'FTD <dm> … · thất bại' while the state is a correction."
  },
  "status": {
   "CONFIRMED_UPTREND": {
@@ -64,7 +69,9 @@
   },
   "CORRECTION": {
    "vi": "Thị trường điều chỉnh",
-   "short": "Điều chỉnh"
+   "short": "Điều chỉnh",
+   "say": "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao.",
+   "_say": "User 2026-10-08: 'Not need mention the rule of FTD: Đếm từ phiên tăng đầu tiên, FTD sớm nhất là ngày thứ tư. Replace it with something meaningful like Nguy co thung phien no luc phuc hoi dau tien(day) rat cao'. In a correction the market scene says this line (the user's words, '(day)' read as 'đáy') after 'find a new FTD', and never recites the FTD rule (day 1, day 4) — the chart keeps the correction low, the low the first attempt has to hold. Read as the FIRST rally attempt to come; the 2026 June–July correction had six attempts undercut (3/6, 9/6, 15/6, 14/7, 16/7, 23/7) before 28/7's attempt gave the 3/8 FTD. scripts/review/scaffold.mjs quotes it in the market brief."
   },
   "RALLY_ATTEMPT": {
    "vi": "Nỗ lực hồi phục",
@@ -655,7 +662,7 @@
   ],
   "roles": {
    "hook": {
-    "job": "Ngày của phiên (thứ, rồi chữ 'ngày' và ngày tháng: 'Thứ Năm, ngày một tháng mười' — người dùng 2026-10-01), điểm số và % của phiên, rồi chữ do số quyết định (chỉ số đi ngang/tăng/giảm; mã tăng giảm thế nào — bản phiên từ 2026-10-05 KHÔNG đọc số mã tăng/giảm khi scene 02 là ảnh FireAnt 'Biến động thị trường', người dùng: 'optimize scene 1 by removing …'), câu hỏi tiền chảy vào đâu, và LỜI MỜI cùng điểm lại thị trường và các mã đáng chú ý. KHÔNG dùng chữ của hệ thống (phiên phân phối, FTD, 'theo quy tắc', trạng thái) — chuyện hệ thống bắt đầu ở market.",
+    "job": "Ngày của phiên (thứ, rồi chữ 'ngày' và ngày tháng: 'Thứ Năm, ngày một tháng mười' — người dùng 2026-10-01), điểm số và % của phiên, rồi chữ do số quyết định (chỉ số đi ngang/tăng/giảm; mã tăng giảm thế nào — bản phiên từ 2026-10-05 KHÔNG đọc số mã tăng/giảm khi scene 02 là ảnh FireAnt 'Biến động thị trường', người dùng: 'optimize scene 1 by removing …'), câu hỏi tiền chảy vào đâu, và LỜI MỜI cùng điểm lại thị trường và các mã đáng chú ý. KHÔNG dùng chữ của hệ thống (phiên phân phối, FTD, 'theo quy tắc', trạng thái) — chuyện hệ thống bắt đầu ở market. Ngoại lệ DUY NHẤT (người dùng 2026-10-08): phiên mà FTD bị mất thì hook MỞ bằng câu `followThrough.lost.say` ('Thị trường đã mất phiên FTD … và đang trong trạng thái nguy hiểm.') trên nến FTD, rồi mới tới ngày, điểm số, câu hỏi và lời mời như cũ.",
     "act": "blue",
     "pace": "short",
     "shots": [
@@ -708,7 +715,7 @@
     ]
    },
    "market": {
-    "job": "Chuyện hệ thống bắt đầu ở đây: hôm nay có phải phiên phân phối không, rồi 'hiện tại đang có <n> phiên phân phối' (người dùng 2026-10-01, thay 'đếm lại còn …'); trạng thái theo quy tắc, neo ở phiên FTD và đáy nhịp hồi; đồng hồ (phiên cũ nhất hết hạn sau mấy phiên) và các ngưỡng kế (thêm mấy phiên là chịu áp lực, mấy phiên là MỨC NGUY HIỂM của hệ thống người dùng — năm phiên, rà lại từng mã và rủi ro, người dùng 2026-10-01 — mấy phiên là điều chỉnh). Đang ở mức nguy hiểm thì scene phải CẢNH BÁO: nói 'mức nguy hiểm' và rà lại từng mã và rủi ro, rồi câu người dùng chốt 2026-10-05 (`distribution.danger.say`: 'Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa.') THAY câu đếm tới điều chỉnh ('Thêm một phiên nữa là điều chỉnh' — ngưỡng điều chỉnh để nhãn beat 3 và scene watch nói). Chưa nói điều kiện nếu … thì — để dành cho watch.",
+    "job": "Chuyện hệ thống bắt đầu ở đây: hôm nay có phải phiên phân phối không, rồi 'hiện tại đang có <n> phiên phân phối' (người dùng 2026-10-01, thay 'đếm lại còn …'); trạng thái theo quy tắc, neo ở phiên FTD và đáy nhịp hồi; đồng hồ (phiên cũ nhất hết hạn sau mấy phiên) và các ngưỡng kế (thêm mấy phiên là chịu áp lực, mấy phiên là MỨC NGUY HIỂM của hệ thống người dùng — năm phiên, rà lại từng mã và rủi ro, người dùng 2026-10-01 — mấy phiên là điều chỉnh). Đang ở mức nguy hiểm thì scene phải CẢNH BÁO: nói 'mức nguy hiểm' và rà lại từng mã và rủi ro, rồi câu người dùng chốt 2026-10-05 (`distribution.danger.say`: 'Xác suất có biến động hoặc điều chỉnh lớn, thị trường không còn khỏe nữa.') THAY câu đếm tới điều chỉnh ('Thêm một phiên nữa là điều chỉnh' — ngưỡng điều chỉnh để nhãn beat 3 và scene watch nói). Chưa nói điều kiện nếu … thì — để dành cho watch. Ở trạng thái điều chỉnh (người dùng 2026-10-08: 'Emphasize the failure FTD and find the another FTD'): phiên FTD đã THẤT BẠI, và phải TÌM một phiên FTD mới — KHÔNG đọc luật của nó (ngày 1, ngày 4: người dùng 2026-10-08 'Not need mention the rule of FTD'), mà nói câu `status.CORRECTION.say` ('Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao.'); không đồng hồ hết hạn, không đếm tới ngưỡng. Phiên FTD bị mất thì nói thêm thị trường đang RẤT NGUY HIỂM.",
     "act": "blue",
     "pace": "long",
     "shots": [

@@ -194,7 +194,10 @@ node scripts/frame-audit.mjs DailyReview --check   # mọi khung hình: nhãn b�
 
 Scene theo `rules.formats.daily.roles` (người dùng yêu cầu tối ưu giữ người xem 2026-09-29, theo arc
 hook_payoff + đếm ngược của vox-director): hook (ngày, điểm số, câu hỏi "Tiền chảy vào đâu?", lời mời — KHÔNG đọc số mã
-tăng/giảm khi scene 02 là ảnh FireAnt, người dùng 2026-10-05) → flow (SCENE 02, ngay sau hook — người dùng 2026-10-05: 'Daily;
+tăng/giảm khi scene 02 là ảnh FireAnt, người dùng 2026-10-05; phiên mà FTD bị mất thì hook MỞ bằng "Thị trường đã mất phiên FTD …
+và đang trong trạng thái nguy hiểm." trên nến FTD rồi mới tới phần cũ, và market nhấn FTD thất bại, thị trường rất nguy hiểm, tìm phiên
+FTD mới — người dùng 2026-10-08, `rules.followThrough.lost`; ở trạng thái điều chỉnh market không đọc luật FTD mà nói
+`rules.status.CORRECTION.say`, "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao.") → flow (SCENE 02, ngay sau hook — người dùng 2026-10-05: 'Daily;
 old chart → weekly', rồi 'move it into the scene 02': ảnh FireAnt "Biến động thị trường" của phiên trả lời câu hỏi của hook,
 beat 1 thẻ dòng tiền — biểu đồ tròn số mã tăng/giảm/đứng giá (đọc số mã thành chữ) và cột phân bổ dòng tiền cùng lúc —,
 beat 2 máy lia xuống thẻ "Top cổ phiếu tác động" — mã kéo / đẩy chỉ số bao nhiêu điểm, khoanh mã dẫn đầu —, kết bằng câu dẫn sang

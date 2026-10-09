@@ -6,25 +6,39 @@
       "page": "out/review/review-daily",
       "video": "out/review/daily-2026-10-05.mp4",
       "updatedAt": "2026-10-06T04:47:00.157Z",
-      "note": "The one shared DailyReview artifact every edition from 29/9 to 5/10 was republished over; v41 shows the 5/10 edition with its video. Its page folder was deleted in the 6/10 cleanup. From 6/10 each edition gets its own artifact."
+      "note": "The one shared DailyReview artifact every edition from 29/9 to 5/10 was republished over; v41 shows the 5/10 edition with its video. Its page folder was deleted in the 6/10 cleanup. From 6/10 each edition gets its own artifact.",
+      "deleted": "2026-10-09",
+      "deletedNote": "Not in the account artifact list on 2026-10-09 and a read answers \"artifact not found\" (the account-wide deletion of 9/10); the local page folder and video stay. Kept for the record; previousArtifact never links it."
     },
     "2026-10-06": {
       "url": "https://claude.ai/artifact/X1MaSjCzNh9iqi26SVFroK",
       "page": "out/review/daily-2026-10-06",
       "video": "out/review/daily-2026-10-06.mp4",
-      "updatedAt": "2026-10-06T12:18:14.642Z"
+      "updatedAt": "2026-10-06T12:18:14.642Z",
+      "deleted": "2026-10-09",
+      "deletedNote": "Not in the account artifact list on 2026-10-09 and a read answers \"artifact not found\" (the account-wide deletion of 9/10); the local page folder and video stay. Kept for the record; previousArtifact never links it."
     },
     "2026-10-07": {
       "url": "https://claude.ai/artifact/JpLNCm6hjJWKvSFLJdFT4r",
       "page": "out/review/daily-2026-10-07",
       "video": "out/review/daily-2026-10-07.mp4",
-      "updatedAt": "2026-10-07T10:19:47.526Z"
+      "updatedAt": "2026-10-07T10:19:47.526Z",
+      "deleted": "2026-10-09",
+      "deletedNote": "Not in the account artifact list on 2026-10-09 and a read answers \"artifact not found\" (the account-wide deletion of 9/10); the local page folder and video stay. Kept for the record; previousArtifact never links it."
     },
     "2026-10-08": {
       "url": "https://claude.ai/artifact/PyKdbY8LnDeVyZJEhDXrWE",
       "page": "out/review/daily-2026-10-08",
       "video": "out/review/daily-2026-10-08.mp4",
-      "updatedAt": "2026-10-08T10:47:24.088Z"
+      "updatedAt": "2026-10-08T10:47:24.088Z",
+      "deleted": "2026-10-09",
+      "deletedNote": "Not in the account artifact list on 2026-10-09 and a read answers \"artifact not found\" (the account-wide deletion of 9/10); the local page folder and video stay. Kept for the record; previousArtifact never links it."
+    },
+    "2026-10-09": {
+      "url": "https://claude.ai/artifact/F3fKNdeiYPEfMpWr65bhdo",
+      "page": "out/review/daily-2026-10-09",
+      "video": "out/review/daily-2026-10-09.mp4",
+      "updatedAt": "2026-10-09T15:08:51.373Z"
     }
   }
 }

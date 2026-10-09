@@ -43,8 +43,18 @@ const T = bars.length - 1;
 const last = bars[T];
 const prev = bars[T - 1];
 
-const snap = tryJson(`${PATHS.snapshots}/${date}.json`);
-if (!snap) die(`no screener snapshot for ${date} — run node scripts/review/pull.mjs after the post-close refresh`);
+// --no-screener[="why"]: the terminal is down (2026-10-09: its API answered 502 from 15:03 into the evening), so the pack is
+// built from the index, FireAnt and the state machine alone: no saved filter, no leader, no pick. The pack says so
+// (screener.unavailable), scaffold drops the filter boards and the stock reviews, and the review page names the gap. A real
+// pull later writes the snapshot and the next facts.mjs (without the flag) builds the full pack.
+const NO_SCREENER = flag('no-screener') || opt('no-screener') != null;
+const snap = NO_SCREENER
+  ? {date, unavailable: opt('no-screener') || 'the terminal did not answer', cachedAt: null, universe: 0, volumeVsSmaUnit: null,
+    rows: {}, filters: {}, members: {spike: [], leaders: []}, picks: {spike: [], leaders: []}, analyze: {}, leaders: null,
+    leadersByFormat: {[FORMAT]: []}, breadth: null, fireant: null}
+  : tryJson(`${PATHS.snapshots}/${date}.json`);
+if (!snap) die(`no screener snapshot for ${date} — run node scripts/review/pull.mjs after the post-close refresh (terminal down: --no-screener)`);
+if (snap.unavailable) console.warn(`screener UNAVAILABLE for ${date}: ${snap.unavailable} — the pack carries no filter, leader or pick`);
 
 const pct = (a, b) => (a / b - 1) * 100;
 const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
@@ -204,7 +214,7 @@ const gainersOrder = moverSort === 'rs_1m' ? byRs : byChange(moverOrder.gainers)
 const losersOrder = moverSort === 'rs_1m' ? byRs : byChange(moverOrder.losers);
 const spike = {
   filter: R.screener.scenes.spike.photo,
-  count: snap.filters[R.screener.scenes.spike.photo].count,
+  count: snap.filters[R.screener.scenes.spike.photo]?.count ?? null,
   top: snap.picks.spike.map((s, i) => show(rowOf(s), i + 1)),
   up: spikeRows.filter((r) => r.changePercent > 0).length,
   down: spikeRows.filter((r) => r.changePercent < 0).length,
@@ -346,7 +356,7 @@ const tierWords = (t) => filtersOfTier(t).join(' ∩ ');
 {
   const left = picksAll.filter((s) => !inTiers(s));
   if (left.length) console.log(`${FORMAT}: ${left.map((s) => `${s} (${tierWords(allTiers[(tierOf[s] ?? allTiers.length) - 1])})`).join(', ')} not reviewed — rules.formats.${FORMAT}.leaders keeps ${tiers.map(tierWords).join(' → ')} only`);
-  if (!picksKept.length) console.log(`${FORMAT}: no name in ${tiers.map(tierWords).join(' or ')} — no leader scene`);
+  if (!picksKept.length) console.log(snap.unavailable ? `${FORMAT}: no screener (${snap.unavailable}) — no leader scene` : `${FORMAT}: no name in ${tiers.map(tierWords).join(' or ')} — no leader scene`);
 }
 /**
  * The symbol-reviewer's review of each pick (.claude/agents/symbol-reviewer.md → content/review/symbols/<date>/<SYM>.json,
@@ -769,7 +779,7 @@ const sectors = fmt.roles.includes('sectors') ? sectorFacts({date, R}) : null;
 // ------------------------------------------------------------------ backtest and anchors
 
 const bt = backtest(bars, P, {thresholds: R.followThrough.backtestThresholds, forward: R.followThrough.backtestForwardSessions});
-const cached = ict(new Date(snap.cachedAt));
+const cached = snap.cachedAt ? ict(new Date(snap.cachedAt)) : null;
 const pack = {
   format: FORMAT,
   asOf: date,
@@ -778,7 +788,7 @@ const pack = {
     reconstructed: false,
     indexFetchedAt: readJson(PATHS.daily.replace(/\.json$/, '.meta.json')).fetchedAt,
     screenerCachedAt: snap.cachedAt,
-    screenerCachedIct: `${cached.date} ${cached.hm}`,
+    screenerCachedIct: cached ? `${cached.date} ${cached.hm}` : null,
   },
   rules: {
     ddMaxChangePercent: Math.abs(R.distribution.maxChangePercent),
@@ -796,6 +806,9 @@ const pack = {
   state,
   watch,
   screener: {
+    // The terminal did not answer (--no-screener): every filter, leader and pick below is empty for that reason, not
+    // because the filters caught nothing — scaffold drops their scenes and the review page says why.
+    ...(snap.unavailable ? {unavailable: snap.unavailable} : {}),
     cachedAt: snap.cachedAt,
     universe: snap.universe,
     volumeVsSmaUnit: snap.volumeVsSmaUnit,
@@ -831,11 +844,14 @@ pack.anchors = [
   ...(breadth ? [{label: 'Độ rộng', value: `${breadth.count.above}/${breadth.count.with} mã${breadth.count.floor ? ' có thanh khoản' : ''} trên SMA200 (${v(breadth.count.percent, 1)}%, terminal)${breadth.week?.screenerChange != null ? ` · tuần ${breadth.week.screenerChange >= 0 ? '+' : ''}${breadth.week.screenerChange} từ ${breadth.week.fromDm}` : breadth.week ? ` · đường tuần ${breadth.week.lineChange >= 0 ? '+' : ''}${breadth.week.lineChange} từ ${breadth.week.fromDm}` : ''} · ${breadth.up} tăng · ${breadth.down} giảm${breadth.line ? ` · đường SSI ${breadth.line.sessions} phiên: ${breadth.line.countFirst} (${breadth.line.fromDm}) → ${breadth.line.countLast} mã (lệch ${breadth.line.residual ?? '—'} so với terminal) trong khi chỉ số ${breadth.line.indexChangePercent >= 0 ? '+' : ''}${v(breadth.line.indexChangePercent, 1)}%` : ''}`, path: 'screener.breadth'}] : []),
   ...(flow ? [{label: `Biến động thị trường (FireAnt, ${flow.ok ? `HOSE ${flow.dm}` : 'không dùng được'})`, value: flow.ok ? `${flow.up} tăng · ${flow.down} giảm · ${flow.flat} đứng giá (${flow.countWord}) · tiền ${v(flow.money.up, 1)} / ${v(flow.money.down, 1)} / ${v(flow.money.flat, 1)} tỷ (${flow.moneyWord}, ×${v(flow.moneyLeadRatio)}${flow.agree ? `, ${flow.agree === 'same' ? 'cùng chiều' : 'NGƯỢC chiều'} số mã` : ''}) · ảnh ${flow.fetchedIct} ICT` : flow.why, path: 'flow'}] : []),
   {label: 'Kịch bản VN-Index', value: `đóng ${v(scenario.close)} · lên: ${scenario.up.map((z) => z.members.map((m) => `${m.name} ${v(m.price)}`).join(' + ')).join(' → ') || '—'} · xuống: ${scenario.down.map((z) => z.members.map((m) => `${m.name} ${v(m.price)}`).join(' + ')).join(' → ') || '—'}`, path: 'scenario'},
-  {label: 'Bộ lọc terminal', value: `cache ${pack.source.screenerCachedIct} ICT · ${snap.universe} mã · volume_vs_sma đọc là ${snap.volumeVsSmaUnit === 'percent' ? '% trên TB20' : 'bội số TB20'}`, path: 'screener'},
+  {label: 'Bộ lọc terminal', value: snap.unavailable ? `KHÔNG CÓ — ${snap.unavailable}` : `cache ${pack.source.screenerCachedIct} ICT · ${snap.universe} mã · volume_vs_sma đọc là ${snap.volumeVsSmaUnit === 'percent' ? '% trên TB20' : 'bội số TB20'}`, path: 'screener'},
   {label: `Backtest FTD (${bars.length} phiên)`, value: bt.map((r) => `+${String(r.threshold).replace('.', ',')}%: ${r.ftds} FTD, ${r.higherPercent}% cao hơn sau ${R.followThrough.backtestForwardSessions} phiên`).join(' · '), path: 'backtest.rows'},
   ...(weekly ? [{label: `Tuần ${weekly.fromDm} → ${session.dm}`, value: `${weekly.changePercent >= 0 ? '+' : ''}${v(weekly.changePercent)}% · KL/phiên ×${v(weekly.volumeVsPriorWeek)} tuần trước · ${weekly.distributionDays.length} phiên phân phối`, path: 'weekly'}] : []),
   ...(sectors?.ok && sectors.groups.length ? [{label: `Nhóm ngành ICB (RS 1M trung vị, ${sectors.groups.length} nhóm xếp hạng)`, value: `${sectors.groups.slice(0, 3).map((g) => `#${g.rank} ${g.short} ${g.rs1m}`).join(' · ')} … #${sectors.groups.length} ${sectors.groups.at(-1).short} ${sectors.groups.at(-1).rs1m}${sectors.unranked.length ? ` · không xếp: ${sectors.unranked.map((g) => `${g.short} (${g.members} mã)`).join(', ')}` : ''}`, path: 'sectors'}] : []),
 ];
+
+// No screener: its rows would read "null mã · 0 tăng" — the "Bộ lọc terminal" row says why they are missing.
+if (snap.unavailable) pack.anchors = pack.anchors.filter((a) => !(a.path ?? '').startsWith('screener.'));
 
 // --out=<file>: write the pack elsewhere and leave the live one alone (rebuilding a past session's archived pack).
 const out = opt('out') ?? fmt.content.replace(/\.json$/, '.facts.json');

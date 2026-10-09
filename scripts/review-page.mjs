@@ -344,6 +344,9 @@ const editionDmy = EDITION ? `${dmOf(EDITION)}/${EDITION.slice(0, 4)}` : null;
 // The page renders without the db (outside claude.ai) and says so; it never writes on load.
 const picksEdition = reel.rules && facts?.screener?.leaders ? (facts.session?.date ?? reel.edition ?? null) : null;
 const picksTaken = picksEdition ? (facts.screener.leaders.top ?? []).map((x) => x.symbol) : [];
+// No screener in this edition (facts.mjs --no-screener: the terminal did not answer, 2026-10-09): the box still takes
+// tickers — they are reviewed once the terminal answers — but it lists no filter and claims no review.
+const picksDown = picksEdition ? facts.screener.unavailable ?? null : null;
 const picksMax = R.screener?.requested?.max ?? 3;
 const picksUni = picksEdition ? (readJson(`.review-cache/${picksEdition}-universe.json`)?.stocks ?? []) : [];
 const picksValid = picksUni.map((x) => x.symbol).filter((sym) => /^[A-Z0-9]{3}$/.test(sym)).sort();
@@ -373,7 +376,7 @@ const picksAuto = picksAllThree
 const fmtSigned = (n) => (n == null ? '—' : `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(2).replace('.', ',')}%`);
 const picksBlock = picksEdition ? `<section class="card picks" id="picks" data-edition="${esc(picksKey)}" data-session="${esc(picksEdition)}" data-max="${picksMax}" data-taken="${esc(picksTaken.join(','))}">
     <h3>Soi thêm mã</h3>
-    <p class="sub">${picksIntro} (cột Bộ lọc ghi mã ở bộ lọc nào) — ${picksAuto}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(viList(picksTaken)) : picksAllThree ? 'các bảng bộ lọc' : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>
+    <p class="sub">${picksDown ? `Terminal chưa trả lời (${esc(picksDown)}), nên bản này chưa có danh sách mã của các bộ lọc và reel chưa soi mã nào. Vẫn gõ được mã muốn soi (tối đa ${picksMax} mã): khi terminal trả lời, mỗi mã thành một scene soi mã riêng, đặt sau các mã của ba bộ lọc. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>` : `${picksIntro} (cột Bộ lọc ghi mã ở bộ lọc nào) — ${picksAuto}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(viList(picksTaken)) : picksAllThree ? 'các bảng bộ lọc' : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>`}
     ${picksPool.length ? `<table class="pick-pool">
       <thead><tr><th>Mã</th><th>Bộ lọc</th><th class="num">RS 1M</th><th class="num">% phiên</th><th></th></tr></thead>
       <tbody>${picksPool.map((r) => `<tr${r.reviewed ? ' class="reviewed"' : ''}><td class="sym">${esc(r.sym)}</td><td class="pick-filters">${r.filters.map((f) => `<span class="pick-filter">${esc(f)}</span>`).join('')}${picksAllTag && r.filters.length === picksScenes.length ? `<span class="pick-all">${picksAllTag}</span>` : ''}</td><td class="num">${r.rs1m ?? '—'}</td><td class="num ${r.change >= 0 ? 'up' : 'down'}">${esc(fmtSigned(r.change))}</td><td>${r.reviewed ? '<span class="pick-tag">đã soi</span>' : ''}</td></tr>`).join('')}</tbody>

@@ -46,6 +46,11 @@ node scripts/review/pull.mjs            # phiên đã đóng gần nhất
   Nến hôm nay lấy trước 15:00 bị bỏ.
 - **Cửa chặn độ tươi:** `GET /api/stocks/cache-info` phải sau 15:00 của phiên và trước phiên sau mở cửa;
   sai thì exit 2 kèm giờ của cache. Skill KHÔNG BAO GIỜ gọi `/stocks/recompute`.
+- **Terminal không trả lời** (đo 2026-10-09: API trả 502 từ 15:03 tới 20:56, trang tĩnh vẫn mở): đừng chờ suông. `pull.mjs
+  --no-screener` lấy nến SSI, `facts.mjs --format=daily --no-screener="<lý do>"` dựng pack từ chỉ số, FireAnt và máy trạng
+  thái (`screener.unavailable`), `scaffold.mjs` bỏ ba bảng bộ lọc và scene soi mã (market trao lời thẳng cho kịch bản), verify báo
+  WARN `review-screener`, trang duyệt nói lý do — đăng bản đó làm vòng 1. Terminal trả lời thì kéo số thật, `facts.mjs` (không cờ),
+  chụp chart từng mã, soi mã, `scaffold.mjs --force`, gọi lại CÙNG người viết cho các scene mới, đăng lại cùng link.
 - `GET /api/config/{id}` → CHỈ lấy `metrics_filter` (bộ lọc đã lưu). Object đó còn chứa bot token Telegram
   của người dùng: không log, không ghi.
 - `POST /api/stocks/filter` — ngoại lệ duy nhất của luật "không POST" (người dùng cho phép 2026-09-29, là
@@ -197,7 +202,7 @@ hook_payoff + đếm ngược của vox-director): hook (ngày, điểm số, c�
 tăng/giảm khi scene 02 là ảnh FireAnt, người dùng 2026-10-05; phiên mà FTD bị mất thì hook MỞ bằng "Thị trường đã mất phiên FTD …
 và đang trong trạng thái nguy hiểm." trên nến FTD rồi mới tới phần cũ, và market nhấn FTD thất bại, thị trường rất nguy hiểm, tìm phiên
 FTD mới — người dùng 2026-10-08, `rules.followThrough.lost`; ở trạng thái điều chỉnh market không đọc luật FTD mà nói
-`rules.status.CORRECTION.say`, "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao.") → flow (SCENE 02, ngay sau hook — người dùng 2026-10-05: 'Daily;
+`rules.status.CORRECTION.say`, "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao."; ở trạng thái NỖ LỰC PHỤC HỒI — lần đầu 2026-10-09 — market nói hôm nay là ngày mấy của nỗ lực, câu đó có đáy của nỗ lực trên chart, không đồng hồ, không đếm ngưỡng, watch "Thủng <đáy> → nỗ lực thất bại", hai vai của scene soi mã siết lại tới khi có FTD) → flow (SCENE 02, ngay sau hook — người dùng 2026-10-05: 'Daily;
 old chart → weekly', rồi 'move it into the scene 02': ảnh FireAnt "Biến động thị trường" của phiên trả lời câu hỏi của hook,
 beat 1 thẻ dòng tiền — biểu đồ tròn số mã tăng/giảm/đứng giá (đọc số mã thành chữ) và cột phân bổ dòng tiền cùng lúc —,
 beat 2 máy lia xuống thẻ "Top cổ phiếu tác động" — mã kéo / đẩy chỉ số bao nhiêu điểm, khoanh mã dẫn đầu —, kết bằng câu dẫn sang

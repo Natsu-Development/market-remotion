@@ -49,10 +49,11 @@ export const readArtifacts = (root = ROOT) => {
 /** The edition's entry ({url, page, video, updatedAt, note?}), or null. */
 export const artifactOf = (format, edition, root = ROOT) => readArtifacts(root)[format]?.[edition] ?? null;
 
-/** The latest registered edition before `edition` with a URL, as {edition, url, …}, or null. */
+/** The latest registered edition before `edition` with a live URL, as {edition, url, …}, or null. An entry marked
+ *  `deleted` (its artifact is gone: the 5/10–8/10 ones on 2026-10-09) keeps its record but is never linked again. */
 export const previousArtifact = (format, edition, root = ROOT) => {
   const all = readArtifacts(root)[format] ?? {};
-  const before = Object.keys(all).filter((e) => EDITION.test(e) && e < edition && all[e]?.url).sort();
+  const before = Object.keys(all).filter((e) => EDITION.test(e) && e < edition && all[e]?.url && !all[e]?.deleted).sort();
   const e = before[before.length - 1];
   return e ? {edition: e, ...all[e]} : null;
 };

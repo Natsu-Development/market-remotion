@@ -151,7 +151,10 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   nhãn trên chart và scene watch nói; ở trạng thái ĐIỀU CHỈNH (người dùng 2026-10-08) không đồng hồ, không ngưỡng, không đọc luật
   FTD ("ngày một", "ngày thứ tư" — "Not need mention the rule of FTD"): phiên FTD đã thất bại, phải tìm một phiên FTD mới, rồi câu
   `rules.status.CORRECTION.say` — "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao."; phiên mất FTD thì thêm "Thị trường
-  đang rất nguy hiểm."; (4) câu dẫn sang scene sau, dạng câu hỏi ngắn. Bản PHIÊN: ảnh FireAnt "Biến động
+  đang rất nguy hiểm."; ở trạng thái NỖ LỰC PHỤC HỒI (2026-10-09, lần đầu từ khi có scaffold: phiên lập đáy mới
+  rồi rút chân, đóng ở nửa trên biên độ) cũng không đồng hồ, không ngưỡng, không đọc luật FTD: nói hôm nay là ngày mấy của nỗ
+  lực phục hồi theo quy tắc (lời trader: "thủng đáy … rồi rút chân"), câu của người dùng ở trên giờ có đáy của nó trên chart (đáy
+  của nỗ lực, đường vàng), rồi "chờ phiên FTD"; gọi trạng thái bằng chữ của người dùng, "nỗ lực phục hồi", cả lời lẫn headline; (4) câu dẫn sang scene sau, dạng câu hỏi ngắn. Bản PHIÊN: ảnh FireAnt "Biến động
   thị trường" (`flow`) đã là scene 02, trước market (người dùng 2026-10-05: 'move it into the scene 02'), nên market trao
   lời thẳng cho bảng Volume spike — câu hỏi trao lời cho các bộ lọc, như "Bộ lọc hôm nay bắt được gì?" (đặt làm câu đầu của
   spike khi market chạm trần chữ), KHÔNG lặp câu "Tiền chảy vào đâu?" của hook. Bản TUẦN sang đường độ rộng (`breadth`):
@@ -265,7 +268,9 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   (`scenario` của fact pack): beat 1 "Kịch bản tích cực: nếu VN-Index vượt <mốc 1 phía trên> thì <mốc 2> là mốc kế." — gọi
   MA50 / MA200 (của FireAnt) và "kháng cự" như trader; beat 2 "Kịch bản tiêu cực: nếu thủng <hỗ trợ gần nhất> thì chỉ số về
   <mốc kế>; thủng đáy nhịp hồi là phiên FTD thất bại", rồi luật từ `watch[]`: thêm N phiên phân phối là đổi trạng thái — hoặc
-  tới MỨC NGUY HIỂM của hệ thống (năm phiên): nhánh đó nói "hệ thống của mình" và "rà lại từng mã và rủi ro". Điểm số đọc
+  tới MỨC NGUY HIỂM của hệ thống (năm phiên): nhánh đó nói "hệ thống của mình" và "rà lại từng mã và rủi ro". Ra khỏi xu hướng
+  tăng (điều chỉnh, nỗ lực phục hồi) không đếm phiên phân phối: nhánh tiêu cực của NỖ LỰC PHỤC HỒI là "nếu thủng <đáy nỗ lực> thì
+  nỗ lực phục hồi thất bại, chỉ số về <mốc kế>" (KHÔNG "FTD thất bại" — chưa có FTD), và lời chỉ "chờ phiên FTD", nhãn mang luật. Điểm số đọc
   tròn thành chữ, nhãn giữ số lẻ. Nói chậm hơn, câu ngắn hơn scene khác. Không câu nào là lời khuyên, không gọi giá.
 - **Headline là phụ đề**: phần lớn người xem tắt tiếng. Mỗi headline đứng một mình kể được chuyện: dòng 1
   = điều nhìn thấy (có số), dòng 2 = nghĩa của nó. Mark hiện ra đúng câu gọi tên nó (`atSentence`).

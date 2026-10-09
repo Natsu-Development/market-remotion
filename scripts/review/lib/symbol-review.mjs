@@ -848,8 +848,9 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
 
   // The two roles (§6b/§6c): decided here, from the numbers, so every review of the same session says the same thing.
   // A correction (six distribution days) is past the danger tier, so the tables stay tightened there too (2026-10-08, the
-  // first correction since the roles: facts' `danger` is false outside an uptrend).
-  const tight = D?.danger === true || F?.state?.status === 'CORRECTION';
+  // first correction since the roles: facts' `danger` is false outside an uptrend). A rally attempt is still a correction
+  // until its FTD (2026-10-09, the first attempt since the roles), so it stays tightened as well.
+  const tight = D?.danger === true || F?.state?.status === 'CORRECTION' || F?.state?.status === 'RALLY_ATTEMPT';
   const roles = rolesOf({num, classes, price, danger: tight, exchange: row.exchange ?? 'HOSE'});
 
   return {

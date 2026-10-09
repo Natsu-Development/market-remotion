@@ -72,7 +72,9 @@ export default function reviewChecks(reel, {root, rules: R}) {
   // ---------------------------------------------------------------- review-fresh
   {
     const bad = [];
-    if (!ofSession(F.source?.screenerCachedAt, session, close)) bad.push(`screener cache ${F.source?.screenerCachedIct ?? '?'} ICT is not from after the ${session} close`);
+    // No screener this edition (facts.mjs --no-screener: the terminal did not answer, 2026-10-09) — there is no cache to
+    // date; review-screener says what the reel is missing.
+    if (!F.screener?.unavailable && !ofSession(F.source?.screenerCachedAt, session, close)) bad.push(`screener cache ${F.source?.screenerCachedIct ?? '?'} ICT is not from after the ${session} close`);
     if (reel.edition && reel.edition !== session) bad.push(`the reel is the ${reel.edition} edition but its fact pack is ${session}`);
     for (const s of reel.scenes) {
       if (s.visual?.type !== 'image') continue;
@@ -87,7 +89,11 @@ export default function reviewChecks(reel, {root, rules: R}) {
       }
     }
     if (bad.length) add('review-fresh', 'fail', `${bad.length} item(s) not from the ${session} session`, bad.join('; ') + '; pull, shoot and scaffold again after the post-close refresh');
-    else add('review-fresh', 'pass', `screener cache and every photo are from after the ${session} close`);
+    else add('review-fresh', 'pass', `${F.screener?.unavailable ? 'every photo is' : 'screener cache and every photo are'} from after the ${session} close`);
+    if (F.screener?.unavailable) {
+      add('review-screener', 'warn', 'no screener in this edition — no filter board, no stock review',
+        `${F.screener.unavailable}; once the terminal answers: node scripts/review/pull.mjs, facts.mjs, shots.mjs --only=leaders, the symbol reviews, scaffold.mjs --force, then the writer for the new scenes`);
+    }
   }
 
   // ---------------------------------------------------------------- review-state
@@ -114,7 +120,9 @@ export default function reviewChecks(reel, {root, rules: R}) {
     // The hook stays free of system words (user, 2026-09-30), so the state must be named by the
     // end of the market scene.
     const early = reel.scenes.filter((s) => s.role === 'hook' || s.role === 'market');
-    const said = early.some((s) => [s.narration ?? '', ...onScreen(s)].some((t) => low(t).includes(low(current.vi)) || low(t).includes(low(current.short))));
+    // "nỗ lực phục hồi" is the user's word order (2026-10-08) for the label's "nỗ lực hồi phục": either names the state.
+    const words = (t) => low(t).replaceAll('phục hồi', 'hồi phục');
+    const said = early.some((s) => [s.narration ?? '', ...onScreen(s)].some((t) => words(t).includes(words(current.vi)) || words(t).includes(words(current.short))));
     if (early.length && !early.some((s) => String(s.narration).includes('TODO')) && !said) warn.push(`${early.map((s) => s.id).join('/')}: neither the hook nor the market scene names the state ("${current.vi}" / "${current.short}")`);
     // A state's on-screen headline (rules.status.<state>.headline, user 2026-10-05: "Xu hướng tăng chịu áp lực" → "Sức
     // khỏe thị trường đang yếu" on the market's beat 2). WARN only — "something like", so the words may be fitted.

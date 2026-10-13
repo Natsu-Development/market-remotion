@@ -10,6 +10,11 @@ skill thứ hai, `.claude/skills/market-review/` (`/market-review`) — xem đo�
 chép từ video-factory 2026-09-30): CHỈ Page Chứng Vịt (`page.json`), CHỈ hồ sơ Chrome của tài khoản trong
 `.publish-profile` (gitignore), dừng ở BẢN NHÁP — không bấm Đăng. Soát bằng `scripts/publish/prep.mjs`,
 lái Chrome bằng `scripts/publish/fb.py`.
+Đăng lại reel ĐÃ ĐĂNG vào các nhóm Page đã tham gia là skill thứ năm, `.claude/skills/share-groups/` (`/share-groups`,
+người dùng tách khỏi publish-video 2026-10-12): composer của Business Suite mở ĐÚNG HAI LẦN — hai bài, mỗi bài tối đa ba nhóm
+chưa đăng (tối đa 6 nhóm) — rồi thôi, không mở trình duyệt thêm, bằng chữ của người dùng — chưa có chữ thì HỎI, không viết
+hộ. Nhóm lấy từ danh sách lưu sẵn `groups.json`; cấu hình riêng `share.json`; Page vẫn là `publish-video/page.json`; mã chung
+`scripts/publish/` (`share.mjs fanout`, `fb.py bspost`).
 Bản TỔNG KẾT TUẦN là skill thứ tư, `.claude/skills/weekly-review/` (`/weekly-review`, người dùng tách khỏi market-review
 2026-10-05): CHUNG rules.json (`formats.weekly`), writer.md, reference.md và `scripts/review/` của market-review với
 `--format=weekly` — không chép luật sang. Ảnh FireAnt "Biến động thị trường" ("Thống kê sàn": số mã tăng/giảm và phân bổ

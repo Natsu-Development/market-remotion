@@ -1,5 +1,5 @@
 ---
-description: Đưa reel đã render (Channel, DailyReview, …) lên Facebook Page "Chứng Vịt" dưới dạng BẢN NHÁP để người dùng tự duyệt rồi bấm Đăng — soát trước bằng script, viết caption một dòng, lái Chrome thật ở ĐÚNG hồ sơ ghi trong .publish-profile (không hồ sơ nào khác). Dùng khi người dùng muốn đăng, đưa lên Facebook, tạo bản nháp, publish, up reel lên Page. KHÔNG dùng để làm video (market-video, market-review) và KHÔNG dùng cho Page nào khác Chứng Vịt.
+description: Đưa reel đã render (Channel, DailyReview, …) lên Facebook Page "Chứng Vịt" dưới dạng BẢN NHÁP để người dùng tự duyệt rồi bấm Đăng — soát trước bằng script, viết caption một dòng, lái Chrome thật ở ĐÚNG hồ sơ ghi trong .publish-profile (không hồ sơ nào khác). Dùng khi người dùng muốn đăng, đưa lên Facebook, tạo bản nháp, publish, up reel lên Page. KHÔNG dùng để đăng lại reel vào các nhóm (đó là share-groups), KHÔNG dùng để làm video (market-video, market-review) và KHÔNG dùng cho Page nào khác Chứng Vịt.
 argument-hint: "<Id>  (Channel | DailyReview | …)"
 allowed-tools: Read, Write, Edit, Bash(node scripts/publish/*), Bash(../video-factory/.venv/bin/python scripts/publish/fb.py *), Bash(npm run verify *), Bash(ffprobe *), Bash(ls *), Bash(cat *)
 ---
@@ -21,7 +21,8 @@ vẫn còn người đã thấy.
 
 ## 0. Ranh giới — đọc trước khi chạm vào Chrome
 
-**KHÔNG BẤM "Đăng". Skill này dừng ở BẢN NHÁP.** Người dùng xem lại rồi tự đăng. Nút cần bấm ở bước
+**KHÔNG BẤM "Đăng". Skill này dừng ở BẢN NHÁP.** Người dùng xem lại rồi tự đăng. (Đăng lại reel đã đăng vào các nhóm
+là skill khác, `share-groups`.) Nút cần bấm ở bước
 cuối là **"Lưu"** (xám, bên trái), không phải "Đăng" (xanh, bên phải). Hai nút cạnh nhau, cách nhau
 ~175px: trước cú bấm đó chạy `fb.py peek X Y` và đọc chữ dưới dấu thập rồi mới `click`.
 
@@ -326,3 +327,9 @@ giữ đúng ranh giới đó (mục 1, "Không gọi lệnh"). Chart trong reel
 người dùng: đưa ảnh giao diện của FireAnt lên Page công khai là việc người dùng quyết. Nhưng nếu họ hỏi
 vì sao bài bị giảm phân phối hay bị gắn cờ, chỗ nên xem trước là lời gọi lệnh trong caption, không phải
 hashtag.
+
+## 9. Đưa reel vào các nhóm
+
+Không ở đây nữa: từ 2026-10-12 việc đăng lại reel đã đăng vào mọi nhóm Page tham gia là skill riêng, `share-groups`
+(`/share-groups`; người dùng: "split this action sharing separate from the publish skill for me"). Nó dùng chung `page.json`
+này và `fb.py`, có `share.json` riêng.

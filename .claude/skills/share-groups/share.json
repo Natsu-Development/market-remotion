@@ -1,0 +1,17 @@
+{
+  "_": "Config of the skill share-groups (split from publish-video §9 on 2026-10-12 — user: 'split this action sharing separate from the publish skill for me'). The Page itself (name, pageId, draftsUrl, profileFile) stays in ../publish-video/page.json, read by both skills. History: 2026-10-11 'when have 1 video share it all group already participate'; 2026-10-12 'i give it a text for re-post the newest content on all group', then 'i see another page better: <composerUrl> using it to repost to another group', then 'Please ask when not provide and when the people confirm publish it to all page when the original video already published, choose 3 group each once and re-post it', then 'scroll on the business suite for upload to all group 3 groups as a one time share, until all the group be posted' and 'Not need for waiting, after press the button Đăng continue to another page group'.",
+  "composerUrl": "https://business.facebook.com/latest/composer?asset_id={asset_id}&nav_ref=fb_composer_share_to_groups_redirect_composer&ref=fb_composer_share_to_groups",
+  "_composerUrl": "The page the user named (12/10), reached from the Facebook share dialog's 'Để tiết kiệm thời gian, hãy chia sẻ bài viết của bạn lên nhiều nhóm Facebook với Meta Business Suite' → 'Dùng thử'. {asset_id} is filled from draftsUrl's asset_id, so the id lives in one place. Measured 12/10: 'Đăng lên' picker = Page row (must stay unticked) + 'Đăng lên Nhóm Facebook' → 'Xem thêm các nhóm' dialog; 'Thêm video' offers only 'Tải lên từ máy tính' (no way to attach the published post), so the reel's mp4 is uploaded again.",
+  "maxGroupsPerPost": 3,
+  "_maxGroupsPerPost": "The group dialog says 'Chọn tối đa 3 nhóm để đăng bài viết.' (measured 2026-10-12).",
+  "spacingSeconds": [
+    0,
+    0
+  ],
+  "_spacingSeconds": "seconds between two posts, drawn uniformly in [min, max]. 0 since the user's word of 2026-10-12: 'Not need for waiting, after press the button Đăng continue to another page group … since the post is waiting for approving' (most groups hold a Page's post for admin approval). It was [180, 420] against Meta's spam filter; raise it again if posts start being blocked.",
+  "maxPerRun": 2,
+  "_maxPerRun": "Business Suite openings per use of the skill, each one post of up to maxGroupsPerPost groups not yet posted: 2 × 3 = 6 groups, then the skill is done and opens no browser again — no loop, no second run for the rest. User 2026-10-12: 'I see the limit Facebook just display 7 groups, so maximum update to 6 group with 2 times open the dialog for the group not post'; 2026-10-13: 'Just open the business twice for 6 groups and not need loop it since the Facebook just display 7 groups at once … after this action don't open browser any-time'. An opening that shows none of the missing groups counts too.",
+  "postLabel": "Đăng",
+  "_postLabel": "the only label fb.py bspost clicks to post, read under the point through Accessibility right before the click",
+  "_groups": "The Page's joined groups are stored once in groups.json next to this file (user 2026-10-13: 'Just store the info of all group join as once and remove the step listing all group'); read 2026-10-13 10:45 from facebook.com/groups/joins as the Page, 10 groups. Kept as it is: no run reads or refreshes it (user 2026-10-13). Business Suite's group dialog shows at most 7 groups and rotates them; its rows carry no link, so a group there is its exact name + member count ('CHỨNG KHOÁN VIỆT' is two groups: ~512k and ~128k members)."
+}

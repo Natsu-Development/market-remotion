@@ -39,6 +39,30 @@
       "page": "out/review/daily-2026-10-09",
       "video": "out/review/daily-2026-10-09.mp4",
       "updatedAt": "2026-10-09T15:08:51.373Z"
+    },
+    "2026-10-12": {
+      "url": "https://claude.ai/artifact/9wei9bBjUerUu6cJ12VU6z",
+      "page": "out/review/daily-2026-10-12",
+      "video": "out/review/daily-2026-10-12.mp4",
+      "updatedAt": "2026-10-12T10:43:21.339Z"
+    },
+    "2026-10-13": {
+      "url": "https://claude.ai/artifact/UB39dMKX11X5gaTikAnL7s",
+      "page": "out/review/daily-2026-10-13",
+      "video": "out/review/daily-2026-10-13.mp4",
+      "updatedAt": "2026-10-13T08:42:47.919Z"
+    },
+    "2026-10-14": {
+      "url": "https://claude.ai/artifact/GSmXAijsmtvz43N89Xm94J",
+      "page": "out/review/daily-2026-10-14",
+      "video": "out/review/daily-2026-10-14.mp4",
+      "updatedAt": "2026-10-14T09:04:39.152Z"
+    },
+    "2026-10-15": {
+      "url": "https://claude.ai/artifact/Roro36EbNjSaAZdKSfgiBc",
+      "page": "out/review/daily-2026-10-15",
+      "video": "out/review/daily-2026-10-15.mp4",
+      "updatedAt": "2026-10-15T14:28:07.847Z"
     }
   }
 }

@@ -53,6 +53,12 @@ const STEP_SINCE = '2026-10-06';
 /** The first edition whose reviews carry the two roles (method /3, user 2026-10-07). */
 export const ROLES_SINCE = '2026-10-07';
 /**
+ * The first edition whose nearest resistance can be a peak the fractal cannot confirm yet (user 2026-10-12, on HDB and
+ * PVT: "kháng cự thật là 23,05 và 26,35" — the 9/10 and 8/10 highs a one-session pullback sits under, where the method
+ * used to fall back to the session's own high, 22,80 and 25,35).
+ */
+export const RECENT_HIGH_SINCE = '2026-10-12';
+/**
  * The two roles' thresholds (symbol-reviewer.md §6b/§6c; designed 2026-10-07 on O'Neil and Minervini, one constant each):
  * a stock this far above FireAnt's MA50 has run — the method's `extended` setup, the holder takes half off ("chốt lời"
  * only from here: MA50 stands in for the typical holder's cost), the one without it does not chase.
@@ -732,6 +738,15 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
       add(key, l.price, 'analyze', wat(`${l.kind} level from ${l.dates.join(', ')} (swings within ${LEVEL_MERGE * 100}%)`), {date: l.t, touches: l.touches, kind: l.kind});
       add(`${key}Touches`, l.touches, 'derived', `sessions whose high or low came within ${LEVEL_MERGE * 100}% of ${l.price}: ${l.touchDates.join(', ')}`);
     };
+    // The last SWING_N sessions can never be fractal highs yet, so a peak one or two sessions old is in no level. With no
+    // swing level above the close, the highest of them before today, above the session's high, is the resistance a fresh
+    // pullback sits under — not the session's own high (RECENT_HIGH_SINCE, user 2026-10-12: HDB 23,05 on 9/10, PVT 26,35
+    // on 8/10). A swing level above keeps its place (DGW 12/10: 48,90 on 6/10 stays, not 8/10's lower 48,10).
+    const fresh = date >= RECENT_HIGH_SINCE && !lv.above.length ? wb.slice(-SWING_N, -1).reduce((m, b) => (b.h > (m?.h ?? -Infinity) ? b : m), null) : null;
+    const recentPeak = fresh && fresh.h > last.h && fresh.h > price
+      ? {price: fresh.h, t: fresh.t, touches: 1, swingTouches: 0, kind: 'recent-high', dates: [fresh.t], touchDates: [fresh.t]}
+      : null;
+    if (recentPeak) lv.above = [recentPeak, ...lv.above];
     lv.above.slice(0, 2).forEach((l, k) => levelNum(`resistance${k + 1}`, l));
     lv.below.slice(0, 2).forEach((l, k) => levelNum(`support${k + 1}`, l));
     // A fresh high has no swing above it: the session's own high is where it was sold (or met no seller yet).
@@ -964,7 +979,10 @@ export const validateReview = (r, ctx = {}) => {
   const wlist = W?.list ?? [];
   const swings = wlist.length ? swingsOf(wlist) : {highs: [], lows: []};
   const fitted = wlist.length ? trendlinesOf(wlist, swings) : {support: {all: []}, resistance: {all: []}};
-  const priced = (label, price) => numbersIn(label).some((n) => Number(Math.abs(n.value).toFixed(n.dp)) === Number(Math.abs(price).toFixed(n.dp)) && (n.dp >= 1 || Math.abs(price) >= 100));
+  // A label prints a price at its own precision: within half a unit of its last digit. measure and this check reach a
+  // trendline's value at the last bar by different float paths, and on a half-cent boundary (CII 15/10: 13,075 is 13,08
+  // in measure's numbers, 13,07 by toFixed here) comparing toFixed strings let no label pass both.
+  const priced = (label, price) => numbersIn(label).some((n) => Math.abs(Math.abs(n.value) - Math.abs(price)) <= 0.5 * 10 ** -n.dp + 1e-6 && (n.dp >= 1 || Math.abs(price) >= 100));
   let M = ctx.measured ?? null;
   if (v2 && !M && isDate(r.date) && typeof SYM === 'string') {
     try { M = measure(r.date, SYM, {format: ctx.format ?? 'daily', facts: ctx.facts ?? null}); } catch (err) { e(`cannot re-run the method for ${SYM} on ${r.date}: ${err.message}`); }

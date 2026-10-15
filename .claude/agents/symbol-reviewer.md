@@ -98,7 +98,11 @@ thứ tự này TRƯỚC khi chọn thế giá:
 2. **Hỗ trợ và kháng cự ngang** (`priceAction.levels`): các đỉnh/đáy dao động trong 1,5% gộp thành một mức; giá của mức là
    đỉnh/đáy gần nhất trong cụm (một giá thật trên chart), `touches` = số PHIÊN có giá cao hoặc thấp nằm trong 1,5% của mức (không chỉ các điểm fractal; `swingTouches` là số điểm fractal). Trên giá đóng cửa là KHÁNG CỰ
    (`resistance1/2`), dưới là HỖ TRỢ (`support1/2`) — đỉnh cũ đã bị vượt thành hỗ trợ. Mã vừa lập đỉnh mới không còn
-   đỉnh nào phía trên: kháng cự là đỉnh của chính phiên đó (`resistance1` = `todayHigh`, kind `session-high`). Mức gần nhất
+   đỉnh nào phía trên: kháng cự là đỉnh của chính phiên đó (`resistance1` = `todayHigh`, kind `session-high`). Từ 2026-10-12
+   (`RECENT_HIGH_SINCE`, người dùng: "kháng cự thật là 23,05 và 26,35"): không có đỉnh dao động nào trên giá đóng cửa mà một
+   trong các phiên fractal chưa xác nhận được (SWING_N phiên cuối, trước hôm nay) có đỉnh cao hơn đỉnh phiên hôm nay, thì
+   kháng cự là đỉnh đó (kind `recent-high`: HDB 23,05 ngày 9/10, PVT 26,35 ngày 8/10) — một nhịp chỉnh một hai phiên nằm dưới
+   đỉnh gần nhất, không dưới đỉnh của chính nó; còn đỉnh dao động phía trên thì mức đó giữ chỗ (DGW 48,90). Mức gần nhất
    là `resistance1`/`support1` — beat 0 phải vẽ đúng mức gần nhất đó (validator soát); mức xa hơn có ý nghĩa hơn thì vẽ THÊM, không thay.
 3. **Trendline** (`priceAction.trendlines`) — vẽ như trader vẽ: DƯỚI các đáy (trên các đỉnh). Từ mỗi đáy dao động A,
    đường có độ dốc NHỎ NHẤT tới một đáy sau ít nhất 5 phiên — đường nằm dưới mọi đáy về sau và chạm một đáy (điểm neo

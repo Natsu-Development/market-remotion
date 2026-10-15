@@ -206,7 +206,9 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   - `rs`: bộ lọc đếm được bao nhiêu mã (`screener.rs.count`), một nhận xét từ cột % (bao nhiêu mã tăng hay giữ giá
     khi thị trường rơi — `screener.rs.up` / `down`), một hai mã đầu bảng. Câu ghim beat 2 nói về mã cần chú ý TRÊN
     BẢNG NÀY — hạng RS 1M, % hôm nay, cột riêng của bảng (`_brief` ghi). Kết bằng câu cầu không mang mã sang Uptrend.
-  - `uptrend`: nghĩa của bộ lọc (giá trên EMA50, EMA50 trên MA200), số mã, mã đứng đầu bảng này; không kể lại điều
+  - `uptrend`: số mã và một nhận xét từ cột % — KHÔNG giải thích điều kiện của bộ lọc (người dùng 2026-10-12: "Not need
+    explain the Uptrend value filter on scene 06 … Remove it for me": không "giá trên EMA50, EMA50 trên MA200", cả lời lẫn
+    headline); không kể lại điều
     `rs` đã nói. Câu ghim beat 2 là câu CUỐI, LỜI MỜI gọi đúng tên các mã sẽ soi, tách bằng chữ: "Cùng mình xem kỹ MSR
     và DGW." (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' => 'Let's review …'"; KHÔNG "soi kỹ": OmniVoice đọc
     "soi" nghe thành "xoay" — 7/7 lượt, đo 2026-10-04) — không "đếm ngược", không chữ "review" (TTS đọc tiếng Anh thất
@@ -354,11 +356,14 @@ dưới thẻ outro). Bản tổng kết phiên có thể hứa "mỗi phiên"/"
 
 | Trường | Chữ gợi ý |
 |---|---|
-| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây. |
+| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Hẹn gặp các bạn vào phiên giao dịch ngày thứ Ba nhé. |
 | headline | `Thả tim, chia sẻ, theo dõi` / `Cập nhật sau mỗi phiên` |
 
 Tên kênh là **Chứng Vịt** (người dùng chốt 2026-09-30 sau khi Facebook từ chối "Cú Đêm Chứng Khoán" — "cú" cũng là tiếng lóng; trước đó Radar Chứng Khoán; `rules.brand`, logo ở `rules.logo`). Câu thả tim · chia sẻ · theo dõi + "để cập nhật sớm nhất những biến động của thị trường" là câu người
-dùng đã duyệt ở market-video — giữ nguyên, chỉ đổi câu hứa theo bản (phiên/tuần).
+dùng đã duyệt ở market-video — giữ nguyên, chỉ đổi câu hứa theo bản (phiên/tuần). Câu hứa của bản phiên gọi THỨ của phiên
+kế tiếp (người dùng 2026-10-12: "Change the text on scene 13: Mỗi phiên đóng cửa, hẹn bạn ở đây. to something like human: Hen
+gap cac ban vao phien giao dich cua ngay thu ... nhe"): "Hẹn gặp các bạn vào phiên giao dịch ngày <thứ> nhé." — brief của outro
+ghi thứ đó (bản thứ Sáu → "thứ Hai").
 
 ## Trả về
 

@@ -335,6 +335,22 @@ const biggest = [...ddXs].sort((a, b) => a.changePercent - b.changePercent)[0];
 // the attempt's rule instead. A rally attempt (2026-10-09, the first on this scaffold: a new correction low that closed in
 // the upper half of its range) is still out of the uptrend: no clock, no countdown, and the FTD it would follow stays failed.
 const inCorrection = F.state.status === 'CORRECTION';
+// A rally attempt undercut TODAY (12/10, the first on this scaffold: 9/10's day 1 lost its low 1724,17): the market scene's
+// news is the failed attempt, not the six DDs or the FTD lost on 8/10.
+const AF = inCorrection ? F.state.attemptFailed ?? null : null;
+// The user's words for that session (rules.status.CORRECTION.attemptFailed, 2026-10-12: "… đang tiến về đáy nỗ lực phục
+// hồi ngày 28/7. Nguy cơ thủng đáy này rất cao."): the market heads for the low of the attempt behind the last FTD (3/8's:
+// day 1 28/7, low 1651,20), drawn on beat 3 and named by its headline.
+const AFS = AF ? R.status.CORRECTION.attemptFailed ?? null : null;
+const behind = AFS && F.state.lastFtd?.day1 && F.state.lastFtd.rallyLow != null
+  ? {dm: F.state.lastFtd.day1.dm, date: F.state.lastFtd.day1.date, low: F.state.lastFtd.rallyLow}
+  : null;
+const priorY = behind ? priceY(index, behind.low, indexUnit) : null;
+const priorX = behind ? barX(index, daily, behind.date) : null;
+const priorVisible = priorY != null && priorY > C.y + 0.02 && priorY < C.y + C.h - 0.02;
+const afLine = (t) => t.replaceAll('{dm}', behind?.dm ?? '').replaceAll('{low}', behind ? vi(behind.low) : '');
+const WEEKDAYS = ['Chủ nhật', 'thứ Hai', 'thứ Ba', 'thứ Tư', 'thứ Năm', 'thứ Sáu', 'thứ Bảy'];
+const weekdayOf = (d) => WEEKDAYS[new Date(`${d}T00:00:00Z`).getUTCDay()];
 const outOfUptrend = inCorrection || inRally;
 // The user's correction line (rules.status.CORRECTION.say, 2026-10-08) is about the first rally attempt's low; once that
 // attempt has started, its low is on the chart and the line names it (a state's own `say` wins).
@@ -441,6 +457,10 @@ const buildHook = () => {
       `Câu đầu là NGÀY của phiên: "${S.weekday}, ngày ${S.dm.replace('/', ' tháng ')}" đọc thành chữ (có chữ "ngày" sau thứ — người dùng 2026-10-01). Câu hai gọi tên chỉ số rồi ĐIỂM SỐ và % của phiên: "VN-Index đóng cửa" ${vi(S.close)} (đọc tròn ${vi(Math.round(S.close), 0)}), ${fmtPct(S.changePercent)}. ${flowAfterHook
         ? `KHÔNG đọc số mã tăng/giảm ở hook (người dùng 2026-10-05: bỏ câu "Chỉ số tăng: … mã tăng, … mã giảm" vì scene 02 — ảnh FireAnt "Biến động thị trường" — đọc chúng); headline beat 1 cũng không in số mã. Chữ do số quyết định của chỉ số: "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang).`
         : `Câu hai là hai chữ mà SỐ quyết định: chỉ số "${T?.indexWord ?? '—'}" (|Δ| < 0,3% = đi ngang), ${T?.breadthWord ?? '—'} (HOSE ${T?.up ?? '?'} tăng · ${T?.down ?? '?'} giảm · ${T?.flat ?? '?'} đứng giá; "phần lớn" chỉ khi một phía ≥ 60%).`}`,
+      // A hundred mark crossed and a long run of same-side closes are the session's news in the trader's words (2026-10-15:
+      // first close under 1700 since 28/7, seventh down close running) — the pack holds both, so a headline may print them.
+      ...(S.crossed ? [`TIN CỦA PHIÊN: đóng cửa ${S.crossed.direction === 'down' ? 'dưới' : 'trên'} mốc ${S.crossed.level} lần đầu từ ${S.crossed.lastSide?.dm ?? 'đầu dữ liệu'} (session.crossed) — trader nói "${S.crossed.direction === 'down' ? 'mất' : 'lấy lại'} mốc ${vi(S.crossed.level, 0)}". Đặt vào lời của hook (đọc thành chữ, câu đó vẫn tối đa hai số) hoặc dòng 2 headline beat ${b0 + 1}: "${S.crossed.direction === 'down' ? 'Mất' : 'Lấy lại'} mốc ${S.crossed.level}".`] : []),
+      ...(Math.abs(S.streak ?? 0) >= 5 ? [`Phiên ${S.streak < 0 ? 'giảm' : 'tăng'} thứ ${Math.abs(S.streak)} liên tiếp (session.streak, tính trên giá đóng cửa) — dùng được ở hook hoặc market, nói bằng chữ.`] : []),
       `Rồi câu hỏi "Tiền đang chảy vào đâu?" và LỜI MỜI (người dùng chốt 30/9, thay lời hứa "cuối video"): "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại" thay "review" (TTS đọc tiếng Anh thất thường), "và" thay "&". Beat ${lost ? 3 : 2} ghim vào câu hỏi.`,
       lost
         ? 'Ngoài câu mở của người dùng, KHÔNG nhắc phiên phân phối, FTD, "theo quy tắc" hay trạng thái ở scene này (người dùng chốt 30/9) — chuyện hệ thống kể ở scene market. Hai số đọc ra lời là hai số của câu điểm số (ngày FTD trong câu mở là ngày, không tính).'
@@ -456,7 +476,9 @@ const buildMarket = () => {
     {...lab(...inC(0.5, 0.06), `${F.distribution.count}/${F.distribution.window} phiên phân phối`, 'red', 0), until: 1},
   ];
   if (biggest) marks.push(lab(biggest.x - 0.012, clamp(priceY(index, barOf(biggest.date).h, indexUnit) - GAP - ARROW / 2), `${biggest.dm} ${fmtPct(biggest.changePercent)} · KL ×${vi(biggest.volumeRatio)}`, 'red', 0, 'end'));
-  marks.push(...ftdMarks(1));
+  // When beat 3 turns to the prior attempt's low (a failed attempt, 2026-10-12) the FTD plate is old news: it leaves with
+  // beat 2, and its spot under the lows is where that low's line runs.
+  marks.push(...ftdMarks(1).map((m) => (behind && priorVisible ? {...m, until: 1} : m)));
   if (holdVisible) marks.push({kind: 'hline', y: clamp(holdY), accent: 'gold', beat: 1, label: `${holdName} ${vi(holdLow)}`, labelSide: 'left'});
   // A rally attempt adds no mark of its own: the gold line is the attempt's low and the beat-2 headline carries its day
   // (frame-audit 9/10: a "Ngày 1" plate collided with the beat-1 plates while the camera moved, and a ring on the last
@@ -465,8 +487,14 @@ const buildMarket = () => {
   // A correction shows no rule plate (user 2026-10-08: "Not need mention the rule of FTD"): beat 3 keeps the correction low,
   // the low the first rally attempt has to hold (rules.status.CORRECTION.say).
   if (!outOfUptrend) marks.push(lab(...inC(0.5, 0.06), ladderText, dangerNow ? 'red' : 'gold', 2));
+  // A failed attempt (user 2026-10-12): beat 3 draws where the market is heading, the low of the attempt behind the last FTD.
+  if (behind && priorVisible) marks.push({kind: 'hline', y: clamp(priorY), accent: 'red', beat: 2, label: `Đáy nỗ lực phục hồi ${behind.dm} · ${vi(behind.low)}`, labelSide: 'left'});
   const thresholdBrief = inRally
     ? `trạng thái ${F.state.since === F.session.date ? 'ĐỔI HÔM NAY' : 'đã là'}: "${F.state.label}" từ ${F.state.sinceDm} theo quy tắc, hôm nay là NGÀY ${F.state.rallyDay} của nỗ lực${F.state.day1?.date === F.session.date ? ` (phiên ${F.session.dm} lập đáy mới ${vi(F.session.low)} dưới đáy điều chỉnh cũ rồi rút chân, đóng cửa ở nửa trên biên độ — nói như trader: thủng đáy cũ rồi rút chân; KHÔNG đọc luật ngày 1)` : ''}. Số phiên phân phối KHÔNG còn đổi trạng thái: KHÔNG đồng hồ hết hạn, KHÔNG đếm tới ngưỡng nào, KHÔNG câu "${DG.say ?? 'mức nguy hiểm'}". Điều kiện kế: một phiên FTD MỚI (từ ${ftd?.dm ?? '—'} tới nay không có phiên FTD nào khác) — KHÔNG đọc luật của nó (FTD từ ngày ${F.rules.ftdMinDay}, +${vi(F.rules.ftdMinChangePercent)}% — người dùng 2026-10-08: "Not need mention the rule of FTD … Replace it with something meaningful"; nhãn scene watch mang luật). Câu người dùng chốt cho trạng thái điều chỉnh giờ có ĐÁY của nó trên chart: "${attemptSay}" — giữ nguyên chữ của người dùng (cả "phục hồi"); "đáy phiên nỗ lực phục hồi đầu tiên" là ${vi(holdLow)}, đáy của nỗ lực hôm nay (đường vàng). Gọi trạng thái bằng chữ của người dùng, "nỗ lực phục hồi", cả lời lẫn headline — không xen "hồi phục". Headline beat 3 mang hai ý: chờ phiên FTD, nguy cơ thủng đáy ${vi(holdLow)} rất cao. Thủng ${vi(holdLow)} là nỗ lực thất bại (để scene watch nói)`
+    : inCorrection && AF && AFS && behind
+    ? `trạng thái ĐỔI HÔM NAY: nỗ lực phục hồi bắt đầu ${AF.day1.dm} THẤT BẠI (thủng đáy ${vi(AF.rallyLow)}, đáy mới ${vi(F.state.correctionLow)}), thị trường vẫn "${F.state.label}" theo quy tắc. LỜI NGƯỜI DÙNG CHỐT 2026-10-12 cho phiên này (rules.status.CORRECTION.attemptFailed — "Edit the sentence on the scene 03: …"; hỏi lại thì người dùng chọn ngày 1 của nỗ lực, ${behind.dm}, và rút câu cuối để scene giữ trần ${R.narration.maxWordsPerScene} chữ): scene là câu đếm, rồi "Giá thủng đáy hôm ${weekdayOf(AF.day1.date)}, nỗ lực phục hồi thất bại.", rồi "${afLine(AFS.say)}" — GIỮ NGUYÊN chữ, ngày đọc thành chữ ("ngày ${behind.dm.replace('/', ' tháng ')}" viết bằng chữ). KHÔNG thêm "Phải tìm phiên FTD mới", KHÔNG câu "${R.status.CORRECTION.say ?? ''}", KHÔNG đồng hồ, KHÔNG đếm ngưỡng. Đáy nỗ lực phục hồi ${behind.dm} là ${vi(behind.low)} (đường đỏ beat 3, nhãn "Đáy nỗ lực phục hồi ${behind.dm} · ${vi(behind.low)}"); đáy điều chỉnh mới ${vi(F.state.correctionLow)} vẫn là đường vàng. Beat 3 ghim vào câu "Theo quy tắc, …"; headline beat 3: "${afLine(AFS.headline[0])}" / "${afLine(AFS.headline[1])}" (đỏ)`
+    : inCorrection && AF
+    ? `trạng thái ĐỔI HÔM NAY: nỗ lực phục hồi bắt đầu ${AF.day1.dm} THẤT BẠI — phiên ${F.session.dm} thủng đáy ${vi(AF.rallyLow)} của nó, lập đáy mới ${vi(F.state.correctionLow)}, nên thị trường quay lại "${F.state.label}" theo quy tắc — nói rõ bằng lời người ("nỗ lực phục hồi thất bại", chữ của người dùng; không xen "hồi phục"). KHÔNG đồng hồ hết hạn, KHÔNG đếm tới ngưỡng nào, KHÔNG câu "${DG.say ?? 'mức nguy hiểm'}". Điều kiện kế: chờ một nỗ lực phục hồi MỚI rồi phải TÌM MỘT PHIÊN FTD MỚI (người dùng 2026-10-08: "find the another FTD"), KHÔNG đọc luật của nó (ngày 1, FTD từ ngày ${F.rules.ftdMinDay}). Câu người dùng chốt cho trạng thái điều chỉnh: "${R.status.CORRECTION.say ?? ''}" — hôm nay nó vừa xảy ra với nỗ lực ${AF.day1.dm}; giữ nguyên chữ của người dùng, đặt nó cho nỗ lực KẾ TIẾP (ví dụ mở bằng "Và với nỗ lực kế tiếp, …" hay "Lần sau cũng vậy: …" — người viết chọn), "đáy" giờ là đáy điều chỉnh mới ${vi(F.state.correctionLow)} (đường vàng, đáy của chính phiên hôm nay). Headline beat 3 mang hai ý: tìm phiên FTD mới, nguy cơ thủng đáy rất cao. Thủng ${vi(F.state.correctionLow)} là đáy điều chỉnh mới (để scene watch nói)`
     : inCorrection
     ? `trạng thái ${F.state.since === F.session.date ? 'ĐỔI HÔM NAY' : 'đã là'}: "${F.state.label}" từ ${F.state.sinceDm} theo quy tắc (${F.distribution.count} ≥ ${R.distribution.correctionAt} phiên phân phối${F.state.lastFtd?.ended ? `; phiên FTD ${F.state.lastFtd.dm} thất bại, kết thúc ${F.state.lastFtd.ended.dm}` : ''}) — nói rõ bằng lời người. Ở trạng thái điều chỉnh số phiên phân phối KHÔNG còn đổi trạng thái: KHÔNG đồng hồ hết hạn, KHÔNG đếm tới ngưỡng nào, KHÔNG câu "${DG.say ?? 'mức nguy hiểm'}" (đó là câu của mức nguy hiểm khi xu hướng tăng còn đứng). Điều kiện kế: phải TÌM MỘT PHIÊN FTD MỚI (người dùng 2026-10-08: "find the another FTD" — nói thành lời, như "Giờ phải tìm một phiên FTD mới."; từ ${ftd?.dm ?? '—'} tới nay không có phiên FTD nào khác), nhưng KHÔNG đọc luật của nó (ngày 1, FTD từ ngày ${F.rules.ftdMinDay} — người dùng 2026-10-08: "Not need mention the rule of FTD … Replace it with something meaningful"); thay vào đó là câu người dùng chốt: "${R.status.CORRECTION.say ?? ''}" — chữ của người dùng, "đáy" là đáy mà nỗ lực phục hồi đầu tiên phải giữ: đáy điều chỉnh ${vi(F.state.correctionLow)} (đường vàng beat 3). Headline beat 3 mang hai ý: tìm phiên FTD mới, nguy cơ thủng đáy rất cao. Thủng ${vi(F.state.correctionLow)} là đáy điều chỉnh mới (để scene watch nói)`
     : F.distribution.toUnderPressure > 0
@@ -483,7 +511,10 @@ const buildMarket = () => {
   const shots = [
     {beat: 0, x: clamp(ddCentre), y: inC(0, 0.42)[1], zoom: 1.5, move: 'pan'},
     {beat: 1, x: clamp(ftdVisible ? (ftdX + (lastX ?? 0.9)) / 2 : inC(0.5, 0)[0]), y: clamp(holdVisible ? (holdY + lastY) / 2 : inC(0, 0.5)[1]), zoom: 1.15, move: 'tilt'},
-    {beat: 2, x: clamp((nextExpDd?.x ?? lastX ?? 0.85) - 0.02), y: clamp(recentTop + 0.1), zoom: 2.1, move: 'push_in'},
+    behind && priorVisible
+      // "đang tiến về đáy … 28/7": the frame holds today's close and the prior attempt's low together.
+      ? {beat: 2, x: clamp(((priorX ?? inC(0.5, 0)[0]) + (lastX ?? 0.9)) / 2), y: clamp((priorY + lastY) / 2), zoom: 1.3, move: 'push_in'}
+      : {beat: 2, x: clamp((nextExpDd?.x ?? lastX ?? 0.85) - 0.02), y: clamp(recentTop + 0.1), zoom: 2.1, move: 'push_in'},
   ];
   push('market', {
     act: warnAct,
@@ -493,6 +524,8 @@ const buildMarket = () => {
       `Beat 1 — mở bằng HÔM NAY: ${F.session.isDistribution ? 'LÀ phiên phân phối' : 'KHÔNG phải phiên phân phối'} (${fmtPct(F.session.changePercent)}, KL ×${vi(F.session.volumeRatio)}), rồi ĐẾM theo khuôn người dùng chốt 1/10: "${countSentence}" (số đọc thành chữ; KHÔNG "đếm lại còn …") — ${F.distribution.count}/${F.distribution.window} phiên: ${dd.map((d) => `${d.dm} ${fmtPct(d.changePercent)} KL ×${vi(d.volumeRatio)}`).join('; ') || 'không có'}. Không kể phiên nặng nhất (người dùng chốt 30/9). Phân phối = giảm từ ${F.rules.ddMaxChangePercent}% với KL cao hơn phiên trước.`,
       inRally
         ? `Beat 2 — HÔM NAY là ngày ${F.state.rallyDay} của nỗ lực phục hồi theo quy tắc${F.state.day1?.date !== F.session.date ? ` (ngày 1 là ${F.state.day1?.dm ?? '—'}; đáy của nỗ lực vẫn giữ)` : F.session.changePercent < 0 ? ` — phiên giảm nhưng lập đáy mới của nhịp điều chỉnh (${vi(F.session.low)}) rồi rút chân, đóng ${vi(F.session.close)} ở nửa trên biên độ: nói như trader ("thủng đáy … rồi rút chân"), không đọc luật` : ' — phiên đóng cửa tăng đầu tiên của nhịp điều chỉnh'}. ${ftdVisible && ftd.ended ? `Nhãn FTD ${ftd.dm} trên chart giữ "· thất bại" (thất bại hôm ${ftd.ended.dm}); lời không cần kể lại. ` : ''}${holdName} ${holdLow != null ? vi(holdLow) : '—'} là đường vàng${holdLow === F.session.low ? ' — đáy của chính phiên hôm nay' : ''}; trên chart không có nhãn "ngày 1" — headline beat 2 mang nó. Headline beat 2 gọi tên trạng thái bằng chữ của người dùng: "Nỗ lực phục hồi" và ngày ${F.state.rallyDay}.`
+        : inCorrection && AF
+        ? `Beat 2 — TIN CỦA HÔM NAY: nỗ lực phục hồi bắt đầu ${AF.day1.dm} (ngày 1 hôm đó — thủng đáy cũ rồi rút chân) đã THẤT BẠI sau ${AF.days} phiên: phiên ${F.session.dm} thủng đáy ${vi(AF.rallyLow)} của nỗ lực, lập đáy mới ${vi(F.session.low)} và đóng ${vi(F.session.close)} ở nửa dưới biên độ (không rút chân như ${AF.day1.dm}). Nói như trader: "thủng đáy ${vi(AF.rallyLow)}, nỗ lực phục hồi thất bại". ${ftdVisible && ftd.ended ? `Nhãn FTD ${ftd.dm} trên chart giữ "· thất bại" (thất bại hôm ${ftd.ended.dm}); lời KHÔNG kể lại chuyện FTD ${ftd.dm} — đó là tin của ${ftd.ended.dm}. ` : ''}Đáy điều chỉnh ${vi(F.state.correctionLow)} là đường vàng — đáy của chính phiên hôm nay. Headline beat 2: "Nỗ lực phục hồi thất bại" / "Thủng đáy ${vi(AF.rallyLow)}" (đỏ).`
         : inCorrection
         ? `Beat 2 — ${ftdVisible ? `phiên FTD ${ftd.dmy} (ngày ${ftd.day}, ${fmtPct(ftd.changePercent)}) ${ftd.ended ? `ĐÃ THẤT BẠI — kết thúc ${ftd.ended.dm}${ftd.ended.why === 'distribution' ? ' vì phiên phân phối thứ ' + F.distribution.count : ' vì thủng đáy nhịp hồi'}; nói đúng chữ "phiên FTD … đã thất bại" (người dùng 2026-10-08: "Emphasize the failure FTD"), nhãn trên chart "FTD ${ftd.dm} ${fmtPct(ftd.changePercent)} · thất bại"` : ''}; ` : ''}${ftdLostToday ? 'rồi MỘT câu ngắn, không số: thị trường đang RẤT NGUY HIỂM (người dùng 2026-10-08: "mention the market is so dangerous right now on scene 1 and 3"); headline beat 2 mang cả hai ý (FTD thất bại, nguy hiểm); ' : ''}${holdName.toLowerCase()} ${holdLow != null ? vi(holdLow) : '—'} (đường vàng${holdLow === F.session.low ? ' — đáy của chính phiên hôm nay' : ''}).`
         : ftdVisible
@@ -507,7 +540,9 @@ const buildMarket = () => {
       // The bridge follows the scene that really comes next: the daily hands over to FireAnt's "Biến động thị trường"
       // (flow), the weekly to the breadth line — and to the filter boards when that scene is dropped (no photo of this
       // session / no breadth counts), where "Nhìn rộng ra thì sao?" would dangle.
-      `Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). ${afterMarket === 'breadth' || afterMarket === 'flow'
+      `Đây là BỐI CẢNH, chưa phải điều kiện (câu nếu … thì để dành cho watch). ${AFS && behind
+        ? `Scene KẾT bằng câu của người dùng ("${afLine(AFS.say).split('. ').pop()}"); câu hỏi trao lời "Bộ lọc hôm nay bắt được gì?" là câu ĐẦU của scene ${afterMarket === 'spike' ? 'Volume spike' : afterMarket}.`
+        : afterMarket === 'breadth' || afterMarket === 'flow'
         ? 'Kết bằng câu dẫn sang độ rộng thị trường, dạng câu hỏi: "Nhìn rộng ra thì sao?".'
         : afterMarket === 'watch'
         ? `Scene sau là THẲNG kịch bản VN-Index (bản này không có bảng bộ lọc hay scene soi mã: ${SCREENER_DOWN ?? 'không có mã nào'}). Kết bằng MỘT câu hỏi ngắn dẫn sang kịch bản cho phiên tới, như "Vậy phiên tới có những kịch bản nào?"; KHÔNG nhắc bộ lọc, KHÔNG lặp câu "Tiền chảy vào đâu?" của hook.`
@@ -750,7 +785,9 @@ const focusBrief = (S, rows, focus, feeds, columns = []) => {
   const own = {rs52w: (x) => (x.rs52w != null ? `RS 52W ${x.rs52w}` : ''), volume: (x) => (x.volumeVsSma20Percent != null ? `KL ${fmtPct(x.volumeVsSma20Percent, 0)} so TB20` : ''), aboveEma50: (x) => (x.aboveEma50Percent != null ? `${fmtPct(x.aboveEma50Percent, 1)} trên EMA50` : ''), aboveSma200: (x) => (x.aboveSma200Percent != null ? `${fmtPct(x.aboveSma200Percent, 1)} trên SMA200` : '')};
   const cols = (x) => [`hạng #${rows.indexOf(x) + 1} theo RS 1M (${x.rs1m})`, `${fmtPct(x.changePercent)} hôm nay`, ...columns.map((c) => own[c]?.(x) ?? '')].filter(Boolean).join(', ');
   const lit = focus.map((sym) => rows.find((x) => x.symbol === sym)).filter(Boolean);
-  const meaning = feeds ? ` Điều riêng của ${S.filter}: nghĩa của bộ lọc (${describeFilter(savedFilter(S.filter)) || 'điều kiện đã lưu'} — lời nói "giá trên EMA50, EMA50 trên MA200") và mã đứng đầu bảng này.` : '';
+  // The filter's conditions stay off the narration and the headlines (user 2026-10-12: "Not need explain the Uptrend value
+  // filter on scene 06: giữ những mã có giá trên EMA50, còn đường này nằm trên MA200. Remove it for me.").
+  const meaning = feeds ? ` Điều riêng của ${S.filter}: số mã và nhận xét từ cột % — KHÔNG giải thích điều kiện của bộ lọc (${describeFilter(savedFilter(S.filter)) || 'điều kiện đã lưu'} là cho đạo diễn; người dùng 2026-10-12: "Not need explain the Uptrend value filter … Remove it"), cả lời lẫn headline (không "giá trên EMA50", không "trên cả hai đường MA").` : '';
   if (!lit.length) return `${NO_OVERLAP}${meaning} Bảng này không có mã nào sẽ soi ở scene sau — không có beat nhấn mạnh.`;
   return `${NO_OVERLAP}${meaning} MÃ CẦN CHÚ Ý trên bảng này (sẽ soi ở scene sau): ${lit.map((x) => `${x.symbol} — ${cols(x)}`).join('; ')}. Beat 2 tô và tạo hiệu ứng cho ${lit.length > 1 ? 'các dòng' : 'dòng'} đó (các dòng khác mờ đi, nhãn "${label}: ${lit.map((x) => x.symbol).join(' · ')}")${feeds ? ' — Ở BẢNG NÀY câu ghim beat 2 là LỜI MỜI ở cuối, đúng câu của dòng "Bảng này MỞ PHẦN SOI MÃ" bên dưới (nó có thể gọi cả mã không có trên bảng này); nó thay cho câu tả hạng của các mã trên bảng' : ` — câu ghim beat 2 nói về ${lit.length > 1 ? 'các mã' : 'mã'} đó TRÊN BẢNG NÀY: hạng, % hôm nay, cột riêng của bảng; gọi MÃ, hai mã tách bằng chữ. Kết bằng một câu mở đường sang bảng sau, không mang mã ("Còn bộ lọc Uptrend thì sao?" là được)`}.`;
 };
@@ -1252,13 +1289,24 @@ const buildSectors = () => {
   });
 };
 
-// outro — the carried-over sign-off.
+// outro — the carried-over sign-off. The daily's promise names the next session's weekday (user 2026-10-12: "Change the
+// text on scene 13: Mỗi phiên đóng cửa, hẹn bạn ở đây. to something like human: Hen gap cac ban vao phien giao dich cua
+// ngay thu ... nhe"). The next weekday stands in for the next session: a holiday has to be fixed by hand.
+const nextSession = (() => {
+  const d = new Date(`${date}T00:00:00Z`);
+  do d.setUTCDate(d.getUTCDate() + 1); while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
+  const t = d.toISOString().slice(0, 10);
+  return {date: t, dm: `${d.getUTCDate()}/${d.getUTCMonth() + 1}`, weekday: weekdayOf(t)};
+})();
 const buildOutro = () => push('outro', {
   eyebrow: 'Theo dõi tiếp',
   beats: [{atSentence: 0, at: R.audio.leadIn, line1: 'TODO', line2: 'TODO', accent: 'gold'}],
   // rules.logo (a path under public/) replaces the generated monogram inside the ring; the name stays.
   visual: {type: 'outro', ...(R.logo ? {logo: R.logo} : {}), brand: R.brand, kicker: 'Chứng khoán', pill: 'Thả tim · Chia sẻ · Theo dõi', line: FORMAT === 'daily' ? 'Cập nhật sau mỗi phiên' : 'Cập nhật mỗi cuối tuần'},
-  brief: ['Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".'],
+  brief: [
+    'Thả tim · chia sẻ · theo dõi bằng giọng người, một câu hứa cập nhật. Không số, không thuật ngữ, không "khuyến nghị".',
+    ...(FORMAT === 'daily' ? [`Câu hứa của bản phiên (người dùng 2026-10-12, thay "Mỗi phiên đóng cửa, hẹn bạn ở đây."): "Hẹn gặp các bạn vào phiên giao dịch ngày ${nextSession.weekday} nhé." — ${nextSession.weekday} ${nextSession.dm} là phiên kế tiếp (thứ trong tuần, không đọc ngày tháng); phiên đó nghỉ lễ thì đạo diễn sửa thứ.`] : []),
+  ],
 });
 
 const builders = {hook: buildHook, market: buildMarket, breadth: buildBreadth, flow: buildFlow, spike: () => (R.screener.scenes.spike.visual === 'movers' && F.screener.spike.gainers?.length ? buildMovers() : buildTable('spike')), watch: buildWatch, week: buildWeek, daily: buildDaily, sectors: buildSectors, outro: buildOutro};

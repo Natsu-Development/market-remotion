@@ -336,3 +336,9 @@ khoảng lặng, khung hai bên mốc beat). Không lồng tiếng hai reel cùn
   Vì vậy: kết luận phân phối của phiên hôm nay phải đối chiếu cùng-cơ-sở (FireAnt khớp lệnh hôm nay vs SSI chốt hôm qua,
   hoặc Entrade tổng vs Entrade tổng), `session.volumeRatio` của pack KHÔNG lên màn hình, lời chỉ nói "khối lượng thấp/cao
   hơn phiên trước" khi hai cơ sở cùng nói vậy, và trước `approve` chạy lại `pull.mjs` + `facts.mjs` để lấy số chốt.
+- **ĐÁY SSI của phiên hôm nay cũng là số tạm** (đo 2026-10-15): nến 15/10 kéo lúc 20:36 ghi đáy 1690,56, trong khi FireAnt
+  (legend L) và Entrade cùng ghi 1694,77; trước đó đáy tạm 8/10 là 1726,00 (chốt 1737,95), 14/10 là 1699,23 (chốt 1700,74).
+  Đáy quyết định đáy điều chỉnh / đáy nỗ lực và mốc của `watch`, nên đối chiếu đáy hôm nay với FireAnt và Entrade
+  (`services.entrade.com.vn/chart-api/v2/ohlcs/index`); lệch thì đặt đáy hai nguồn kia vào nến hôm nay của
+  `content/review/vnindex.daily.json`, ghi nguồn ở `sameDayLow` của file meta, rồi `facts.mjs`. `pull.mjs` lúc kéo lại trước
+  `approve` ghi đè nến đó: đặt lại nếu SSI vẫn tạm.

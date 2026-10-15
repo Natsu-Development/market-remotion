@@ -85,6 +85,23 @@ const session = {
   high: round(last.h, 2), low: round(last.l, 2),
   volumeM: round(last.v / 1e6, 1), volumeRatio: round(last.v / prev.v, 2), volumeVsAvg20: round(last.v / avg20, 2),
   isDistribution: st.today.isDistribution, isFtd: st.today.isFtd,
+  /** Closes in a row on today's side of the previous close: −7 = the seventh down close running (15/10: 7/10 → 15/10). */
+  streak: (() => {
+    const dir = Math.sign(last.c - prev.c);
+    let n = 0;
+    for (let i = T; dir && i > 0 && Math.sign(bars[i].c - bars[i - 1].c) === dir; i--) n++;
+    return dir * n;
+  })(),
+  /** The hundred mark today's close crossed, and the last session before today that closed on its new side (15/10:
+   *  1700 downward, last close under it 28/7) — the hook's "mất mốc 1700" without a number the pack does not hold. */
+  crossed: (() => {
+    const mark = Math.ceil(Math.min(last.c, prev.c) / 100) * 100;
+    if (!(mark < Math.max(last.c, prev.c))) return null;
+    const down = last.c < prev.c;
+    let i = T - 1;
+    while (i >= 0 && (down ? bars[i].c >= mark : bars[i].c <= mark)) i--;
+    return {level: mark, direction: down ? 'down' : 'up', lastSide: i >= 0 ? {date: bars[i].t, dm: dm(bars[i].t), close: round(bars[i].c, 2)} : null};
+  })(),
   /** Advancers and decliners of the session, per exchange, from the screener's universe (the hook's opener). */
   breadthToday: (() => {
     const uni = tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? [];
@@ -142,6 +159,8 @@ const ftdOut = (f) => (f ? {
   date: f.t, dm: dm(f.t), dmy: dmy(f.t), day: f.day,
   changePercent: round(f.changePercent, 2), volumeRatio: round(f.volumeRatio, 2),
   close: round(f.close, 2), low: round(f.low, 2), rallyLow: round(f.rallyLow, 2),
+  // Day 1 of the attempt the FTD followed (3/8's: 28/7) — the market scene names it when a later attempt fails (12/10).
+  ...(f.day1 ? {day1: {date: f.day1, dm: dm(f.day1)}} : {}),
   ...(f.ended ? {ended: {date: f.ended.t, dm: dm(f.ended.t), why: f.ended.why}} : {}),
 } : null);
 const state = {
@@ -157,6 +176,12 @@ const state = {
   lastFtd: ftdOut(st.lastFtd),
   distanceToRallyLowPercent: st.rallyLow == null ? null : round(pct(last.c, st.rallyLow), 1),
   sessionsSinceFtd: st.ftd ? T - bars.findIndex((b) => b.t === st.ftd.t) : null,
+  // A rally attempt undercut TODAY (12/10: the 9/10 attempt's low 1724,17 gave way): the correction is news again.
+  attemptFailed: (() => {
+    const x = st.transitions[st.transitions.length - 1];
+    if (!x || x.t !== last.t || !x.attempt) return null;
+    return {date: x.t, dm: dm(x.t), day1: {date: x.attempt.day1, dm: dm(x.attempt.day1)}, rallyLow: round(x.attempt.rallyLow, 2), days: x.attempt.days};
+  })(),
 };
 
 /** What would change the status next, in the machine's own terms (the market scene's "nếu … thì"). */
@@ -831,7 +856,7 @@ const pack = {
 // Rows for the review page's data table (scripts/review-page.mjs reads `anchors` when present).
 const v = (n, dp = 2) => (n == null ? '—' : String(round(n, dp)).replace('.', ','));
 pack.anchors = [
-  {label: `Phiên ${session.dmy}`, value: `${v(session.close)} (${session.changePercent >= 0 ? '+' : ''}${v(session.changePercent)}%) · KL ×${v(session.volumeRatio)} phiên trước · ×${v(session.volumeVsAvg20)} TB20`, path: 'session'},
+  {label: `Phiên ${session.dmy}`, value: `${v(session.close)} (${session.changePercent >= 0 ? '+' : ''}${v(session.changePercent)}%) · KL ×${v(session.volumeRatio)} phiên trước · ×${v(session.volumeVsAvg20)} TB20${Math.abs(session.streak) >= 3 ? ` · ${Math.abs(session.streak)} phiên ${session.streak < 0 ? 'giảm' : 'tăng'} liên tiếp` : ''}${session.crossed ? ` · đóng cửa ${session.crossed.direction === 'down' ? 'dưới' : 'trên'} ${session.crossed.level} lần đầu từ ${session.crossed.lastSide?.dm ?? 'đầu dữ liệu'}` : ''}`, path: 'session'},
   {label: 'Trạng thái theo quy tắc', value: `${state.label} từ ${state.sinceDm}${state.rallyDay ? ` · ngày ${state.rallyDay}` : ''}`, path: 'state'},
   {label: `Phân phối / ${distribution.window} phiên`, value: `${distribution.count}: ${dd.map((d) => `${d.dm} ${v(d.changePercent)}% ×${v(d.volumeRatio)} (còn ${d.sessionsLeft})`).join(' · ') || '—'}${distribution.dangerAt != null ? ` · mức nguy hiểm từ ${distribution.dangerAt}${distribution.danger ? ' — ĐANG Ở MỨC NGUY HIỂM' : ` (còn ${distribution.toDanger})`}` : ''}`, path: 'distribution.active'},
   ...(state.lastFtd ? [{label: 'FTD gần nhất', value: `${state.lastFtd.dmy} · ngày ${state.lastFtd.day} · +${v(state.lastFtd.changePercent)}% · KL ×${v(state.lastFtd.volumeRatio)} · đáy nhịp hồi ${v(state.lastFtd.rallyLow)}${state.lastFtd.ended ? ` · kết thúc ${state.lastFtd.ended.dm} (${state.lastFtd.ended.why})` : ''}`, path: 'state.lastFtd'}] : []),

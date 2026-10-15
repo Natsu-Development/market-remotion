@@ -570,6 +570,15 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         if a.restore_tab and state["tabbed"] and a.restore_tab.upper() != (a.tab or "").upper():
             click_tab(a.restore_tab, "9")
 
+    def focus_chart() -> None:
+        """Focus the chart frame before a toolbar click or a shortcut. The click goes on the TIME AXIS (59pt above the
+        page bottom, over the range bar at 26pt): a click in the middle of the pane landed on MSB's MA200 line 2026-10-14,
+        selected the MA Cross study, and its legend then showed the study's buttons instead of the MA values (fireant_ma
+        read nothing, and the selection stayed on the tab for the next symbol). Esc drops any selection already there."""
+        click(px + pw // 3, py + ph - 59, delay=0.6)
+        ours()
+        sc.key(53, delay=0.5)
+
     a._restore = restore
     if a.tab:
         state["tabbed"] = True
@@ -594,7 +603,7 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         # x measured on the 1080x607 page area (2026-09-22); y is 26pt above the page bottom.
         RANGE_X = {"5y": 82, "1y": 110, "6p": 137, "3p": 165, "1p": 192, "5n": 219, "1n": 247}
         ours()
-        click(px + pw // 3, py + ph // 2, delay=0.6)        # focus the chart frame first
+        focus_chart()
         ours()
         click(px + RANGE_X[a.range], py + ph - 26, delay=3.0)
     if a.interval:
@@ -602,12 +611,12 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         # (page-area 1080 wide, 2026-09-23): D 166, W 189, 2W 220, M 247 at y = 104.
         INTERVAL_X = {"D": 166, "W": 189, "2W": 220, "M": 247}
         ours()
-        click(px + pw // 3, py + ph // 2, delay=0.6)        # focus the chart frame first
+        focus_chart()
         ours()
         click(px + INTERVAL_X[a.interval], py + 104, delay=3.0)
     if a.reset_view:
         ours()
-        click(px + pw // 3, py + ph // 2, delay=0.6)        # focus the chart frame first
+        focus_chart()
         ours()
         key_alt(15, delay=2.5)                               # 15 = R → Option+R, TradingView "reset chart view"
         dbg("reset-view")
@@ -615,7 +624,7 @@ def run(a, hit, ref, W, H, out: Path) -> None:
         # The "fx Các chỉ báo" button on the TradingView toolbar (page-area 1080 wide: x ≈ 356,
         # y = 104) opens a dialog whose search box has focus; Enter adds the first match.
         ours()
-        click(px + pw // 3, py + ph // 2, delay=0.6)        # focus the chart frame first
+        focus_chart()
         ours()
         click(px + 356, py + 104, delay=1.6)
         dbg = (lambda tag: capture(page, out.with_name(f"{out.stem}.dbg-{tag}.png"))) if a.debug else (lambda tag: None)

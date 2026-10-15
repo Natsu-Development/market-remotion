@@ -48,9 +48,9 @@ export function analyze(bars, {distribution: D, followThrough: F}) {
   const transitions = [];
   const log = [];
 
-  const move = (i, to, why) => {
+  const move = (i, to, why, extra) => {
     if (to === status) return;
-    transitions.push({t: bars[i].t, from: status, to, why});
+    transitions.push({t: bars[i].t, from: status, to, why, ...extra});
     status = to;
     since = bars[i].t;
   };
@@ -96,8 +96,9 @@ export function analyze(bars, {distribution: D, followThrough: F}) {
     if (status === 'RALLY_ATTEMPT') {
       if (x.l < rallyLow) {
         low = x.l;
+        // The failed attempt (its day 1, the low it had to hold, how many days it ran) rides on the transition.
+        move(i, 'CORRECTION', 'undercut the rally low', {attempt: {day1, rallyLow, days: rallyDay}});
         rallyDay = 0;
-        move(i, 'CORRECTION', 'undercut the rally low');
         if (isDay1(i)) startAttempt(i);   // a reversal session can open the next attempt
         continue;
       }

@@ -486,7 +486,9 @@ for (const item of plan) {
   }
 
   if (RETIME) {
-    const next = Math.max(Math.round(spoken * 100) / 100, 4);
+    // Up to a whole frame (30 fps), then up to the hundredth: the nearest hundredth left 9,3546 s of voice in a 9,34 s
+    // scene — 280 frames, 9,333 s — and verify's audio check FAILed on the cut tail (DailyReview uptrend, 13/10).
+    const next = Math.max(Math.ceil((Math.ceil(spoken * 30 - 1e-6) / 30) * 100 - 1e-6) / 100, 4);
     if (Math.abs(next - scene.duration) > 0.01) {
       // A beat pinned to a sentence already sits at a real timestamp — rescaling
       // it would move it off the word. Only unpinned beats keep their rhythm as

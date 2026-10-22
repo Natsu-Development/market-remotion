@@ -1,7 +1,50 @@
 {
-  "fetchedAt": "2026-10-08T09:43:19.542Z",
+  "fetchedAt": "2026-10-22T11:14:31.862Z",
   "_note": "names and conditions only, taken from GET /api/config/{id}.metrics_filter",
   "filters": [
+    {
+      "name": "Breakout Momentum",
+      "match": "and",
+      "conditions": [
+        {
+          "field": "rs_1m",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "rs_3m",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "rs_52w",
+          "op": ">=",
+          "value": 70
+        },
+        {
+          "field": "volume_sma20",
+          "op": ">=",
+          "value": 1000000
+        }
+      ],
+      "groups": [
+        {
+          "match": "or",
+          "conditions": [
+            {
+              "field": "has_breakout_confirmed",
+              "op": "=",
+              "value": 1
+            },
+            {
+              "field": "has_breakout_potential",
+              "op": "=",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "Momentum breakout",
       "match": "and",
@@ -169,7 +212,7 @@
         {
           "field": "volume_sma20",
           "op": ">=",
-          "value": 2000000
+          "value": 1000000
         }
       ]
     },

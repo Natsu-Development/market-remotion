@@ -110,7 +110,8 @@ và nhãn giữ mã. Cách đọc chưa đo — mã có chữ hiếm (W, J, Z) t
   filter existed on other filter"): không "cũng ở / cũng nằm trong …", không "cả hai / cả ba bộ lọc", không "dải vàng",
   không gọi tên bộ lọc khác trong câu có mã — ở spike, rs, uptrend, leader lẫn pick. Câu cầu không mang mã ("Còn bộ lọc
   Uptrend thì sao?") vẫn được. Verify `review-overlap` FAIL.
-- **Hook ≤ 3 giây**: câu đầu ≤ 10 chữ và headline beat đầu đã mang kết luận của phiên.
+- **Hook ≤ 3 giây**: câu đầu ≤ 10 chữ và headline beat đầu đã mang kết luận của phiên — trừ câu mở `followThrough.lost.say`
+  của người dùng (8/10; 16 chữ, giữ nguyên chữ).
 
 ## Giữ người xem — arc và các móc (người dùng yêu cầu 2026-09-29)
 
@@ -131,8 +132,8 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   đi ngang: một trăm năm mươi hai mã tăng, một trăm tám mươi sáu mã giảm." — khuôn "<số> mã tăng, <số> mã
   giảm", hai nửa song song (người dùng chốt 30/9; không tự viết "phần lớn" khi số không nói vậy) — BẢN PHIÊN bỏ phần số mã
   khi scene 02 là ảnh FireAnt `flow` (người dùng 2026-10-05: bỏ câu "Chỉ số tăng: … mã tăng, … mã giảm" vì scene 02 đọc nó):
-  hook chỉ còn ngày · điểm số và % · câu hỏi · lời mời, headline beat 1 không in số mã; (3) câu hỏi "Tiền đang chảy vào
-  đâu?"; (4) LỜI MỜI: "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại", không
+  hook chỉ còn ngày · điểm số và % · lời mời, headline beat 1 không in số mã; (3) KHÔNG còn câu hỏi "Tiền đang chảy vào
+  đâu?" (người dùng 2026-10-19: "Remove: Tiền đang chảy vào đâu from the intro"); (4) LỜI MỜI, beat cuối ghim vào nó: "Cùng mình điểm lại thị trường và những mã đáng chú ý nhé." — "điểm lại", không
   "review"; "và", không "&". Hook mở bằng con số theo ý người dùng — verify sẽ WARN `style`, chấp nhận.
 - **market** là chỗ chuyện hệ thống BẮT ĐẦU, theo khuôn người dùng chốt 30/9: (1) hôm nay có phải phiên
   phân phối không, rồi ĐẾM theo khuôn người dùng chốt 1/10 — "…, hiện tại đang có <n> phiên phân phối." (n = `distribution.count`
@@ -151,15 +152,18 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   nhãn trên chart và scene watch nói; ở trạng thái ĐIỀU CHỈNH (người dùng 2026-10-08) không đồng hồ, không ngưỡng, không đọc luật
   FTD ("ngày một", "ngày thứ tư" — "Not need mention the rule of FTD"): phiên FTD đã thất bại, phải tìm một phiên FTD mới, rồi câu
   `rules.status.CORRECTION.say` — "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao."; phiên mất FTD thì thêm "Thị trường
-  đang rất nguy hiểm."; (4) câu dẫn sang scene sau, dạng câu hỏi ngắn. Bản PHIÊN: ảnh FireAnt "Biến động
+  đang rất nguy hiểm."; ở trạng thái NỖ LỰC PHỤC HỒI (2026-10-09, lần đầu từ khi có scaffold: phiên lập đáy mới
+  rồi rút chân, đóng ở nửa trên biên độ) cũng không đồng hồ, không ngưỡng, không đọc luật FTD: nói hôm nay là ngày mấy của nỗ
+  lực phục hồi theo quy tắc (lời trader: "thủng đáy … rồi rút chân"), câu của người dùng ở trên giờ có đáy của nó trên chart (đáy
+  của nỗ lực, đường vàng), rồi "chờ phiên FTD"; gọi trạng thái bằng chữ của người dùng, "nỗ lực phục hồi", cả lời lẫn headline; (4) câu dẫn sang scene sau, dạng câu hỏi ngắn. Bản PHIÊN: ảnh FireAnt "Biến động
   thị trường" (`flow`) đã là scene 02, trước market (người dùng 2026-10-05: 'move it into the scene 02'), nên market trao
   lời thẳng cho bảng Volume spike — câu hỏi trao lời cho các bộ lọc, như "Bộ lọc hôm nay bắt được gì?" (đặt làm câu đầu của
-  spike khi market chạm trần chữ), KHÔNG lặp câu "Tiền chảy vào đâu?" của hook. Bản TUẦN sang đường độ rộng (`breadth`):
+  spike khi market chạm trần chữ), KHÔNG dùng câu "Tiền chảy vào đâu?" (người dùng bỏ nó khỏi hook 2026-10-19). Bản TUẦN sang đường độ rộng (`breadth`):
   "Nhìn rộng ra thì sao?"; scene đó bị bỏ (pack thiếu số độ rộng) thì cũng sang thẳng bảng Volume spike. KHÔNG nói điều
   kiện nếu … thì ở đây.
 - **flow** (bản phiên, SCENE 02 ngay sau hook — người dùng 2026-10-05: 'Daily; old chart → weekly', rồi 'move it into the
-  scene 02') là ảnh FireAnt "Biến động thị trường" — trang "Thống kê sàn", sàn HOSE, của PHIÊN HÔM NAY. Mở bằng việc trả lời
-  câu hỏi "Tiền chảy vào đâu?" của hook; hook không còn đọc số mã, nên scene này ĐỌC số mã tăng và giảm thành chữ, rồi
+  scene 02') là ảnh FireAnt "Biến động thị trường" — trang "Thống kê sàn", sàn HOSE, của PHIÊN HÔM NAY. Mở thẳng bằng phiên của dòng tiền
+  (hook không còn câu hỏi "Tiền chảy vào đâu?" từ 2026-10-19 — đừng trả lời nó); hook không còn đọc số mã, nên scene này ĐỌC số mã tăng và giảm thành chữ, rồi
   mới tới dòng tiền. Beat 1 = thẻ dòng tiền, biểu đồ tròn VÀ cột cùng lúc (người dùng 2026-10-05: "beat 1 include the flow
   money circle and phân bổ dòng tiền"): bao nhiêu mã tăng, giảm, đứng giá (`flow.up` / `down` / `flat`, chữ
   `flow.countWord`), rồi bao nhiêu tỷ đồng vào mã tăng, vào mã giảm (`flow.money`), phía nào nhiều hơn và gấp mấy lần
@@ -191,8 +195,26 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   và một hai mã đáng chú ý — bảng gánh phần còn lại. Mã sẽ soi ngay sau mà bảng có được tô và tạo hiệu ứng ở BEAT 3
   (người dùng 2026-10-06: "With the volumn spike also have the animation with this scene for me highlight the symbol must noted" — như bảng RS Strong/Uptrend: các dòng khác mờ, nhãn "Xem kỹ: DGW"): câu ghim beat 3 nói về
   mã đó TRÊN BẢNG NÀY — % thay đổi và khối lượng so trung bình 20 phiên —, không mời "xem kỹ" (lời mời là câu cuối của
-  bảng Uptrend), không "mã dẫn dắt", không nói nó có ở bộ lọc khác. Bảng không có mã nào sẽ soi thì vẫn hai beat.
-- **rs** rồi **uptrend**: MỖI BỘ LỌC MỘT SCENE, không gộp (người dùng chốt 2026-09-30: "separate the filter …
+  bảng shortlist), không "mã dẫn dắt", không nói nó có ở bộ lọc khác. Bảng không có mã nào sẽ soi thì vẫn hai beat. Bản
+  PHIÊN từ 2026-10-19: câu CUỐI của spike là câu dẫn đúng chữ của bảng sau — "Mã nào cần chú ý trong các phiên tới?"
+  (`formats.daily.screener.scenes.shortlist.bridge`; brief ghi).
+- **shortlist — Mã cần chú ý trong các phiên tới** (bản PHIÊN từ 2026-10-19, THAY hai scene rs và uptrend — người dùng:
+  "Only keep the volume spike screen, with 2 scressn of RS strong and Uptend, combine it to one scene piority the RS strong 1M
+  sort DESC and both existed on 2 filter. And naming this screen like Ma can chu y trong các phien toi", rồi "Remove 2 old
+  screen about the RS strong and Uptrend"). MỘT bảng: MỌI mã mà bộ lọc RS Strong HOẶC Uptrend tìm ra; mã cả hai bộ lọc cùng
+  tìm ra xếp TRƯỚC, rồi mã chỉ một bộ lọc, mỗi nhóm theo RS 1M giảm dần; mỗi dòng: % hôm nay · RS 1M (số + thanh) · một
+  CHIP cho mỗi bộ lọc đã tìm ra mã. Mười dòng một trang, MỖI BEAT MỘT TRANG, và MỖI TRANG MỘT CÂU đủ dài (~3 giây) để đọc
+  kịp; beat cuối bảng xoá trắng chỉ còn các mã sẽ soi ngay sau (sáng lên). Lời, theo thứ tự trang: (1) bảng là gì —
+  "<số> mã cần chú ý trong các phiên tới, mã có ở hai bộ lọc xếp trước." (câu KHÔNG mang mã; số mã là số DUY NHẤT đọc ra
+  lời); (2) các trang giữa — phần còn lại chỉ có một bộ lọc, một nhận xét từ cột % hôm nay — câu không mang mã, không số;
+  (trang cuối) "Cứ theo dõi, chưa phải lúc hành động."; (câu cuối, ghim beat sáng mã) LỜI MỜI gọi đúng tên các mã sẽ soi,
+  tách bằng chữ: "Cùng mình xem kỹ TCB và VPB." — luật của lời mời như cũ (không "soi kỹ", không "đếm ngược", không chữ
+  "review", không "dẫn đầu"); không có scene soi mã nào thì câu cuối dẫn sang kịch bản VN-Index ("Còn VN-Index thì sao?").
+  Tên bộ lọc ("RS Strong", "Uptrend") chỉ đọc trong câu không mang mã; KHÔNG "cả hai bộ lọc" (nói "hai bộ lọc"; verify
+  `review-overlap` FAIL "cả hai / cả ba bộ lọc"); câu có mã không gọi bộ lọc của chính mã đó (bảng đã in chip). KHÔNG giải
+  thích điều kiện bộ lọc (người dùng 2026-10-12), không "mua", "bán", "cơ hội". Headline mỗi beat theo trang đang hiện.
+- **rs** rồi **uptrend** (bản phiên tới 2026-10-16; từ 2026-10-19 bản phiên dùng `shortlist` ở trên — đoạn này còn cho bản
+  cũ dựng lại): MỖI BỘ LỌC MỘT SCENE, không gộp (người dùng chốt 2026-09-30: "separate the filter …
   not union it first"), mỗi scene một BẢNG VẼ tối đa mười mã xếp theo RS 1M giảm dần (người dùng chốt 2026-10-01).
   Bảng (`board`, người dùng 2026-10-01: "must have the RS1M column, price change & more info") là MỘT bảng đủ rộng:
   giá · % hôm nay · RS 1M (số + thanh) và hai cột riêng của bộ lọc — RS 52W và KL so TB20 cho RS Strong; % trên EMA50
@@ -203,7 +225,9 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   - `rs`: bộ lọc đếm được bao nhiêu mã (`screener.rs.count`), một nhận xét từ cột % (bao nhiêu mã tăng hay giữ giá
     khi thị trường rơi — `screener.rs.up` / `down`), một hai mã đầu bảng. Câu ghim beat 2 nói về mã cần chú ý TRÊN
     BẢNG NÀY — hạng RS 1M, % hôm nay, cột riêng của bảng (`_brief` ghi). Kết bằng câu cầu không mang mã sang Uptrend.
-  - `uptrend`: nghĩa của bộ lọc (giá trên EMA50, EMA50 trên MA200), số mã, mã đứng đầu bảng này; không kể lại điều
+  - `uptrend`: số mã và một nhận xét từ cột % — KHÔNG giải thích điều kiện của bộ lọc (người dùng 2026-10-12: "Not need
+    explain the Uptrend value filter on scene 06 … Remove it for me": không "giá trên EMA50, EMA50 trên MA200", cả lời lẫn
+    headline); không kể lại điều
     `rs` đã nói. Câu ghim beat 2 là câu CUỐI, LỜI MỜI gọi đúng tên các mã sẽ soi, tách bằng chữ: "Cùng mình xem kỹ MSR
     và DGW." (người dùng 2026-10-01: "Remove 'Đếm ngược từ hai' => 'Let's review …'"; KHÔNG "soi kỹ": OmniVoice đọc
     "soi" nghe thành "xoay" — 7/7 lượt, đo 2026-10-04) — không "đếm ngược", không chữ "review" (TTS đọc tiếng Anh thất
@@ -249,11 +273,20 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   gọn lại. Câu ghim BEAT 3 (scene có ba beat) là câu người đang giữ; headline beat 3: dòng 1 = `roles.holder.headline`, dòng 2 =
   `roles.notHolder.headline` (≤ 26 ký tự, số có trong pack). Trên chart, beat 3 đặt plate đỏ "Đang giữ: …" và plate trắng
   "Chưa mua: …" lên đúng đường giá — lời không tả plate. Verify `review-roles` FAIL khi scene thiếu một trong hai câu.
+  Người giữ có thể có HAI đường (người dùng 2026-10-11, mã kéo xa không nền): `roles.holder` là đường MỘT NỬA, `full` là đường
+  thoát hết — lời chỉ đọc đường một nửa (`say`, một số); plate beat 3 mang đường một nửa, `.md` của bản soi ghi cả hai.
 - **pick** (người dùng 2026-10-05: "… i can choose and fill the symbol on the artifact to review beside existed symbol on 3
   filter") — mã người dùng gõ trên trang duyệt (`screener.requested`), mỗi mã một scene SAU các scene leader, soi y như
   leader: price action trước, MA50/MA200 của FireAnt, một thế giá, nhánh nếu … thì không gọi giá. Câu đầu "Thêm một mã đáng
   chú ý là <MÃ>, …" — reel không có scene leader thì mã chọn ĐẦU TIÊN mở bằng "Mã đầu tiên là <MÃ>." (là mã chọn duy nhất thì "Mã đáng chú ý hôm nay là <MÃ>."); KHÔNG nói mã có hay không có ở bộ lọc nào (người dùng 2026-10-05), KHÔNG nói "bạn chọn" / "theo
   yêu cầu" (người xem không biết trang duyệt). Kết bằng hai vai như leader (beat 3).
+  **Mã ngành (bản tuần, từ 2026-10-10** — người dùng: "Get one of stock on this marjor best ranking to review 1-5 ranking"):
+  scene pick ĐẦU TIÊN, ngay sau sectors, soi mã mạnh nhất (RS 1M cao nhất, `top[0]`) của nhóm ngành hạng 1
+  (`screener.sectorLeader`, `sectors.review`; nhóm hạng 2…5 chỉ khi mã của nhóm trên đã có scene soi hoặc không có chart) —
+  soi y như mã người dùng chọn, cùng hai vai. Câu đầu "Mã đầu tiên là <MÃ>, …" (mã duy nhất: "Mã đáng chú ý tuần này là
+  <MÃ>.") và được nói MỘT lần, không số, mã thuộc nhóm nào ("… mã mạnh nhất nhóm hàng hóa và dịch vụ công nghiệp"); các mã
+  người dùng chọn theo sau mở bằng "Thêm một mã đáng chú ý là …". Bảng Momentum chen giữa thì câu cuối của nó là câu dẫn sang
+  bảng ("Mã nào đang gãy?"), không có gì chen thì không cần câu dẫn; là scene soi cuối thì "Vậy tuần tới canh gì?".
 - **Mã gánh chỉ số** (người dùng 2026-10-05: "Not need the scene: VIC · VN-Index since i want it combine into the VIC symbol
   review scene not separate scene, the purpose is warning the trader monitor the behavior of VIC, not compare it with the market
   VNIndex") — KHÔNG có scene riêng. Khi mã kéo chỉ số nhiều nhất hôm nay (`flow.impact.lead`, ≥ `screener.impact.minShare` %
@@ -265,7 +298,9 @@ trong ba giây đầu và bỏ đi ở chỗ nào không có gì mới; mỗi sc
   (`scenario` của fact pack): beat 1 "Kịch bản tích cực: nếu VN-Index vượt <mốc 1 phía trên> thì <mốc 2> là mốc kế." — gọi
   MA50 / MA200 (của FireAnt) và "kháng cự" như trader; beat 2 "Kịch bản tiêu cực: nếu thủng <hỗ trợ gần nhất> thì chỉ số về
   <mốc kế>; thủng đáy nhịp hồi là phiên FTD thất bại", rồi luật từ `watch[]`: thêm N phiên phân phối là đổi trạng thái — hoặc
-  tới MỨC NGUY HIỂM của hệ thống (năm phiên): nhánh đó nói "hệ thống của mình" và "rà lại từng mã và rủi ro". Điểm số đọc
+  tới MỨC NGUY HIỂM của hệ thống (năm phiên): nhánh đó nói "hệ thống của mình" và "rà lại từng mã và rủi ro". Ra khỏi xu hướng
+  tăng (điều chỉnh, nỗ lực phục hồi) không đếm phiên phân phối: nhánh tiêu cực của NỖ LỰC PHỤC HỒI là "nếu thủng <đáy nỗ lực> thì
+  nỗ lực phục hồi thất bại, chỉ số về <mốc kế>" (KHÔNG "FTD thất bại" — chưa có FTD), và lời chỉ "chờ phiên FTD", nhãn mang luật. Điểm số đọc
   tròn thành chữ, nhãn giữ số lẻ. Nói chậm hơn, câu ngắn hơn scene khác. Không câu nào là lời khuyên, không gọi giá.
 - **Headline là phụ đề**: phần lớn người xem tắt tiếng. Mỗi headline đứng một mình kể được chuyện: dòng 1
   = điều nhìn thấy (có số), dòng 2 = nghĩa của nó. Mark hiện ra đúng câu gọi tên nó (`atSentence`).
@@ -280,35 +315,108 @@ những chỗ sau là khác:
 - **Chủ ngữ là TUẦN.** Số của tuần nằm ở `weekly`: `changePercent` (so với đóng cửa tuần trước), `volumeVsPriorWeek`
   (khối lượng mỗi phiên so với tuần trước), `high` / `low` / `close`, `distributionDays`, `transitions`, `newLeaders` /
   `droppedLeaders`. Phiên cuối tuần chỉ là một phần của tuần, không phải nhân vật chính.
-- **hook**: câu đầu gọi tên TUẦN thay cho ngày của phiên, đọc thành chữ: "Tuần từ hai mươi tám tháng chín đến hai tháng
-  mười." (`weekly.fromDm` → `session.dm`). Câu hai là điểm đóng cửa tuần và % của TUẦN ("VN-Index đóng tuần ở …,
-  giảm … phần trăm"), rồi câu hỏi và lời mời như bản phiên ("điểm lại tuần qua"). Không chữ hệ thống, như bản phiên.
-- **week** (VN-Index · Khung tuần, từ 2026-10-06 là ĐÁNH GIÁ khung tuần, không chỉ cây nến): ảnh FireAnt tuần. Beat 1
-  cận cảnh cây nến tuần: tuần tăng hay giảm bao nhiêu, đóng cửa gần đỉnh hay gần đáy của biên tuần, khối lượng so với tuần
-  trước — trừ khi `_brief` báo KL phiên cuối của SSI còn là số tạm (khi đó không đọc tỉ lệ KL); tuần chưa khép lại
-  (`indexWeekly.openThrough`) thì nói "tuần này tới thứ Ba", không "cả tuần". Beat 2 toàn cảnh, số ở `indexWeekly`: cấu
-  trúc đỉnh/đáy tuần (`structure.text`, hai đường đứt trên ảnh), giá so với MA50 tuần / MA200 tuần của FireAnt
-  (`maPosition`, `ma.*.closeVsPercent`), vùng kháng cự và hỗ trợ tuần gần nhất (`up[0]` / `down[0]`). Gọi "MA50 tuần",
-  "MA200 tuần" — không lẫn với MA ngày của scene sau. Không nhánh nếu … thì (để watch). Tối đa hai số đọc ra lời.
-- **market**: trạng thái theo quy tắc tính tới phiên cuối tuần. Phiên phân phối mới trong tuần (`weekly.distributionDays`)
-  và lần đổi trạng thái trong tuần (`weekly.transitions`) là chuyện của tuần. Kết bằng câu dẫn sang độ rộng.
+- **Số và tên đọc ra lời — đo giọng 2026-10-09** (`scripts/voice-checks/weekly_words.py` + `tts_takes.py` trên bản 6/10):
+  phần thập phân HAI chữ số đọc đủ như bản phiên — "một phẩy hai mươi ba phần trăm", KHÔNG "một phẩy hai ba" (giọng đọc
+  "hai ba" thành "hai mươi ba" 6/7 lượt, cửa nghe phải thu tới lượt 7); tên nhóm ngành viết ĐẦY ĐỦ bằng chữ ("Xây dựng và vật
+  liệu", "Hàng hóa và dịch vụ công nghiệp"), không chép tên gọn có "&" của bảng (giọng đọc "&" thành "y" 4/4); "RS 1M" nói
+  "RS một tháng" (lexicon không có "1M"); "Momentum breakout / breakdown" giữ nguyên chữ — lexicon đọc "mô men tum · brếch ao ·
+  brếch đao" (đo 15/15, cách đọc cũ "bờ rếch" nghe thành "bờ rách" 9/9).
+- **hook** (từ 2026-10-09 — đạo diễn và người xem trader duyệt, orchestrator gộp; ~46 chữ, trần 64, `rules.formats.weekly.hook`):
+  SỐ trước, rồi câu hỏi KHÔNG có ngày, rồi lời mời — "VN-Index đóng tuần ở một nghìn bảy trăm năm mươi chín phẩy không tám
+  điểm, tăng một phẩy hai mươi ba phần trăm so với tuần trước. Thị trường còn khỏe không? Cùng mình điểm lại tuần qua và
+  lên kế hoạch giao dịch cho tuần tới nhé." Không đọc ngày của tuần (người dùng 2026-10-18: "Remove: Tuần từ mười hai đến
+  mười sáu tháng mười on the intro" — eyebrow "Tổng kết tuần · <từ> → <đến>" mang ngày); tuần chưa khép: "Tính tới thứ <T>,
+  thị trường còn khỏe không?". Điểm đóng tuần đọc ĐỦ cả hai số lẻ, không làm
+  tròn (người dùng 2026-10-18: "nghìn bảy trăm linh sáu not correctly for the VNIndex for the intro … 1705.91 not round
+  up/down this number" — "một nghìn bảy trăm linh năm phẩy chín mươi mốt điểm"). "so với tuần trước" (tuần chưa khép: "so với cuối tuần trước") là
+  BẮT BUỘC trong câu số — thiếu nó, % của tuần nghe như % của phiên (8/10: +0,07% tuần, phiên thứ Năm −0,82%); không thay
+  bằng "tuần này". Câu hỏi là `hook.question` "Thị trường còn khỏe không?" (scene market trả lời ở mọi
+  trạng thái) — KHÔNG "Tiền đang chảy vào đâu?" ở bản tuần: bản tuần không có scene flow, không ai trả lời câu đó. Tuần chưa
+  khép lại: "VN-Index đang ở …, … so với cuối tuần trước. Tuần này, tính tới thứ … ngày …, thị trường còn khỏe không?"
+  và `inviteOpen` ("tuần này"). Lời mời đúng chữ người dùng (2026-10-09: "With weekly the intro must have the sentence
+  like: cung minh review va ke hoach giao dich cho tuan toi nhe.") — "điểm lại" thay "review". Beat 1 ← câu số (headline
+  "Đóng tuần 1759,08 · +1,23%" / "Cả tuần tăng mạnh" — dòng 2 do số quyết định), beat 2 ← câu hỏi (headline "Thị trường còn
+  khỏe không?" / "Kế hoạch tuần tới"); ảnh không còn nhãn "+x%" (headline mang nó). Phiên FTD mất TRONG tuần của bản (8/10:
+  phiên phân phối thứ sáu) thì câu mở của bản phiên 8/10 (`followThrough.lost.say`, "Thị trường đã mất phiên FTD ba tháng
+  tám và đang trong trạng thái nguy hiểm.") đứng trước, beat riêng trên nến FTD, rồi câu số, câu hỏi, lời mời. Câu hỏi khi
+  đó BỎ NGÀY (eyebrow và headline mang ngày; F4 2026-10-09 — đủ khuôn có ngày là 69 chữ): tuần đã khép "Thị trường còn khỏe
+  không?", tuần chưa khép "Tính tới thứ <T>, thị trường còn khỏe không?" — câu mở, câu số và lời mời giữ nguyên chữ (~59–63
+  chữ, trần 64). Không chữ hệ thống ngoài câu mở đó. verify style không cảnh báo hook mở bằng số (`numberFirst`).
+- **week** (VN-Index · Khung tuần, từ 2026-10-06 là ĐÁNH GIÁ khung tuần; từ 2026-10-09 ~28 chữ, hai beat, MỘT số đọc ra lời
+  — đạo diễn và người xem trader, `rules.formats.weekly.week`): ảnh FireAnt tuần. Beat 1 cận cảnh cây nến tuần: KẾT LUẬN của
+  cây nến — đóng cửa sát đỉnh / sát đáy / giữa biên tuần, khối lượng mỗi phiên cao hay thấp hơn tuần trước (nói bằng chữ;
+  không nói khi `_brief` báo KL phiên cuối của SSI còn là số tạm). KHÔNG đọc lại điểm và % của tuần (hook đã đọc; headline
+  beat 1 mang chúng, ảnh không còn nhãn "+x%"). Beat 2 toàn cảnh, số ở `indexWeekly`: cấu trúc đỉnh/đáy tuần
+  (`structure.text`) và vùng tuần GẦN giá đóng nhất (`up[0]` hoặc `down[0]`) đọc MỘT LẦN thành số tròn ("kháng cự vùng một
+  nghìn bảy trăm bảy mươi sáu" ngày 6/10) — scene duy nhất ngoài kế hoạch (watch) đọc mức này. MA50 tuần / MA200 tuần là
+  nhãn, không đọc; không câu "xu hướng dài hạn chưa gãy". Câu cuối trao lời: "Còn khung ngày thì sao?" (`week.bridge`).
+  Không nhánh nếu … thì (để watch).
+- **market**: trạng thái theo quy tắc tính tới phiên cuối tuần — chuyện của TUẦN: phiên phân phối mới trong tuần
+  (`weekly.distributionDays`), lần đổi trạng thái trong tuần (`weekly.transitions`). Từ 2026-10-09 scene này MỞ bằng khung
+  ngày (người dùng: "Combine the scene 03 and 04 to one scene but still keep it meaningful") và trả lời câu hỏi của hook —
+  xem bullet **market (khung ngày + quy tắc)** ở mục dưới.
 - **breadth** chỉ có ở bản tuần: SỐ mã đóng cửa trên MA200 theo terminal (`screener.breadth.count`, caption và headline
   beat 2 in "<n>/<tổng> mã trên SMA200") và đường số mã đó (`screener.breadth.history`, tính lại từ giá SSI bởi
   `breadth.mjs`) dưới đường chỉ số, theo bullet `breadth` ở trên. Ảnh FireAnt "Biến động thị trường" (`flow`) là của bản
   phiên, bản tuần không có.
+  **Từ 2026-10-09** (cắt gọn, ≤ 28 chữ; người xem: đường tính lại in 288/255/221 cạnh 244/898 của caption — "hai con số
+  cho một sự thật"): ba câu — câu đếm của terminal, chiều của đường bằng CHỮ, MỘT cụm mà `_brief` tính từ đỉnh (đáy) của
+  đường ("giảm dần từ cuối tháng tám" ngày 8/10 — đỉnh 286 mã ngày 27/8), rồi "Nhóm ngành nào còn khỏe?". Beat 2 (đường số mã)
+  ghim vào câu chiều của đường (`atSentence` 1). Khung dưới không còn số trên trục (`axis: false`); chỉ caption in số, số của terminal.
 - **spike, rs, uptrend**: từ 2026-10-06 CHỈ có ở bản phiên — bản tuần thay chúng bằng hai bộ lọc Momentum (mục dưới).
   Bảng, chart và scene soi mã của bản tuần vẫn là của PHIÊN CUỐI TUẦN (terminal không giữ lịch sử).
-- **watch**: các nhánh nếu … thì nhìn sang TUẦN SAU.
+- **watch** = KẾ HOẠCH cho tuần tới (từ 2026-10-09; trả lời hứa "lên kế hoạch giao dịch cho tuần tới" của hook — đạo diễn
+  và người xem trader, orchestrator gộp; `rules.formats.weekly.watch`): NĂM câu, ~66 chữ (trần 76), ~18 giây, theo thứ tự mốc
+  trên → mốc dưới → điều gì đổi trạng thái → người có hàng → người chưa có hàng; chữ chung của hệ thống, không gọi giá, không
+  lệnh, không mã. Trạng thái điều chỉnh (khuôn rút gọn F4 2026-10-09 — khuôn cũ 86 chữ): "Tuần tới, nếu vượt lại vùng <mốc
+  trên> thì <mốc kế> là mốc kế. Nếu thủng <mốc dưới> thì về <mốc kế dưới>. Trạng thái chỉ đổi khi có phiên FTD mới. Có hàng
+  thì hạ tỷ trọng và tuân thủ cắt lỗ. Chưa có hàng thì đứng ngoài, không mua đuổi nhịp hồi, chờ phiên FTD mới." ("hạ tỷ
+  trọng và tuân thủ cắt lỗ" là câu của chính người dùng 8/10; hai câu vai soi theo vai đang giữ / chưa có hàng của scene soi
+  mã từ 7/10 và GIỮ NGUYÊN CHỮ — không cắt "đứng ngoài" hay "chờ phiên FTD mới" cho vừa chữ; dài thì nắn ba câu đầu). Chịu áp lực / mức nguy hiểm: cùng hai câu đầu, rồi "Thêm một phiên phân phối nữa
+  là điều chỉnh.", "Có hàng thì rà lại điểm cắt lỗ của từng mã.", "Chưa có hàng thì không mua đuổi." Headline beat 1 "Vượt
+  1776,85 → MA200" / "Kế hoạch tuần tới" (dòng 2 = headline beat 2 của hook); beat 2 "Thủng 1731,03 → 1651,20" / "Chờ phiên
+  FTD mới" (mức nguy hiểm: "Rà lại từng mã và rủi ro"); nhãn "Chờ FTD từ ngày 4, +1,25%" ở trạng thái điều chỉnh như bản phiên
+  8/10. Tối đa ba số đọc ra lời. Scene ngay trước (mã soi cuối, hoặc bảng cuối khi không có mã soi) kết bằng
+  `watch.bridge` "Vậy tuần tới canh gì?" — thay "Còn VN-Index thì sao?". Verify `review-plan` WARN khi hook thiếu "kế
+  hoạch giao dịch cho tuần tới" hay watch thiếu "tuần tới" / "tuần sau".
 - **outro**: hứa "mỗi cuối tuần" (headline `Cập nhật mỗi cuối tuần`).
 
 ### Bản tuần từ 2026-10-06
 
 Người dùng 2026-10-06: "With weekly artifact, eval the VNIndex as daily and weekly of this week, eval the filter: Momentum
-breakout, Momentum breakdown. Also include major ranking and amount of stock have price better than its SMA200." Thứ tự:
-hook → week → daily → market → breadth → sectors → breakout → leader → breakdown → leader → watch → outro. Ba bộ lọc của
-bản phiên (Volume spike, RS Strong, Uptrend) KHÔNG có ở bản tuần (người dùng chọn "Replace").
+breakout, Momentum breakdown. Also include major ranking and amount of stock have price better than its SMA200." Thứ tự
+từ 2026-10-09 (người dùng: "Combine the scene 03 and 04 to one scene but still keep it meaningful" và "Remove the soi ma
+first, i will select the symbol to review with weekly not follow by the filter value and rule"): hook → week → market (khung
+ngày + trạng thái theo quy tắc, MỘT scene) → breadth → sectors → [pick mã ngành, từ 2026-10-10] → breakdown → breakout →
+[0–4 scene pick: mã người dùng chọn] → watch → outro (trước đó: … → daily → market → … → breakout → leader → breakdown → leader → …). Breakdown đứng
+TRƯỚC breakout từ 2026-10-09 (đạo diễn + người xem là trader: danh sách cảnh báo trước, danh sách theo dõi sau — bảng
+breakout hai mã không soi "đọc như danh sách mua: tôi sẽ chụp MSB/PVS và mua sáng thứ Hai"). Ba bộ lọc của bản
+phiên (Volume spike, RS Strong, Uptrend) KHÔNG có ở bản tuần (người dùng chọn "Replace").
 
-- **daily** (VN-Index · Khung ngày): CẤU TRÚC và XU HƯỚNG trên ảnh FireAnt ngày, số ở `indexDaily`. Beat 1: hai đỉnh
+- **market (khung ngày + quy tắc)** — từ 2026-10-09 MỘT scene, eyebrow "VN-Index · Khung ngày" (người dùng: "Combine the
+  scene 03 and 04 to one scene but still keep it meaningful"). Cùng ngày, đạo diễn và người xem trader duyệt, orchestrator
+  gộp: MỘT KẾT LUẬN MỖI BEAT, SÁU câu, ~72 chữ (trần 80, tối đa 6 câu, tối đa HAI số đọc ra lời — `rules.formats.weekly.market`),
+  KHÔNG đọc mức giá nào (nhãn mang 1776,85, MA50, MA200; scene week đọc vùng tuần gần nhất, watch đọc các mốc kế hoạch). s0
+  (beat 1) kết luận cấu trúc ("Khung ngày đi ngang, nhưng giá đã thủng đáy gần nhất."); s1 (beat 2) kết luận MA ("Giá dưới
+  cả MA50 lẫn MA200, khung ngày đang yếu."); s2 (beat 3) chuyện quy tắc của TUẦN kèm thay đổi so với tuần trước — điều
+  chỉnh: "Theo quy tắc, tuần này thị trường chuyển sang điều chỉnh: thứ Năm là phiên phân phối thứ sáu."; chịu áp lực /
+  mức nguy hiểm: câu đếm theo khuôn người dùng 1/10 "… hiện tại đang có năm phiên phân phối", thêm "thêm <k> so với tuần
+  trước" khi tuần có phiên phân phối mới; s3 (beat 4) điều chỉnh: "Phiên FTD ba tháng tám đã thất bại, giờ phải tìm một
+  phiên FTD mới." / mức nguy hiểm: "Hệ thống mình báo nguy hiểm, rà lại từng mã và rủi ro."; s4 câu người dùng chốt của
+  trạng thái (`status.CORRECTION.say` "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao." / `distribution.danger.say`);
+  s5 "Nhìn rộng ra thì sao?". Phiên FTD mất trong tuần: KHÔNG thêm câu "Thị trường đang rất nguy hiểm." của bản phiên — sáu
+  câu của scene gộp không còn chỗ, và câu mở của hook (`followThrough.lost.say`) đã nói "nguy hiểm" (F4 2026-10-09). Nhãn đếm beat 3 trả nợ thuật ngữ thay lời ("6/25 phiên phân phối" + "Giảm ≥ 0,5%, KL cao hơn
+  phiên trước") — lời không giảng định nghĩa; nhãn FTD "FTD 3/8 · thất bại" ở trạng thái điều chỉnh (beat 4, cùng đường đáy
+  điều chỉnh), "FTD 3/8 +1,56%" ở trạng thái khác (beat 3, cùng đáy nhịp hồi). Beat 4 chỉ có nhãn của nó; KHÔNG đồng hồ hết
+  hạn, KHÔNG thang ngưỡng ("6 phiên → điều chỉnh") ở mọi trạng thái, KHÔNG nhãn "Nguy hiểm" khi điều chỉnh — người xem không
+  đọc nổi ba con số phiên trên một chart. Headline: "Thủng đáy 14/9 · 1776,85" / "Đáy cao dần đã bị phá"; "Dưới cả MA50 lẫn
+  MA200" / "Khung ngày đang yếu"; "6/25 phiên phân phối" / "Thị trường điều chỉnh" (mức nguy hiểm: "5/25 phiên phân phối" /
+  "Sức khỏe thị trường yếu" — `status.UNDER_PRESSURE.headline` rút còn ≤ 26 ký tự); "Tìm phiên FTD mới" / "Nguy cơ thủng
+  đáy rất cao" (mức nguy hiểm: "Mức nguy hiểm · 5 phiên" / "Rà lại từng mã và rủi ro") — scaffold điền theo số của bản. Ảnh
+  ngày cắt ở đáy khung khối lượng (`formats.weekly.indexPhoto`): khung MACD của FireAnt không còn hiện. Không nhánh nếu … thì
+  (verify `review-timeframes`).
+- **daily** (VN-Index · Khung ngày; scene riêng tới 2026-10-08, từ 2026-10-09 là beat 1–2 của scene market ở trên):
+  CẤU TRÚC và XU HƯỚNG trên ảnh FireAnt ngày, số ở `indexDaily`. Beat 1: hai đỉnh
   dao động gần nhất và hai đáy gần nhất (`structure.highs` / `structure.lows`, hai đường đứt có nhãn giá) — đỉnh sau cao
   hay thấp hơn, đáy sau cao hay thấp hơn (`structure.text`); khi `structure.broke` có thì giá đã đóng dưới đáy (trên đỉnh)
   gần nhất, nói ra — đó là chi tiết đắt nhất của khung ngày. Khung vàng là các phiên của tuần (`weekSessions`; phiên có
@@ -323,10 +431,68 @@ bản phiên (Volume spike, RS Strong, Uptrend) KHÔNG có ở bản tuần (ng�
   bảng in tên gọn (`short`). Hai ba nhóm dẫn đầu (beat 2 làm chúng sáng lên, câu ghim beat 2 nói về chúng), nhóm yếu
   nhất TRÊN BẢNG, một nhận xét từ cột % trên SMA200 hoặc % tuần ("ngay nhóm đứng đầu cũng chỉ bốn mươi hai phần trăm
   số mã trên MA200"); tối đa hai số đọc ra lời. Nhóm ở `unranked` (quá ít mã thanh khoản) và nhóm ngoài mười dòng không
-  lên bảng: nói tên được, không đọc số. Không đọc mã; nếu gọi một mã thì đó là mã mạnh nhất của nhóm (`strongest`), và
-  KHÔNG nói mã đó có ở bộ lọc nào. Không khuyên mua bán nhóm ngành nào. `comparedWith` là null (chưa có bảng tuần trước)
+  lên bảng: nói tên được, không đọc số. Không đọc mã; nếu gọi một mã thì đó là mã mạnh nhất của nhóm DẪN ĐẦU (`strongest`
+  = `top[0]`; xem đoạn 2026-10-09 chiều bên dưới), và KHÔNG nói mã đó có ở bộ lọc nào. Không khuyên mua bán nhóm ngành nào. `comparedWith` là null (chưa có bảng tuần trước)
   thì không nói "tăng hạng / tụt hạng". Tuần chưa trọn (`weekly.sessions` < 5) thì % tuần là "từ đầu tuần".
-- **breakout / breakdown** (người dùng: "eval the filter: Momentum breakout, Momentum breakdown", chọn "Replace" và
+  **Từ 2026-10-09** (người xem: "I do not trade 'Hàng & DV công nghiệp' (23 names); the useful column is % above MA200"):
+  ~28 chữ, ba câu — nhóm dẫn đầu theo RS 1M trung vị (MỘT số; beat 1), rồi câu về CÁC NHÓM DẪN ĐẦU mà beat 2 làm sáng, từ cột
+  % mã trên SMA200 (8/10: "Chỉ bốn mươi hai phần trăm mã trên MA200.", số của pack; beat 2 ghim vào câu này, `atSentence` 1 —
+  F4 2026-10-09: câu ghim beat 2 không nói về dòng beat 2 làm mờ); vế TƯƠNG PHẢN, nếu còn chữ, gọi được bất kỳ nhóm nào trên
+  bảng, sáng hay mờ ("…, Y tế chỉ còn hai mươi phần trăm"); rồi "Mã nào đang gãy?" (bảng breakdown kế tiếp). Không đọc cột % tuần, không đọc nhóm yếu nhất.
+  **Từ 2026-10-09 chiều** (người dùng: "With the scene 05 also listing 2-3 stock with this major ranking?"): mỗi dòng của
+  bảng in thêm BA mã mạnh nhất của nhóm theo RS 1M (`sectors.groups[].top`, mã thanh khoản, mạnh nhất trước — "CAR · PVP ·
+  VKC"), số mã của nhóm in nhỏ, xám, dưới tên ngành; beat 2 làm sáng cả ba nhóm dẫn đầu lẫn mã của chúng. Người xem ĐỌC mã
+  trên màn hình nên lời KHÔNG đọc lại danh sách; ngân sách vẫn ~28 chữ, ba câu như trên. Lời gọi tối đa MỘT mã, và chỉ là mã
+  mạnh nhất của NHÓM DẪN ĐẦU (`top[0]` của nhóm hạng 1; viết mã in hoa, `voice.letters` đánh vần), không bao giờ nói mã đó
+  có ở bộ lọc nào; gọi mã khác của bảng thì verify `review-sectors` cảnh báo.
+  **Từ 2026-10-10** (người dùng: "on the scene 05, mentiond the major raking from 1 to 3 and mention its stock on this
+  major"; THAY hai đoạn trên ở số câu, số mã và câu cuối): ~46 chữ (trần 54, `formats.weekly.sectors`), BỐN câu — (s0, beat
+  1) bảng và RS 1M trung vị của nhóm dẫn đầu, MỘT số ("Bảng ngành tuần này, nhóm đứng đầu có RS một tháng tám mươi bảy.";
+  headline beat 1 mang tên gọn); (s1, beat 2 — ba dòng đầu sáng lên, `atSentence` 1) BA nhóm hạng 1 → 3 theo thứ tự, tên
+  đầy đủ, mỗi nhóm MỘT mã, mã mạnh nhất của nó: "Dẫn đầu là Hàng hóa và dịch vụ công nghiệp với PVP, rồi Dịch vụ bán lẻ với
+  PET, Hóa chất với DRI." — tên nhóm dẫn đầu nói một lần trong cả scene; (s2, chỉ khi còn chữ) MỘT nhận xét từ cột % mã trên
+  SMA200; (câu CUỐI — THAY từ 2026-10-11, xem đoạn dưới) LỜI MỜI gọi đúng các scene soi mã chiếu NGAY SAU, theo thứ tự — mã ngành trước, rồi mã người dùng chọn
+  khi không có bảng Momentum chen giữa: "Cùng mình xem kỹ PVP, rồi VPB và HDB." (mã tách bằng chữ); không scene soi nào theo
+  sau thì câu dẫn như cũ ("Mã nào đang gãy?" khi bảng breakdown kế tiếp, "Vậy tuần tới canh gì?" khi kế hoạch kế tiếp).
+  **Từ 2026-10-11** (người dùng: "Edit the sentence: Cùng mình xem kỹ PVP, rồi VPB và HDB => something like: Cung minh xem ky cac ma nam trong cac nhom nganh tren & dang manh nhat (leader) cua thi truong nhe"; THAY câu cuối của đoạn trên): có scene soi mã chiếu ngay sau thì câu CUỐI là LỜI
+  MỜI CỐ ĐỊNH, đúng từng chữ, KHÔNG mang mã nào — `formats.weekly.sectors.invite`: "Cùng mình xem kỹ các mã nằm trong các nhóm ngành trên và đang mạnh nhất thị trường nhé." (19 chữ); các scene soi tự gọi
+  tên mã của chúng ("Mã đầu tiên là PVP."). Không scene soi nào theo sau thì câu dẫn như cũ. Lời mời dài nên scene thường
+  còn BA câu, ~49 chữ (trần 54): s2 (% trên SMA200) chỉ khi s0 và s1 còn ngắn — brief của scaffold nói có vừa không. Lời
+  chỉ gọi BA mã của câu s1 (`maxTickers` 3). Verify `review-sectors`: FAIL khi có scene soi theo sau mà câu cuối khác lời
+  mời này (bỏ qua khoảng trắng và hoa/thường), hoặc mời khi không có scene soi nào; WARN khi thiếu mã của một trong ba nhóm
+  đầu hay gọi mã nào khác.
+- **watchlist — Bảng theo dõi tuần tới** (từ 2026-10-18 tối, người dùng sửa: "Why i don't see the 10 symbol of RS1M strong sorting DESC? I mean setting the RS1M strong of the RS strong filter to base and expand the list of symbol? Not limit to 10 symbol on the stock list to monitor? Just piority the stock have RS strong and another filter also find it at first?" — GỐC là RS Strong, MỌI mã của nó, mã được
+  bộ lọc khác cùng tìm ra xếp trước, mười dòng một trang, MỖI BEAT MỘT TRANG, MỖI TRANG MỘT CÂU đủ dài để đọc kịp (~3 giây). 19 dòng,
+  hai trang, bốn câu ~44 chữ: "Mười chín mã của bộ lọc RS Strong, mã có thêm bộ lọc khác xếp trước. Mã có chip breakdown đang gãy
+  hoặc sắp gãy trendline tăng, cần canh rủi ro. Cứ theo dõi, chưa phải lúc hành động. Vậy tuần tới canh gì?" (trang 2 ghim câu ba).
+  33 dòng (16/10 sau khi người dùng hạ sàn KL TB20 của RS Strong xuống 1 000 000), bốn trang, năm câu 58 chữ (trần 62): "Ba mươi
+  ba mã của bộ lọc RS Strong, mã có thêm bộ lọc khác xếp trước. Mã có chip breakdown đang gãy hoặc sắp gãy trendline tăng, cần
+  canh rủi ro. Phần còn lại chỉ có RS Strong, cũng xếp từ mạnh đến yếu. Cứ theo dõi, chưa phải lúc hành động. Vậy tuần tới canh
+  gì?" — trang 1–4 ghim câu một tới bốn; headline: "RS Strong · 33 mã / Có thêm bộ lọc xếp trước", "Chip breakdown / Cần canh
+  rủi ro" (đỏ), "Mã chỉ có RS Strong / Xếp từ mạnh đến yếu", "Cứ theo dõi / Chưa phải lúc hành động". Brief của scaffold ghi câu nào
+  ghim trang nào. Từ 2026-10-18 chiều (người dùng: "Bang theo doi co phieu must be after the xep hang nganh scene with my pick: 4
+  symbols and my plus symbol: GMD, ANV") bảng đứng NGAY SAU xếp hạng ngành: scene sectors KHÔNG còn lời mời cố định (không còn
+  scene soi mã ngành) mà kết bằng câu dẫn "Mã nào cần theo dõi?"; mã người dùng chọn (tối đa 6) sáng lên ở beat cuối của bảng
+  (bảng xoá trắng, chỉ còn các mã đó) và câu cuối của bảng là lời mời gọi tên từng mã, tách bằng chữ: "Cùng mình xem kỹ DCL,
+  rồi MSB, rồi VPB, rồi HDB, rồi GMD và ANV." (beat cuối ghim vào nó; headline beat đó không in sáu mã — quá dài — mà "Xem kỹ
+  từng mã / Bắt đầu với <MÃ ĐẦU>"). Các scene soi mở "Mã đầu tiên là …", "Mã thứ hai là …"; scene soi cuối kết "Vậy tuần tới
+  canh gì?".
+  Cùng tối, người dùng: "Edit … to Cung minh review nhung ma dang chu y cho tuan sau nhe" và "Also have scene for all my picked
+  stock and its filter, also include the price must be monitor and notice": khi có scene **picklist** ngay sau bảng, câu CUỐI của
+  bảng là ĐÚNG câu người dùng "Cùng mình review những mã đáng chú ý cho tuần sau nhé." (không gọi mã, không ghim beat). Scene
+  picklist "Mã đáng chú ý tuần sau" (bảng mọi mã chọn: chip bộ lọc, VƯỢT, THỦNG): ba câu ~40 chữ, tối đa hai số đọc ra lời —
+  danh sách là gì ("Sáu mã đáng chú ý cho tuần sau, mỗi mã kèm bộ lọc đã tìm ra nó."), hai cột giá nghĩa là gì không đọc giá nào
+  ("Đóng cửa vượt giá theo dõi là mạnh lên, thủng giá lưu ý thì phải canh rủi ro."), rồi trao sang các scene soi chart ("Bốn mã đầu
+  bảng, mình xem kỹ trên chart." — beat 2 tô chúng); headline "Mã đáng chú ý tuần sau / Giá theo dõi · giá lưu ý" rồi "Xem kỹ trên
+  chart / <các mã>". Đoạn sau là bản đầu cùng ngày, hợp bốn bộ
+  lọc, mười mã — người dùng bác.) Bản đầu (THAY hai bảng breakout / breakdown của đoạn dưới; người dùng: "Also include the RS strong to this video, combine it with the moment breakout/breakdown, Uptrend filter, and give me 10 of symbol raking by the RS1M sorting DESC, Listing for me the table with each symbol and the filter find it? If the symbol have many fiter listing it on the table for me. The table be using for select the stock to review and need notice and monitor for the next week scene without each filter scene (reduce annoy from all filter scene)"): MỘT
+  bảng mười mã RS 1M cao nhất của bốn bộ lọc RS Strong, Uptrend, Momentum breakout, Momentum breakdown; mỗi dòng một chip cho
+  MỖI bộ lọc đã tìm ra mã — bảng TỰ in, lời KHÔNG đọc chip của mã nào, không "cả hai / cả ba bộ lọc", không "vừa … vừa …".
+  ~34 chữ (trần 44), ba câu + câu cuối: (1) bảng là gì và mã đứng đầu ("Mười mã RS một tháng cao nhất của bốn bộ lọc, đứng đầu là
+  MSR."); (2) — beat 2, plate trạng thái — chip BREAKDOWN là cảnh báo ("Mã có chip breakdown đang gãy hoặc sắp gãy trendline
+  tăng, cần canh rủi ro."); (3) "Cứ theo dõi, chưa phải lúc hành động."; câu cuối là lời mời các mã người dùng chọn (scene soi
+  chiếu ngay sau) hoặc "Vậy tuần tới canh gì?". Mã soi đứng TRƯỚC bảng (mã ngành) kết bằng "Mã nào cần theo dõi?". Tối đa MỘT số.
+- **breakout / breakdown** (TỚI 2026-10-17 — xem watchlist ở trên; người dùng: "eval the filter: Momentum breakout, Momentum breakdown", chọn "Replace" và
   "Top of each filter"): hai bộ lọc đã lưu của terminal, mỗi bộ lọc một bảng (fact pack `screener.breakout` /
   `screener.breakdown`): mã đang có sức mạnh giá (RS 1M, RS 3M, RS 52W cao, thanh khoản) kèm tín hiệu trendline của
   terminal — breakout = vượt trendline giảm, breakdown = thủng trendline tăng; "xác nhận" = đã vượt / đã thủng, "tiềm
@@ -335,11 +501,25 @@ bản phiên (Volume spike, RS Strong, Uptrend) KHÔNG có ở bản tuần (ng�
   Momentum breakdown" (lexicon đọc), không dịch thành "đà tăng", "động lượng". Lời: số mã, mấy mã đã xác nhận, một hai
   mã đầu bảng, một nhận xét từ cột % tuần; tối đa hai số đọc ra lời; nói "tuần này", không "hôm nay". Breakout là danh
   sách để theo dõi, không lời khuyên mua; breakdown là danh sách CẢNH BÁO (mã mạnh gãy hoặc sắp gãy hỗ trợ — phải canh
-  rủi ro), không lời khuyên bán. Mỗi bảng có MỘT mã soi (RS 1M cao nhất của bảng đó, chưa được soi ở bảng trước —
-  `screener.leaders.top[k].tierScene`): beat 2 làm nó sáng lên và câu cuối là lời mời "Cùng mình xem kỹ HAH."; scene
-  soi mã đó chiếu ngay sau bảng (`leaders.order` = "tier": breakout → mã của nó → breakdown → mã của nó), câu đầu
-  "Mã đầu tiên là …" / "Mã thứ hai là …" như bản phiên. KHÔNG nói mã nào có ở cả hai bộ lọc Momentum (5/10: PVS và
-  ABB ở cả hai) — verify `review-overlap` FAIL.
+  rủi ro), không lời khuyên bán. Từ 2026-10-09 KHÔNG bảng nào có mã soi theo luật (người dùng: "i will select the symbol
+  to review with weekly not follow by the filter value and rule"; trước đó mỗi bảng một mã RS 1M cao nhất): mã soi là mã
+  người dùng chọn trên trang duyệt (`screener.requested`, tối đa bốn). Bảng nào có mã đó thì beat 2 làm nó sáng lên và câu
+  ghim beat 2 nói về nó TRÊN bảng đó (hạng RS 1M, % tuần, tín hiệu). **Từ 2026-10-09** bảng breakdown đi TRƯỚC và kết
+  bằng "Còn chiều ngược lại?", không mời mã nào; bảng breakout là bảng CUỐI: câu cuối là lời mời gọi đúng các mã người dùng
+  chọn, cả mã không có trên bảng ("Cùng mình xem kỹ MSB."), các scene pick chiếu ngay sau; chưa có mã nào thì câu cuối dẫn
+  sang kế hoạch tuần tới bằng câu của watch (`formats.weekly.watch.bridge`, "Vậy tuần tới canh gì?"), không nói vì sao
+  không soi mã. Hai bảng in plate trạng thái ("Thị trường: điều chỉnh · danh sách cảnh báo / theo dõi") và thẻ định nghĩa
+  của bộ lọc đã lưu dưới các dòng — bảng không có mã soi thì beat 2 là plate đó.
+  **Lời breakdown từ 2026-10-09** (~26 chữ, ba câu; người xem là trader "mất nhiều tiền"): câu nói danh sách là gì, rồi
+  đường an toàn của người đang cầm, nói chung, chữ của hệ thống (beat 2 ghim vào câu này, `atSentence` 1), rồi câu trao lời —
+  "<n> mã mạnh đang gãy hoặc sắp gãy trendline tăng. Đang cầm mã nào ở đây thì rà lại điểm cắt lỗ. Còn chiều ngược lại?"
+  — không gọi mã, không "bán".
+  **Lời breakout từ 2026-10-09** (~24 chữ, ba câu; người xem: "I would screenshot MSB/PVS and buy Monday"): "Bộ lọc Momentum
+  breakout chỉ có <n> mã, <MÃ> đã vượt trendline giảm. Cứ theo dõi, chưa phải lúc hành động. Vậy tuần tới canh gì?" — câu
+  hai là câu ghim beat 2 (`atSentence` 1); không "mua", không "cơ hội"; câu cuối là lời mời khi có mã chọn (beat 2 khi đó
+  ghim vào lời mời nếu mã đó có trên bảng), không thì câu dẫn sang kế hoạch. Scene pick mở bằng "Mã đầu tiên là …" (chỉ một mã: "Mã đáng
+  chú ý tuần này là …"), không nói "bạn chọn" / "theo yêu cầu". KHÔNG nói mã nào có ở cả hai bộ lọc Momentum (5/10: PVS
+  và ABB ở cả hai) — verify `review-overlap` FAIL.
 
 ## Outro — người làm kênh chào người xem
 
@@ -349,11 +529,14 @@ dưới thẻ outro). Bản tổng kết phiên có thể hứa "mỗi phiên"/"
 
 | Trường | Chữ gợi ý |
 |---|---|
-| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Mỗi phiên đóng cửa, hẹn bạn ở đây. |
+| `narration` | Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Hẹn gặp các bạn vào phiên giao dịch ngày thứ Ba nhé. |
 | headline | `Thả tim, chia sẻ, theo dõi` / `Cập nhật sau mỗi phiên` |
 
 Tên kênh là **Chứng Vịt** (người dùng chốt 2026-09-30 sau khi Facebook từ chối "Cú Đêm Chứng Khoán" — "cú" cũng là tiếng lóng; trước đó Radar Chứng Khoán; `rules.brand`, logo ở `rules.logo`). Câu thả tim · chia sẻ · theo dõi + "để cập nhật sớm nhất những biến động của thị trường" là câu người
-dùng đã duyệt ở market-video — giữ nguyên, chỉ đổi câu hứa theo bản (phiên/tuần).
+dùng đã duyệt ở market-video — giữ nguyên, chỉ đổi câu hứa theo bản (phiên/tuần). Câu hứa của bản phiên gọi THỨ của phiên
+kế tiếp (người dùng 2026-10-12: "Change the text on scene 13: Mỗi phiên đóng cửa, hẹn bạn ở đây. to something like human: Hen
+gap cac ban vao phien giao dich cua ngay thu ... nhe"): "Hẹn gặp các bạn vào phiên giao dịch ngày <thứ> nhé." — brief của outro
+ghi thứ đó (bản thứ Sáu → "thứ Hai").
 
 ## Trả về
 

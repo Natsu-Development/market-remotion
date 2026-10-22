@@ -1,0 +1,770 @@
+{
+  "symbol": "PVT",
+  "date": "2026-10-12",
+  "method": "symbol-reviewer/3",
+  "exchange": "HOSE",
+  "inputs": {
+    "facts": "content/review-daily.facts.json#screener.leaders.top[1]",
+    "analyze": "content/review/analyze/2026-10-12/PVT.json",
+    "photo": "public/shots/review/2026-10-12/pvt-fireant.png",
+    "ma": "public/shots/review/2026-10-12/pvt-fireant.ma.json"
+  },
+  "window": {
+    "source": "public/shots/review/2026-10-12/pvt-fireant.calib.json",
+    "bars": 144,
+    "from": "2026-03-17",
+    "to": "2026-10-12",
+    "low": 16.05,
+    "high": 26.35
+  },
+  "numbers": [
+    {
+      "key": "price",
+      "value": 25.15,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].price"
+    },
+    {
+      "key": "changePercent",
+      "value": -0.2,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].changePercent"
+    },
+    {
+      "key": "volumeVsSma20Percent",
+      "value": 13,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].volumeVsSma20Percent"
+    },
+    {
+      "key": "rs1m",
+      "value": 87,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].rs1m"
+    },
+    {
+      "key": "rs52w",
+      "value": 95,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].rs52w"
+    },
+    {
+      "key": "high52w",
+      "value": 29.73,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].high52w"
+    },
+    {
+      "key": "fromHigh52wPercent",
+      "value": -15.4,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].fromHigh52wPercent"
+    },
+    {
+      "key": "ema50Terminal",
+      "value": 22.16,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].ema50",
+      "note": "terminal EMA50, context only"
+    },
+    {
+      "key": "sma200Terminal",
+      "value": 20.2,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#screener.leaders.top[1].sma200",
+      "note": "terminal SMA200, context only"
+    },
+    {
+      "key": "indexClose",
+      "value": 1720.98,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#session.close"
+    },
+    {
+      "key": "indexChangePercent",
+      "value": -0.81,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#session.changePercent"
+    },
+    {
+      "key": "distributionCount",
+      "value": 6,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#distribution.count"
+    },
+    {
+      "key": "dangerAt",
+      "value": 5,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#distribution.dangerAt"
+    },
+    {
+      "key": "toDanger",
+      "value": 0,
+      "source": "facts",
+      "path": "content/review-daily.facts.json#distribution.toDanger"
+    },
+    {
+      "key": "low52w",
+      "value": 14.95,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:min(l) of the last 250 bars",
+      "date": "2025-10-20"
+    },
+    {
+      "key": "pivot",
+      "value": 26.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:max(h) of the 20 sessions before 2026-10-12",
+      "date": "2026-10-08"
+    },
+    {
+      "key": "pullbackLow",
+      "value": 24.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:min(l) after 2026-10-08",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "pullbackDepthPercent",
+      "value": -7.59,
+      "source": "derived",
+      "path": "pullbackLow / pivot − 1",
+      "formula": "pullbackLow / pivot − 1"
+    },
+    {
+      "key": "pullbackVolumeVsPivotPercent",
+      "value": -38.91,
+      "source": "derived",
+      "path": "mean(v after pivot) / v(pivot) − 1",
+      "formula": "mean(v after pivot) / v(pivot) − 1"
+    },
+    {
+      "key": "swingLow",
+      "value": 23.3,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:5-bar pivot low on 2026-10-01",
+      "date": "2026-10-01"
+    },
+    {
+      "key": "range20High",
+      "value": 26.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:max(h) of the 20 sessions before 2026-10-12"
+    },
+    {
+      "key": "range20Low",
+      "value": 22.1,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:min(l) of the 20 sessions before 2026-10-12"
+    },
+    {
+      "key": "range20DepthPercent",
+      "value": -16.13,
+      "source": "derived",
+      "path": "range20Low / range20High − 1",
+      "formula": "range20Low / range20High − 1"
+    },
+    {
+      "key": "todayHigh",
+      "value": 25.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:h on 2026-10-12",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "todayLow",
+      "value": 24.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:l on 2026-10-12",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "closeRangePercent",
+      "value": 80,
+      "source": "derived",
+      "path": "(c − l) / (h − l) of the session",
+      "formula": "(c − l) / (h − l)"
+    },
+    {
+      "key": "aboveLow52wPercent",
+      "value": 68.23,
+      "source": "derived",
+      "path": "price / low52w − 1",
+      "formula": "price / low52w − 1"
+    },
+    {
+      "key": "closeVsPivotPercent",
+      "value": -4.55,
+      "source": "derived",
+      "path": "price / pivot − 1",
+      "formula": "price / pivot − 1"
+    },
+    {
+      "key": "run15Percent",
+      "value": 12.78,
+      "source": "derived",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:close / min(l) of the last 15 sessions − 1",
+      "formula": "price / min(l of the last 15 sessions) − 1"
+    },
+    {
+      "key": "ma50",
+      "value": 21.52,
+      "source": "fireant",
+      "path": "public/shots/review/2026-10-12/pvt-fireant.ma.json#ma.ma50.value"
+    },
+    {
+      "key": "ma200",
+      "value": 20.2,
+      "source": "fireant",
+      "path": "public/shots/review/2026-10-12/pvt-fireant.ma.json#ma.ma200.value"
+    },
+    {
+      "key": "aboveMa50Percent",
+      "value": 16.87,
+      "source": "derived",
+      "path": "price / ma50 (FireAnt) − 1",
+      "formula": "price / ma50 − 1"
+    },
+    {
+      "key": "aboveMa200Percent",
+      "value": 24.5,
+      "source": "derived",
+      "path": "price / ma200 (FireAnt) − 1",
+      "formula": "price / ma200 − 1"
+    },
+    {
+      "key": "swingHigh1",
+      "value": 25.05,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): 3-bar fractal high on 2026-09-29",
+      "date": "2026-09-29"
+    },
+    {
+      "key": "swingHigh2",
+      "value": 24.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): 3-bar fractal high on 2026-09-22",
+      "date": "2026-09-22"
+    },
+    {
+      "key": "swingLow1",
+      "value": 22.3,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): 3-bar fractal low on 2026-09-24",
+      "date": "2026-09-24"
+    },
+    {
+      "key": "swingLow2",
+      "value": 22.25,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): 3-bar fractal low on 2026-09-18",
+      "date": "2026-09-18"
+    },
+    {
+      "key": "resistance1",
+      "value": 26.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): recent-high level from 2026-10-08 (swings within 1.5%)",
+      "date": "2026-10-08",
+      "touches": 1,
+      "kind": "recent-high"
+    },
+    {
+      "key": "resistance1Touches",
+      "value": 1,
+      "source": "derived",
+      "path": "sessions whose high or low came within 1.5% of 26.35: 2026-10-08"
+    },
+    {
+      "key": "support1",
+      "value": 25.05,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): swing-high level from 2026-09-29 (swings within 1.5%)",
+      "date": "2026-09-29",
+      "touches": 7,
+      "kind": "swing-high"
+    },
+    {
+      "key": "support1Touches",
+      "value": 7,
+      "source": "derived",
+      "path": "sessions whose high or low came within 1.5% of 25.05: 2026-09-29, 2026-09-30, 2026-10-06, 2026-10-07, 2026-10-08, 2026-10-09, 2026-10-12"
+    },
+    {
+      "key": "support2",
+      "value": 24.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): swing-high level from 2026-09-22 (swings within 1.5%)",
+      "date": "2026-09-22",
+      "touches": 7,
+      "kind": "swing-high"
+    },
+    {
+      "key": "support2Touches",
+      "value": 7,
+      "source": "derived",
+      "path": "sessions whose high or low came within 1.5% of 24.35: 2026-09-22, 2026-09-23, 2026-10-01, 2026-10-02, 2026-10-05, 2026-10-07, 2026-10-12"
+    },
+    {
+      "key": "trendlineSupport",
+      "value": 22.73,
+      "source": "derived",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history (window 2026-03-17 → 2026-10-12): hull line under the lows from 2026-09-18 (22.25) touching 2026-09-25 (22.4), at 2026-10-12",
+      "formula": "a + (b − a)·(i − iA)/(iB − iA)",
+      "anchors": [
+        {
+          "date": "2026-09-18",
+          "price": 22.25
+        },
+        {
+          "date": "2026-09-25",
+          "price": 22.4
+        }
+      ]
+    },
+    {
+      "key": "trendlineSupportTouches",
+      "value": 2,
+      "source": "derived",
+      "path": "sessions whose low came within 1% of the line: 2026-09-18, 2026-09-24"
+    },
+    {
+      "key": "trendlineSupportSlopePercent",
+      "value": 0.13,
+      "source": "derived",
+      "path": "line rise per session / anchor A − 1"
+    },
+    {
+      "key": "closeVsSupportTrendlinePercent",
+      "value": 10.65,
+      "source": "derived",
+      "path": "close / line at the last bar − 1"
+    },
+    {
+      "key": "trendlineSupportWorstPiercePercent",
+      "value": 0.31,
+      "source": "derived",
+      "path": "deepest low under the line from its first anchor on (≤ 0.5%)"
+    },
+    {
+      "key": "d2Open",
+      "value": 25.1,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:o on 2026-10-08",
+      "date": "2026-10-08"
+    },
+    {
+      "key": "d2High",
+      "value": 26.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:h on 2026-10-08",
+      "date": "2026-10-08"
+    },
+    {
+      "key": "d2Low",
+      "value": 24.85,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:l on 2026-10-08",
+      "date": "2026-10-08"
+    },
+    {
+      "key": "d2Close",
+      "value": 25.55,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:c on 2026-10-08",
+      "date": "2026-10-08"
+    },
+    {
+      "key": "d1Open",
+      "value": 25.85,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:o on 2026-10-09",
+      "date": "2026-10-09"
+    },
+    {
+      "key": "d1High",
+      "value": 25.95,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:h on 2026-10-09",
+      "date": "2026-10-09"
+    },
+    {
+      "key": "d1Low",
+      "value": 25,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:l on 2026-10-09",
+      "date": "2026-10-09"
+    },
+    {
+      "key": "d1Close",
+      "value": 25.2,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:c on 2026-10-09",
+      "date": "2026-10-09"
+    },
+    {
+      "key": "d0Open",
+      "value": 24.8,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:o on 2026-10-12",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "d0High",
+      "value": 25.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:h on 2026-10-12",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "d0Low",
+      "value": 24.35,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:l on 2026-10-12",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "d0Close",
+      "value": 25.15,
+      "source": "analyze",
+      "path": "content/review/analyze/2026-10-12/PVT.json#price_history:c on 2026-10-12",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "upperWickPercent",
+      "value": 20,
+      "source": "derived",
+      "path": "(h − max(o, c)) / (h − l) of the session",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "lowerWickPercent",
+      "value": 45,
+      "source": "derived",
+      "path": "(min(o, c) − l) / (h − l) of the session",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "bodyPercent",
+      "value": 35,
+      "source": "derived",
+      "path": "|c − o| / (h − l) of the session",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "rangeVsAvg20",
+      "value": 0.97,
+      "source": "derived",
+      "path": "(h − l) / mean(h − l) of the 20 sessions before",
+      "date": "2026-10-12"
+    },
+    {
+      "key": "gapPercent",
+      "value": -1.59,
+      "source": "derived",
+      "path": "open / previous close − 1",
+      "date": "2026-10-12"
+    }
+  ],
+  "checks": [
+    {
+      "id": "price-ma50",
+      "label": "Giá trên MA50",
+      "pass": true,
+      "keys": [
+        "price",
+        "ma50"
+      ]
+    },
+    {
+      "id": "price-ma200",
+      "label": "Giá trên MA200",
+      "pass": true,
+      "keys": [
+        "price",
+        "ma200"
+      ]
+    },
+    {
+      "id": "ma50-ma200",
+      "label": "MA50 trên MA200",
+      "pass": true,
+      "keys": [
+        "ma50",
+        "ma200"
+      ]
+    },
+    {
+      "id": "near-high",
+      "label": "Trong vòng 25% dưới đỉnh 52 tuần",
+      "pass": true,
+      "keys": [
+        "fromHigh52wPercent"
+      ]
+    },
+    {
+      "id": "above-low",
+      "label": "Trên đáy 52 tuần ít nhất 30%",
+      "pass": true,
+      "keys": [
+        "aboveLow52wPercent"
+      ]
+    },
+    {
+      "id": "rs",
+      "label": "RS 1M và RS 52W từ 70",
+      "pass": true,
+      "keys": [
+        "rs1m",
+        "rs52w"
+      ]
+    },
+    {
+      "id": "extension",
+      "label": "Không kéo xa MA50 quá 25%",
+      "pass": true,
+      "keys": [
+        "aboveMa50Percent"
+      ]
+    },
+    {
+      "id": "volume-up",
+      "label": "Phiên tăng có khối lượng từ +40% TB20",
+      "pass": "n/a",
+      "keys": [
+        "volumeVsSma20Percent",
+        "changePercent"
+      ]
+    },
+    {
+      "id": "volume-down",
+      "label": "Phiên giảm không kèm khối lượng từ +40% TB20",
+      "pass": true,
+      "keys": [
+        "volumeVsSma20Percent",
+        "changePercent"
+      ]
+    },
+    {
+      "id": "pivot",
+      "label": "Đóng cửa trên đỉnh 20 phiên trước",
+      "pass": false,
+      "keys": [
+        "closeVsPivotPercent",
+        "pivot"
+      ]
+    },
+    {
+      "id": "day",
+      "label": "Giữ giá khi chỉ số giảm (giảm chưa tới một nửa chỉ số)",
+      "pass": true,
+      "keys": [
+        "changePercent",
+        "indexChangePercent"
+      ]
+    },
+    {
+      "id": "structure",
+      "label": "Đỉnh sau cao hơn, đáy sau cao hơn (HH/HL)",
+      "pass": false,
+      "keys": [
+        "swingHigh1",
+        "swingHigh2",
+        "swingLow1",
+        "swingLow2"
+      ]
+    },
+    {
+      "id": "trendline",
+      "label": "Đóng cửa trên trendline hỗ trợ",
+      "pass": true,
+      "keys": [
+        "trendlineSupport"
+      ]
+    },
+    {
+      "id": "close-range",
+      "label": "Đóng cửa ở nửa trên biên độ phiên",
+      "pass": true,
+      "keys": [
+        "closeRangePercent"
+      ]
+    }
+  ],
+  "setup": "pullback",
+  "priceAction": {
+    "structure": "range",
+    "read": "Đỉnh 29/9 ở 25,05 cao hơn đỉnh 22/9 ở 24,35, còn hai đáy 18/9 và 24/9 ngang nhau ở 22,25–22,30 — đi ngang, hai đáy, trên trendline hỗ trợ gần như phẳng 22,73 dưới hai đáy đó; phiên 8/10 bị bán từ 26,35, thành kháng cự gần nhất; phiên 9/10 là nến inside, rồi phiên 12/10 mở cửa 24,80, dưới giá đóng cửa 25,20 phiên trước, rút chân về 24,35 và đóng cửa 25,15 ở 80% biên độ, vẫn trên đỉnh cũ 25,05 — lực mua đỡ từ 24,35.",
+    "keys": [
+      "swingHigh1",
+      "swingHigh2",
+      "swingLow1",
+      "swingLow2",
+      "trendlineSupport",
+      "d2High",
+      "resistance1",
+      "d1Close",
+      "d0Open",
+      "todayLow",
+      "price",
+      "closeRangePercent",
+      "lowerWickPercent",
+      "support1"
+    ]
+  },
+  "verdict": "PVT vẫn đạt trend template — giá trên MA50 21,52 và MA200 20,20 của FireAnt, MA50 trên MA200, RS 1M 87, RS 52W 95, cách đỉnh 52 tuần 15,4%, cao hơn MA50 16,87% — và trong phiên VN-Index giảm 0,81% về 1720,98, thị trường trở lại điều chỉnh, PVT chỉ giảm 0,20%, rút chân từ 24,35 về đóng cửa 25,15 trên đỉnh cũ 25,05; nhưng sau râu trên ở 26,35 phiên 8/10, giá đang ở nhịp chỉnh dưới đỉnh gần, chưa có lần vượt đỉnh sạch.",
+  "detail": {
+    "kind": "pullback",
+    "text": "Nhịp chỉnh dưới đỉnh gần: từ đỉnh 26,35 của phiên 8/10, giá về thấp nhất 24,35 hôm nay, sâu 7,6%, rồi đóng cửa 25,15, dưới đỉnh 4,55%; khối lượng các phiên chỉnh thấp hơn phiên tạo đỉnh 39%.",
+    "keys": [
+      "pivot",
+      "pullbackLow",
+      "pullbackDepthPercent",
+      "price",
+      "closeVsPivotPercent",
+      "pullbackVolumeVsPivotPercent"
+    ]
+  },
+  "marks": [
+    {
+      "kind": "ma",
+      "ref": "ma50",
+      "label": "MA50 · 21,52",
+      "accent": "green",
+      "beat": 0
+    },
+    {
+      "kind": "ma",
+      "ref": "ma200",
+      "label": "MA200 · 20,20",
+      "accent": "gold",
+      "beat": 0
+    },
+    {
+      "kind": "trendline",
+      "role": "support",
+      "anchors": [
+        {
+          "date": "2026-09-18",
+          "price": 22.25
+        },
+        {
+          "date": "2026-09-25",
+          "price": 22.4
+        }
+      ],
+      "price": 22.73,
+      "label": "Trendline hỗ trợ · 22,73",
+      "accent": "green",
+      "beat": 0
+    },
+    {
+      "kind": "level",
+      "role": "resistance",
+      "ref": "resistance1",
+      "price": 26.35,
+      "label": "Kháng cự · đỉnh 8/10 · 26,35",
+      "accent": "gold",
+      "beat": 0
+    },
+    {
+      "kind": "level",
+      "role": "support",
+      "ref": "support1",
+      "price": 25.05,
+      "label": "Hỗ trợ · đỉnh cũ 29/9 · 25,05",
+      "accent": "green",
+      "beat": 0
+    },
+    {
+      "kind": "candle",
+      "date": "last",
+      "read": "lower-wick",
+      "price": 24.35,
+      "label": "Rút chân · mua đỡ từ 24,35",
+      "accent": "green",
+      "beat": 1
+    }
+  ],
+  "camera": [
+    {
+      "beat": 0,
+      "focus": "all"
+    },
+    {
+      "beat": 1,
+      "focus": "last",
+      "zoom": 1.8
+    }
+  ],
+  "branches": [
+    {
+      "if": "Nếu đóng cửa vượt 26,35, đỉnh phiên 8/10",
+      "then": "nhịp chỉnh kết thúc bằng một lần vượt đỉnh mới, đỉnh sau cao hơn đỉnh trước; râu trên phiên 8/10 cho thấy lực bán ở đúng mức này, nên phiên vượt cần đóng cửa ở nửa trên biên độ, trên khối lượng lớn."
+    },
+    {
+      "if": "Nếu đóng cửa lại dưới 25,05, đỉnh cũ 29/9",
+      "then": "đỉnh cũ không còn giữ vai hỗ trợ, nhịp chỉnh từ 26,35 sâu thêm; mức kế là 24,35, đáy phiên 12/10, nơi lực mua vừa đỡ giá."
+    },
+    {
+      "if": "Nếu thủng 24,35, đáy phiên 12/10",
+      "then": "nến rút chân hôm nay mất tác dụng và giá quay về nền đi ngang; phía dưới là trendline 22,73 dưới hai đáy, rồi MA50 21,52."
+    }
+  ],
+  "roles": {
+    "holder": {
+      "case": "trend-intact",
+      "if": "Nếu đóng cửa lại dưới 25,05",
+      "priceKey": "support1",
+      "price": 25.05,
+      "then": "hạ tỷ trọng một nửa",
+      "plate": "Đang giữ: dưới 25,05 hạ 1/2",
+      "headline": "Đang giữ: hạ tỷ trọng 1/2",
+      "say": "Đang giữ, thủng 25,05 thì hạ một nửa.",
+      "keys": [
+        "aboveMa50Percent",
+        "support1"
+      ]
+    },
+    "notHolder": {
+      "case": "wait-breakout",
+      "if": "Nếu đóng cửa vượt 26,35 với khối lượng lớn",
+      "priceKey": "resistance1",
+      "price": 26.35,
+      "then": "mới giải ngân nhỏ, chưa vượt thì chờ",
+      "plate": "Chưa mua: chờ vượt 26,35",
+      "headline": "Chưa mua: chờ vượt 26,35",
+      "say": "Chưa có hàng, vượt 26,35 mới giải ngân nhỏ.",
+      "keys": [
+        "resistance1",
+        "closeVsPivotPercent"
+      ]
+    }
+  },
+  "context": {
+    "market": "Thị trường điều chỉnh",
+    "status": "CORRECTION",
+    "since": "2026-10-12",
+    "index": "VN-Index 1720,98, −0,81%",
+    "distributionCount": 6,
+    "dangerAt": 5,
+    "toDanger": 0,
+    "danger": false,
+    "tight": true,
+    "day": "✓ — chỉ số −0,81%, PVT −0,20%"
+  },
+  "unsupported": [
+    "EMA50 22,16 và SMA200 20,20 của terminal chỉ là ngữ cảnh; mark MA dùng số FireAnt trên legend của ảnh (MA50 21,52, MA200 20,20). Thẻ 19,70 trên trục giá và dấu + xanh dương cuối tháng 9 là marker MA Cross của FireAnt (MA50 cắt lên MA200), không phải mark của bản soi. Trendline và tín hiệu phá vỡ của terminal không lên màn hình.",
+    "Cấu trúc measure đo là đi ngang, hai đáy: đỉnh 29/9 25,05 cao hơn đỉnh 22/9 24,35, nhưng hai đáy 18/9 22,25 và 24/9 22,30 cách nhau dưới 0,5% nên là ngang nhau — ô structure ✗. Đáy 1/10 23,30 là đáy 5 phiên (swingLow), không phải đáy fractal 3 phiên mỗi bên.",
+    "Đỉnh 26,35 của phiên 8/10 chưa là đỉnh dao động (fractal cần 3 phiên mỗi bên, sau nó mới có 2 phiên). Từ 12/10 measure xếp nó là kháng cự gần nhất: resistance1 kind recent-high, đỉnh cao nhất của các phiên gần đây mà fractal chưa xác nhận (người dùng 2026-10-12: \"kháng cự thật là … 26,35\"), không còn là đỉnh của chính phiên 12/10 25,35. Beat 0 vẽ 26,35; beat 1 không vẽ lại. 25,35 (todayHigh) không có đường: không nhánh nào và không vai nào nhắc tới nó.",
+    "Trendline đi lên từ đáy 8/9 mà bản 8/10 vẽ (24,13 ở phiên 8/10, 4 lần chạm) bị đáy 24,35 của phiên 12/10 xuyên qua quá 0,5% trong phiên — giá đóng cửa vẫn trên đường — nên measure bỏ đường đó. Đường còn hiệu lực là đường gần như phẳng dưới hai đáy 18/9 → 25/9, 22,73 ở nến cuối, 2 lần chạm. Trader có thể đọc nến 12/10 là một lần rút chân xuyên dưới trendline đi lên rồi đóng cửa lại trên nó; không vẽ đường cũ vì không còn là đường phương pháp đo.",
+    "Thế giá: pullback là thế đầu tiên measure liệt kê (rồi far-from-high, trend); bốn leader VPB, PVT, HDB, NAB có thế đầu khác nhau theo đạo diễn. pullback-to-support không khớp dù giá đóng cửa 25,15 sát support1 25,05: đáy phiên 24,35 đã xuyên qua 25,05 trong phiên.",
+    "Đỉnh 52 tuần 29,73 (9/3) nằm ngoài khung ảnh (ảnh bắt đầu 17/3, đỉnh khung 26,35) — không vẽ, nói bằng khoảng cách −15,4%.",
+    "range20Low 22,10 và range20DepthPercent −16,13% là biên 20 phiên (gồm cả nhịp tăng cuối tháng 9), không phải nền giá — không dùng.",
+    "24,35 (support2, đỉnh 22/9, cũng là đáy phiên 12/10) không có đường ngang riêng: mark nến rút chân ở beat 1 mang giá 24,35. 23,70 (đỉnh 16/9, 13 phiên chạm) không vẽ: beat 0 đã đủ 5 mark và không nhánh nào nhắc.",
+    "Không có hộp khối lượng: beat 0 đủ 5 mark; KL hôm nay +13% so TB20, KL nhịp chỉnh thấp hơn phiên tạo đỉnh 39% nằm trong detail.",
+    "Không ô nào pending.",
+    "Hai vai (method /3, chép nguyên từ measure), thị trường điều chỉnh từ 12/10 nên market.tight. Đang giữ: trend-intact siết → hạ một nửa khi đóng cửa lại dưới 25,05 (P1 = support1, đỉnh cũ 29/9); P2 = 24,35 (support2). Hợp chart, lưu ý 25,05 rất sát giá đóng cửa 25,15 và đáy phiên 12/10 đã xuyên dưới nó trong phiên rồi đóng cửa lại trên — đường tính theo giá đóng cửa nên vẫn đúng là mức gãy gần nhất. Chưa có hàng: wait-breakout ở resistance1 26,35, đỉnh phiên 8/10 với râu trên 53% — đúng kháng cự trên ảnh; đóng cửa vượt nó trên khối lượng lớn mới là vượt đỉnh của nhịp chỉnh. Hợp chart. Beat 3: plate trắng trên đường 26,35, plate đỏ dưới đường 25,05 — hai đường khác nhau, cách 5%; 26,35 là giá cao nhất của khung ảnh; trên ảnh còn khoảng trống tới mức 27,00 của trục giá cho plate trắng."
+  ]
+}

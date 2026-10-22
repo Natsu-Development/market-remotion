@@ -253,6 +253,22 @@ def legend_rows_of(arr, im):
         # again with the box held to its own text before giving up on it.
         if not words:
             words = ocr_band(1, 1, f'row-{y0}-tight')
+        # The same dotted line running ALONG the row past its last value (AAS 21/10: close 10.30 level with the MA Cross
+        # row) keeps x_end at the pane's edge, and tesseract reads nothing in the long box. End the box where only a
+        # stripe one or two pixels tall goes on — no glyph column is that thin for 22 px.
+        if not words:
+            tall = ((((band.mean(axis=2) > 95) & ((band.max(axis=2) - band.min(axis=2)) < 45)) | (((band.max(axis=2) - band.min(axis=2)) > 60) & (band.max(axis=2) > 90))).sum(axis=0)) >= 3
+            x_cut, gap = TITLE_X[0], 0
+            for x in range(TITLE_X[0], x_end + 1):
+                if tall[x]:
+                    x_cut, gap = x, 0
+                else:
+                    gap += 1
+                    if gap > 22 and x > TITLE_X[0] + 60:
+                        break
+            if x_cut < x_end:
+                x_end = x_cut
+                words = ocr_band(3, 4, f'row-{y0}-cut')
         rows.append({'y0': y0, 'y1': y1, 'x0': 62, 'x1': x_end, 'words': words, 'text': ' '.join(w['text'] for w in words)})
     return rows
 
@@ -287,6 +303,14 @@ for r in value_rows:
     if hover_check is None and spec.get('expectClose') is not None and re.search(r'\bH\s*[\d.,]+.*\bL\s*[\d.,]+', norm):
         # The OHLC header of the bar the legend shows: its close must be the edition's close.
         cw = [w for w in ws if re.match(r'^[C©€]\s*\d', re.sub(r'[oO](?=\d)', '0', w['text']))]  # tesseract reads FireAnt's C as € (VIC 5/10)
+        if not cw:
+            # tesseract can drop the C altogether ("L12.10 12.30 +0.15", NAB 12/10): the close is the bare number after L.
+            li = next((i for i, w in enumerate(ws) if re.match(r'^L\s*\d', w['text'])), None)
+            if li is not None and li + 1 < len(ws) and re.match(r'^\d+[.,]\d+$', ws[li + 1]['text']):
+                cw = [ws[li + 1]]
+            # … or read it as a word of its own ("L1694.77 C 1705.91", VNINDEX 1W 16/10): the close is the number after it.
+            elif li is not None and li + 2 < len(ws) and re.match(r'^[C©€]$', ws[li + 1]['text']) and re.match(r'^\d+[.,]\d+$', ws[li + 2]['text']):
+                cw = [ws[li + 2]]
         reads = [re.sub(r'^[C©€]', '', cw[-1]['text'])] + list(reread_dark(cw[-1]['x'], cw[-1]['y'], cw[-1]['w'], cw[-1]['h'], 'hover-close')) if cw else []
         got, _ = consensus(reads)
         hover_check = {'expectClose': spec['expectClose'], 'readClose': got, 'ok': got is not None and abs(got - spec['expectClose']) < 0.011, 'header': text}
@@ -352,11 +376,34 @@ def below_legend(x, ys):
     return ys[ys + int(cal['pane'][1]) > LEG_FLOOR] if x < LEG_RIGHT else ys
 
 
-def line_y(colour, tol=46):
+def thin_runs(ys, gap=3, span=12):
+    """A column's pixels of one colour split where they stop touching, keeping the short runs: a thin line is one
+    of them; a badge, a glyph or a candle body in the same colour makes others."""
+    out, cur = [], []
+    for y in ys:
+        if cur and y - cur[-1] > gap:
+            out.append(cur)
+            cur = []
+        cur.append(int(y))
+    if cur:
+        out.append(cur)
+    return [r for r in out if r[-1] - r[0] < span]
+
+
+def line_y(colour, tol=46, path=None):
     """Median y of `colour` pixels in the columns just left of the last candle (the candle's own
-    body sits on last_x; the MA passes through the gap between the last two candles)."""
+    body sits on last_x; the MA passes through the gap between the last two candles). With the line's
+    path near that candle, only the run of pixels on the path counts: FireAnt's orange 'S' badges at the
+    foot of the price pane share the MA200's colour (HDB 2026-10-15: the median sat on them, 185 px off)."""
     if not colour:
         return None
+    near_path = [(p[0] * W, p[1] * H) for p in (path or []) if abs(p[0] * W - asof_x) <= 8 * d]
+    ref = None
+    if len(near_path) >= 2:                              # the line through the path's points around the candle
+        slope, cut = np.polyfit([p[0] for p in near_path], [p[1] for p in near_path], 1)
+        ref = float(slope * asof_x + cut)
+    elif near_path:
+        ref = near_path[0][1]
     xs = [int(round(asof_x - d * f)) for f in (0.5, 0.45, 0.55, 1.5)]
     hits = []
     for x in xs:
@@ -365,9 +412,36 @@ def line_y(colour, tol=46):
         colx = A[int(cal['pane'][1]):int(cal['pane'][3]), x]
         near = np.abs(colx - np.array(colour)).sum(axis=1) < tol
         ys = below_legend(x, np.where(near)[0])
-        if len(ys):
+        if not len(ys):
+            continue
+        if ref is None:
             hits.append(float(np.median(ys)) + cal['pane'][1])
+            continue
+        runs = [float(np.median(r)) + cal['pane'][1] for r in thin_runs(ys)]
+        best = min(runs, key=lambda y: abs(y - ref), default=None)
+        if best is not None and abs(best - ref) <= 20:
+            hits.append(best)
+    if not hits and ref is not None:
+        return ref
     return float(np.median(hits)) if hits else None
+
+
+def off_line(pts, reach=3, tol_px=24):
+    """Drops the points of a path that leave the line: an MA moves a few pixels between neighbouring candles, so a
+    point far from the median of its neighbours is something else in the line's colour (the 'S' badges above).
+    The worst goes first and the rest are judged again — two badge points either side of a good one would
+    otherwise outvote it (HDB 2026-10-15)."""
+    pts = [list(p) for p in pts]
+    while True:
+        worst, at = tol_px, None
+        for i, (x, y) in enumerate(pts):
+            nb = [q[1] for q in pts[max(0, i - reach):i] + pts[i + 1:i + 1 + reach] if abs(q[0] - x) * W <= 4 * reach * d]
+            off = abs(y - float(np.median(nb))) * H if nb else 0
+            if off > worst:
+                worst, at = off, i
+        if at is None:
+            return pts
+        del pts[at]
 
 
 def line_path(colour, tol=46):
@@ -384,7 +458,7 @@ def line_path(colour, tol=46):
         ys = below_legend(x, np.where(np.abs(colx - np.array(colour)).sum(axis=1) < tol)[0])
         if len(ys) and ys.max() - ys.min() < 12:            # one thin line, not a candle or a legend glyph
             pts.append([round(x / W, 4), round((float(np.median(ys)) + cal['pane'][1]) / H, 4)])
-    return pts
+    return off_line(pts)
 
 
 def nearest_tag(colour):
@@ -402,7 +476,8 @@ for p in periods:
         continue
     tag = nearest_tag(row.get('colour'))
     value = row['value'] if row['value'] is not None else (tag or {}).get('value')
-    ly = line_y(row.get('colour'))
+    path = line_path(row.get('colour'))
+    ly = line_y(row.get('colour'), path=path)
     entry = {
         'value': value,
         'label': row['text'],
@@ -410,7 +485,7 @@ for p in periods:
         'color': row.get('colour'),
         'tag': {'value': tag['value'], 'y': tag['y']} if tag else None,
         'yAtLast': round(ly / H, 4) if ly is not None else None,
-        'path': line_path(row.get('colour')),
+        'path': path,
         'source': 'legend' if row['value'] is not None else ('price-scale tag' if tag else None),
     }
     if value is not None and ly is not None:

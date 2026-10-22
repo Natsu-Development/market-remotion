@@ -1,0 +1,27 @@
+{
+  "edition": "2026-10-21",
+  "symbols": [
+    "VHM",
+    "VIC"
+  ],
+  "skip": [
+    "AAS"
+  ],
+  "source": "user chat 2026-10-21: \"Remove the AAS, review for me the VHM, and VIC. Also include the sentence and enrich its meaning on this video: Thị trường tăng điểm nhưng hầu hết các cổ phiếu đều bật từ dưới đáy lên và các cổ phiếu mạnh đầu ngành đã phân tích (VPB, HDB)vẫn đang đứng im.\"",
+  "readAt": "2026-10-21T10:17:48.000Z",
+  "say": [
+    {
+      "scene": "flow",
+      "text": "Thị trường tăng điểm nhưng hầu hết các cổ phiếu đều bật từ dưới đáy lên và các cổ phiếu mạnh đầu ngành đã phân tích (VPB, HDB)vẫn đang đứng im."
+    }
+  ],
+  "spotlight": [
+    {
+      "scene": "shortlist",
+      "symbols": [
+        "VPB",
+        "HDB"
+      ]
+    }
+  ]
+}

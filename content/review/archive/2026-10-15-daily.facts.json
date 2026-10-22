@@ -1,0 +1,1821 @@
+{
+  "format": "daily",
+  "asOf": "2026-10-15",
+  "source": {
+    "label": "SSI iBoard · zionle.io.vn",
+    "reconstructed": false,
+    "indexFetchedAt": "2026-10-15T14:28:27.856Z",
+    "screenerCachedAt": "2026-10-15T08:00:35.340792809Z",
+    "screenerCachedIct": "2026-10-15 15:00"
+  },
+  "rules": {
+    "ddMaxChangePercent": 0.5,
+    "windowSessions": 25,
+    "expireRallyPercent": 5,
+    "underPressureAt": 4,
+    "correctionAt": 6,
+    "dangerAt": 5,
+    "ftdMinDay": 4,
+    "ftdMinChangePercent": 1.25,
+    "topN": 4
+  },
+  "session": {
+    "date": "2026-10-15",
+    "dm": "15/10",
+    "dmy": "15/10/2026",
+    "weekday": "Thứ Năm",
+    "window": {
+      "sessions": 60,
+      "from": "2026-07-21",
+      "fromDm": "21/7",
+      "high": 1874.48,
+      "highDm": "7/9",
+      "low": 1651.2,
+      "lowDm": "28/7",
+      "firstClose": 1730.56,
+      "changePercent": -1.9,
+      "positionPercent": 21
+    },
+    "close": 1698.35,
+    "prevClose": 1704.87,
+    "change": -6.52,
+    "changePercent": -0.38,
+    "high": 1709.54,
+    "low": 1694.77,
+    "volumeM": 586.7,
+    "volumeRatio": 1.31,
+    "volumeVsAvg20": 1.12,
+    "isDistribution": false,
+    "isFtd": false,
+    "streak": -7,
+    "crossed": {
+      "level": 1700,
+      "direction": "down",
+      "lastSide": {
+        "date": "2026-07-28",
+        "dm": "28/7",
+        "close": 1680.62
+      }
+    },
+    "breadthToday": {
+      "exchange": "HOSE",
+      "up": 164,
+      "down": 153,
+      "flat": 51,
+      "total": 368,
+      "source": "fireant.vn/thi-truong",
+      "all": {
+        "up": 488,
+        "down": 489,
+        "flat": 427,
+        "total": 1404
+      },
+      "indexWord": "giảm",
+      "breadthWord": "mã tăng giảm cân bằng",
+      "downUpRatio": 0.93,
+      "screener": {
+        "exchange": "HOSE",
+        "up": 184,
+        "down": 166,
+        "flat": 61,
+        "total": 411,
+        "source": "zionle.io.vn screener, price_change_pct per stock"
+      },
+      "fireant": {
+        "index": 1698.35,
+        "change": -6.52,
+        "changePercent": -0.38,
+        "up": 164,
+        "flat": 51,
+        "down": 153,
+        "total": 368
+      }
+    }
+  },
+  "distribution": {
+    "count": 6,
+    "window": 25,
+    "active": [
+      {
+        "date": "2026-09-11",
+        "dm": "11/9",
+        "changePercent": -1.86,
+        "volumeRatio": 1.64,
+        "close": 1795.21,
+        "sessionsLeft": 0,
+        "expireLevel": 1884.97
+      },
+      {
+        "date": "2026-09-23",
+        "dm": "23/9",
+        "changePercent": -0.84,
+        "volumeRatio": 1.23,
+        "close": 1801.65,
+        "sessionsLeft": 8,
+        "expireLevel": 1891.73
+      },
+      {
+        "date": "2026-09-24",
+        "dm": "24/9",
+        "changePercent": -1.47,
+        "volumeRatio": 1.07,
+        "close": 1775.09,
+        "sessionsLeft": 9,
+        "expireLevel": 1863.84
+      },
+      {
+        "date": "2026-09-30",
+        "dm": "30/9",
+        "changePercent": -0.51,
+        "volumeRatio": 1.16,
+        "close": 1768.62,
+        "sessionsLeft": 13,
+        "expireLevel": 1857.05
+      },
+      {
+        "date": "2026-10-02",
+        "dm": "2/10",
+        "changePercent": -0.66,
+        "volumeRatio": 1.37,
+        "close": 1737.71,
+        "sessionsLeft": 15,
+        "expireLevel": 1824.6
+      },
+      {
+        "date": "2026-10-08",
+        "dm": "8/10",
+        "changePercent": -0.82,
+        "volumeRatio": 1.1,
+        "close": 1738.97,
+        "sessionsLeft": 19,
+        "expireLevel": 1825.92
+      }
+    ],
+    "nextExpiry": {
+      "date": "2026-09-11",
+      "dm": "11/9",
+      "changePercent": -1.86,
+      "volumeRatio": 1.64,
+      "close": 1795.21,
+      "sessionsLeft": 0,
+      "expireLevel": 1884.97
+    },
+    "lowestExpireLevel": 1824.6,
+    "toUnderPressure": 0,
+    "toCorrection": 0,
+    "dangerAt": 5,
+    "toDanger": 0,
+    "danger": false
+  },
+  "state": {
+    "status": "CORRECTION",
+    "label": "Thị trường điều chỉnh",
+    "short": "Điều chỉnh",
+    "since": "2026-10-14",
+    "sinceDm": "14/10",
+    "rallyDay": null,
+    "day1": null,
+    "rallyLow": null,
+    "correctionLow": 1694.77,
+    "ftd": null,
+    "lastFtd": {
+      "date": "2026-08-03",
+      "dm": "3/8",
+      "dmy": "3/8/2026",
+      "day": 5,
+      "changePercent": 1.56,
+      "volumeRatio": 1.07,
+      "close": 1762.84,
+      "low": 1737.26,
+      "rallyLow": 1651.2,
+      "day1": {
+        "date": "2026-07-28",
+        "dm": "28/7"
+      },
+      "ended": {
+        "date": "2026-10-08",
+        "dm": "8/10",
+        "why": "distribution"
+      }
+    },
+    "distanceToRallyLowPercent": null,
+    "sessionsSinceFtd": null,
+    "attemptFailed": null
+  },
+  "watch": [
+    {
+      "if": "có một phiên đóng cửa tăng",
+      "then": "ngày 1 của nỗ lực hồi phục"
+    },
+    {
+      "if": "thủng đáy 1694.77",
+      "then": "đáy điều chỉnh mới",
+      "level": 1694.77
+    }
+  ],
+  "screener": {
+    "cachedAt": "2026-10-15T08:00:35.340792809Z",
+    "universe": 1404,
+    "volumeVsSmaUnit": "percent",
+    "spike": {
+      "filter": "Volume spike",
+      "count": 41,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "MSB",
+          "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
+          "exchange": "HOSE",
+          "price": 14.65,
+          "changePercent": 0,
+          "volumeRatio": 1.22,
+          "volumeVsSma20Percent": 22,
+          "rs1m": 91,
+          "rs52w": 91,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 2,
+          "symbol": "HDB",
+          "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 22.8,
+          "changePercent": -1.72,
+          "volumeRatio": 1.15,
+          "volumeVsSma20Percent": 15,
+          "rs1m": 85,
+          "rs52w": 89,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 3,
+          "symbol": "NKG",
+          "name": "Công ty Cổ phần Thép Nam Kim",
+          "exchange": "HOSE",
+          "price": 10.5,
+          "changePercent": 0,
+          "volumeRatio": 2.29,
+          "volumeVsSma20Percent": 129,
+          "rs1m": 81,
+          "rs52w": 25,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
+        }
+      ],
+      "up": 23,
+      "down": 14,
+      "flat": 4,
+      "sortedBy": "changePercent",
+      "order": {
+        "gainers": "desc",
+        "losers": "asc"
+      },
+      "volumeUnit": "percentVsSma20",
+      "gainers": [
+        {
+          "rank": 1,
+          "symbol": "CII",
+          "name": "Công ty Cổ phần Đầu tư Hạ tầng Kỹ thuật TPHCM",
+          "exchange": "HOSE",
+          "price": 12.95,
+          "changePercent": 6.15,
+          "volumeRatio": 3.04,
+          "volumeVsSma20Percent": 204,
+          "rs1m": 70,
+          "rs52w": 7,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
+        },
+        {
+          "rank": 2,
+          "symbol": "VCG",
+          "name": "Tổng CTCP Xuất nhập khẩu và Xây dựng Việt Nam",
+          "exchange": "HOSE",
+          "price": 15,
+          "changePercent": 5.63,
+          "volumeRatio": 2.98,
+          "volumeVsSma20Percent": 198,
+          "rs1m": 80,
+          "rs52w": 20,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 3,
+          "symbol": "HHV",
+          "name": "CTCP Đầu tư hạ tầng giao thông Đèo Cả",
+          "exchange": "HOSE",
+          "price": 9.52,
+          "changePercent": 5.31,
+          "volumeRatio": 2.86,
+          "volumeVsSma20Percent": 186,
+          "rs1m": 73,
+          "rs52w": 25,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ]
+        },
+        {
+          "rank": 4,
+          "symbol": "HCM",
+          "name": "Công ty Cổ phần Chứng khoán Thành phố Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 24,
+          "changePercent": 3.9,
+          "volumeRatio": 1.7,
+          "volumeVsSma20Percent": 70,
+          "rs1m": 35,
+          "rs52w": 77,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 5,
+          "symbol": "VCK",
+          "name": "Công ty Cổ phần Chứng khoán VPS",
+          "exchange": "HOSE",
+          "price": 27.9,
+          "changePercent": 3.53,
+          "volumeRatio": 1.8,
+          "volumeVsSma20Percent": 80,
+          "rs1m": 45,
+          "rs52w": 0,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 6,
+          "symbol": "MBB",
+          "name": "Ngân hàng Thương mại Cổ phần Quân Đội",
+          "exchange": "HOSE",
+          "price": 19.9,
+          "changePercent": 2.84,
+          "volumeRatio": 2.94,
+          "volumeVsSma20Percent": 194,
+          "rs1m": 44,
+          "rs52w": 58,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 7,
+          "symbol": "CEO",
+          "name": "Công ty cổ phần Tập đoàn C.E.O",
+          "exchange": "HNX",
+          "price": 11,
+          "changePercent": 2.8,
+          "volumeRatio": 1.83,
+          "volumeVsSma20Percent": 83,
+          "rs1m": 30,
+          "rs52w": 5,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 8,
+          "symbol": "MBS",
+          "name": "Công ty Cổ phần Chứng khoán MB",
+          "exchange": "HNX",
+          "price": 15.2,
+          "changePercent": 2.7,
+          "volumeRatio": 1.45,
+          "volumeVsSma20Percent": 45,
+          "rs1m": 23,
+          "rs52w": 16,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 9,
+          "symbol": "DXG",
+          "name": "CÔNG TY CỔ PHẦN BLUEMARQ GROUP",
+          "exchange": "HOSE",
+          "price": 10.25,
+          "changePercent": 2.5,
+          "volumeRatio": 1.61,
+          "volumeVsSma20Percent": 61,
+          "rs1m": 36,
+          "rs52w": 15,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 10,
+          "symbol": "VIX",
+          "name": "Công ty cổ phần Chứng khoán VIX",
+          "exchange": "HOSE",
+          "price": 11.75,
+          "changePercent": 2.17,
+          "volumeRatio": 1.67,
+          "volumeVsSma20Percent": 67,
+          "rs1m": 25,
+          "rs52w": 3,
+          "filters": [
+            "Volume spike"
+          ]
+        }
+      ],
+      "losers": [
+        {
+          "rank": 1,
+          "symbol": "BSR",
+          "name": "Công ty cổ phần – Tổng Công ty Lọc hóa dầu Việt Nam",
+          "exchange": "HOSE",
+          "price": 28.2,
+          "changePercent": -6.31,
+          "volumeRatio": 1.71,
+          "volumeVsSma20Percent": 71,
+          "rs1m": 26,
+          "rs52w": 96,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 2,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 23.65,
+          "changePercent": -4.25,
+          "volumeRatio": 1.31,
+          "volumeVsSma20Percent": 31,
+          "rs1m": 81,
+          "rs52w": 94,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 3,
+          "symbol": "PVS",
+          "name": "Tổng CTCP Dịch Vụ Kỹ Thuật Dầu Khí Việt Nam",
+          "exchange": "HNX",
+          "price": 31.6,
+          "changePercent": -4.24,
+          "volumeRatio": 1.64,
+          "volumeVsSma20Percent": 64,
+          "rs1m": 36,
+          "rs52w": 90,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 4,
+          "symbol": "VHM",
+          "name": "Công ty Cổ phần Vinhomes",
+          "exchange": "HOSE",
+          "price": 58.9,
+          "changePercent": -3.44,
+          "volumeRatio": 1.29,
+          "volumeVsSma20Percent": 29,
+          "rs1m": 13,
+          "rs52w": 73,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 5,
+          "symbol": "STB",
+          "name": "Ngân hàng Thương mại Cổ phần Sài Gòn Tài Lộc",
+          "exchange": "HOSE",
+          "price": 62.8,
+          "changePercent": -2.79,
+          "volumeRatio": 2.24,
+          "volumeVsSma20Percent": 124,
+          "rs1m": 12,
+          "rs52w": 77,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 6,
+          "symbol": "VPI",
+          "name": "Công ty cổ phần Phát triển Bất động sản Văn Phú",
+          "exchange": "HOSE",
+          "price": 49.4,
+          "changePercent": -2.37,
+          "volumeRatio": 1.61,
+          "volumeVsSma20Percent": 61,
+          "rs1m": 9,
+          "rs52w": 64,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 7,
+          "symbol": "LPB",
+          "name": "Ngân hàng Thương mại cổ phần Lộc Phát Việt Nam",
+          "exchange": "HOSE",
+          "price": 37.2,
+          "changePercent": -2.36,
+          "volumeRatio": 1.31,
+          "volumeVsSma20Percent": 31,
+          "rs1m": 10,
+          "rs52w": 37,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 8,
+          "symbol": "POW",
+          "name": "Tổng công ty Điện lực Dầu khí Việt Nam – Công ty cổ phần",
+          "exchange": "HOSE",
+          "price": 12.2,
+          "changePercent": -2.01,
+          "volumeRatio": 2.19,
+          "volumeVsSma20Percent": 119,
+          "rs1m": 43,
+          "rs52w": 74,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 9,
+          "symbol": "PLX",
+          "name": "Tập đoàn Xăng dầu Việt Nam",
+          "exchange": "HOSE",
+          "price": 35.55,
+          "changePercent": -1.93,
+          "volumeRatio": 1.04,
+          "volumeVsSma20Percent": 4,
+          "rs1m": 32,
+          "rs52w": 81,
+          "filters": [
+            "Volume spike"
+          ]
+        },
+        {
+          "rank": 10,
+          "symbol": "HDB",
+          "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 22.8,
+          "changePercent": -1.72,
+          "volumeRatio": 1.15,
+          "volumeVsSma20Percent": 15,
+          "rs1m": 85,
+          "rs52w": 89,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        }
+      ]
+    },
+    "rs": {
+      "filter": "RS Strong",
+      "sortBy": "rs_1m",
+      "count": 18,
+      "ranked": 18,
+      "up": 6,
+      "down": 9,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "MSR",
+          "name": "Công ty Cổ phần Masan High-Tech Materials",
+          "exchange": "UPCOM",
+          "price": 65.9,
+          "changePercent": 2.33,
+          "volumeRatio": 0.76,
+          "volumeVsSma20Percent": -24,
+          "rs1m": 97,
+          "rs52w": 99,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 26.5,
+          "aboveSma200Percent": 61.1
+        },
+        {
+          "rank": 2,
+          "symbol": "NVB",
+          "name": "Ngân hàng TMCP Quốc Dân",
+          "exchange": "HNX",
+          "price": 13.8,
+          "changePercent": -1.43,
+          "volumeRatio": 0.57,
+          "volumeVsSma20Percent": -43,
+          "rs1m": 93,
+          "rs52w": 63,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 2.1,
+          "aboveSma200Percent": 12.4
+        },
+        {
+          "rank": 3,
+          "symbol": "MSB",
+          "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
+          "exchange": "HOSE",
+          "price": 14.65,
+          "changePercent": 0,
+          "volumeRatio": 1.22,
+          "volumeVsSma20Percent": 22,
+          "rs1m": 91,
+          "rs52w": 91,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 6.9,
+          "aboveSma200Percent": 24.5
+        },
+        {
+          "rank": 4,
+          "symbol": "VPB",
+          "name": "Ngân hàng Thương mại cổ phần Việt Nam Thịnh Vượng",
+          "exchange": "HOSE",
+          "price": 24.45,
+          "changePercent": 0.41,
+          "volumeRatio": 0.99,
+          "volumeVsSma20Percent": -1,
+          "rs1m": 87,
+          "rs52w": 71,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 9.6,
+          "aboveSma200Percent": 14.2
+        },
+        {
+          "rank": 5,
+          "symbol": "HDB",
+          "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 22.8,
+          "changePercent": -1.72,
+          "volumeRatio": 1.15,
+          "volumeVsSma20Percent": 15,
+          "rs1m": 85,
+          "rs52w": 89,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 6.9,
+          "aboveSma200Percent": 10.3
+        },
+        {
+          "rank": 6,
+          "symbol": "NKG",
+          "name": "Công ty Cổ phần Thép Nam Kim",
+          "exchange": "HOSE",
+          "price": 10.5,
+          "changePercent": 0,
+          "volumeRatio": 2.29,
+          "volumeVsSma20Percent": 129,
+          "rs1m": 81,
+          "rs52w": 25,
+          "filters": [
+            "Volume spike",
+            "RS Strong"
+          ],
+          "aboveEma50Percent": 2.2,
+          "aboveSma200Percent": -13.6
+        },
+        {
+          "rank": 7,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 23.65,
+          "changePercent": -4.25,
+          "volumeRatio": 1.31,
+          "volumeVsSma20Percent": 31,
+          "rs1m": 81,
+          "rs52w": 94,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 5.5,
+          "aboveSma200Percent": 16.4
+        },
+        {
+          "rank": 8,
+          "symbol": "MSN",
+          "name": "Công ty Cổ phần Tập đoàn MaSan",
+          "exchange": "HOSE",
+          "price": 70.4,
+          "changePercent": -1.81,
+          "volumeRatio": 0.71,
+          "volumeVsSma20Percent": -29,
+          "rs1m": 80,
+          "rs52w": 46,
+          "filters": [
+            "RS Strong"
+          ],
+          "aboveEma50Percent": 0.5,
+          "aboveSma200Percent": -4.3
+        },
+        {
+          "rank": 9,
+          "symbol": "HAG",
+          "name": "Công ty Cổ phần Hoàng Anh Gia Lai",
+          "exchange": "HOSE",
+          "price": 14.5,
+          "changePercent": 0.69,
+          "volumeRatio": 0.75,
+          "volumeVsSma20Percent": -25,
+          "rs1m": 79,
+          "rs52w": 48,
+          "filters": [
+            "RS Strong"
+          ],
+          "aboveEma50Percent": 1.4,
+          "aboveSma200Percent": -6.2
+        },
+        {
+          "rank": 10,
+          "symbol": "HQC",
+          "name": "Công ty Cổ phần Tư vấn – Thương mại – Dịch vụ Địa ốc Hoàng Quân",
+          "exchange": "HOSE",
+          "price": 1.98,
+          "changePercent": 0,
+          "volumeRatio": 0.76,
+          "volumeVsSma20Percent": -24,
+          "rs1m": 79,
+          "rs52w": 14,
+          "filters": [
+            "RS Strong"
+          ],
+          "aboveEma50Percent": -3,
+          "aboveSma200Percent": -20.2
+        }
+      ],
+      "overlap": {
+        "shown": 10,
+        "both": 6,
+        "only": 4,
+        "all3": 3
+      }
+    },
+    "uptrend": {
+      "filter": "Uptrend",
+      "sortBy": "rs_1m",
+      "count": 12,
+      "ranked": 12,
+      "up": 4,
+      "down": 7,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "MSR",
+          "name": "Công ty Cổ phần Masan High-Tech Materials",
+          "exchange": "UPCOM",
+          "price": 65.9,
+          "changePercent": 2.33,
+          "volumeRatio": 0.76,
+          "volumeVsSma20Percent": -24,
+          "rs1m": 97,
+          "rs52w": 99,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 26.5,
+          "aboveSma200Percent": 61.1
+        },
+        {
+          "rank": 2,
+          "symbol": "PVP",
+          "name": "CTCP Vận tải Dầu khí Thái Bình Dương",
+          "exchange": "HOSE",
+          "price": 22,
+          "changePercent": -4.97,
+          "volumeRatio": 2,
+          "volumeVsSma20Percent": 100,
+          "rs1m": 94,
+          "rs52w": 97,
+          "filters": [
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 10.5,
+          "aboveSma200Percent": 34.1
+        },
+        {
+          "rank": 3,
+          "symbol": "NVB",
+          "name": "Ngân hàng TMCP Quốc Dân",
+          "exchange": "HNX",
+          "price": 13.8,
+          "changePercent": -1.43,
+          "volumeRatio": 0.57,
+          "volumeVsSma20Percent": -43,
+          "rs1m": 93,
+          "rs52w": 63,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 2.1,
+          "aboveSma200Percent": 12.4
+        },
+        {
+          "rank": 4,
+          "symbol": "DRI",
+          "name": "CTCP Đầu tư Cao su Đắk Lắk",
+          "exchange": "UPCOM",
+          "price": 15.8,
+          "changePercent": -1.25,
+          "volumeRatio": 0.73,
+          "volumeVsSma20Percent": -27,
+          "rs1m": 91,
+          "rs52w": 95,
+          "filters": [
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 9,
+          "aboveSma200Percent": 23
+        },
+        {
+          "rank": 5,
+          "symbol": "MSB",
+          "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
+          "exchange": "HOSE",
+          "price": 14.65,
+          "changePercent": 0,
+          "volumeRatio": 1.22,
+          "volumeVsSma20Percent": 22,
+          "rs1m": 91,
+          "rs52w": 91,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 6.9,
+          "aboveSma200Percent": 24.5
+        },
+        {
+          "rank": 6,
+          "symbol": "AAS",
+          "name": "Công ty cổ phần Chứng khoán SmartInvest",
+          "exchange": "UPCOM",
+          "price": 10.2,
+          "changePercent": 0.99,
+          "volumeRatio": 0.55,
+          "volumeVsSma20Percent": -45,
+          "rs1m": 87,
+          "rs52w": 64,
+          "filters": [
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 13.2,
+          "aboveSma200Percent": 15.7
+        },
+        {
+          "rank": 7,
+          "symbol": "VPB",
+          "name": "Ngân hàng Thương mại cổ phần Việt Nam Thịnh Vượng",
+          "exchange": "HOSE",
+          "price": 24.45,
+          "changePercent": 0.41,
+          "volumeRatio": 0.99,
+          "volumeVsSma20Percent": -1,
+          "rs1m": 87,
+          "rs52w": 71,
+          "filters": [
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 9.6,
+          "aboveSma200Percent": 14.2
+        },
+        {
+          "rank": 8,
+          "symbol": "HDB",
+          "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 22.8,
+          "changePercent": -1.72,
+          "volumeRatio": 1.15,
+          "volumeVsSma20Percent": 15,
+          "rs1m": 85,
+          "rs52w": 89,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 6.9,
+          "aboveSma200Percent": 10.3
+        },
+        {
+          "rank": 9,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 23.65,
+          "changePercent": -4.25,
+          "volumeRatio": 1.31,
+          "volumeVsSma20Percent": 31,
+          "rs1m": 81,
+          "rs52w": 94,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 5.5,
+          "aboveSma200Percent": 16.4
+        },
+        {
+          "rank": 10,
+          "symbol": "DGW",
+          "name": "Công ty Cổ phần Thế Giới Số",
+          "exchange": "HOSE",
+          "price": 45.05,
+          "changePercent": -0.99,
+          "volumeRatio": 0.5,
+          "volumeVsSma20Percent": -50,
+          "rs1m": 73,
+          "rs52w": 86,
+          "filters": [
+            "Uptrend"
+          ],
+          "aboveEma50Percent": 3.9,
+          "aboveSma200Percent": 7.9
+        }
+      ],
+      "overlap": {
+        "shown": 10,
+        "both": 6,
+        "only": 4,
+        "all3": 3
+      }
+    },
+    "leaders": {
+      "from": [
+        [
+          "spike",
+          "rs",
+          "uptrend"
+        ]
+      ],
+      "filters": [
+        "Volume spike",
+        "RS Strong",
+        "Uptrend"
+      ],
+      "tiers": [
+        {
+          "scenes": [
+            "spike",
+            "rs",
+            "uptrend"
+          ],
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "names": [
+            "MSB",
+            "HDB",
+            "PVT"
+          ]
+        }
+      ],
+      "count": 3,
+      "top": [
+        {
+          "rank": 1,
+          "symbol": "MSB",
+          "name": "Ngân hàng Thương mại cổ phần Hàng Hải Việt Nam",
+          "exchange": "HOSE",
+          "price": 14.65,
+          "changePercent": 0,
+          "volumeRatio": 1.22,
+          "volumeVsSma20Percent": 22,
+          "rs1m": 91,
+          "rs52w": 91,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "ema50": 13.7,
+          "sma200": 11.77,
+          "aboveEma50Percent": 6.9,
+          "aboveSma200Percent": 24.5,
+          "high52w": 15,
+          "fromHigh52wPercent": -2.3,
+          "signal": {
+            "type": "breakdown_potential",
+            "price": 14.65,
+            "date": "2026-10-15",
+            "dm": "15/10"
+          },
+          "chart": {
+            "bars": 256,
+            "from": "2025-10-06",
+            "to": "2026-10-15"
+          },
+          "fireant": {
+            "ma50": 13.57,
+            "ma200": 11.77,
+            "aboveMa50Percent": 8,
+            "aboveMa200Percent": 24.5,
+            "photo": "shots/review/2026-10-15/msb-fireant.png",
+            "source": "fireant.vn (legend / price-scale tags, OCR)",
+            "asOf": {
+              "date": "2026-10-15",
+              "closeRead": 14.65,
+              "ok": true
+            }
+          },
+          "review": {
+            "setup": "pullback-to-support",
+            "verdict": "MSB qua đủ trend template — giá trên MA50 13,57 và MA200 11,77 của FireAnt, MA50 trên MA200, RS 1M 91, RS 52W 91, cách đỉnh 52 tuần 2,3% — và phiên 15/10 chỉnh về hỗ trợ 14,50 rồi đóng cửa 14,65, đứng giá khi VN-Index giảm 0,38% trong thị trường điều chỉnh với 6 phiên phân phối; nhưng đó là phiên thứ ba liền râu trên dài, bị bán từ vùng 14,75–15,00, giá vẫn dưới đỉnh 15,00.",
+            "detail": "Chỉnh về hỗ trợ: phiên 15/10 xuống thấp nhất 14,45, dưới hỗ trợ 14,50 (hai đỉnh cũ 25/9 và 1/10) trong phiên, rồi đóng cửa 14,65, trên hỗ trợ 1,03%; nhịp chỉnh từ đỉnh 15,00 phiên 14/10 sâu 3,67%, khối lượng +22% so trung bình 20 phiên.",
+            "priceAction": {
+              "structure": "range",
+              "read": "Hai đỉnh ngang nhau 14,50 (25/9 và 1/10), đáy 5/10 ở 13,85 cao hơn đáy 15/9 ở 12,65 — đi ngang, hai đỉnh — trên trendline hỗ trợ đi lên từ đáy 30/3, 12,98 ở phiên 15/10; giá đóng cửa trên 14,50 từ phiên 7/10, nhưng ba phiên 13/10, 14/10, 15/10 đều râu trên dài, bị bán từ 14,75, 15,00 rồi 14,90; phiên 15/10 xuống 14,45, dưới hỗ trợ 14,50 trong phiên, rồi đóng cửa 14,65 ở 44% biên độ."
+            },
+            "roles": {
+              "holder": {
+                "case": "warning",
+                "if": "Nếu đóng cửa lại dưới 14,50",
+                "then": "thoát hết",
+                "price": 14.5,
+                "plate": "Đang giữ: dưới 14,50 thoát hết",
+                "say": "Đang giữ, thủng 14,50 thì thoát hết.",
+                "headline": "Đang giữ: thoát hết"
+              },
+              "notHolder": {
+                "case": "wait-breakout",
+                "if": "Nếu đóng cửa vượt 15,00 với khối lượng lớn",
+                "then": "mới giải ngân nhỏ, chưa vượt thì chờ",
+                "price": 15,
+                "plate": "Chưa mua: chờ vượt 15,00",
+                "say": "Chưa có hàng, vượt 15,00 mới giải ngân nhỏ.",
+                "headline": "Chưa mua: chờ vượt 15,00"
+              }
+            },
+            "numbers": {
+              "ma50": 13.57,
+              "ma200": 11.77,
+              "rs1m": 91,
+              "fromHigh52wPercent": -2.3,
+              "support1": 14.5,
+              "price": 14.65,
+              "indexChangePercent": -0.38,
+              "distributionCount": 6,
+              "d2High": 14.75,
+              "pullbackLow": 14.45,
+              "closeVsBreakoutPivotPercent": 1.03,
+              "pullbackDepthPercent": -3.67,
+              "volumeVsSma20Percent": 22,
+              "support2": 13.85,
+              "swingLow2": 12.65,
+              "trendlineSupport": 12.98,
+              "todayHigh": 14.9,
+              "closeRangePercent": 44.44,
+              "resistance1": 15
+            },
+            "pending": [],
+            "path": "content/review/symbols/2026-10-15/MSB.json"
+          },
+          "tier": 1,
+          "tierFilters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 2,
+          "symbol": "HDB",
+          "name": "Ngân hàng TMCP Phát triển TP.Hồ Chí Minh",
+          "exchange": "HOSE",
+          "price": 22.8,
+          "changePercent": -1.72,
+          "volumeRatio": 1.15,
+          "volumeVsSma20Percent": 15,
+          "rs1m": 85,
+          "rs52w": 89,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "ema50": 21.33,
+          "sma200": 20.67,
+          "aboveEma50Percent": 6.9,
+          "aboveSma200Percent": 10.3,
+          "high52w": 23.45,
+          "fromHigh52wPercent": -2.8,
+          "signal": {
+            "type": "breakdown_potential",
+            "price": 22.8,
+            "date": "2026-10-15",
+            "dm": "15/10"
+          },
+          "chart": {
+            "bars": 256,
+            "from": "2025-10-06",
+            "to": "2026-10-15"
+          },
+          "fireant": {
+            "ma50": 21.2,
+            "ma200": 20.67,
+            "aboveMa50Percent": 7.5,
+            "aboveMa200Percent": 10.3,
+            "photo": "shots/review/2026-10-15/hdb-fireant.png",
+            "source": "fireant.vn (legend / price-scale tags, OCR)",
+            "asOf": {
+              "date": "2026-10-15"
+            }
+          },
+          "review": {
+            "setup": "near-high",
+            "verdict": "HDB vẫn qua trend template — giá trên MA50 21,20 và MA200 20,67 của FireAnt, MA50 trên MA200, RS 1M 85, RS 52W 89, trên đáy 52 tuần 32% — và sau nhịp vượt đỉnh 22,05 từ 9/10 lên đỉnh 52 tuần 23,45 phiên 14/10, phiên 15/10 lùi về 22,80, cách đỉnh 2,8%, vẫn trên đỉnh cũ 22,05 và trendline hỗ trợ 21,37; nhưng mã giảm 1,72% khi VN-Index chỉ giảm 0,38% về 1698,35 và đóng cửa ở nửa dưới biên độ — không giữ giá khi chỉ số giảm, trong thị trường điều chỉnh với 6 phiên phân phối.",
+            "detail": "Sát đỉnh 52 tuần: phiên 15/10 đóng cửa 22,80, cách 2,8% dưới đỉnh 23,45 lập phiên 14/10, vẫn trên đỉnh cũ 22,05 vừa vượt từ 9/10.",
+            "priceAction": {
+              "structure": "range",
+              "read": "Từ đỉnh 23/9 ở 22,05 giá đi ngang — đỉnh 2/10 ở 21,90 thấp hơn, đáy 6/10 ở 21,05 cao hơn đáy 29/9 ở 20,85 — trên trendline hỗ trợ đi lên từ đáy 28/7, 21,37 ở phiên 15/10, 5 lần chạm; phiên 9/10 vượt đỉnh 22,05, phiên 14/10 lập đỉnh 52 tuần 23,45, rồi phiên 15/10 mở cửa 23,20, xuống 22,55 và đóng cửa 22,80 ở 38% biên độ, cách đỉnh 2,8%."
+            },
+            "roles": {
+              "holder": {
+                "case": "trend-intact",
+                "if": "Nếu đóng cửa lại dưới 22,05",
+                "then": "hạ tỷ trọng một nửa",
+                "price": 22.05,
+                "plate": "Đang giữ: dưới 22,05 hạ 1/2",
+                "say": "Đang giữ, thủng 22,05 thì hạ một nửa.",
+                "headline": "Đang giữ: hạ tỷ trọng 1/2"
+              },
+              "notHolder": {
+                "case": "wait-breakout",
+                "if": "Nếu đóng cửa vượt 23,45 với khối lượng lớn",
+                "then": "mới giải ngân nhỏ, chưa vượt thì chờ",
+                "price": 23.45,
+                "plate": "Chưa mua: chờ vượt 23,45",
+                "say": "Chưa có hàng, vượt 23,45 mới giải ngân nhỏ.",
+                "headline": "Chưa mua: chờ vượt 23,45"
+              }
+            },
+            "numbers": {
+              "ma50": 21.2,
+              "ma200": 20.67,
+              "rs1m": 85,
+              "rs52w": 89,
+              "aboveLow52wPercent": 32.33,
+              "support1@step": 22.05,
+              "resistance1": 23.45,
+              "price": 22.8,
+              "fromHigh52wPercent": -2.8,
+              "trendlineSupport": 21.37,
+              "changePercent": -1.72,
+              "indexChangePercent": -0.38,
+              "indexClose": 1698.35,
+              "distributionCount": 6,
+              "swingHigh1@step": 21.9,
+              "swingLow@step": 21.05,
+              "swingLow2": 20.85,
+              "dangerAt": 5,
+              "todayHigh": 23.2,
+              "pullbackLow": 22.55,
+              "closeRangePercent": 38.46
+            },
+            "pending": [],
+            "path": "content/review/symbols/2026-10-15/HDB.json"
+          },
+          "tier": 1,
+          "tierFilters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        },
+        {
+          "rank": 3,
+          "symbol": "PVT",
+          "name": "Tổng Công ty Cổ phần Vận tải Dầu khí",
+          "exchange": "HOSE",
+          "price": 23.65,
+          "changePercent": -4.25,
+          "volumeRatio": 1.31,
+          "volumeVsSma20Percent": 31,
+          "rs1m": 81,
+          "rs52w": 94,
+          "filters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ],
+          "ema50": 22.41,
+          "sma200": 20.32,
+          "aboveEma50Percent": 5.5,
+          "aboveSma200Percent": 16.4,
+          "high52w": 29.73,
+          "fromHigh52wPercent": -20.4,
+          "signal": {
+            "type": "breakout_confirmed",
+            "price": 20.3,
+            "date": "2026-08-17",
+            "dm": "17/8"
+          },
+          "chart": {
+            "bars": 256,
+            "from": "2025-10-06",
+            "to": "2026-10-15"
+          },
+          "fireant": {
+            "ma50": 21.89,
+            "ma200": 20.32,
+            "aboveMa50Percent": 8,
+            "aboveMa200Percent": 16.4,
+            "photo": "shots/review/2026-10-15/pvt-fireant.png",
+            "source": "fireant.vn (legend / price-scale tags, OCR)",
+            "asOf": {
+              "date": "2026-10-15",
+              "closeRead": 23.65,
+              "ok": true
+            }
+          },
+          "review": {
+            "setup": "breakout-failed",
+            "verdict": "PVT vẫn qua các ô xu hướng của trend template — giá trên MA50 21,89 và MA200 20,32 của FireAnt, MA50 trên MA200, RS 1M 81, RS 52W 94, cách đỉnh 52 tuần 20,4% — nhưng price action đã gãy: lần vượt đỉnh 25,05 của phiên 8/10 thất bại, và phiên 15/10 mở cửa nhảy giá xuống 24,50, đóng cửa 23,65 ngay đáy phiên, thủng trendline đi lên từ đáy 8/9 (24,91 ở nến cuối) và mức 24,35, trên khối lượng cao hơn trung bình 20 phiên 31%; PVT giảm 4,25% khi VN-Index chỉ giảm 0,38%, trong thị trường điều chỉnh với 6 phiên phân phối.",
+            "detail": "Vượt đỉnh thất bại: phiên 8/10 đóng cửa vượt đỉnh 25,05 của phiên 29/9 và chạm 26,35, rồi ba phiên liền đóng cửa lại dưới 25,05 — 25,00, 24,70 và 23,65 ở phiên 15/10, thấp hơn đỉnh 26,35 10,25%, trên khối lượng cao hơn trung bình 20 phiên 31%.",
+            "priceAction": {
+              "structure": "range",
+              "read": "Đỉnh 8/10 ở 26,35 cao hơn đỉnh 29/9 ở 25,05, còn hai đáy 18/9 và 24/9 ngang nhau ở 22,25–22,30 — đi ngang, hai đáy; lần vượt đỉnh 25,05 của phiên 8/10 thất bại, ba phiên liền đóng cửa ở đáy phiên — 25,00, 24,70 rồi 23,65 — và phiên 15/10 mở cửa nhảy giá xuống 24,50, đóng cửa 23,65, thủng trendline đi lên từ đáy 8/9 (24,91 ở nến cuối) và mức 24,35, đáy 12/10, về sát trendline dài từ đáy 28/7 (23,75 ở nến cuối: đáy phiên chạm đường, giá đóng cửa dưới đường 0,42%)."
+            },
+            "roles": {
+              "holder": {
+                "case": "trendline-broken",
+                "if": "Đã thủng trendline ở 24,91",
+                "then": "thoát hết",
+                "price": 24.91,
+                "plate": "Đang giữ: dưới 24,91 thoát hết",
+                "say": "Đang giữ, trendline đã gãy, thoát hết.",
+                "headline": "Đang giữ: thoát hết"
+              },
+              "notHolder": {
+                "case": "trend-broken",
+                "if": "Khi giá còn dưới trendline vừa thủng, ở 24,91",
+                "then": "đứng ngoài",
+                "price": 24.91,
+                "plate": "Chưa mua: dưới 24,91 đứng ngoài",
+                "say": "Chưa có hàng thì đứng ngoài, trendline đã thủng.",
+                "headline": "Chưa mua: đứng ngoài"
+              }
+            },
+            "numbers": {
+              "ma50": 21.89,
+              "ma200": 20.32,
+              "rs1m": 81,
+              "rs52w": 94,
+              "fromHigh52wPercent": -20.4,
+              "failedBreakoutLevel": 25.05,
+              "d0Open": 24.5,
+              "price": 23.65,
+              "trendlineSupportBroken": 24.91,
+              "resistance1": 24.35,
+              "volumeVsSma20Percent": 31,
+              "changePercent": -4.25,
+              "indexChangePercent": -0.38,
+              "distributionCount": 6,
+              "pivot": 26.35,
+              "d2Low": 25,
+              "d1Low": 24.7,
+              "pullbackDepthPercent": -10.25,
+              "swingLow2": 22.25,
+              "support2": 22.3,
+              "trendlineSupport": 23.75,
+              "closeVsSupportTrendlinePercent": -0.42,
+              "support1@step": 23.25,
+              "support1Touches": 14
+            },
+            "pending": [],
+            "path": "content/review/symbols/2026-10-15/PVT.json"
+          },
+          "tier": 1,
+          "tierFilters": [
+            "Volume spike",
+            "RS Strong",
+            "Uptrend"
+          ]
+        }
+      ],
+      "alsoSpiking": [
+        "MSB",
+        "HDB",
+        "PVT"
+      ]
+    },
+    "requested": [
+      {
+        "rank": 1,
+        "symbol": "CII",
+        "name": "Công ty Cổ phần Đầu tư Hạ tầng Kỹ thuật TPHCM",
+        "exchange": "HOSE",
+        "price": 12.95,
+        "changePercent": 6.15,
+        "volumeRatio": 3.04,
+        "volumeVsSma20Percent": 204,
+        "rs1m": 70,
+        "rs52w": 7,
+        "filters": [
+          "Volume spike",
+          "RS Strong"
+        ],
+        "ema50": 13.32,
+        "sma200": 16.63,
+        "aboveEma50Percent": -2.8,
+        "aboveSma200Percent": -22.1,
+        "high52w": 31.35,
+        "fromHigh52wPercent": -58.7,
+        "signal": {
+          "type": "breakout_potential",
+          "price": 12.95,
+          "date": "2026-10-15",
+          "dm": "15/10"
+        },
+        "chart": {
+          "bars": 256,
+          "from": "2025-10-06",
+          "to": "2026-10-15"
+        },
+        "fireant": {
+          "ma50": 13.4,
+          "ma200": 16.63,
+          "aboveMa50Percent": -3.4,
+          "aboveMa200Percent": -22.1,
+          "photo": "shots/review/2026-10-15/cii-fireant.png",
+          "source": "fireant.vn (legend / price-scale tags, OCR)",
+          "asOf": {
+            "date": "2026-10-15",
+            "closeRead": 12.95,
+            "ok": true
+          }
+        },
+        "review": {
+          "setup": "far-from-high",
+          "verdict": "CII trượt cả sáu ô xu hướng của trend template — giá dưới MA50 13,40 và MA200 16,63 của FireAnt, MA50 nằm dưới MA200, cách đỉnh 52 tuần 58,7%, chỉ trên đáy 52 tuần 14,1%, RS 1M 70 nhưng RS 52W 7 — và đỉnh sau, đáy sau đều thấp hơn; phiên 15/10 tăng 6,15% với KL +204% so TB20 khi VN-Index giảm 0,38% trong thị trường điều chỉnh có 6 phiên phân phối, nến bao trùm tăng đóng cửa 12,95 lấy lại mức 12,55, nhưng đỉnh phiên 13,05 dừng dưới trendline kháng cự 13,08, kháng cự 13,30 và MA50 13,40 — một nhịp hồi mạnh trong xu hướng giảm, xu hướng chưa đổi.",
+          "detail": "Còn xa đỉnh 52 tuần: đóng cửa 12,95 thấp hơn đỉnh 31,35 (17/10/2025) 58,7%, và chỉ cao hơn đáy 52 tuần 11,35 lập ngày 6/10 là 14,1%.",
+          "priceAction": {
+            "structure": "down",
+            "read": "Đỉnh sau thấp hơn đỉnh trước (13,30 ngày 21/9 dưới 15,20 ngày 24/8), đáy sau thấp hơn đáy trước (11,35 ngày 6/10, đáy 52 tuần, dưới 11,95 ngày 28/9) — xu hướng giảm; phiên 15/10 là nến bao trùm tăng biên rộng 12,15–13,05 (gấp 1,98 lần trung bình 20 phiên), đóng cửa 12,95 sát đỉnh phiên (89% biên độ), lần đầu trên 12,55 từ sau phiên 25/9 và trên trendline giảm từ đỉnh 19/6 (12,86), nhưng đỉnh phiên 13,05 dừng ngay dưới trendline kháng cự từ đỉnh 25/8, 13,08 ở nến cuối, và kháng cự 13,30."
+          },
+          "roles": {
+            "holder": {
+              "case": "exit-downtrend",
+              "if": "Đã đóng cửa dưới MA50 và MA200",
+              "then": "cắt lỗ, không chờ hồi",
+              "price": null,
+              "plate": "Đang giữ: cắt lỗ",
+              "say": "Đang giữ thì cắt lỗ, giá đã dưới MA200.",
+              "headline": "Đang giữ: cắt lỗ"
+            },
+            "notHolder": {
+              "case": "below-ma",
+              "if": "Khi giá còn dưới MA50 ở 13,40",
+              "then": "đứng ngoài",
+              "price": 13.4,
+              "plate": "Chưa mua: dưới 13,40 đứng ngoài",
+              "say": "Chưa có hàng thì đứng ngoài, giá dưới MA50.",
+              "headline": "Chưa mua: đứng ngoài"
+            }
+          },
+          "numbers": {
+            "ma50": 13.4,
+            "ma200": 16.63,
+            "fromHigh52wPercent": -58.7,
+            "aboveLow52wPercent": 14.1,
+            "rs1m": 70,
+            "rs52w": 7,
+            "changePercent": 6.15,
+            "volumeVsSma20Percent": 204,
+            "indexChangePercent": -0.38,
+            "price": 12.95,
+            "support1": 12.55,
+            "todayHigh": 13.05,
+            "trendlineResistance": 13.08,
+            "resistance1": 13.3,
+            "high52w": 31.35,
+            "low52w": 11.35,
+            "swingHigh2": 15.2,
+            "swingLow2": 11.95,
+            "todayLow": 12.15,
+            "rangeVsAvg20": 1.98,
+            "closeRangePercent": 88.89,
+            "trendlineResistanceBroken": 12.86
+          },
+          "pending": [],
+          "path": "content/review/symbols/2026-10-15/CII.json"
+        },
+        "requested": true
+      },
+      {
+        "rank": 2,
+        "symbol": "HCM",
+        "name": "Công ty Cổ phần Chứng khoán Thành phố Hồ Chí Minh",
+        "exchange": "HOSE",
+        "price": 24,
+        "changePercent": 3.9,
+        "volumeRatio": 1.7,
+        "volumeVsSma20Percent": 70,
+        "rs1m": 35,
+        "rs52w": 77,
+        "filters": [
+          "Volume spike"
+        ],
+        "ema50": 24.51,
+        "sma200": 22.82,
+        "aboveEma50Percent": -2.1,
+        "aboveSma200Percent": 5.2,
+        "high52w": 27.35,
+        "fromHigh52wPercent": -12.2,
+        "signal": {
+          "type": "breakout_potential",
+          "price": 24,
+          "date": "2026-10-15",
+          "dm": "15/10"
+        },
+        "chart": {
+          "bars": 256,
+          "from": "2025-10-06",
+          "to": "2026-10-15"
+        },
+        "fireant": {
+          "ma50": 25.06,
+          "ma200": 22.82,
+          "aboveMa50Percent": -4.2,
+          "aboveMa200Percent": 5.2,
+          "photo": "shots/review/2026-10-15/hcm-fireant.png",
+          "source": "fireant.vn (legend / price-scale tags, OCR)",
+          "asOf": {
+            "date": "2026-10-15",
+            "closeRead": 24,
+            "ok": true
+          }
+        },
+        "review": {
+          "setup": "trend",
+          "verdict": "HCM còn giữ khung dài hạn của trend template — MA50 25,06 trên MA200 22,82 của FireAnt, giá trên MA200, cách đỉnh 52 tuần 12,2% — nhưng nhịp chỉnh từ đỉnh 17/9 đã đưa giá xuống dưới MA50, đỉnh sau và đáy sau đều thấp hơn, RS 1M chỉ 35 dù RS 52W 77; phiên 15/10 HCM tăng 3,90% khi VN-Index giảm 0,38%, bật từ 22,90 sát MA200 lên đóng cửa 24,00 sát đỉnh phiên với khối lượng +70% so TB20, vượt đỉnh 9/10 và trendline giảm từ đỉnh 7/9, nhưng còn dưới kháng cự 24,20 và MA50 — trong thị trường điều chỉnh với 6 phiên phân phối, đây là nhịp hồi trong nhịp chỉnh, cấu trúc giảm chưa đổi.",
+          "detail": "Xu hướng dài hạn còn: MA50 25,06 vẫn trên MA200 22,82 của FireAnt, giá 24,00 trên MA200 5,17% và cách đỉnh 52 tuần 12,2%; nhịp chỉnh sâu 13,13% từ đỉnh 17/9 (25,90) dừng ở đáy 7/10 (22,50), chạm trendline hỗ trợ đi từ đáy 28/4 (22,51 ở nến cuối) — nhưng giá còn dưới MA50 4,23%.",
+          "priceAction": {
+            "structure": "down",
+            "read": "Đỉnh 9/10 ở 23,70 thấp hơn đỉnh 17/9 ở 25,90, đáy 7/10 ở 22,50 thấp hơn đáy 17/9 ở 24,20 — xu hướng giảm của nhịp chỉnh; phiên 15/10 mở cửa 23,00, xuống 22,90 sát MA200 22,82 rồi đóng cửa 24,00 sát đỉnh phiên 24,05, biên độ gấp 1,54 lần trung bình 20 phiên, vượt đỉnh 9/10 và trendline giảm từ đỉnh 7/9 (23,82 ở nến cuối) nhưng dừng dưới kháng cự 24,20, đáy 17/9."
+          },
+          "roles": {
+            "holder": {
+              "case": "below-ma50",
+              "if": "Đã đóng cửa dưới MA50 ở 25,06",
+              "then": "thoát hết",
+              "price": 25.06,
+              "plate": "Đang giữ: dưới 25,06 thoát hết",
+              "say": "Đang giữ, giá đã thủng MA50, thoát hết.",
+              "headline": "Đang giữ: thoát hết"
+            },
+            "notHolder": {
+              "case": "below-ma",
+              "if": "Khi giá còn dưới MA50 ở 25,06",
+              "then": "đứng ngoài",
+              "price": 25.06,
+              "plate": "Chưa mua: dưới 25,06 đứng ngoài",
+              "say": "Chưa có hàng thì đứng ngoài, giá dưới MA50.",
+              "headline": "Chưa mua: đứng ngoài"
+            }
+          },
+          "numbers": {
+            "ma50": 25.06,
+            "ma200": 22.82,
+            "fromHigh52wPercent": -12.2,
+            "rs1m": 35,
+            "rs52w": 77,
+            "changePercent": 3.9,
+            "indexChangePercent": -0.38,
+            "todayLow": 22.9,
+            "price": 24,
+            "volumeVsSma20Percent": 70,
+            "resistance1": 24.2,
+            "distributionCount": 6,
+            "aboveMa200Percent": 5.17,
+            "pullbackDepthPercent": -13.13,
+            "pivot": 25.9,
+            "pullbackLow": 22.5,
+            "trendlineSupport": 22.51,
+            "aboveMa50Percent": -4.23,
+            "support1": 23.7,
+            "d2Open": 23,
+            "todayHigh": 24.05,
+            "rangeVsAvg20": 1.54,
+            "trendlineResistanceBroken": 23.82
+          },
+          "pending": [],
+          "path": "content/review/symbols/2026-10-15/HCM.json"
+        },
+        "requested": true
+      }
+    ]
+  },
+  "scenario": {
+    "close": 1698.35,
+    "up": [
+      {
+        "low": 1731.03,
+        "high": 1731.03,
+        "members": [
+          {
+            "kind": "level",
+            "name": "kháng cự",
+            "price": 1731.03,
+            "dm": "2/10",
+            "touches": 31
+          }
+        ],
+        "at": 1731.03,
+        "rally": false
+      },
+      {
+        "low": 1764.45,
+        "high": 1764.45,
+        "members": [
+          {
+            "kind": "level",
+            "name": "kháng cự",
+            "price": 1764.45,
+            "dm": "8/10",
+            "touches": 53
+          }
+        ],
+        "at": 1764.45,
+        "rally": false
+      }
+    ],
+    "down": [
+      {
+        "low": 1651.2,
+        "high": 1651.2,
+        "members": [
+          {
+            "kind": "level",
+            "name": "hỗ trợ",
+            "price": 1651.2,
+            "dm": "28/7",
+            "touches": 14
+          }
+        ],
+        "at": 1651.2,
+        "rally": false
+      }
+    ],
+    "rallyLow": null,
+    "window": 142,
+    "ma": {
+      "MA50": 1777.73,
+      "MA200": 1797.59
+    },
+    "source": "price action of the last 142 sessions (SSI daily, lib/symbol-review.mjs swings/levels) + FireAnt MA50/MA200 off the index photo"
+  },
+  "flow": {
+    "ok": true,
+    "exchange": "HOSE",
+    "session": "2026-10-15",
+    "dm": "15/10",
+    "index": 1698.35,
+    "up": 164,
+    "down": 153,
+    "flat": 51,
+    "total": 368,
+    "upPercent": 44.6,
+    "downPercent": 41.6,
+    "flatPercent": 13.9,
+    "money": {
+      "up": 6475.6,
+      "down": 7131,
+      "flat": 415.7,
+      "total": 14022.3
+    },
+    "moneyPercent": {
+      "up": 46.2,
+      "down": 50.9,
+      "flat": 3
+    },
+    "moneyLead": "down",
+    "moneyLeadRatio": 1.1,
+    "unit": "tỷ đồng",
+    "countWord": "mã tăng giảm gần cân bằng",
+    "moneyWord": "tiền chia gần đều hai phía",
+    "countLean": null,
+    "moneyLean": null,
+    "agree": null,
+    "photo": "shots/review/2026-10-15/fireant-flow.png",
+    "fetchedAt": "2026-10-15T13:38:34.971Z",
+    "fetchedIct": "2026-10-15 20:38",
+    "source": "https://fireant.vn/thi-truong/thong-ke-san · Biến động theo sàn (HSX)",
+    "impact": {
+      "up": [
+        {
+          "symbol": "MBB",
+          "points": 1.14
+        },
+        {
+          "symbol": "VCK",
+          "points": 0.48
+        },
+        {
+          "symbol": "CTG",
+          "points": 0.4
+        },
+        {
+          "symbol": "VPL",
+          "points": 0.37
+        },
+        {
+          "symbol": "FPT",
+          "points": 0.35
+        }
+      ],
+      "down": [
+        {
+          "symbol": "VHM",
+          "points": -3.56
+        },
+        {
+          "symbol": "BSR",
+          "points": -1.96
+        },
+        {
+          "symbol": "GAS",
+          "points": -1.19
+        },
+        {
+          "symbol": "BVH",
+          "points": -0.7
+        },
+        {
+          "symbol": "STB",
+          "points": -0.7
+        }
+      ],
+      "lead": {
+        "symbol": "VHM",
+        "points": -3.56
+      },
+      "indexChange": -6.52,
+      "leadShare": 54.6,
+      "upSum": 2.74,
+      "downSum": -8.11,
+      "unit": "điểm",
+      "source": "FireAnt \"Top cổ phiếu tác động\" (contribute-to-index, top 5 each way)"
+    }
+  },
+  "backtest": {
+    "from": "2013-01-02",
+    "sessions": 3416,
+    "forward": 25,
+    "rows": [
+      {
+        "threshold": 1.25,
+        "ftds": 31,
+        "evaluated": 31,
+        "higherPercent": 65,
+        "medianReturnPercent": 2.6
+      },
+      {
+        "threshold": 1.5,
+        "ftds": 28,
+        "evaluated": 28,
+        "higherPercent": 75,
+        "medianReturnPercent": 3.7
+      },
+      {
+        "threshold": 1.7,
+        "ftds": 26,
+        "evaluated": 26,
+        "higherPercent": 73,
+        "medianReturnPercent": 3.7
+      }
+    ]
+  },
+  "anchors": [
+    {
+      "label": "Phiên 15/10/2026",
+      "value": "1698,35 (-0,38%) · KL ×1,31 phiên trước · ×1,12 TB20 · 7 phiên giảm liên tiếp · đóng cửa dưới 1700 lần đầu từ 28/7",
+      "path": "session"
+    },
+    {
+      "label": "Trạng thái theo quy tắc",
+      "value": "Thị trường điều chỉnh từ 14/10",
+      "path": "state"
+    },
+    {
+      "label": "Phân phối / 25 phiên",
+      "value": "6: 11/9 -1,86% ×1,64 (còn 0) · 23/9 -0,84% ×1,23 (còn 8) · 24/9 -1,47% ×1,07 (còn 9) · 30/9 -0,51% ×1,16 (còn 13) · 2/10 -0,66% ×1,37 (còn 15) · 8/10 -0,82% ×1,1 (còn 19) · mức nguy hiểm từ 5 (còn 0)",
+      "path": "distribution.active"
+    },
+    {
+      "label": "FTD gần nhất",
+      "value": "3/8/2026 · ngày 5 · +1,56% · KL ×1,07 · đáy nhịp hồi 1651,2 · kết thúc 8/10 (distribution)",
+      "path": "state.lastFtd"
+    },
+    {
+      "label": "Volume spike (41 mã · 23 tăng · 14 giảm)",
+      "value": "xếp theo % thay đổi (tăng mạnh nhất / giảm sâu nhất trước) · tăng: CII +6,15% KL +204% · VCG +5,63% KL +198% · HHV +5,31% KL +186% · HCM +3,9% KL +70% · VCK +3,53% KL +80% · MBB +2,84% KL +194% · CEO +2,8% KL +83% · MBS +2,7% KL +45% · DXG +2,5% KL +61% · VIX +2,17% KL +67% — giảm: BSR -6,31% KL +71% · PVT -4,25% KL +31% · PVS -4,24% KL +64% · VHM -3,44% KL +29% · STB -2,79% KL +124% · VPI -2,37% KL +61% · LPB -2,36% KL +31% · POW -2,01% KL +119% · PLX -1,93% KL +4% · HDB -1,72% KL +15%",
+      "path": "screener.spike.gainers / losers"
+    },
+    {
+      "label": "RS Strong (18 mã · 6 tăng · 9 giảm)",
+      "value": "MSR RS1M 97 · +2,33% · NVB RS1M 93 · -1,43% · MSB RS1M 91 · +0% · VPB RS1M 87 · +0,41% · HDB RS1M 85 · -1,72% · NKG RS1M 81 · +0% · PVT RS1M 81 · -4,25% · MSN RS1M 80 · -1,81% · HAG RS1M 79 · +0,69% · HQC RS1M 79 · +0%",
+      "path": "screener.rs.top"
+    },
+    {
+      "label": "Uptrend (12 mã · 4 tăng · 7 giảm)",
+      "value": "MSR RS1M 97 · +2,33% · PVP RS1M 94 · -4,97% · NVB RS1M 93 · -1,43% · DRI RS1M 91 · -1,25% · MSB RS1M 91 · +0% · AAS RS1M 87 · +0,99% · VPB RS1M 87 · +0,41% · HDB RS1M 85 · -1,72% · PVT RS1M 81 · -4,25% · DGW RS1M 73 · -0,99%",
+      "path": "screener.uptrend.top"
+    },
+    {
+      "label": "Dẫn dắt · Volume spike ∩ RS Strong ∩ Uptrend (3 mã)",
+      "value": "MSB RS1M 91 · +0% (Volume spike, RS Strong, Uptrend) · HDB RS1M 85 · -1,72% (Volume spike, RS Strong, Uptrend) · PVT RS1M 81 · -4,25% (Volume spike, RS Strong, Uptrend)",
+      "path": "screener.leaders.top"
+    },
+    {
+      "label": "Soi thêm · CII (người dùng chọn)",
+      "value": "12.95 · +6,15% · RS1M 70 · Volume spike, RS Strong — far-from-high — Còn xa đỉnh 52 tuần: đóng cửa 12,95 thấp hơn đỉnh 31,35 (17/10/2025) 58,7%, và chỉ cao hơn đáy 52 tuần 11,35 lập ngày 6/10 là 14,1%.",
+      "path": "screener.requested[0]"
+    },
+    {
+      "label": "Soi thêm · HCM (người dùng chọn)",
+      "value": "24 · +3,9% · RS1M 35 · Volume spike — trend — Xu hướng dài hạn còn: MA50 25,06 vẫn trên MA200 22,82 của FireAnt, giá 24,00 trên MA200 5,17% và cách đỉnh 52 tuần 12,2%; nhịp chỉnh sâu 13,13% từ đỉnh 17/9 (25,90) dừng ở đáy 7/10 (22,50), chạm trendline hỗ trợ đi từ đáy 28/4 (22,51 ở nến cuối) — nhưng giá còn dưới MA50 4,23%.",
+      "path": "screener.requested[1]"
+    },
+    {
+      "label": "Soi mã · MSB",
+      "value": "pullback-to-support — Chỉnh về hỗ trợ: phiên 15/10 xuống thấp nhất 14,45, dưới hỗ trợ 14,50 (hai đỉnh cũ 25/9 và 1/10) trong phiên, rồi đóng cửa 14,65, trên hỗ trợ 1,03%; nhịp chỉnh từ đỉnh 15,00 phiên 14/10 sâu 3,67%, khối lượng +22% so trung bình 20 phiên.",
+      "path": "screener.leaders.top[0].review"
+    },
+    {
+      "label": "Soi mã · HDB",
+      "value": "near-high — Sát đỉnh 52 tuần: phiên 15/10 đóng cửa 22,80, cách 2,8% dưới đỉnh 23,45 lập phiên 14/10, vẫn trên đỉnh cũ 22,05 vừa vượt từ 9/10.",
+      "path": "screener.leaders.top[1].review"
+    },
+    {
+      "label": "Soi mã · PVT",
+      "value": "breakout-failed — Vượt đỉnh thất bại: phiên 8/10 đóng cửa vượt đỉnh 25,05 của phiên 29/9 và chạm 26,35, rồi ba phiên liền đóng cửa lại dưới 25,05 — 25,00, 24,70 và 23,65 ở phiên 15/10, thấp hơn đỉnh 26,35 10,25%, trên khối lượng cao hơn trung bình 20 phiên 31%.",
+      "path": "screener.leaders.top[2].review"
+    },
+    {
+      "label": "Biến động thị trường (FireAnt, HOSE 15/10)",
+      "value": "164 tăng · 153 giảm · 51 đứng giá (mã tăng giảm gần cân bằng) · tiền 6475,6 / 7131 / 415,7 tỷ (tiền chia gần đều hai phía, ×1,1) · ảnh 2026-10-15 20:38 ICT",
+      "path": "flow"
+    },
+    {
+      "label": "Kịch bản VN-Index",
+      "value": "đóng 1698,35 · lên: kháng cự 1731,03 → kháng cự 1764,45 · xuống: hỗ trợ 1651,2",
+      "path": "scenario"
+    },
+    {
+      "label": "Bộ lọc terminal",
+      "value": "cache 2026-10-15 15:00 ICT · 1404 mã · volume_vs_sma đọc là % trên TB20",
+      "path": "screener"
+    },
+    {
+      "label": "Backtest FTD (3416 phiên)",
+      "value": "+1,25%: 31 FTD, 65% cao hơn sau 25 phiên · +1,5%: 28 FTD, 75% cao hơn sau 25 phiên · +1,7%: 26 FTD, 73% cao hơn sau 25 phiên",
+      "path": "backtest.rows"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+ "_": "VNINDEX bar fields that win over SSI on every pull.mjs (scripts/review/pull.mjs). Vendors' intraday index lows differ by a few points (tick sampling); the reel's index chart is FireAnt's, the platform the user checks, so a session whose low decides the state machine (correction low, rally low) takes FireAnt's — measured 2026-10-16.",
+ "2026-10-15": {
+  "l": 1694.77,
+  "source": "FireAnt VNINDEX 1D legend L1694.77 (public/shots/review/2026-10-15/vnindex-daily.png, 20:37 ICT 15/10) = DNSE Entrade 1694,77; SSI same day 1690,56 = VNDirect 1690,56, SSI final (16/10) 1691,18. The 15/10 reel showed 1694,77 as the correction low.",
+  "checked": "FireAnt hovered 16/10 17:10 ICT (pointer on the 15/10 candle): still O1701.20 H1709.54 L1694.77 C1698.35; 16/10 bar on FireAnt L1696.71 = SSI same day = VNDirect (Entrade 1698,11), so 16/10 needs no override."
+ },
+ "2026-10-19": {
+  "v": 519290379,
+  "source": "VNDirect dchart VNINDEX 1D v 519290379 (15:20 ICT 19/10) = FireAnt VNINDEX 1D legend Volume 519,29M (public/shots/review/2026-10-19/vnindex-daily.png, 15:10 ICT); SSI same day 428214026 (provisional). VNDirect 16/10 460798676 = SSI final, so the basis matches; Entrade total 602,5M vs 502,4M (×1,20) agrees: higher volume than 16/10."
+ }
+}

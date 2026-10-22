@@ -1,0 +1,2014 @@
+{
+  "title": "VNINDEX · tổng kết tuần 12/10 → 16/10/2026",
+  "edition": "2026-10-16",
+  "format": "weekly",
+  "status": "enriched",
+  "rules": ".claude/skills/market-review/rules.json",
+  "brief": "brief/review-weekly.md",
+  "facts": "content/review-weekly.facts.json",
+  "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
+  "footer": "Chứng Vịt",
+  "logo": "logo/chung-vit.png",
+  "ticker": {
+    "symbol": "VN-INDEX",
+    "timeframe": "1W",
+    "last": 1705.91,
+    "prev": 1735.09,
+    "asOf": "2026-10-16"
+  },
+  "scenes": [
+    {
+      "id": "rw-261016-hook",
+      "role": "hook",
+      "eyebrow": "Tổng kết tuần · 12/10 → 16/10",
+      "act": "blue",
+      "duration": 10.7,
+      "narration": "VN-Index đóng tuần ở một nghìn bảy trăm linh năm phẩy chín mươi mốt điểm, giảm một phẩy sáu mươi tám phần trăm so với tuần trước. Thị trường còn khỏe không? Cùng mình điểm lại tuần qua và lên kế hoạch giao dịch cho tuần tới nhé.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Đóng tuần 1705,91 · −1,68%",
+          "line2": "Cả tuần giảm mạnh",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Thị trường còn khỏe không?",
+          "line2": "Kế hoạch tuần tới",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-16/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3944,
+          "y": 0.1592,
+          "w": 0.5732,
+          "h": 0.5029
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.154,
+            "w": 0.5191,
+            "h": 0.0207
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1852,
+            "w": 0.2099,
+            "h": 0.0195
+          },
+          {
+            "x": 0.0574,
+            "y": 0.2128,
+            "w": 0.4265,
+            "h": 0.0196
+          },
+          {
+            "x": 0.0594,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "box",
+            "x": 0.8146,
+            "y": 0.4568,
+            "w": 0.03,
+            "h": 0.0816,
+            "accent": "down",
+            "beat": 0
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7707,
+            "y": 0.511,
+            "zoom": 2,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.7407,
+            "y": 0.531,
+            "zoom": 1.6,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "weekly.close",
+        "weekly.changePercent",
+        "weekly.prevClose",
+        "weekly.from",
+        "weekly.to",
+        "rules.formats.weekly.hook.question",
+        "rules.formats.weekly.hook.invite",
+        "rules.formats.weekly.hook.headline"
+      ]
+    },
+    {
+      "id": "rw-261016-week",
+      "role": "week",
+      "eyebrow": "VN-Index · Khung tuần",
+      "act": "blue",
+      "duration": 7,
+      "narration": "Nến tuần đóng ở nửa dưới biên tuần, khối lượng thấp hơn tuần trước. Đỉnh, đáy tuần thấp dần, ngay trên là kháng cự vùng một nghìn bảy trăm mười một. Còn khung ngày thì sao?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Nến tuần 12/10 · −1,68%",
+          "line2": "Đóng nửa dưới biên tuần",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Kháng cự tuần 1711,49",
+          "line2": "Đỉnh, đáy tuần thấp dần",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-16/vnindex-weekly.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3906,
+          "y": 0.1592,
+          "w": 0.577,
+          "h": 0.5062
+        },
+        "masks": [
+          {
+            "x": 0.3906,
+            "y": 0.154,
+            "w": 0.1921,
+            "h": 0.0207
+          },
+          {
+            "x": 0.3906,
+            "y": 0.2128,
+            "w": 0.0893,
+            "h": 0.0196
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "box",
+            "x": 0.8433,
+            "y": 0.2818,
+            "w": 0.017,
+            "h": 0.0443,
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.864,
+            "y": 0.3834,
+            "text": "Cao 1736,64 · thấp 1694,77 · đóng 1705,91",
+            "accent": "white",
+            "beat": 0,
+            "anchor": "end",
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.8232,
+            "y": 0.1899,
+            "text": "KL mỗi phiên ×0,87 tuần trước",
+            "accent": "white",
+            "beat": 0,
+            "anchor": "end",
+            "until": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.763,
+              0.2169
+            ],
+            "to": [
+              0.8241,
+              0.2268
+            ],
+            "dashed": true,
+            "accent": "down",
+            "beat": 1
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.7574,
+              0.2748
+            ],
+            "to": [
+              0.7907,
+              0.3353
+            ],
+            "dashed": true,
+            "accent": "down",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.306,
+            "accent": "red",
+            "beat": 1,
+            "label": "Kháng cự 1711,49 (tuần 1/9/2025)",
+            "labelSide": "left"
+          },
+          {
+            "kind": "hline",
+            "y": 0.3353,
+            "accent": "green",
+            "beat": 1
+          },
+          {
+            "kind": "circle",
+            "x": 0.8518,
+            "y": 0.2746,
+            "r": 0.014,
+            "accent": "green",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.839,
+            "y": 0.2096,
+            "text": "MA50 tuần 1776,13",
+            "accent": "green",
+            "beat": 1,
+            "anchor": "end"
+          },
+          {
+            "kind": "circle",
+            "x": 0.8518,
+            "y": 0.4693,
+            "r": 0.014,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.8168,
+            "y": 0.4693,
+            "text": "MA200 tuần 1375,44",
+            "accent": "gold",
+            "beat": 1,
+            "anchor": "end"
+          },
+          {
+            "kind": "label",
+            "x": 0.7047,
+            "y": 0.35,
+            "text": "Hỗ trợ 1651,20 (tuần 27/7)",
+            "accent": "green",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7636,
+            "y": 0.301,
+            "zoom": 2,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.8046,
+            "y": 0.3431,
+            "zoom": 1.44,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "weekly.high",
+        "weekly.low",
+        "weekly.close",
+        "weekly.changePercent",
+        "weekly.volumeVsPriorWeek (0,87 — said in words)",
+        "indexWeekly.structure.text",
+        "indexWeekly.up[0].at (1711,49 — said round, once)",
+        "rules.formats.weekly.week.bridge"
+      ]
+    },
+    {
+      "id": "rw-261016-market",
+      "role": "market",
+      "eyebrow": "VN-Index · Khung ngày",
+      "act": "maroon",
+      "duration": 16.1,
+      "narration": "Khung ngày cũng đỉnh, đáy thấp dần, giá đã thủng đáy hai tháng mười. Giá dưới cả MA50 lẫn MA200, khung ngày đang yếu. Theo quy tắc, hai nỗ lực phục hồi đều thất bại, thủng đáy vào thứ Hai rồi thứ Tư. Thứ Sáu mở nỗ lực mới, phiên FTD sớm nhất là thứ Tư tuần tới. Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao. Nhìn rộng ra thì sao?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Thủng đáy 2/10 · 1731,03",
+          "line2": "Khung ngày xu hướng giảm",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Dưới cả MA50 lẫn MA200",
+          "line2": "Khung ngày đang yếu",
+          "accent": "red"
+        },
+        {
+          "atSentence": 2,
+          "at": 7.25,
+          "line1": "2 nỗ lực phục hồi thất bại",
+          "line2": "Thủng đáy thứ Hai, thứ Tư",
+          "accent": "red"
+        },
+        {
+          "atSentence": 3,
+          "at": 10.75,
+          "line1": "FTD sớm nhất thứ Tư 21/10",
+          "line2": "Nỗ lực phục hồi · ngày đầu",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-16/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3944,
+          "y": 0.1592,
+          "w": 0.5732,
+          "h": 0.5029
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.154,
+            "w": 0.5191,
+            "h": 0.0207
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1852,
+            "w": 0.2099,
+            "h": 0.0195
+          },
+          {
+            "x": 0.0574,
+            "y": 0.2128,
+            "w": 0.4265,
+            "h": 0.0196
+          },
+          {
+            "x": 0.0594,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "line",
+            "from": [
+              0.7296,
+              0.325
+            ],
+            "to": [
+              0.8074,
+              0.4305
+            ],
+            "dashed": true,
+            "accent": "down",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.6815,
+            "y": 0.2251,
+            "text": "Đỉnh 18/9 1841,20 → 8/10 1764,45",
+            "accent": "red",
+            "beat": 0,
+            "anchor": "middle",
+            "until": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.7074,
+              0.4135
+            ],
+            "to": [
+              0.7852,
+              0.4765
+            ],
+            "dashed": true,
+            "accent": "down",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.6815,
+            "y": 0.2452,
+            "text": "Đáy 14/9 1776,85 → 2/10 1731,03",
+            "accent": "red",
+            "beat": 0,
+            "anchor": "middle",
+            "until": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.8146,
+            "y": 0.4568,
+            "w": 0.03,
+            "h": 0.0816,
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.8407,
+            "y": 0.511,
+            "r": 0.022,
+            "accent": "gold",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7183,
+            "y": 0.4921,
+            "text": "Dưới MA50 1776,30 (−3,96%)",
+            "accent": "green",
+            "beat": 1,
+            "anchor": "middle",
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7183,
+            "y": 0.5122,
+            "text": "Dưới MA200 1797,26 (−5,08%)",
+            "accent": "gold",
+            "beat": 1,
+            "anchor": "middle",
+            "until": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.4859,
+            "accent": "red",
+            "beat": 2,
+            "until": 2,
+            "label": "Đáy nỗ lực 9/10 · 1724,17 · thủng 12/10",
+            "labelSide": "left"
+          },
+          {
+            "kind": "hline",
+            "y": 0.5041,
+            "accent": "red",
+            "beat": 2,
+            "until": 2,
+            "label": "Đáy nỗ lực 13/10 · 1710,95 · thủng 14/10",
+            "labelSide": "left"
+          },
+          {
+            "kind": "label",
+            "x": 0.6822,
+            "y": 0.5612,
+            "text": "Thủng đáy nỗ lực = nỗ lực thất bại",
+            "accent": "white",
+            "beat": 2,
+            "anchor": "middle",
+            "until": 2
+          },
+          {
+            "kind": "hline",
+            "y": 0.5264,
+            "accent": "gold",
+            "beat": 3,
+            "until": 3,
+            "label": "Đáy nỗ lực phục hồi 1694,77",
+            "labelSide": "left"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7741,
+            "y": 0.418,
+            "zoom": 1.25,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.7707,
+            "y": 0.4482,
+            "zoom": 2,
+            "move": "push_in"
+          },
+          {
+            "beat": 2,
+            "x": 0.7207,
+            "y": 0.4985,
+            "zoom": 1.5,
+            "move": "pull_out"
+          },
+          {
+            "beat": 3,
+            "x": 0.7807,
+            "y": 0.5187,
+            "zoom": 2,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "indexDaily.structure.text",
+        "indexDaily.structure.broke (2/10, 1731,03)",
+        "indexDaily.maPosition",
+        "indexDaily.ma",
+        "weekly.transitions (12/10 thủng đáy 1724,17 của nỗ lực 9/10; 14/10 thủng đáy 1710,95 của nỗ lực 13/10; 16/10 ngày 1)",
+        "weekly.distributionDays (none — not spoken)",
+        "state.status",
+        "state.rallyDay",
+        "state.day1",
+        "state.rallyLow",
+        "rules.status.CORRECTION.say",
+        "rules.formats.weekly.market.bridge"
+      ]
+    },
+    {
+      "id": "rw-261016-breadth",
+      "role": "breadth",
+      "eyebrow": "Độ rộng thị trường",
+      "act": "maroon",
+      "duration": 7,
+      "narration": "Mã đóng cửa trên MA200 chỉ còn hai trăm năm mươi trên tám trăm chín mươi bảy. Đường này giảm dần từ cuối tháng tám, cùng chiều VN-Index. Nhóm ngành nào còn khỏe?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Chỉ 27,9% mã trên SMA200",
+          "line2": "Điểm yếu lan rộng",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "250/897 mã trên SMA200",
+          "line2": "Giảm từ cuối tháng tám",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "lines",
+        "caption": "TERMINAL: 250/897 MÃ TRÊN SMA200 · 27,9%",
+        "top": {
+          "label": "VN-INDEX · ĐÓNG CỬA",
+          "points": [
+            [
+              "2026-07-22",
+              1668.53
+            ],
+            [
+              "2026-07-23",
+              1699.38
+            ],
+            [
+              "2026-07-24",
+              1686.11
+            ],
+            [
+              "2026-07-27",
+              1669.01
+            ],
+            [
+              "2026-07-28",
+              1680.62
+            ],
+            [
+              "2026-07-29",
+              1704.68
+            ],
+            [
+              "2026-07-30",
+              1744.66
+            ],
+            [
+              "2026-07-31",
+              1735.78
+            ],
+            [
+              "2026-08-03",
+              1762.84
+            ],
+            [
+              "2026-08-04",
+              1777.23
+            ],
+            [
+              "2026-08-05",
+              1776.46
+            ],
+            [
+              "2026-08-06",
+              1764.78
+            ],
+            [
+              "2026-08-07",
+              1768.06
+            ],
+            [
+              "2026-08-10",
+              1776.77
+            ],
+            [
+              "2026-08-11",
+              1773.41
+            ],
+            [
+              "2026-08-12",
+              1793.18
+            ],
+            [
+              "2026-08-13",
+              1765.63
+            ],
+            [
+              "2026-08-14",
+              1729.08
+            ],
+            [
+              "2026-08-17",
+              1727.46
+            ],
+            [
+              "2026-08-18",
+              1732.02
+            ],
+            [
+              "2026-08-19",
+              1726.69
+            ],
+            [
+              "2026-08-20",
+              1734.24
+            ],
+            [
+              "2026-08-21",
+              1768.12
+            ],
+            [
+              "2026-08-24",
+              1788.78
+            ],
+            [
+              "2026-08-25",
+              1791.41
+            ],
+            [
+              "2026-08-26",
+              1821.32
+            ],
+            [
+              "2026-08-27",
+              1831.56
+            ],
+            [
+              "2026-08-28",
+              1832.12
+            ],
+            [
+              "2026-09-03",
+              1827.72
+            ],
+            [
+              "2026-09-04",
+              1853.08
+            ],
+            [
+              "2026-09-07",
+              1821.64
+            ],
+            [
+              "2026-09-08",
+              1830.44
+            ],
+            [
+              "2026-09-09",
+              1827.12
+            ],
+            [
+              "2026-09-10",
+              1829.23
+            ],
+            [
+              "2026-09-11",
+              1795.21
+            ],
+            [
+              "2026-09-14",
+              1788.23
+            ],
+            [
+              "2026-09-15",
+              1811.15
+            ],
+            [
+              "2026-09-16",
+              1810.11
+            ],
+            [
+              "2026-09-17",
+              1822.77
+            ],
+            [
+              "2026-09-18",
+              1815.66
+            ],
+            [
+              "2026-09-21",
+              1799.67
+            ],
+            [
+              "2026-09-22",
+              1816.93
+            ],
+            [
+              "2026-09-23",
+              1801.65
+            ],
+            [
+              "2026-09-24",
+              1775.09
+            ],
+            [
+              "2026-09-25",
+              1785.11
+            ],
+            [
+              "2026-09-28",
+              1780.68
+            ],
+            [
+              "2026-09-29",
+              1777.73
+            ],
+            [
+              "2026-09-30",
+              1768.62
+            ],
+            [
+              "2026-10-01",
+              1749.3
+            ],
+            [
+              "2026-10-02",
+              1737.71
+            ],
+            [
+              "2026-10-05",
+              1753.2
+            ],
+            [
+              "2026-10-06",
+              1759.08
+            ],
+            [
+              "2026-10-07",
+              1753.39
+            ],
+            [
+              "2026-10-08",
+              1738.97
+            ],
+            [
+              "2026-10-09",
+              1735.09
+            ],
+            [
+              "2026-10-12",
+              1720.98
+            ],
+            [
+              "2026-10-13",
+              1719.42
+            ],
+            [
+              "2026-10-14",
+              1704.87
+            ],
+            [
+              "2026-10-15",
+              1698.35
+            ],
+            [
+              "2026-10-16",
+              1705.91
+            ]
+          ],
+          "unit": "points"
+        },
+        "bottom": {
+          "label": "SỐ MÃ TRÊN SMA200 · GIÁ SSI",
+          "points": [
+            [
+              "2026-07-22",
+              223
+            ],
+            [
+              "2026-07-23",
+              231
+            ],
+            [
+              "2026-07-24",
+              224
+            ],
+            [
+              "2026-07-27",
+              217
+            ],
+            [
+              "2026-07-28",
+              223
+            ],
+            [
+              "2026-07-29",
+              220
+            ],
+            [
+              "2026-07-30",
+              234
+            ],
+            [
+              "2026-07-31",
+              230
+            ],
+            [
+              "2026-08-03",
+              245
+            ],
+            [
+              "2026-08-04",
+              241
+            ],
+            [
+              "2026-08-05",
+              242
+            ],
+            [
+              "2026-08-06",
+              242
+            ],
+            [
+              "2026-08-07",
+              245
+            ],
+            [
+              "2026-08-10",
+              262
+            ],
+            [
+              "2026-08-11",
+              264
+            ],
+            [
+              "2026-08-12",
+              267
+            ],
+            [
+              "2026-08-13",
+              265
+            ],
+            [
+              "2026-08-14",
+              259
+            ],
+            [
+              "2026-08-17",
+              264
+            ],
+            [
+              "2026-08-18",
+              259
+            ],
+            [
+              "2026-08-19",
+              251
+            ],
+            [
+              "2026-08-20",
+              268
+            ],
+            [
+              "2026-08-21",
+              279
+            ],
+            [
+              "2026-08-24",
+              267
+            ],
+            [
+              "2026-08-25",
+              266
+            ],
+            [
+              "2026-08-26",
+              274
+            ],
+            [
+              "2026-08-27",
+              282
+            ],
+            [
+              "2026-08-28",
+              279
+            ],
+            [
+              "2026-09-03",
+              264
+            ],
+            [
+              "2026-09-04",
+              269
+            ],
+            [
+              "2026-09-07",
+              253
+            ],
+            [
+              "2026-09-08",
+              261
+            ],
+            [
+              "2026-09-09",
+              263
+            ],
+            [
+              "2026-09-10",
+              256
+            ],
+            [
+              "2026-09-11",
+              235
+            ],
+            [
+              "2026-09-14",
+              232
+            ],
+            [
+              "2026-09-15",
+              250
+            ],
+            [
+              "2026-09-16",
+              246
+            ],
+            [
+              "2026-09-17",
+              254
+            ],
+            [
+              "2026-09-18",
+              259
+            ],
+            [
+              "2026-09-21",
+              252
+            ],
+            [
+              "2026-09-22",
+              262
+            ],
+            [
+              "2026-09-23",
+              260
+            ],
+            [
+              "2026-09-24",
+              245
+            ],
+            [
+              "2026-09-25",
+              243
+            ],
+            [
+              "2026-09-28",
+              239
+            ],
+            [
+              "2026-09-29",
+              244
+            ],
+            [
+              "2026-09-30",
+              244
+            ],
+            [
+              "2026-10-01",
+              243
+            ],
+            [
+              "2026-10-02",
+              235
+            ],
+            [
+              "2026-10-05",
+              237
+            ],
+            [
+              "2026-10-06",
+              237
+            ],
+            [
+              "2026-10-07",
+              244
+            ],
+            [
+              "2026-10-08",
+              244
+            ],
+            [
+              "2026-10-09",
+              243
+            ],
+            [
+              "2026-10-12",
+              245
+            ],
+            [
+              "2026-10-13",
+              237
+            ],
+            [
+              "2026-10-14",
+              237
+            ],
+            [
+              "2026-10-15",
+              232
+            ],
+            [
+              "2026-10-16",
+              239
+            ]
+          ],
+          "accent": "red",
+          "unit": "points",
+          "tag": false,
+          "axis": false
+        },
+        "events": [
+          {
+            "t": "2026-08-03",
+            "label": "FTD 3/8",
+            "accent": "green"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.breadth.count.above",
+        "screener.breadth.count.with",
+        "screener.breadth.count.percent",
+        "screener.breadth.line.countPeakDm (27/8 — said in words)",
+        "screener.breadth.week.screenerFrom (254 — not spoken)"
+      ]
+    },
+    {
+      "id": "rw-261016-sectors",
+      "role": "sectors",
+      "eyebrow": "Xếp hạng ngành",
+      "act": "amber",
+      "duration": 11.3,
+      "narration": "Nhóm mạnh nhất có RS một tháng bảy mươi sáu. Dẫn đầu là Tài nguyên cơ bản với MSR, rồi Hàng hóa và dịch vụ công nghiệp với PVP, Dịch vụ bán lẻ với PET. Cùng mình xem kỹ các mã nằm trong các nhóm ngành trên và đang mạnh nhất thị trường nhé.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Tài nguyên cơ bản đứng đầu",
+          "line2": "RS 1M trung vị 76",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Ba nhóm dẫn đầu bảng",
+          "line2": "Mỗi nhóm một mã mạnh nhất",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "board",
+        "mode": "sector",
+        "caption": "NHÓM NGÀNH ICB · XẾP THEO RS 1M TRUNG VỊ",
+        "columns": [
+          "topSymbols",
+          "members",
+          "rs1m",
+          "weekChange",
+          "aboveSma200Share"
+        ],
+        "rows": [
+          {
+            "name": "Tài nguyên cơ bản",
+            "topSymbols": [
+              "MSR",
+              "TVN",
+              "NKG"
+            ],
+            "members": 10,
+            "rs1m": 76,
+            "weekChangePercent": 1.37,
+            "aboveSma200Share": 67,
+            "focus": true
+          },
+          {
+            "name": "Hàng & DV công nghiệp",
+            "topSymbols": [
+              "PVP",
+              "VTO",
+              "GMD"
+            ],
+            "members": 13,
+            "rs1m": 74,
+            "weekChangePercent": -2.3,
+            "aboveSma200Share": 42,
+            "focus": true
+          },
+          {
+            "name": "Bán lẻ",
+            "topSymbols": [
+              "PET",
+              "FRT",
+              "MWG"
+            ],
+            "members": 6,
+            "rs1m": 68,
+            "weekChangePercent": -3.59,
+            "aboveSma200Share": 60,
+            "focus": true
+          },
+          {
+            "name": "Đồ cá nhân & gia dụng",
+            "topSymbols": [
+              "TNG",
+              "VGT",
+              "VTZ"
+            ],
+            "members": 5,
+            "rs1m": 55,
+            "weekChangePercent": -2.65,
+            "aboveSma200Share": 20
+          },
+          {
+            "name": "Hóa chất",
+            "topSymbols": [
+              "DRI",
+              "DCM",
+              "APH"
+            ],
+            "members": 7,
+            "rs1m": 52,
+            "weekChangePercent": -2.96,
+            "aboveSma200Share": 29
+          },
+          {
+            "name": "Ngân hàng",
+            "topSymbols": [
+              "MSB",
+              "VPB",
+              "NVB"
+            ],
+            "members": 22,
+            "rs1m": 52,
+            "weekChangePercent": 1.14,
+            "aboveSma200Share": 36
+          },
+          {
+            "name": "Thực phẩm & đồ uống",
+            "topSymbols": [
+              "ANV",
+              "MSN",
+              "HAG"
+            ],
+            "members": 11,
+            "rs1m": 47,
+            "weekChangePercent": -1.37,
+            "aboveSma200Share": 27
+          },
+          {
+            "name": "Bất động sản",
+            "topSymbols": [
+              "VGC",
+              "IDC",
+              "VCG"
+            ],
+            "members": 28,
+            "rs1m": 34,
+            "weekChangePercent": 0.81,
+            "aboveSma200Share": 7
+          },
+          {
+            "name": "Xây dựng & vật liệu",
+            "topSymbols": [
+              "IJC",
+              "MST",
+              "GEL"
+            ],
+            "members": 10,
+            "rs1m": 30,
+            "weekChangePercent": 2.45,
+            "aboveSma200Share": 29
+          },
+          {
+            "name": "Dầu khí",
+            "topSymbols": [
+              "PVS",
+              "BSR",
+              "PLX"
+            ],
+            "members": 6,
+            "rs1m": 28,
+            "weekChangePercent": -6,
+            "aboveSma200Share": 17
+          }
+        ],
+        "emphasis": [
+          {
+            "beat": 1,
+            "set": "focus",
+            "dim": true,
+            "label": "Ba nhóm ngành dẫn đầu"
+          }
+        ]
+      },
+      "citedFacts": [
+        "sectors.groups[0].rs1m",
+        "sectors.groups[0].short",
+        "sectors.groups[0].top[0].symbol",
+        "sectors.groups[1].name",
+        "sectors.groups[1].top[0].symbol",
+        "sectors.groups[2].name",
+        "sectors.groups[2].top[0].symbol",
+        "rules.formats.weekly.sectors.invite"
+      ]
+    },
+    {
+      "id": "rw-261016-pick-1",
+      "role": "pick",
+      "eyebrow": "Soi mã · MSR",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Mã đáng chú ý tuần này là MSR, mạnh nhất nhóm Tài nguyên cơ bản. Đỉnh, đáy vẫn cao dần. Thứ Sáu, nến bao trùm giảm khi VN-Index tăng. Đang giữ, thủng sáu mươi ba phẩy ba mươi thì chốt lời một nửa. Chưa có hàng thì không mua đuổi, giá đã kéo xa. Mã nào đang gãy?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Cao hơn MA50 29,72%",
+          "line2": "Giá đã kéo quá xa",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 2.83,
+          "line1": "Bao trùm giảm · KL −35%",
+          "line2": "Ngược chiều VN-Index",
+          "accent": "red"
+        },
+        {
+          "atSentence": 3,
+          "at": 5.4,
+          "line1": "Đang giữ: chốt lời 1/2",
+          "line2": "Chưa mua: không mua đuổi",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-16/msr-fireant.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3906,
+          "y": 0.1592,
+          "w": 0.577,
+          "h": 0.5062
+        },
+        "masks": [
+          {
+            "x": 0.3906,
+            "y": 0.154,
+            "w": 0.3211,
+            "h": 0.0207
+          },
+          {
+            "x": 0.3906,
+            "y": 0.2128,
+            "w": 0.0655,
+            "h": 0.0196
+          },
+          {
+            "x": 0.3926,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.423,
+            "y": 0.1889,
+            "text": "MSR · RS 1M 97 · −1,52%",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.8113,
+            "y": 0.4072,
+            "text": "MA50 · 50,03",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7531,
+            "y": 0.4926,
+            "text": "MA200 · 41,11",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.1986,
+            "accent": "gold",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.597,
+            "y": 0.1897,
+            "text": "Kháng cự · đỉnh 52T · 70,00",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.3169,
+            "accent": "green",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.423,
+            "y": 0.3356,
+            "text": "Hỗ trợ · đáy 13/10 · 57,40",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.5333,
+              0.5635
+            ],
+            "to": [
+              0.8556,
+              0.3379
+            ],
+            "accent": "green",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.819,
+            "y": 0.3439,
+            "text": "Trendline · 55,17",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.8556,
+            "y": 0.2465,
+            "r": 0.008,
+            "accent": "red",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2615,
+            "accent": "red",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.592,
+            "y": 0.2758,
+            "text": "Đáy nến đảo chiều · 63,30",
+            "accent": "red",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2615,
+            "accent": "red",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.648,
+            "y": 0.2758,
+            "text": "Đang giữ: dưới 63,30 chốt 1/2",
+            "accent": "red",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.72,
+            "y": 0.1895,
+            "text": "Chưa mua: không mua đuổi",
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.85,
+            "y": 0.3431,
+            "text": "55,17",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.818,
+            "y": 0.4086,
+            "text": "MA50 · 50,03",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.676,
+            "y": 0.2129,
+            "text": "Kháng cự · đỉnh 52T · 70,00",
+            "accent": "gold",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.592,
+            "y": 0.3312,
+            "text": "Hỗ trợ · đáy 13/10 · 57,40",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.6791,
+            "y": 0.4123,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.7344,
+            "y": 0.3194,
+            "zoom": 1.8,
+            "move": "pull_out"
+          },
+          {
+            "beat": 2,
+            "x": 0.7544,
+            "y": 0.2446,
+            "zoom": 1.8,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.sectorLeader (MSR, nhóm #1 Tài nguyên)",
+        "review.setup (extended)",
+        "review.priceAction (đỉnh 70,00 > 58,00, đáy 57,40 > 51,10)",
+        "review.numbers.aboveMa50Percent (29,72)",
+        "review.numbers.volumeVsSma20Percent (−35)",
+        "session.changePercent (+0,45 — said as \"VN-Index tăng\")",
+        "review.roles.holder (đáy nến đảo chiều 63,30 → chốt lời một nửa; full 57,40 thoát hết chỉ ở .md, không đọc)",
+        "review.roles.notHolder.say",
+        "brief: hand-off \"Mã nào đang gãy?\" (the Momentum breakdown board follows)"
+      ]
+    },
+    {
+      "id": "rw-261016-breakdown",
+      "role": "breakdown",
+      "eyebrow": "Bộ lọc Momentum breakdown",
+      "act": "amber",
+      "duration": 6.6,
+      "narration": "Năm mã mạnh đang gãy hoặc sắp gãy trendline tăng. Đang cầm mã nào ở đây thì rà lại điểm cắt lỗ. Còn chiều ngược lại?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "5 mã · 1 đã xác nhận",
+          "line2": "Danh sách cảnh báo",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Đang cầm mã ở đây?",
+          "line2": "Rà lại điểm cắt lỗ",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "board",
+        "caption": "MOMENTUM BREAKDOWN · 5 MÃ · XẾP THEO RS 1M",
+        "columns": [
+          "price",
+          "weekChange",
+          "rs1m",
+          "signal",
+          "rs52w"
+        ],
+        "rows": [
+          {
+            "symbol": "MSB",
+            "price": 14.8,
+            "changePercent": 1.02,
+            "rs1m": 92,
+            "weekChangePercent": 1.37,
+            "signal": "potential",
+            "rs52w": 91
+          },
+          {
+            "symbol": "VPB",
+            "price": 24.5,
+            "changePercent": 0.2,
+            "rs1m": 90,
+            "weekChangePercent": 2.94,
+            "signal": "potential",
+            "rs52w": 71
+          },
+          {
+            "symbol": "HDB",
+            "price": 22.8,
+            "changePercent": 0,
+            "rs1m": 85,
+            "weekChangePercent": 1.79,
+            "signal": "potential",
+            "rs52w": 87
+          },
+          {
+            "symbol": "GMD",
+            "price": 54,
+            "changePercent": 1.89,
+            "rs1m": 81,
+            "weekChangePercent": -1.82,
+            "signal": "confirmed",
+            "rs52w": 89
+          },
+          {
+            "symbol": "DCM",
+            "price": 33.9,
+            "changePercent": 0,
+            "rs1m": 76,
+            "weekChangePercent": -2.73,
+            "signal": "potential",
+            "rs52w": 72
+          }
+        ],
+        "signalKind": "breakdown",
+        "notes": {
+          "state": {
+            "label": "Thị trường",
+            "value": "nỗ lực phục hồi",
+            "list": "danh sách cảnh báo",
+            "accent": "gold"
+          },
+          "definition": {
+            "title": "Bộ lọc Momentum breakdown",
+            "items": [
+              "RS 1M, RS 3M, RS 52W ≥ 70",
+              "KL TB20 ≥ 1 triệu",
+              "đã thủng hoặc áp sát trendline tăng"
+            ]
+          },
+          "beat": 1
+        }
+      },
+      "citedFacts": [
+        "screener.breakdown.count",
+        "screener.breakdown.confirmed",
+        "screener.breakdown.potential"
+      ]
+    },
+    {
+      "id": "rw-261016-breakout",
+      "role": "breakout",
+      "eyebrow": "Bộ lọc Momentum breakout",
+      "act": "amber",
+      "duration": 6.1,
+      "narration": "Bộ lọc Momentum breakout chỉ có một mã là GMD, đã vượt trendline giảm. Cứ theo dõi, chưa phải lúc hành động. Vậy tuần tới canh gì?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "1 mã · GMD đã xác nhận",
+          "line2": "Vượt trendline giảm",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Danh sách theo dõi",
+          "line2": "Chưa phải lúc hành động",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "board",
+        "caption": "MOMENTUM BREAKOUT · 1 MÃ · XẾP THEO RS 1M",
+        "columns": [
+          "price",
+          "weekChange",
+          "rs1m",
+          "signal",
+          "rs52w"
+        ],
+        "rows": [
+          {
+            "symbol": "GMD",
+            "price": 54,
+            "changePercent": 1.89,
+            "rs1m": 81,
+            "weekChangePercent": -1.82,
+            "signal": "confirmed",
+            "rs52w": 89
+          }
+        ],
+        "signalKind": "breakout",
+        "notes": {
+          "state": {
+            "label": "Thị trường",
+            "value": "nỗ lực phục hồi",
+            "list": "danh sách theo dõi",
+            "accent": "gold"
+          },
+          "definition": {
+            "title": "Bộ lọc Momentum breakout",
+            "items": [
+              "RS 1M ≥ 80 · RS 3M, RS 52W ≥ 70",
+              "KL TB20 ≥ 1 triệu",
+              "đã vượt hoặc áp sát trendline giảm"
+            ]
+          },
+          "beat": 1
+        }
+      },
+      "citedFacts": [
+        "screener.breakout.count",
+        "screener.breakout.confirmed",
+        "rules.formats.weekly.watch.bridge"
+      ]
+    },
+    {
+      "id": "rw-261016-watch",
+      "role": "watch",
+      "eyebrow": "Kịch bản VN-Index",
+      "act": "amber",
+      "duration": 14.9,
+      "narration": "Tuần tới, nếu vượt lại vùng một nghìn bảy trăm ba mươi mốt thì một nghìn bảy trăm sáu mươi tư là mốc kế. Nếu thủng một nghìn sáu trăm chín mươi lăm thì nỗ lực thất bại, về một nghìn sáu trăm năm mươi mốt. Có hàng thì hạ tỷ trọng và tuân thủ cắt lỗ. Chưa có hàng thì đứng ngoài, không mua đuổi nhịp hồi, chờ phiên FTD mới.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Vượt 1731,03 → 1764",
+          "line2": "Kế hoạch tuần tới",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Thủng 1694,77 → 1651,20",
+          "line2": "Chờ phiên FTD mới",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-16/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3944,
+          "y": 0.1592,
+          "w": 0.5732,
+          "h": 0.5029
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.154,
+            "w": 0.5191,
+            "h": 0.0207
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1852,
+            "w": 0.2099,
+            "h": 0.0195
+          },
+          {
+            "x": 0.0574,
+            "y": 0.2128,
+            "w": 0.4265,
+            "h": 0.0196
+          },
+          {
+            "x": 0.0594,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "hline",
+            "y": 0.4765,
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.4305,
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.8407,
+            "y": 0.511,
+            "r": 0.022,
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.5264,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.5863,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.8103,
+            "y": 0.5463,
+            "text": "Chờ FTD từ ngày 4, +1,25%",
+            "accent": "red",
+            "beat": 1,
+            "anchor": "end"
+          },
+          {
+            "kind": "label",
+            "x": 0.6464,
+            "y": 0.4701,
+            "text": "Kháng cự 1731,03",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.6464,
+            "y": 0.444,
+            "text": "Kháng cự 1764,45",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.5616,
+            "y": 0.5188,
+            "text": "Thủng 1694,77 → nỗ lực thất bại",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.4343,
+            "y": 0.6033,
+            "text": "Hỗ trợ 1651,20",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7207,
+            "y": 0.4708,
+            "zoom": 1.7,
+            "move": "tilt"
+          },
+          {
+            "beat": 1,
+            "x": 0.73832,
+            "y": 0.5084,
+            "zoom": 1.05,
+            "move": "static"
+          }
+        ]
+      },
+      "citedFacts": [
+        "scenario.up[0].at (1731,03)",
+        "scenario.up[1].at (1764,45)",
+        "scenario.down[0].at (1694,77 = state.rallyLow)",
+        "scenario.down[1].at (1651,20)",
+        "watch[1] (thủng đáy 1694,77)",
+        "watch[0] (FTD — on the plate, not spoken)",
+        "rules.formats.weekly.watch.headline"
+      ]
+    },
+    {
+      "id": "rw-261016-outro",
+      "role": "outro",
+      "eyebrow": "Theo dõi tiếp",
+      "act": "navy",
+      "duration": 7.6,
+      "narration": "Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Hẹn gặp các bạn vào cuối tuần sau nhé.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Thả tim, chia sẻ, theo dõi",
+          "line2": "Cập nhật mỗi cuối tuần",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "outro",
+        "logo": "logo/chung-vit.png",
+        "brand": "Chứng Vịt",
+        "kicker": "Chứng khoán",
+        "pill": "Thả tim · Chia sẻ · Theo dõi",
+        "line": "Cập nhật mỗi cuối tuần"
+      },
+      "headline": {
+        "line1Baseline": 1338,
+        "line2Baseline": 1418,
+        "maxFontSize": 60,
+        "footnoteY": 1484
+      },
+      "citedFacts": [
+        "rules.brand"
+      ]
+    }
+  ]
+}

@@ -83,9 +83,11 @@ export const LineChart: React.FC<Props> = ({caption, top, bottom, events = [], b
         {gridOf(s).map((v) => (
           <g key={v}>
             <line x1={PAD_L} x2={W - PAD_R} y1={s.y(v)} y2={s.y(v)} stroke={COLORS.hairline} strokeWidth={1} />
-            <text x={W - PAD_R + 8} y={s.y(v) + 5} fontFamily={FONTS.mono} fontSize={14} fill={COLORS.faint}>
-              {fmt(v, p.unit)}
-            </text>
+            {p.axis === false ? null : (
+              <text x={W - PAD_R + 8} y={s.y(v) + 5} fontFamily={FONTS.mono} fontSize={14} fill={COLORS.faint}>
+                {fmt(v, p.unit)}
+              </text>
+            )}
           </g>
         ))}
         {p.ref != null && p.ref > s.a && p.ref < s.b ? (

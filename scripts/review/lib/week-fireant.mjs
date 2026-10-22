@@ -59,9 +59,10 @@ export const closeWord = (W) => {
  * @param spec   rules.shots.fireantStock merged with rules.shots.fireantWeekly
  * @param E      the fact pack's `indexWeekly` block (the weekly timeframe's evaluation), or null for the candle alone
  * @param provisional  the last session's volume is SSI's same-day figure (the week's volume ratio is provisional too)
+ * @param plan   {words, bridge} of rules.formats.weekly.week (2026-10-09): the brief's budget and the scene's last sentence
  * @returns {visual, brief, after} or {why} when the calibration does not reach the edition's week
  */
-export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor, E = null, provisional = false}) => {
+export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor, E = null, provisional = false, plan = null}) => {
   const S = {...DEFAULT, ...spec};
   const C = p.calib;
   const vis = weeks.slice(-C.n);
@@ -122,7 +123,7 @@ export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor, E = nul
   const candleUntil = E ? {until: 0} : {};
   const annotations = [
     {kind: 'box', x: clamp(cx - bw / 2), y: clamp(top - 0.012), w: clamp(bw), h: clamp(bottom - top + 0.024), accent: down ? 'down' : 'up', beat: 0},
-    {kind: 'label', x: clamp(cx - 0.03), y: clamp(top - 0.05), text: `Tuần ${W.fromDm} → ${toDm} · ${pct(W.changePercent)}`, accent: down ? 'red' : 'green', beat: 0, anchor: 'end', ...candleUntil},
+    // No "Tuần … · +x%" plate since 2026-10-09 (the director's review): beat 1's headline carries the week's change.
     {kind: 'label', x: clamp(cx - 0.03), y: clamp(bottom + 0.04), text: `Cao ${vi(W.high)} · thấp ${vi(W.low)} · đóng ${vi(W.close)}`, accent: 'white', beat: candleBeat, anchor: 'end', ...candleUntil},
     // Not while the last session's volume is SSI's same-day figure: the skill never prints today's volume ratio (SKILL.md
     // market-review §9 — 1/10: 260M at 15:47, 449M on FireAnt), and the week's ratio carries it.
@@ -205,9 +206,11 @@ export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor, E = nul
     {beat: 1, x: clamp(Math.min(edge, (span.x0 + span.x1) / 2)), y: clamp((span.y0 + span.y1) / 2), zoom: round(zw, 2), move: 'pull_out'},
   ];
   const st = E.structure ?? {};
+  const [near, far] = zones.slice().sort((x, y) => Math.abs(x.z.at - W.close) - Math.abs(y.z.at - W.close));
   const maText = Object.entries(E.ma ?? {}).map(([name, m]) => `${name} tuần ${vi(m.value)} (giá ${pct(m.closeVsPercent)})`).join('; ');
+  // MA200 tuần is a plate, never part of the spoken verdict (2026-10-09: no "xu hướng dài hạn chưa gãy" sentence).
   const verdict = st.kind === 'down'
-    ? `khung tuần đang ${E.ma?.MA200?.closeVsPercent > 0 ? 'điều chỉnh: đỉnh, đáy thấp dần nhưng giá vẫn trên MA200 tuần — xu hướng dài hạn chưa gãy' : 'giảm: đỉnh, đáy thấp dần và giá dưới MA200 tuần'}`
+    ? `khung tuần đang ${E.ma?.MA200?.closeVsPercent > 0 ? 'điều chỉnh' : 'giảm'}: đỉnh, đáy thấp dần`
     : st.kind === 'up'
       ? `khung tuần tăng: đỉnh, đáy cao dần${E.ma?.MA50?.closeVsPercent < 0 ? ', nhưng giá đang dưới MA50 tuần' : ''}`
       : `khung tuần đi ngang: ${st.text ?? '—'}`;
@@ -215,10 +218,10 @@ export const weekVisual = ({W, toDm, p, ma, weeks, spec = {}, maskColor, E = nul
     after,
     visual: {crop, masks, ...(masks.length ? {maskColor} : {}), annotations, shots},
     brief: [
-      `VN-INDEX · KHUNG TUẦN (người dùng 2026-10-06: "eval the VNIndex as daily and weekly of this week") — ĐÁNH GIÁ khung tuần, không chỉ cây nến. ${photoLine} Hai đường trên chart là MA50 / MA200 TUẦN của FireAnt: gọi "MA50 tuần", "MA200 tuần" (không lẫn với MA ngày của scene sau).`,
-      `Beat 1 = cận cảnh cây nến tuần (khung ${down ? 'đỏ' : 'xanh'}): ${candleLine}.`,
-      `Beat 2 = toàn cảnh khung tuần (${E.window} tuần): ${st.text ?? '—'} (hai đường đứt: đỉnh ${(st.highs ?? []).map((s) => `${s.dm} ${vi(s.price)}`).join(' → ') || '—'}; đáy ${(st.lows ?? []).map((s) => `${s.dm} ${vi(s.price)}`).join(' → ') || '—'}). Giá ${E.maPosition ?? '—'} tuần${maText ? ` (${maText})` : E.maWhy ? ` — không có MA tuần của tuần này: ${E.maWhy}` : ''}. Vùng gần nhất phía trên: ${(E.up ?? []).slice(0, 1).map(zoneText).join('') || '—'}; phía dưới: ${(E.down ?? []).slice(0, 1).map(zoneText).join('') || '—'}. Kết luận do số quyết định: "${verdict}".`,
-      'Tối đa hai số đọc ra lời; số đọc thành chữ, mức điểm đọc tròn. Từ của trader: nến tuần, biên tuần, đỉnh, đáy, kháng cự, hỗ trợ, MA50 tuần, MA200 tuần. Nhãn giữ số lẻ của pack (weekly.*, indexWeekly.*). Không nhánh nếu … thì (để scene watch).',
+      `VN-INDEX · KHUNG TUẦN (người dùng 2026-10-06: "eval the VNIndex as daily and weekly of this week") — ĐÁNH GIÁ khung tuần, không chỉ cây nến. ${photoLine} Hai đường trên chart là MA50 / MA200 TUẦN của FireAnt (gọi "MA50 tuần", "MA200 tuần" nếu nhắc — không lẫn với MA ngày của scene sau). HAI BEAT, khoảng ${plan?.words ?? 28} chữ, MỘT số đọc ra lời (2026-10-09, đạo diễn + người xem trader, orchestrator gộp).`,
+      `Beat 1 = cận cảnh cây nến tuần — KẾT LUẬN của cây nến: đóng cửa ${CW.word} (${CW.at}% biên tuần, tính từ đáy)${W.volumeVsPriorWeek != null && !provisional ? `, khối lượng mỗi phiên ${W.volumeVsPriorWeek >= 1 ? 'cao hơn' : 'thấp hơn'} tuần trước (×${vi(W.volumeVsPriorWeek)} — nói bằng chữ, không đọc tỉ lệ)` : provisional ? ' — KL phiên cuối của SSI còn tạm: KHÔNG nói khối lượng' : ''}. KHÔNG đọc lại điểm và % của tuần (hook đã đọc); headline beat 1 mang chúng: "Tuần ${W.fromDm} → ${toDm} · ${pct(W.changePercent)}" / "Đóng ${CW.word}" — ảnh không còn nhãn "+x%". Số của nến: ${candleLine}.`,
+      `Beat 2 = toàn cảnh khung tuần (${E.window} tuần): ${st.text ?? '—'} (hai đường đứt: đỉnh ${(st.highs ?? []).map((s) => `${s.dm} ${vi(s.price)}`).join(' → ') || '—'}; đáy ${(st.lows ?? []).map((s) => `${s.dm} ${vi(s.price)}`).join(' → ') || '—'}). ${near ? `Vùng GẦN NHẤT (${near.up ? 'phía trên' : 'phía dưới'}, gần giá đóng ${vi(W.close)} nhất): ${zoneText(near.z)} — ĐỌC MỘT LẦN, đọc tròn ("${near.up ? 'kháng cự' : 'hỗ trợ'} vùng" ${vi(Math.round(near.z.at), 0)}) — scene DUY NHẤT ngoài kế hoạch (watch) đọc mức này; scene market không đọc mức giá nào.` : 'Không có vùng tuần nào trong khung: không đọc mức giá.'}${far ? ` Vùng ${far.up ? 'phía trên' : 'phía dưới'} (${zoneText(far.z)}) là nhãn, không đọc.` : ''} ${maText ? `MA tuần (${maText}) là NHÃN: KHÔNG đọc MA200 tuần ra lời, KHÔNG câu "xu hướng dài hạn chưa gãy".` : E.maWhy ? `Không có MA tuần của tuần này (${E.maWhy}).` : ''} Kết luận do số quyết định: "${verdict}". Headline beat 2: "${near ? `${near.up ? 'Kháng cự' : 'Hỗ trợ'} tuần ${vi(near.z.at)}` : 'Khung tuần'}" / "${st.kind === 'down' ? 'Đỉnh, đáy tuần thấp dần' : st.kind === 'up' ? 'Đỉnh, đáy tuần cao dần' : 'Khung tuần đi ngang'}".`,
+      `Câu CUỐI trao lời cho khung ngày (scene market): "${plan?.bridge ?? 'Còn khung ngày thì sao?'}". Số đọc thành chữ. Từ của trader: nến tuần, biên tuần, đỉnh, đáy, kháng cự, hỗ trợ. Nhãn giữ số lẻ của pack (weekly.*, indexWeekly.*). Không nhánh nếu … thì (để scene watch).`,
     ],
   };
 };

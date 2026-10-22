@@ -1,385 +1,385 @@
 {
-  "asOf": "2026-10-06",
-  "fetchedAt": "2026-10-06T08:03:30.480Z",
+  "asOf": "2026-10-16",
+  "fetchedAt": "2026-10-17T03:25:17.570Z",
   "source": "SSI iBoard daily closes (scripts/review/lib/stock-bars.mjs)",
   "method": "SMA200 of closes carried forward over market sessions",
   "set": {
     "rule": "sma_200 > 0 on the terminal",
     "floor": 0,
-    "size": 898
+    "size": 897
   },
-  "symbols": 898,
-  "fetched": 896,
+  "symbols": 897,
+  "fetched": 894,
   "period": 200,
   "terminal": {
-    "above": 244,
-    "with": 898,
-    "percent": 27.2
+    "above": 250,
+    "with": 897,
+    "percent": 27.9
   },
   "residual": {
-    "count": -9,
-    "sharePercent": -1
+    "count": -11,
+    "sharePercent": -1.23
   },
   "rows": [
     {
-      "t": "2026-07-10",
-      "above": 294,
-      "with": 894,
-      "percent": 32.9
-    },
-    {
-      "t": "2026-07-13",
-      "above": 278,
-      "with": 894,
-      "percent": 31.1
-    },
-    {
-      "t": "2026-07-14",
-      "above": 278,
-      "with": 894,
-      "percent": 31.1
-    },
-    {
-      "t": "2026-07-15",
-      "above": 267,
-      "with": 894,
-      "percent": 29.9
-    },
-    {
-      "t": "2026-07-16",
-      "above": 272,
-      "with": 894,
-      "percent": 30.4
-    },
-    {
-      "t": "2026-07-17",
-      "above": 266,
-      "with": 894,
-      "percent": 29.8
-    },
-    {
-      "t": "2026-07-20",
-      "above": 241,
-      "with": 894,
-      "percent": 27
-    },
-    {
-      "t": "2026-07-21",
-      "above": 233,
-      "with": 894,
-      "percent": 26.1
-    },
-    {
       "t": "2026-07-22",
-      "above": 220,
-      "with": 894,
-      "percent": 24.6
+      "above": 223,
+      "with": 890,
+      "percent": 25.1
     },
     {
       "t": "2026-07-23",
-      "above": 228,
-      "with": 894,
-      "percent": 25.5
+      "above": 231,
+      "with": 890,
+      "percent": 26
     },
     {
       "t": "2026-07-24",
-      "above": 219,
-      "with": 894,
-      "percent": 24.5
+      "above": 224,
+      "with": 890,
+      "percent": 25.2
     },
     {
       "t": "2026-07-27",
-      "above": 215,
-      "with": 894,
-      "percent": 24
+      "above": 217,
+      "with": 890,
+      "percent": 24.4
     },
     {
       "t": "2026-07-28",
-      "above": 221,
-      "with": 894,
-      "percent": 24.7
+      "above": 223,
+      "with": 890,
+      "percent": 25.1
     },
     {
       "t": "2026-07-29",
-      "above": 219,
-      "with": 894,
-      "percent": 24.5
+      "above": 220,
+      "with": 890,
+      "percent": 24.7
     },
     {
       "t": "2026-07-30",
       "above": 234,
-      "with": 894,
-      "percent": 26.2
+      "with": 890,
+      "percent": 26.3
     },
     {
       "t": "2026-07-31",
       "above": 230,
-      "with": 894,
-      "percent": 25.7
+      "with": 890,
+      "percent": 25.8
     },
     {
       "t": "2026-08-03",
-      "above": 244,
-      "with": 894,
-      "percent": 27.3
+      "above": 245,
+      "with": 890,
+      "percent": 27.5
     },
     {
       "t": "2026-08-04",
-      "above": 239,
-      "with": 894,
-      "percent": 26.7
+      "above": 241,
+      "with": 890,
+      "percent": 27.1
     },
     {
       "t": "2026-08-05",
-      "above": 241,
-      "with": 894,
-      "percent": 27
+      "above": 242,
+      "with": 890,
+      "percent": 27.2
     },
     {
       "t": "2026-08-06",
-      "above": 241,
-      "with": 894,
-      "percent": 27
+      "above": 242,
+      "with": 890,
+      "percent": 27.2
     },
     {
       "t": "2026-08-07",
-      "above": 244,
-      "with": 894,
-      "percent": 27.3
+      "above": 245,
+      "with": 890,
+      "percent": 27.5
     },
     {
       "t": "2026-08-10",
-      "above": 261,
-      "with": 895,
-      "percent": 29.2
-    },
-    {
-      "t": "2026-08-11",
       "above": 262,
-      "with": 895,
-      "percent": 29.3
-    },
-    {
-      "t": "2026-08-12",
-      "above": 265,
-      "with": 895,
-      "percent": 29.6
-    },
-    {
-      "t": "2026-08-13",
-      "above": 263,
-      "with": 895,
+      "with": 891,
       "percent": 29.4
     },
     {
+      "t": "2026-08-11",
+      "above": 264,
+      "with": 891,
+      "percent": 29.6
+    },
+    {
+      "t": "2026-08-12",
+      "above": 267,
+      "with": 891,
+      "percent": 30
+    },
+    {
+      "t": "2026-08-13",
+      "above": 265,
+      "with": 891,
+      "percent": 29.7
+    },
+    {
       "t": "2026-08-14",
-      "above": 256,
-      "with": 895,
-      "percent": 28.6
+      "above": 259,
+      "with": 891,
+      "percent": 29.1
     },
     {
       "t": "2026-08-17",
-      "above": 262,
-      "with": 895,
-      "percent": 29.3
+      "above": 264,
+      "with": 891,
+      "percent": 29.6
     },
     {
       "t": "2026-08-18",
-      "above": 258,
-      "with": 895,
-      "percent": 28.8
+      "above": 259,
+      "with": 891,
+      "percent": 29.1
     },
     {
       "t": "2026-08-19",
-      "above": 252,
-      "with": 895,
+      "above": 251,
+      "with": 891,
       "percent": 28.2
     },
     {
       "t": "2026-08-20",
       "above": 268,
-      "with": 895,
-      "percent": 29.9
+      "with": 891,
+      "percent": 30.1
     },
     {
       "t": "2026-08-21",
-      "above": 281,
-      "with": 895,
-      "percent": 31.4
+      "above": 279,
+      "with": 891,
+      "percent": 31.3
     },
     {
       "t": "2026-08-24",
-      "above": 266,
-      "with": 895,
-      "percent": 29.7
+      "above": 267,
+      "with": 891,
+      "percent": 30
     },
     {
       "t": "2026-08-25",
-      "above": 264,
-      "with": 895,
-      "percent": 29.5
+      "above": 266,
+      "with": 891,
+      "percent": 29.9
     },
     {
       "t": "2026-08-26",
-      "above": 275,
-      "with": 895,
-      "percent": 30.7
+      "above": 274,
+      "with": 891,
+      "percent": 30.8
     },
     {
       "t": "2026-08-27",
       "above": 282,
-      "with": 895,
-      "percent": 31.5
+      "with": 891,
+      "percent": 31.6
     },
     {
       "t": "2026-08-28",
       "above": 279,
-      "with": 895,
-      "percent": 31.2
+      "with": 891,
+      "percent": 31.3
     },
     {
       "t": "2026-09-03",
       "above": 264,
-      "with": 895,
-      "percent": 29.5
+      "with": 891,
+      "percent": 29.6
     },
     {
       "t": "2026-09-04",
-      "above": 270,
-      "with": 895,
+      "above": 269,
+      "with": 891,
       "percent": 30.2
     },
     {
       "t": "2026-09-07",
-      "above": 255,
-      "with": 895,
-      "percent": 28.5
+      "above": 253,
+      "with": 891,
+      "percent": 28.4
     },
     {
       "t": "2026-09-08",
-      "above": 263,
-      "with": 895,
-      "percent": 29.4
+      "above": 261,
+      "with": 891,
+      "percent": 29.3
     },
     {
       "t": "2026-09-09",
-      "above": 264,
-      "with": 895,
+      "above": 263,
+      "with": 891,
       "percent": 29.5
     },
     {
       "t": "2026-09-10",
-      "above": 257,
-      "with": 895,
+      "above": 256,
+      "with": 891,
       "percent": 28.7
     },
     {
       "t": "2026-09-11",
-      "above": 236,
-      "with": 895,
+      "above": 235,
+      "with": 891,
       "percent": 26.4
     },
     {
       "t": "2026-09-14",
-      "above": 234,
-      "with": 895,
-      "percent": 26.1
+      "above": 232,
+      "with": 891,
+      "percent": 26
     },
     {
       "t": "2026-09-15",
-      "above": 253,
-      "with": 895,
-      "percent": 28.3
+      "above": 250,
+      "with": 891,
+      "percent": 28.1
     },
     {
       "t": "2026-09-16",
-      "above": 247,
-      "with": 895,
+      "above": 246,
+      "with": 891,
       "percent": 27.6
     },
     {
       "t": "2026-09-17",
       "above": 254,
-      "with": 895,
-      "percent": 28.4
+      "with": 891,
+      "percent": 28.5
     },
     {
       "t": "2026-09-18",
-      "above": 258,
-      "with": 895,
-      "percent": 28.8
+      "above": 259,
+      "with": 891,
+      "percent": 29.1
     },
     {
       "t": "2026-09-21",
-      "above": 250,
-      "with": 895,
-      "percent": 27.9
+      "above": 252,
+      "with": 891,
+      "percent": 28.3
     },
     {
       "t": "2026-09-22",
-      "above": 259,
-      "with": 895,
-      "percent": 28.9
+      "above": 262,
+      "with": 891,
+      "percent": 29.4
     },
     {
       "t": "2026-09-23",
-      "above": 256,
-      "with": 895,
-      "percent": 28.6
+      "above": 260,
+      "with": 891,
+      "percent": 29.2
     },
     {
       "t": "2026-09-24",
-      "above": 242,
-      "with": 895,
-      "percent": 27
+      "above": 245,
+      "with": 891,
+      "percent": 27.5
     },
     {
       "t": "2026-09-25",
-      "above": 241,
-      "with": 895,
-      "percent": 26.9
+      "above": 243,
+      "with": 891,
+      "percent": 27.3
     },
     {
       "t": "2026-09-28",
-      "above": 238,
-      "with": 895,
-      "percent": 26.6
+      "above": 239,
+      "with": 891,
+      "percent": 26.8
     },
     {
       "t": "2026-09-29",
       "above": 244,
-      "with": 895,
-      "percent": 27.3
+      "with": 891,
+      "percent": 27.4
     },
     {
       "t": "2026-09-30",
-      "above": 243,
-      "with": 895,
-      "percent": 27.2
+      "above": 244,
+      "with": 891,
+      "percent": 27.4
     },
     {
       "t": "2026-10-01",
-      "above": 242,
-      "with": 895,
-      "percent": 27
+      "above": 243,
+      "with": 891,
+      "percent": 27.3
     },
     {
       "t": "2026-10-02",
-      "above": 234,
-      "with": 895,
-      "percent": 26.1
+      "above": 235,
+      "with": 891,
+      "percent": 26.4
     },
     {
       "t": "2026-10-05",
-      "above": 236,
-      "with": 896,
-      "percent": 26.3
+      "above": 237,
+      "with": 892,
+      "percent": 26.6
     },
     {
       "t": "2026-10-06",
-      "above": 235,
-      "with": 896,
-      "percent": 26.2
+      "above": 237,
+      "with": 892,
+      "percent": 26.6
+    },
+    {
+      "t": "2026-10-07",
+      "above": 244,
+      "with": 893,
+      "percent": 27.3
+    },
+    {
+      "t": "2026-10-08",
+      "above": 244,
+      "with": 894,
+      "percent": 27.3
+    },
+    {
+      "t": "2026-10-09",
+      "above": 243,
+      "with": 894,
+      "percent": 27.2
+    },
+    {
+      "t": "2026-10-12",
+      "above": 245,
+      "with": 894,
+      "percent": 27.4
+    },
+    {
+      "t": "2026-10-13",
+      "above": 237,
+      "with": 894,
+      "percent": 26.5
+    },
+    {
+      "t": "2026-10-14",
+      "above": 237,
+      "with": 894,
+      "percent": 26.5
+    },
+    {
+      "t": "2026-10-15",
+      "above": 232,
+      "with": 894,
+      "percent": 26
+    },
+    {
+      "t": "2026-10-16",
+      "above": 239,
+      "with": 894,
+      "percent": 26.7
     }
   ]
 }

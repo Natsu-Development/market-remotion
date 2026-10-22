@@ -319,6 +319,7 @@ export const fireantLeaderVisual = (args) => {
   const NEAR_PX = 24;            // a level / MA / trendline / box plate from its own mark
   const CANDLE_PX = 60;          // a candle read's plate from its candle
   const LEADER_PX = 60;          // no leader longer than this
+  const ROLE_LEADER_PX = 180;    // ... except a role's plate on the action beat, when its line has no room at all
   const lastB = views.length - 1;
   const sx = (b) => kx * views[b].z;
   const sy = (b) => ky * views[b].z;
@@ -368,9 +369,10 @@ export const fireantLeaderVisual = (args) => {
     for (const e of order) {
       if (e.line && e.line.until !== undefined && e.line.until < e.beat) continue;   // never shown: no price, no line
       let cur = e.lab;
+      const cf = typeof e.coveredFrom === 'function' ? e.coveredFrom() : e.coveredFrom;
       // The action beat shows the roles alone: the earlier beats' plates are not carried into it.
       for (let b = e.beat + 1; b <= (roles && e.beat < ACTION_B ? ACTION_B - 1 : lastB); b++) {
-        if (e.coveredFrom != null && b >= e.coveredFrom) { cur = null; continue; }   // another plate prints this price here
+        if (cf != null && b >= cf) { cur = null; continue; }   // another plate prints this price here
         if (!e.shown(b)) { cur = null; continue; }
         if (cur?._rec && cur._rec.until === b - 1) {
           const r = {...cur._rec, self: cur._rec};
@@ -399,10 +401,10 @@ export const fireantLeaderVisual = (args) => {
    * a beat (same price, `coveredFrom`) keeps its line there without a second plate.
    */
   /** A plate within LEADER_PX of a line (points `pts`), with a straight leader from its nearer edge to the nearest point. */
-  const leadered = (text, pts, b, accent, prefer = null) => {
+  const leadered = (text, pts, b, accent, prefer = null, maxPx = LEADER_PX) => {
     if (!pts.length) return null;
     const anchor = prefer ?? pts.at(-1);
-    const got = placeNear(text, {x: anchor[0] - 0.04, y: anchor[1] + 0.04}, b, accent, 'near', (r, bb) => pxRectPath(r, bb, pts), [{px: LEADER_PX}, {px: LEADER_PX, lines: false}]);
+    const got = placeNear(text, {x: anchor[0] - 0.04, y: anchor[1] + 0.04}, b, accent, 'near', (r, bb) => pxRectPath(r, bb, pts), [{px: maxPx}, {px: maxPx, lines: false}]);
     if (!got) return null;
     const r = got._rect;
     let q = pts[0];
@@ -413,7 +415,7 @@ export const fireantLeaderVisual = (args) => {
     return got;
   };
   let levelN = 0;
-  const level = (price, text, accent, beat, role = null, coveredFrom = null) => {
+  const level = (price, text, accent, beat, role = null, coveredFrom = null, opts = {}) => {
     const y = priceY(price);
     if (!inside(y, 0.03)) return;
     const line = {kind: 'hline', y: clamp(y), accent, beat};
@@ -431,7 +433,7 @@ export const fireantLeaderVisual = (args) => {
       // A cross line keeps its price when its full plate finds no room (user 2026-10-06: "the cross line with any price must be
       // considered"; HDB's 27,10 line vanished on the close-up): a short tag right of the last bar, over the price scale's edge if
       // it must — the role and the price, else the price alone — instead of hiding the line.
-      if (!got && Number.isFinite(price)) {
+      if (!got && Number.isFinite(price) && !opts.noTag) {
         const roleWord = role === 'support' ? 'Hỗ trợ' : role === 'resistance' ? 'Kháng cự' : '';
         for (const t of [`${roleWord} ${vi(price)}`.trim(), vi(price)]) {
           got = add(place(t, {x: closeX + 0.03, y}, b, accent, 'near', {...(b < lastB ? {until: b} : {}), within: (r) => pxRectPoint(r, b, closeX + 0.03, y) <= NEAR_PX * 2, blockOpts: {lines: false, scale: false}}));
@@ -440,8 +442,9 @@ export const fireantLeaderVisual = (args) => {
       }
       return got;
     };
-    const lab = coveredFrom != null && coveredFrom <= beat ? null : own(beat);
-    if (!lab && !(coveredFrom != null && coveredFrom <= beat)) { line.until = beat - 1; }   // no plate in its own beat: no line
+    const cf = typeof coveredFrom === 'function' ? coveredFrom() : coveredFrom;
+    const lab = cf != null && cf <= beat ? null : own(beat);
+    if (!lab && !(cf != null && cf <= beat)) { line.until = beat - 1; }   // no plate in its own beat: no line
     later.push({lab, beat, dist: distPx, own, shown, line, coveredFrom});
   };
   /** A plate on FireAnt's own MA line (no second line of ours) — on the line, near the recent candles or where the two lines part. */
@@ -506,25 +509,36 @@ export const fireantLeaderVisual = (args) => {
     }));
     const lenPx = ([a, b]) => Math.hypot((a[0] - b[0]) * sx(beat), (a[1] - b[1]) * sy(beat));
     const TOUCH = 14;
-    const ok = (r) => {
+    const ok = (r, far = 1) => {
       const d = pxRectBox(r, beat, box);
-      if (d > CANDLE_PX) return false;
+      if (d > CANDLE_PX * far) return false;
       if (d <= TOUCH) return true;
       const ar = arrowFor(r);
-      return lenPx(ar) <= LEADER_PX && !crossesCandles(ar[0], ar[1], idx) && !crossesPlates(ar[0], ar[1]);
+      return lenPx(ar) <= LEADER_PX * far && !crossesCandles(ar[0], ar[1], idx) && !crossesPlates(ar[0], ar[1]);
     };
     const fy = focus ? (focus[0] + focus[1]) / 2 : null;
     const target = fy != null ? {x: x - 0.02, y: fy + (side === 'below' ? 0.02 : -0.02)} : {x: x - 0.02, y: side === 'below' ? ly + 0.03 : hy - 0.03};
-    const extra = (lines) => ({within: ok, ...(lines === false ? {blockOpts: {lines: false}} : {})});
+    const extra = (lines, far = 1) => ({within: (r) => ok(r, far), ...(lines === false ? {blockOpts: {lines: false}} : {})});
+    // Last: farther out on a longer arrow — a ring with no words was the alternative (MSR, GMD, BSR close-ups 13/10).
+    const FAR = 2.5;
     const lab = add(place(text, target, beat, accent, 'near', extra()))
-      ?? add(place(text, target, beat, accent, 'near', extra(false)));
-    if (!lab) return;
+      ?? add(place(text, target, beat, accent, 'near', extra(false)))
+      ?? add(place(text, target, beat, accent, 'near', extra(false, FAR)));
+    if (!lab) return null;
+    const far = pxRectBox(lab._rect, beat, box) > CANDLE_PX ? FAR : 1;
     const [from, to] = arrowFor(lab._rect);
     // An arrow onto the candle's high says "the high"; a read about the low (or a close at the low) never gets one.
     const wrongEnd = (aim === 'low' && to[1] < (hy + ly) / 2) || (aim === 'high' && to[1] > (hy + ly) / 2);
-    if (pxRectBox(lab._rect, beat, box) > TOUCH && lenPx([from, to]) >= 12 && lenPx([from, to]) <= LEADER_PX && !wrongEnd && !crossesCandles(from, to, idx)) {
+    const arrow = pxRectBox(lab._rect, beat, box) > TOUCH && lenPx([from, to]) >= 12 && lenPx([from, to]) <= LEADER_PX * far && !wrongEnd && !crossesCandles(from, to, idx);
+    if (arrow) {
       marks.push({kind: 'arrow', from: [clamp(from[0]), clamp(from[1])], to: [clamp(to[0]), clamp(to[1])], accent, beat, weight: 1.2});
+    } else if (far > 1) {
+      // A far plate without its arrow names nothing: take it back.
+      marks.splice(marks.indexOf(lab), 1);
+      plates.splice(plates.indexOf(lab._rec), 1);
+      return null;
     }
+    return lab;
   };
   /** The day's volume bar in a gold box; its plate within NEAR_PX of the box. */
   const volumeBox = (text, beat, t = 'last') => {
@@ -627,7 +641,7 @@ export const fireantLeaderVisual = (args) => {
     const focus = bar && bar.o != null && m.read === 'upper-wick' ? [priceY(bar.h), priceY(Math.max(bar.o, bar.c))]
       : bar && bar.o != null && m.read === 'lower-wick' ? [priceY(Math.min(bar.o, bar.c)), priceY(bar.l)]
       : Number.isFinite(m.price) ? [priceY(m.price), priceY(m.price)] : null;
-    pointer(m.label, m.accent ?? 'white', beat, t, m.side ?? (up ? 'above' : 'below'), aim, focus);
+    return pointer(m.label, m.accent ?? 'white', beat, t, m.side ?? (up ? 'above' : 'below'), aim, focus);
   };
 
   let detail = '';
@@ -637,9 +651,12 @@ export const fireantLeaderVisual = (args) => {
     const order = {ma: 0, candle: 1, level: 2, trendline: 3, zone: 4, volume: 5, pointer: 6};
     // A candle read and a level at the same price print it ONCE (QA 4/10: "Kháng cự · đỉnh 52T 63,20" and "Râu trên · bị
     // bán từ 63,20" both in MSR's close-up): from the read's beat on the level keeps its line, the read's plate its price.
-    const coveredFrom = (lv) => {
+    // Only when the read's plate was placed: MSR 13/10's close-up had no room by the candle for "Biên rộng · 57,40–67,60",
+    // and the 67,60 line it covered stood bare. Asked lazily — a read on a later beat is placed after its level's own beat.
+    const readPlaced = new Map();
+    const coveredFrom = (lv) => () => {
       const c = review.marks.find((x) => x.kind === 'candle' && Number.isFinite(x.price) && Math.abs(x.price - lv.price) <= 0.006);
-      return c ? c.beat ?? 1 : null;
+      return c && readPlaced.get(c) !== false ? c.beat ?? 1 : null;
     };
     for (const m of [...review.marks].sort((a, b) => (a.beat ?? 0) - (b.beat ?? 0) || (order[a.kind] ?? 9) - (order[b.kind] ?? 9))) {
       const beat = m.beat ?? 0;
@@ -649,13 +666,16 @@ export const fireantLeaderVisual = (args) => {
       else if (m.kind === 'trendline') trendline(m);
       else if (m.kind === 'zone') zone(m);
       else if (m.kind === 'volume') volumeBox(m.label, beat, m.date ?? 'last');
-      else if (m.kind === 'candle') candle(m);
+      else if (m.kind === 'candle') readPlaced.set(m, !!candle(m));
       else if (m.kind === 'pointer') pointer(m.label, m.accent ?? 'green', beat, m.date ?? 'last', m.side ?? 'below');
     }
     // The two roles on the action beat: each plate on the line of the price it acts on — the review's trendline (its value at
     // the last bar), FireAnt's MA curve, else a cross line at that price; a role without a price stands by the last candle.
     // The holder's plate (a break that cuts the position) is red under its line, the not-holder's white above it.
-    if (roles) {
+    // A role plate with no room by its line (NVB 14/10: 13,40 ran under the September candles at zoom 1,8; the plate fell to the
+    // free-placement fallback 0,076 above its line, over the 14,60 line, and the 13,40 line was never drawn): the action shot
+    // backs off 0,2 of zoom at a time and both roles are placed again; the free placement is the last try's only.
+    const placeRoles = (lastTry) => {
       for (const [who, accent, side] of [['holder', 'red', 'support'], ['notHolder', 'white', 'resistance']]) {
         const r = roles[who];
         const at = marks.length;
@@ -670,24 +690,61 @@ export const fireantLeaderVisual = (args) => {
             const pts = inViewPts(ACTION_B, path.slice(49));
             if (pts.length) {
               marks.push({kind: 'line', from: [clamp(a[0]), clamp(a[1])], to: [clamp(b[0]), clamp(b[1])], accent: tl.accent ?? 'green', beat: ACTION_B});
-              got = placeNear(r.plate, {x: pts.at(-1)[0], path: pts}, ACTION_B, accent, 'path', (q, bt) => pxRectLine(q, bt, pts)) ?? leadered(r.plate, pts, ACTION_B, accent, pts.at(-1));
+              got = placeNear(r.plate, {x: pts.at(-1)[0], path: pts}, ACTION_B, accent, 'path', (q, bt) => pxRectLine(q, bt, pts)) ?? leadered(r.plate, pts, ACTION_B, accent, pts.at(-1))
+                ?? leadered(r.plate, pts, ACTION_B, accent, pts.at(-1), ROLE_LEADER_PX);
             }
           }
         } else if (maKey && MA[maKey]?.path?.length) {
-          const pts = inViewPts(ACTION_B, MA[maKey].path);
-          if (pts.length) got = placeNear(r.plate, {x: views[ACTION_B].x1, path: pts}, ACTION_B, accent, 'path', (q, bt) => pxRectLine(q, bt, pts)) ?? leadered(r.plate, pts, ACTION_B, accent);
+          // The curve's last month only, as the trendline above: the plate names today's value, and anywhere along the curve
+          // its leader pointed where the MA stood elsewhere (HCM 15/10: "dưới 25,06" leadered onto August's MA50, ~23,5).
+          const pts = inViewPts(ACTION_B, MA[maKey].path.filter(([x]) => x >= closeX - 0.12));
+          if (pts.length) got = placeNear(r.plate, {x: views[ACTION_B].x1, path: pts}, ACTION_B, accent, 'path', (q, bt) => pxRectLine(q, bt, pts)) ?? leadered(r.plate, pts, ACTION_B, accent)
+            ?? leadered(r.plate, pts, ACTION_B, accent, null, ROLE_LEADER_PX);
         }
+        // A role's plate carries its words, never a bare price tag (GMD and BSR 13/10: "52,24" and "Hỗ trợ 29,95" stood for
+        // the holder's line, the not-holder's plate floated off its 52,70): on its cross line, else in free room with a leader
+        // onto that line — the close-up crowds the lines at the last candle.
         if (!got && Number.isFinite(r.price) && inside(priceY(r.price), 0.03)) {
-          level(r.price, r.plate, accent, ACTION_B, side);
+          level(r.price, r.plate, accent, ACTION_B, side, null, {noTag: true});
           got = marks.slice(at).find((m) => m.kind === 'label');
+          if (!got) {
+            const line = marks.slice(at).find((m) => m.kind === 'hline');
+            const y = priceY(r.price), v = views[ACTION_B];
+            const pts = inViewPts(ACTION_B, Array.from({length: 41}, (_, k) => [v.x0 + ((Math.min(closeX, v.x1) - v.x0) * k) / 40, y]));
+            got = leadered(r.plate, pts, ACTION_B, accent, [Math.min(closeX, v.x1), y], ROLE_LEADER_PX);
+            if (got && line) delete line.until;
+          }
         }
+        // A role with a line of its own and no plate on it: back the camera off rather than float the plate (lastTry only).
+        if (!got && !lastTry && Number.isFinite(r.price) && inside(priceY(r.price), 0.03)) return false;
         if (!got) {
+          // A role without a price (VHM 14/10: "Đang giữ: thoát hết", already under both MAs) stands by the last candle.
           const cy = who === 'holder' ? lowY + 0.04 : highY - 0.04;
-          got = add(place(r.plate, {x: closeX - 0.08, y: cy}, ACTION_B, accent, 'near', {within: (q) => pxRectPoint(q, ACTION_B, closeX, cy) <= CANDLE_PX * 3}))
-            ?? add(place(r.plate, {x: closeX - 0.08, y: cy}, ACTION_B, accent, 'near', {blockOpts: {lines: false}}));
+          got = add(place(r.plate, {x: closeX - 0.08, y: cy}, ACTION_B, accent, 'near', {within: (q) => pxRectPoint(q, ACTION_B, closeX, cy) <= CANDLE_PX * 3}));
+          if (!got && !lastTry) return false;
+          got = got ?? add(place(r.plate, {x: closeX - 0.08, y: cy}, ACTION_B, accent, 'near', {blockOpts: {lines: false}}));
         }
         if (!got) console.warn(`${L.symbol}: the ${who} plate "${r.plate}" found no room on the action beat`);
         for (const m of marks.slice(at)) roleMarks.add(m);
+      }
+      return true;
+    };
+    if (roles) {
+      const shot = shots.find((sh) => sh.beat === ACTION_B);
+      const base = {marks: marks.length, plates: plates.length, later: later.length, levelN};
+      const zooms = [shot.zoom];
+      for (let z = round(shot.zoom - 0.2, 2); z >= 1; z = round(z - 0.2, 2)) zooms.push(z);
+      for (const [i, z] of zooms.entries()) {
+        if (i > 0) {
+          marks.length = base.marks; plates.length = base.plates; later.length = base.later; levelN = base.levelN; roleMarks.clear();
+          const vw = Math.min(crop.w, BOX_W / (z * DRIFT) / kx);
+          Object.assign(shot, {zoom: z, x: clamp(Math.min(closeX + 0.05, crop.x + crop.w) - vw / 2)});
+          views[shots.indexOf(shot)] = viewOf(shot);
+        }
+        if (placeRoles(i === zooms.length - 1)) {
+          if (i > 0) console.warn(`${L.symbol}: the action beat backed off to zoom ${z} so both role plates sit on their lines`);
+          break;
+        }
       }
     }
     detail = review.detail?.text ?? '';

@@ -1,0 +1,1925 @@
+{
+  "title": "VNINDEX · tổng kết phiên 20/10/2026",
+  "edition": "2026-10-20",
+  "format": "daily",
+  "status": "enriched",
+  "rules": ".claude/skills/market-review/rules.json",
+  "brief": "brief/review-daily.md",
+  "facts": "content/review-daily.facts.json",
+  "disclaimer": "Mọi thông tin chỉ là thông tin tham khảo, không phải khuyến nghị đầu tư.",
+  "footer": "Chứng Vịt",
+  "logo": "logo/chung-vit.png",
+  "ticker": {
+    "symbol": "VN-INDEX",
+    "timeframe": "1D",
+    "last": 1691.97,
+    "prev": 1689.84,
+    "asOf": "2026-10-20"
+  },
+  "scenes": [
+    {
+      "id": "rd-261020-hook",
+      "role": "hook",
+      "eyebrow": "Tổng kết phiên 20/10",
+      "act": "blue",
+      "duration": 7,
+      "narration": "Thứ Ba, ngày hai mươi tháng mười. VN-Index đóng cửa một nghìn sáu trăm chín mươi hai điểm. Tăng không phẩy mười ba phần trăm. Rút chân từ đáy mới. Cùng mình điểm lại thị trường và những mã đáng chú ý nhé.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "VN-Index 1691,97 · +0,13%",
+          "line2": "Rút chân từ đáy mới",
+          "accent": "green"
+        },
+        {
+          "atSentence": 4,
+          "at": 3.75,
+          "line1": "Cùng điểm lại thị trường",
+          "line2": "Và những mã đáng chú ý",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-20/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.154,
+            "w": 0.5191,
+            "h": 0.0207
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1852,
+            "w": 0.2062,
+            "h": 0.0195
+          },
+          {
+            "x": 0.0574,
+            "y": 0.2128,
+            "w": 0.4265,
+            "h": 0.0196
+          },
+          {
+            "x": 0.0594,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "circle",
+            "x": 0.8481,
+            "y": 0.5357,
+            "r": 0.022,
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.8043,
+            "y": 0.5251,
+            "text": "Đóng cửa 1691,97 · +0,13%",
+            "accent": "green",
+            "beat": 0,
+            "anchor": "end"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7781,
+            "y": 0.5357,
+            "zoom": 2,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.7481,
+            "y": 0.5557,
+            "zoom": 1.6,
+            "move": "pull_out"
+          }
+        ]
+      },
+      "citedFacts": [
+        "session.weekday (Thứ Ba)",
+        "session.dm (20/10)",
+        "session.close (1691,97; read rounded 1692)",
+        "session.changePercent (+0,13)",
+        "session.low 1677,19 < prior low 1682,54 (19/10, the correction low), close in the upper half: \"thủng đáy rồi rút chân\" (director note 20/10)"
+      ]
+    },
+    {
+      "id": "rd-261020-flow",
+      "role": "flow",
+      "eyebrow": "Biến động thị trường",
+      "act": "maroon",
+      "duration": 7,
+      "narration": "Độ rộng nghiêng về bên tăng: một trăm tám mươi tám mã tăng, một trăm mười lăm mã giảm. Tiền cũng dồn vào mã tăng, gần gấp ba bên giảm. Riêng VHM kéo lùi bốn phẩy hai mươi tư điểm mà VN-Index vẫn tăng. Thị trường khỏe hơn chỉ số. Còn theo quy tắc thì sao?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "188 mã tăng · 115 mã giảm",
+          "line2": "Phần lớn tiền vào mã tăng",
+          "accent": "green"
+        },
+        {
+          "atSentence": 2,
+          "at": 3.75,
+          "line1": "VHM −4,24 · chỉ số +2,13",
+          "line2": "Thị trường khỏe hơn chỉ số",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-20/fireant-flow.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.5362,
+            "y": 0.1186,
+            "text": "HOSE · phiên 20/10",
+            "accent": "gold",
+            "beat": 0,
+            "anchor": "end"
+          },
+          {
+            "kind": "label",
+            "x": 0.2883,
+            "y": 0.4087,
+            "text": "188 tăng · 115 giảm · 65 đứng giá",
+            "accent": "white",
+            "beat": 0,
+            "anchor": "middle"
+          },
+          {
+            "kind": "box",
+            "x": 0.6726,
+            "y": 0.0299,
+            "w": 0.085,
+            "h": 0.4165,
+            "accent": "up",
+            "beat": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.81,
+            "y": 0.7037,
+            "w": 0.07,
+            "h": 0.1954,
+            "accent": "down",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.05,
+            "y": 0.535,
+            "text": "Tác động đến VN-Index (điểm)",
+            "accent": "gold",
+            "beat": 1,
+            "anchor": "start"
+          },
+          {
+            "kind": "label",
+            "x": 0.9,
+            "y": 0.7557,
+            "text": "VHM −4,24 điểm · chỉ số +2,13",
+            "accent": "red",
+            "beat": 1,
+            "anchor": "start"
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.5,
+            "y": 0.25,
+            "zoom": 2,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.5,
+            "y": 0.75,
+            "zoom": 2,
+            "move": "tilt"
+          }
+        ]
+      },
+      "citedFacts": [
+        "flow.up (188)",
+        "flow.down (115)",
+        "flow.countWord (mã tăng nhiều hơn mã giảm)",
+        "flow.moneyWord (phần lớn tiền vào mã tăng)",
+        "flow.moneyLeadRatio (2,72 — \"gần gấp ba\")",
+        "flow.agree (same — \"cũng\")",
+        "flow.impact.lead (VHM −4,24)",
+        "flow.impact.indexChange (+2,13)",
+        "flow.impact.leadShare (−199,1%: VHM alone pulls more than the index gained)"
+      ]
+    },
+    {
+      "id": "rd-261020-market",
+      "role": "market",
+      "eyebrow": "Trạng thái theo quy tắc",
+      "act": "maroon",
+      "duration": 10.1,
+      "narration": "Hôm nay không phải phiên phân phối, hiện tại đang có sáu phiên phân phối. Chỉ số thủng đáy hôm qua rồi rút chân, theo quy tắc là ngày đầu tiên của nỗ lực phục hồi mới. Giờ phải chờ một phiên FTD. Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "6/25 phiên phân phối",
+          "line2": "Không thêm phiên phân phối",
+          "accent": "red"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Đáy mới 1677,19 · rút chân",
+          "line2": "Nỗ lực phục hồi · ngày đầu",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 7.25,
+          "line1": "Chờ phiên FTD",
+          "line2": "Nguy cơ thủng đáy rất cao",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-20/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.154,
+            "w": 0.5191,
+            "h": 0.0207
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1852,
+            "w": 0.2062,
+            "h": 0.0195
+          },
+          {
+            "x": 0.0574,
+            "y": 0.2128,
+            "w": 0.4265,
+            "h": 0.0196
+          },
+          {
+            "x": 0.0594,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7426,
+              0.3235
+            ],
+            "to": [
+              0.7426,
+              0.3485
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7481,
+              0.3537
+            ],
+            "to": [
+              0.7481,
+              0.3787
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7704,
+              0.3745
+            ],
+            "to": [
+              0.7704,
+              0.3995
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.7815,
+              0.4228
+            ],
+            "to": [
+              0.7815,
+              0.4478
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8037,
+              0.4049
+            ],
+            "to": [
+              0.8037,
+              0.4299
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.8426,
+              0.465
+            ],
+            "to": [
+              0.8426,
+              0.49
+            ],
+            "accent": "down",
+            "beat": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.5121,
+            "y": 0.2134,
+            "text": "6/25 phiên phân phối",
+            "accent": "red",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7369,
+            "y": 0.2663,
+            "text": "24/9 −1,47% · KL ×1,07",
+            "accent": "red",
+            "beat": 0,
+            "anchor": "end"
+          },
+          {
+            "kind": "arrow",
+            "style": "block",
+            "from": [
+              0.5537,
+              0.5019
+            ],
+            "to": [
+              0.5537,
+              0.4769
+            ],
+            "accent": "up",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.6825,
+            "y": 0.5373,
+            "text": "FTD 3/8 +1,56% · thất bại",
+            "accent": "red",
+            "beat": 1,
+            "anchor": "middle"
+          },
+          {
+            "kind": "hline",
+            "y": 0.5563,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.5524,
+            "y": 0.5821,
+            "text": "Đáy nỗ lực phục hồi 1677,19",
+            "accent": "gold",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7954,
+            "y": 0.494444,
+            "zoom": 1.35,
+            "move": "pan"
+          },
+          {
+            "beat": 1,
+            "x": 0.7009,
+            "y": 0.546,
+            "zoom": 1.15,
+            "move": "tilt"
+          },
+          {
+            "beat": 2,
+            "x": 0.8281,
+            "y": 0.504,
+            "zoom": 2.1,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "session.isDistribution (false; +0,13%)",
+        "session.volumeRatio 0,78 (not read; director matched VNDirect 488,4M < 519,3M, SSI 402,5M provisional)",
+        "distribution.count (6)",
+        "distribution.window (25)",
+        "state.status (RALLY_ATTEMPT, since 20/10)",
+        "state.rallyDay (1)",
+        "state.rallyLow (1677,19 = session.low, gold line) — under the 19/10 low 1682,54: \"thủng đáy hôm qua\"",
+        "state.ftd (null) — \"chờ một phiên FTD\"",
+        "rules.status.CORRECTION.say (the user's line, verbatim)"
+      ]
+    },
+    {
+      "id": "rd-261020-spike",
+      "role": "spike",
+      "eyebrow": "Bộ lọc Volume spike",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Bộ lọc hôm nay bắt được gì? Cột tăng áp đảo, nổi bật là nhóm thép với NKG. Cột giảm chỉ hai mã, có VHM vừa kéo lùi chỉ số. Còn TCB tăng hai phẩy mười một phần trăm, khối lượng hơn gấp rưỡi. Mã nào cần chú ý trong các phiên tới?",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "NKG +5,66% · KL +260%",
+          "line2": "Cột tăng: nhóm thép",
+          "accent": "green"
+        },
+        {
+          "atSentence": 2,
+          "at": 3.75,
+          "line1": "VHM −4,15% · KL +59%",
+          "line2": "Cột giảm chỉ hai mã",
+          "accent": "red"
+        },
+        {
+          "atSentence": 3,
+          "at": 7.25,
+          "line1": "TCB +2,11% · KL +65%",
+          "line2": "Tăng trên khối lượng cao",
+          "accent": "green"
+        }
+      ],
+      "visual": {
+        "type": "movers",
+        "caption": "KHỐI LƯỢNG ĐỘT BIẾN · 23 MÃ · XẾP THEO % THAY ĐỔI · KL SO SMA20",
+        "left": {
+          "title": "TĂNG",
+          "accent": "green",
+          "rows": [
+            {
+              "symbol": "PNJ",
+              "changePercent": 6.76,
+              "volumeVsSma20Percent": 19,
+              "rs1m": 2
+            },
+            {
+              "symbol": "NKG",
+              "changePercent": 5.66,
+              "volumeVsSma20Percent": 260,
+              "rs1m": 90
+            },
+            {
+              "symbol": "POM",
+              "changePercent": 3.13,
+              "volumeVsSma20Percent": 4,
+              "rs1m": 5
+            },
+            {
+              "symbol": "VCG",
+              "changePercent": 2.99,
+              "volumeVsSma20Percent": 84,
+              "rs1m": 84
+            },
+            {
+              "symbol": "HSG",
+              "changePercent": 2.87,
+              "volumeVsSma20Percent": 124,
+              "rs1m": 82
+            },
+            {
+              "symbol": "HPG",
+              "changePercent": 2.68,
+              "volumeVsSma20Percent": 46,
+              "rs1m": 55
+            },
+            {
+              "symbol": "VPI",
+              "changePercent": 2.19,
+              "volumeVsSma20Percent": 47,
+              "rs1m": 16
+            },
+            {
+              "symbol": "TCB",
+              "changePercent": 2.11,
+              "volumeVsSma20Percent": 65,
+              "rs1m": 79,
+              "focus": true
+            },
+            {
+              "symbol": "POW",
+              "changePercent": 2.04,
+              "volumeVsSma20Percent": 48,
+              "rs1m": 44
+            },
+            {
+              "symbol": "CII",
+              "changePercent": 1.93,
+              "volumeVsSma20Percent": 56,
+              "rs1m": 72
+            }
+          ]
+        },
+        "right": {
+          "title": "GIẢM",
+          "accent": "red",
+          "rows": [
+            {
+              "symbol": "VHM",
+              "changePercent": -4.15,
+              "volumeVsSma20Percent": 59,
+              "rs1m": 13
+            },
+            {
+              "symbol": "VCB",
+              "changePercent": -0.71,
+              "volumeVsSma20Percent": 24,
+              "rs1m": 34
+            }
+          ]
+        },
+        "emphasis": [
+          {
+            "beat": 2,
+            "set": "focus",
+            "dim": true,
+            "label": "Xem kỹ: TCB"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.spike.count (23)",
+        "screener.spike.up (18) / down (2) — spoken as \"áp đảo\" and \"chỉ hai mã\"; the board caption carries 23",
+        "screener.spike.gainers (NKG, HSG, HPG = steel in the ten rows — \"nhóm thép\", director note)",
+        "screener.spike.gainers[1] NKG +5,66%, volumeVsSma20Percent 260 — headline beat 1 (lời chỉ gọi tên)",
+        "screener.spike.losers[0] VHM −4,15%, KL +59%; flow.impact.lead VHM (\"mã vừa kéo lùi chỉ số\", points not re-read)",
+        "screener.spike.gainers[7] TCB +2,11%, volumeVsSma20Percent 65 (\"hơn gấp rưỡi\") — focus row, beat 3",
+        "formats.daily.screener.scenes.shortlist.bridge (last sentence, verbatim)"
+      ]
+    },
+    {
+      "id": "rd-261020-shortlist",
+      "role": "shortlist",
+      "eyebrow": "Mã cần chú ý trong các phiên tới",
+      "act": "amber",
+      "duration": 11.5,
+      "narration": "RS Strong và Uptrend tìm ra ba mươi lăm mã, xếp trước là mã ở hai bộ lọc. Còn lại chỉ một bộ lọc, xếp từ mạnh đến yếu. Trên bảng, đa số tăng giá dù chỉ số đi ngang. Mới ngày đầu nỗ lực phục hồi, cứ theo dõi, chưa phải lúc hành động. Cùng mình xem kỹ ORS và TCB.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "35 mã cần chú ý",
+          "line2": "Có ở hai bộ lọc xếp trước",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.34,
+          "line1": "Mã chỉ có một bộ lọc",
+          "line2": "Xếp theo RS 1M giảm dần",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 2,
+          "at": 5.38,
+          "line1": "24 mã tăng · 7 mã giảm",
+          "line2": "Chỉ số đi ngang",
+          "accent": "green"
+        },
+        {
+          "atSentence": 3,
+          "at": 7.42,
+          "line1": "Nỗ lực phục hồi · ngày đầu",
+          "line2": "Chưa phải lúc hành động",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 4,
+          "at": 10.2,
+          "line1": "ORS #10 · TCB #7",
+          "line2": "Hai mã xem kỹ ngay sau",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "board",
+        "caption": "RS STRONG + UPTREND · 35 MÃ · CÓ Ở 2 BỘ LỌC XẾP TRƯỚC",
+        "columns": [
+          "change",
+          "rs1m",
+          "filters"
+        ],
+        "rows": [
+          {
+            "symbol": "MSR",
+            "changePercent": -0.61,
+            "rs1m": 95,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "PVP",
+            "changePercent": 0.88,
+            "rs1m": 94,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "DRI",
+            "changePercent": 1.89,
+            "rs1m": 93,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "AAS",
+            "changePercent": 0,
+            "rs1m": 90,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "MSB",
+            "changePercent": 1.35,
+            "rs1m": 88,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "VPB",
+            "changePercent": 0,
+            "rs1m": 84,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "TCB",
+            "changePercent": 2.11,
+            "rs1m": 79,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ],
+            "focus": true
+          },
+          {
+            "symbol": "DGW",
+            "changePercent": 1.21,
+            "rs1m": 78,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "HDB",
+            "changePercent": -2.86,
+            "rs1m": 78,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "ORS",
+            "changePercent": 1.48,
+            "rs1m": 74,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ],
+            "focus": true
+          },
+          {
+            "symbol": "PVT",
+            "changePercent": 0.41,
+            "rs1m": 66,
+            "filters": [
+              "RS Strong",
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "ANV",
+            "changePercent": 0.27,
+            "rs1m": 93,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "NKG",
+            "changePercent": 5.66,
+            "rs1m": 90,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "DCL",
+            "changePercent": -1.73,
+            "rs1m": 88,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "VCG",
+            "changePercent": 2.99,
+            "rs1m": 84,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "GMD",
+            "changePercent": 1.85,
+            "rs1m": 82,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "HSG",
+            "changePercent": 2.87,
+            "rs1m": 82,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "IDC",
+            "changePercent": 3.83,
+            "rs1m": 79,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "MSN",
+            "changePercent": 1.66,
+            "rs1m": 78,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "MWG",
+            "changePercent": 0.94,
+            "rs1m": 77,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "HQC",
+            "changePercent": -0.51,
+            "rs1m": 75,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "HAG",
+            "changePercent": 0,
+            "rs1m": 74,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "KBC",
+            "changePercent": 3.08,
+            "rs1m": 74,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "VOS",
+            "changePercent": 2.61,
+            "rs1m": 73,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "HAH",
+            "changePercent": 0.92,
+            "rs1m": 73,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "VIB",
+            "changePercent": 0,
+            "rs1m": 73,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "CII",
+            "changePercent": 1.93,
+            "rs1m": 72,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "HHV",
+            "changePercent": 1.61,
+            "rs1m": 71,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "DCM",
+            "changePercent": 1.62,
+            "rs1m": 69,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "DBC",
+            "changePercent": 2.56,
+            "rs1m": 67,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "TPB",
+            "changePercent": 0.42,
+            "rs1m": 66,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "BVH",
+            "changePercent": -1.41,
+            "rs1m": 62,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "VSC",
+            "changePercent": 2.29,
+            "rs1m": 61,
+            "filters": [
+              "RS Strong"
+            ]
+          },
+          {
+            "symbol": "HHP",
+            "changePercent": -0.88,
+            "rs1m": 45,
+            "filters": [
+              "Uptrend"
+            ]
+          },
+          {
+            "symbol": "AAA",
+            "changePercent": -0.42,
+            "rs1m": 29,
+            "filters": [
+              "Uptrend"
+            ]
+          }
+        ],
+        "emphasis": [
+          {
+            "beat": 4,
+            "set": "focus",
+            "dim": true,
+            "label": "Xem kỹ: ORS · TCB",
+            "collapse": [
+              "ORS",
+              "TCB"
+            ]
+          }
+        ],
+        "notes": {
+          "state": {
+            "label": "Thị trường",
+            "value": "nỗ lực phục hồi",
+            "list": "danh sách theo dõi",
+            "accent": "gold"
+          },
+          "beat": 0
+        },
+        "scroll": [
+          {
+            "beat": 1,
+            "offset": 8
+          },
+          {
+            "beat": 2,
+            "offset": 17
+          },
+          {
+            "beat": 3,
+            "offset": 25
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.shortlist.count (35; the one spoken number)",
+        "screener.shortlist.sources (RS Strong 33, Uptrend 13 — names only, not read)",
+        "visual.rows[].filters (11 names with both chips first, rows 1–11; 24 with one chip)",
+        "screener.shortlist.up (24) / down (7) — headline beat 3; \"đa số tăng giá\"",
+        "session.breadthToday.indexWord (đi ngang, +0,13%)",
+        "state.status RALLY_ATTEMPT, state.rallyDay 1 (\"mới ngày đầu nỗ lực phục hồi\")",
+        "visual.rows ORS #10, TCB #7 (focus, beat 5); screener.leaders order on screen: ORS first, TCB last"
+      ]
+    },
+    {
+      "id": "rd-261020-leader-1",
+      "role": "leader",
+      "eyebrow": "Soi mã · ORS",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Mã đầu tiên là ORS, đi ngang với đáy nâng dần, giá trên MA50 và MA200. Hôm nay xuống đúng trendline hỗ trợ rồi rút chân. Đóng cửa ở đỉnh phiên. Đang giữ, thủng MA50 ở mười ba phẩy năm mươi chín thì thoát hết. Chưa có hàng, vượt mười ba phẩy chín mới giải ngân nhỏ.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Đi ngang dưới 13,90",
+          "line2": "Đáy nâng dần",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 2.83,
+          "line1": "Rút chân từ 13,40",
+          "line2": "Đóng cửa ở đỉnh phiên",
+          "accent": "green"
+        },
+        {
+          "atSentence": 3,
+          "at": 5.4,
+          "line1": "Đang giữ: thoát hết",
+          "line2": "Chưa mua: chờ vượt 13,90",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-20/ors-fireant.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3906,
+          "y": 0.1592,
+          "w": 0.577,
+          "h": 0.5062
+        },
+        "masks": [
+          {
+            "x": 0.3906,
+            "y": 0.154,
+            "w": 0.2748,
+            "h": 0.0207
+          },
+          {
+            "x": 0.3906,
+            "y": 0.2128,
+            "w": 0.0785,
+            "h": 0.0196
+          },
+          {
+            "x": 0.3926,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.423,
+            "y": 0.1889,
+            "text": "ORS · RS 1M 74 · +1,48%",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.6823,
+            "y": 0.3699,
+            "text": "MA50 · 13,59",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.597,
+            "y": 0.4989,
+            "text": "MA200 · 13,48",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.6806,
+              0.4842
+            ],
+            "to": [
+              0.6806,
+              0.4418
+            ],
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.3822,
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.675,
+            "y": 0.3439,
+            "text": "Kháng cự · đỉnh 17/9 · 13,90",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.449,
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.873,
+            "y": 0.4539,
+            "text": "13,50",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.8,
+              0.549
+            ],
+            "to": [
+              0.8556,
+              0.4656
+            ],
+            "accent": "green",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.873,
+            "y": 0.4789,
+            "text": "13,40",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "box",
+            "x": 0.8523,
+            "y": 0.4376,
+            "w": 0.0065,
+            "h": 0.031,
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.748,
+            "y": 0.3885,
+            "text": "Rút chân · mua đỡ từ 13,40",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.732,
+            "y": 0.3676,
+            "text": "Đang giữ: dưới 13,59 thoát hết",
+            "accent": "red",
+            "beat": 2
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.7417,
+              0.371
+            ],
+            "to": [
+              0.7417,
+              0.4118
+            ],
+            "accent": "red",
+            "beat": 2
+          },
+          {
+            "kind": "hline",
+            "y": 0.3822,
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.756,
+            "y": 0.3476,
+            "text": "Chưa mua: chờ vượt 13,90",
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.7572,
+              0.351
+            ],
+            "to": [
+              0.7546,
+              0.3822
+            ],
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.85,
+            "y": 0.4835,
+            "text": "13,40",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.768,
+            "y": 0.4386,
+            "text": "MA50 · 13,59",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.6791,
+            "y": 0.4123,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.7344,
+            "y": 0.4948,
+            "zoom": 1.8,
+            "move": "pull_out"
+          },
+          {
+            "beat": 2,
+            "x": 0.7544,
+            "y": 0.4239,
+            "zoom": 1.8,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.leaders.top[1].review.setup (trendline-test)",
+        "review.priceAction (range: hai đỉnh 13,50 ngang nhau, đáy 15/10 13,25 > đáy 6/10 12,90 — \"đi ngang với đáy nâng dần\")",
+        "review.numbers.resistance1 (13,90 — headline beat 1)",
+        "review.numbers.ma50 13,59 / ma200 13,48 (\"giá trên MA50 và MA200\")",
+        "review.numbers.todayLow (13,40 = trendline hỗ trợ at the last candle — \"xuống đúng trendline hỗ trợ rồi rút chân\")",
+        "review.priceAction last candle (20/10 close 13,70 = high, 100% of range — \"đóng cửa ở đỉnh phiên\")",
+        "review.roles.holder.say + headline (MA50 13,59, thoát hết)",
+        "review.roles.notHolder.say + headline (13,90, giải ngân nhỏ)"
+      ]
+    },
+    {
+      "id": "rd-261020-leader-2",
+      "role": "leader",
+      "eyebrow": "Soi mã · TCB",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Mã thứ hai là TCB, giá trên MA50 và MA200. Đây là phiên vượt mà hôm qua mình chờ, qua đỉnh cũ và trendline kháng cự. Đóng cửa sát đỉnh phiên, dưới kháng cự từ tháng tư. Đang giữ, thủng ba mươi ba phẩy bảy thì hạ một nửa. Chưa có hàng thì chỉ giải ngân nhỏ.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "MA50 · MA200 ở 32,27",
+          "line2": "Giá nằm trên cả hai",
+          "accent": "gold"
+        },
+        {
+          "atSentence": 1,
+          "at": 2.83,
+          "line1": "Vượt đỉnh 33,70 · KL +65%",
+          "line2": "Phiên vượt hôm qua chờ",
+          "accent": "green"
+        },
+        {
+          "atSentence": 3,
+          "at": 5.4,
+          "line1": "Đang giữ: hạ tỷ trọng 1/2",
+          "line2": "Chưa mua: giải ngân nhỏ",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-20/tcb-fireant.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.3906,
+          "y": 0.1592,
+          "w": 0.577,
+          "h": 0.5062
+        },
+        "masks": [
+          {
+            "x": 0.3906,
+            "y": 0.154,
+            "w": 0.3174,
+            "h": 0.0242
+          },
+          {
+            "x": 0.3906,
+            "y": 0.2128,
+            "w": 0.0887,
+            "h": 0.0196
+          },
+          {
+            "x": 0.3926,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "label",
+            "x": 0.423,
+            "y": 0.1889,
+            "text": "TCB · RS 1M 79 · +2,11%",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.7416,
+            "y": 0.4369,
+            "text": "MA50 · 32,27",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.5457,
+            "y": 0.3453,
+            "text": "MA200 · 32,27",
+            "accent": "gold",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2546,
+            "accent": "gold",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.669,
+            "y": 0.2458,
+            "text": "Kháng cự · đỉnh 8/7 · 34,20",
+            "accent": "gold",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.294,
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.861,
+            "y": 0.2989,
+            "text": "33,50",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.6148,
+              0.4568
+            ],
+            "to": [
+              0.8481,
+              0.3827
+            ],
+            "accent": "green",
+            "beat": 0,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.861,
+            "y": 0.3889,
+            "text": "31,92",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "circle",
+            "x": 0.8481,
+            "y": 0.2687,
+            "r": 0.008,
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7101,
+            "y": 0.2524,
+            "text": "Đóng cửa sát đỉnh · 33,95",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2827,
+            "accent": "red",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.4701,
+            "y": 0.2743,
+            "text": "Đỉnh 25/9 vừa vượt · 33,70",
+            "accent": "red",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "box",
+            "x": 0.8401,
+            "y": 0.5534,
+            "w": 0.016,
+            "h": 0.106,
+            "accent": "gold",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7881,
+            "y": 0.5374,
+            "text": "KL +65%",
+            "accent": "gold",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.2827,
+            "accent": "red",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.4721,
+            "y": 0.2743,
+            "text": "Đang giữ: dưới 33,70 hạ 1/2",
+            "accent": "red",
+            "beat": 2
+          },
+          {
+            "kind": "hline",
+            "y": 0.2827,
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.7061,
+            "y": 0.2123,
+            "text": "Chưa mua: trên 33,70 mua nhỏ",
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.7069,
+              0.2167
+            ],
+            "to": [
+              0.7069,
+              0.2827
+            ],
+            "accent": "white",
+            "beat": 2
+          },
+          {
+            "kind": "label",
+            "x": 0.7161,
+            "y": 0.4274,
+            "text": "Trendline hỗ trợ · 31,92",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "line",
+            "from": [
+              0.8054,
+              0.4142
+            ],
+            "to": [
+              0.8054,
+              0.3963
+            ],
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.7117,
+            "y": 0.4503,
+            "text": "MA50 · 32,27",
+            "accent": "green",
+            "beat": 1,
+            "until": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.4701,
+            "y": 0.2463,
+            "text": "Kháng cự · đỉnh 8/7 · 34,20",
+            "accent": "gold",
+            "beat": 1,
+            "until": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.6791,
+            "y": 0.4123,
+            "zoom": 1,
+            "move": "push_in"
+          },
+          {
+            "beat": 1,
+            "x": 0.6513,
+            "y": 0.3717,
+            "zoom": 1.2,
+            "move": "pull_out"
+          },
+          {
+            "beat": 2,
+            "x": 0.6713,
+            "y": 0.294,
+            "zoom": 1.2,
+            "move": "push_in"
+          }
+        ]
+      },
+      "citedFacts": [
+        "screener.leaders.top[0].review.setup (breakout)",
+        "review.numbers.ma50 32,27 / ma200 32,27 (\"giá trên MA50 và MA200\"; equal, not called a cross)",
+        "review.numbers.pivot (33,70 — đỉnh 25/9, \"đỉnh cũ\"), review.numbers.trendlineResistanceBroken (33,28 — \"trendline kháng cự\")",
+        "review.numbers.volumeVsSma20Percent (65 — headline only; spike already read it)",
+        "yesterday's review content/review/symbols/2026-10-19/TCB.md (notHolder: chờ vượt 33,50) — \"phiên vượt mà hôm qua mình chờ\", yesterday's price not read",
+        "review.priceAction last candle (close 33,95 at 100% of range — \"sát đỉnh phiên\")",
+        "review.numbers.resistance1 (34,20 = cụm đỉnh 28/4, 15/5, 8/7 — \"kháng cự từ tháng tư\", not read)",
+        "review.roles.holder.say + headline (33,70, hạ một nửa)",
+        "review.roles.notHolder.say + headline (giải ngân nhỏ)"
+      ]
+    },
+    {
+      "id": "rd-261020-watch",
+      "role": "watch",
+      "eyebrow": "Kịch bản VN-Index",
+      "act": "amber",
+      "duration": 8.4,
+      "narration": "Tích cực: nếu vượt kháng cự một nghìn bảy trăm ba mươi mốt, mốc kế là một nghìn bảy trăm sáu mươi tư. Tiêu cực: nếu thủng đáy hôm nay thì nỗ lực phục hồi thất bại, chỉ số về đáy tháng bảy. Khi chưa có phiên FTD, nên giữ tỷ trọng thấp và tuân thủ cắt lỗ.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Vượt 1731,03 → 1764,45",
+          "line2": "Kịch bản tích cực",
+          "accent": "green"
+        },
+        {
+          "atSentence": 1,
+          "at": 3.75,
+          "line1": "Thủng 1677,19 → 1651,20",
+          "line2": "Kịch bản tiêu cực",
+          "accent": "red"
+        }
+      ],
+      "visual": {
+        "type": "image",
+        "src": "shots/review/2026-10-20/vnindex-daily.png",
+        "source": "fireant.vn",
+        "fit": "contain",
+        "crop": {
+          "x": 0.0574,
+          "y": 0.1592,
+          "w": 0.9102,
+          "h": 0.7982
+        },
+        "masks": [
+          {
+            "x": 0.0574,
+            "y": 0.154,
+            "w": 0.5191,
+            "h": 0.0207
+          },
+          {
+            "x": 0.0574,
+            "y": 0.1852,
+            "w": 0.2062,
+            "h": 0.0195
+          },
+          {
+            "x": 0.0574,
+            "y": 0.2128,
+            "w": 0.4265,
+            "h": 0.0196
+          },
+          {
+            "x": 0.0594,
+            "y": 0.2324,
+            "w": 0.04,
+            "h": 0.038
+          },
+          {
+            "x": 0.0574,
+            "y": 0.6701,
+            "w": 0.7222,
+            "h": 0.0144
+          },
+          {
+            "x": 0.0574,
+            "y": 0.684,
+            "w": 0.7222,
+            "h": 0.009
+          },
+          {
+            "x": 0.0648,
+            "y": 0.8593,
+            "w": 0.0407,
+            "h": 0.0507
+          },
+          {
+            "x": 0.9287,
+            "y": 0.9181,
+            "w": 0.0278,
+            "h": 0.03
+          }
+        ],
+        "maskColor": "#161921",
+        "annotations": [
+          {
+            "kind": "hline",
+            "y": 0.4811,
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.4344,
+            "accent": "green",
+            "beat": 0,
+            "until": 0,
+            "label": "Kháng cự 1764,45 · MA50 1773,12",
+            "labelSide": "left"
+          },
+          {
+            "kind": "circle",
+            "x": 0.8481,
+            "y": 0.5357,
+            "r": 0.022,
+            "accent": "gold",
+            "beat": 0
+          },
+          {
+            "kind": "hline",
+            "y": 0.5563,
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "hline",
+            "y": 0.5926,
+            "accent": "red",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.8161,
+            "y": 0.2671,
+            "text": "Chờ FTD từ ngày 4, +1,25%",
+            "accent": "red",
+            "beat": 1,
+            "anchor": "end"
+          },
+          {
+            "kind": "label",
+            "x": 0.6475,
+            "y": 0.5025,
+            "text": "Kháng cự 1731,03",
+            "accent": "green",
+            "beat": 0,
+            "until": 0
+          },
+          {
+            "kind": "label",
+            "x": 0.1208,
+            "y": 0.5443,
+            "text": "Thủng 1677,19 → nỗ lực thất bại",
+            "accent": "gold",
+            "beat": 1
+          },
+          {
+            "kind": "label",
+            "x": 0.1208,
+            "y": 0.5806,
+            "text": "Hỗ trợ 1651,20",
+            "accent": "red",
+            "beat": 1
+          }
+        ],
+        "shots": [
+          {
+            "beat": 0,
+            "x": 0.7281,
+            "y": 0.485,
+            "zoom": 1.7,
+            "move": "tilt"
+          },
+          {
+            "beat": 1,
+            "x": 0.60352,
+            "y": 0.5135,
+            "zoom": 1.05,
+            "move": "static"
+          }
+        ]
+      },
+      "citedFacts": [
+        "scenario.up[0] (kháng cự 1731,03, 2/10 — read round 1731)",
+        "scenario.up[1] (kháng cự 1764,45, 8/10, with MA50 1773,12 on the label — read round 1764)",
+        "scenario.down[0] = state.rallyLow 1677,19 (\"đáy hôm nay\") · watch[1]",
+        "scenario.down[1] (hỗ trợ 1651,20, 28/7 — \"đáy tháng bảy\")",
+        "watch[0] (FTD rule on the beat-2 plate \"Chờ FTD từ ngày 4, +1,25%\", not read)",
+        "closing line = the user's line approved 12/10, verbatim; the whole narration is the 13/10 watch word for word"
+      ]
+    },
+    {
+      "id": "rd-261020-outro",
+      "role": "outro",
+      "eyebrow": "Theo dõi tiếp",
+      "act": "navy",
+      "duration": 7,
+      "narration": "Thấy hữu ích thì thả tim, chia sẻ và theo dõi Chứng Vịt để cập nhật sớm nhất những biến động của thị trường nhé. Hẹn gặp các bạn vào phiên giao dịch ngày thứ Tư nhé.",
+      "beats": [
+        {
+          "atSentence": 0,
+          "at": 0.25,
+          "line1": "Thả tim, chia sẻ, theo dõi",
+          "line2": "Cập nhật sau mỗi phiên",
+          "accent": "gold"
+        }
+      ],
+      "visual": {
+        "type": "outro",
+        "logo": "logo/chung-vit.png",
+        "brand": "Chứng Vịt",
+        "kicker": "Chứng khoán",
+        "pill": "Thả tim · Chia sẻ · Theo dõi",
+        "line": "Cập nhật sau mỗi phiên"
+      },
+      "headline": {
+        "line1Baseline": 1338,
+        "line2Baseline": 1418,
+        "maxFontSize": 60,
+        "footnoteY": 1484
+      },
+      "citedFacts": [
+        "rules.brand (Chứng Vịt)",
+        "next session Wednesday 21/10 (brief)"
+      ]
+    }
+  ]
+}

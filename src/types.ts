@@ -69,6 +69,9 @@ export type LinePane = {
   /** false: no value plate at the line's end — the weekly count line, whose on-screen figure is the terminal's count in
    * the caption, not the recomputed line's last point (2026-10-06). */
   tag?: boolean;
+  /** false: no value labels on the pane's gridlines — the weekly count line (2026-10-09): its SSI-recomputed scale printed
+   * 288/255/221 beside the caption's terminal count 244/898, two numbers for one fact. The gridlines stay. */
+  axis?: boolean;
   min?: number;
   max?: number;
 };
@@ -101,9 +104,22 @@ export type BoardColumn =
    * The weekly boards (2026-10-06): `weekChange` = the week's % change (a pill in the slot of `change` when the
    * board has no day column, else a plain figure), `signal` = the filter's breakout/breakdown flag as a pill
    * (XÁC NHẬN / TIỀM NĂNG, coloured by the board's `signalKind`), `rs3m` = RS 3M. Sector boards: `members` = how many
-   * stocks the group counts, `aboveSma200Share` = the share of them closing above SMA200, whole %.
+   * stocks the group counts, `aboveSma200Share` = the share of them closing above SMA200, whole %, `topSymbols` = the
+   * group's strongest tickers by RS 1M (2026-10-09, user: "With the scene 05 also listing 2-3 stock with this major
+   * ranking?") — with it the count moves, small and grey, under the group's name.
    */
-  | 'weekChange' | 'signal' | 'rs3m' | 'members' | 'aboveSma200Share';
+  | 'weekChange' | 'signal' | 'rs3m' | 'members' | 'aboveSma200Share' | 'topSymbols'
+  /**
+   * The weekly's watchlist board (2026-10-18, user: "combine it with the momentum breakout/breakdown, Uptrend filter … If
+   * the symbol have many filter listing it on the table"): every saved filter that found the name, one chip each.
+   */
+  | 'filters'
+  /**
+   * The weekly's "Mã đáng chú ý tuần sau" board (2026-10-18, user: "have scene for all my picked stock and its filter, also
+   * include the price must be monitor and notice"): the price to watch above (`watchUp`, a close above it) and below
+   * (`watchDown`, a close under it), from the name's symbol review. A board with them draws no RS 1M.
+   */
+  | 'watchUp' | 'watchDown';
 
 /**
  * One row of a filter board: the terminal's own figures, from the fact pack. `focus` = a name the reel reviews
@@ -128,7 +144,19 @@ export type BoardRow = {
   rs3m?: number;
   /** The filter's signal: the terminal's has_<signalKind>_confirmed (confirmed) or _potential (potential). */
   signal?: 'confirmed' | 'potential';
+  /** The saved filters that found the name (the watchlist board's `filters` column), as the terminal names them. */
+  filters?: string[];
   focus?: boolean;
+  /**
+   * A name a sentence of the scene calls (user 2026-10-21: "… các cổ phiếu mạnh đầu ngành đã phân tích (VPB, HDB) vẫn đang
+   * đứng im"): lit by a `set: 'spot'` emphasis on that sentence's beat only — no mark on beat 1, not a name reviewed next.
+   */
+  spot?: boolean;
+  /** A name the user picked that the board's own filter did not list (the weekly's watchlist, 2026-10-18) — chip THÊM. */
+  added?: boolean;
+  /** The prices to watch (columns watchUp / watchDown). */
+  watchUp?: number;
+  watchDown?: number;
 };
 
 /**
@@ -138,6 +166,8 @@ export type BoardRow = {
  */
 export type SectorRow = {
   name: string;
+  /** The group's strongest liquid stocks by RS 1M, strongest first (pack sectors.groups[].top, ≤ 3). */
+  topSymbols?: string[];
   members?: number;
   rs1m: number;
   weekChangePercent?: number;
@@ -149,10 +179,37 @@ export type SectorRow = {
 type BoardBase = {type: 'board'; caption?: string; columns: BoardColumn[]; startRank?: number; emphasis?: BoardEmphasis[]};
 
 /**
+ * The weekly's Momentum boards (2026-10-09, director + trader-viewer review): the rows anchor at the top and the space
+ * under them carries the market state and the list's nature (`state`: "Thị trường: điều chỉnh · danh sách theo dõi" —
+ * a short breakout list with no review "reads as a tip list") and, while the rows leave room (≤ 6), the saved filter's
+ * definition (`definition`, built from content/review/filters.json). `beat` = when they appear: 0 = once the rows have
+ * landed, 1 = on beat 2 (a board with no focus row: the plates are its second beat).
+ */
+export type BoardNotes = {
+  state?: {label: string; value: string; list: string; accent?: AccentName};
+  definition?: {title: string; items: string[]};
+  beat?: number;
+};
+
+/**
+ * A board longer than ten rows (the weekly's watchlist, 2026-10-18 — user: "Not limit to 10 symbol on the stock list to
+ * monitor"): ten rows show at a time and on `beat` the list scrolls so row `offset` (0-based) is the first one shown.
+ */
+export type BoardScroll = {beat: number; offset: number};
+
+/**
  * What a later beat brings forward: `set: 'focus'` lights the rows marked `focus`, `dim` fades the rest, `label` is
  * the plate that says it ("Xem kỹ: MSR · DGW").
  */
-export type BoardEmphasis = {beat: number; set: 'focus'; dim?: boolean; label?: string};
+/**
+ * `collapse` (a scrolling board, 2026-10-18): on this beat the table clears and only these rows come back, top-down in this
+ * order — the picks of a long watchlist lie pages apart.
+ */
+/**
+ * `set: 'spot'` (2026-10-21) lights the rows marked `spot` instead of the focus rows, and `until` is the beat it ends on:
+ * from there it fades out and the board reads as before (the focus emphasis of a later beat is untouched).
+ */
+export type BoardEmphasis = {beat: number; set: 'focus' | 'spot'; until?: number; dim?: boolean; label?: string; collapse?: string[]};
 
 export type Visual =
   /**
@@ -172,7 +229,7 @@ export type Visual =
    * the RS1M column, price change & more info"): up to ten rows in the chart panel's box. Beat 1 the rows come in
    * and the focus rows get their mark; the `emphasis` lights the focus rows on its beat.
    */
-  | (BoardBase & {mode?: 'ticker'; rows: BoardRow[]; signalKind?: 'breakout' | 'breakdown'})
+  | (BoardBase & {mode?: 'ticker'; rows: BoardRow[]; signalKind?: 'breakout' | 'breakdown'; notes?: BoardNotes; scroll?: BoardScroll[]})
   | (BoardBase & {mode: 'sector'; rows: SectorRow[]})
   /**
    * A photograph of a live page (scripts/shoot.mjs), path under public/.

@@ -46,6 +46,11 @@ node scripts/review/pull.mjs            # phiên đã đóng gần nhất
   Nến hôm nay lấy trước 15:00 bị bỏ.
 - **Cửa chặn độ tươi:** `GET /api/stocks/cache-info` phải sau 15:00 của phiên và trước phiên sau mở cửa;
   sai thì exit 2 kèm giờ của cache. Skill KHÔNG BAO GIỜ gọi `/stocks/recompute`.
+- **Terminal không trả lời** (đo 2026-10-09: API trả 502 từ 15:03 tới 20:56, trang tĩnh vẫn mở): đừng chờ suông. `pull.mjs
+  --no-screener` lấy nến SSI, `facts.mjs --format=daily --no-screener="<lý do>"` dựng pack từ chỉ số, FireAnt và máy trạng
+  thái (`screener.unavailable`), `scaffold.mjs` bỏ ba bảng bộ lọc và scene soi mã (market trao lời thẳng cho kịch bản), verify báo
+  WARN `review-screener`, trang duyệt nói lý do — đăng bản đó làm vòng 1. Terminal trả lời thì kéo số thật, `facts.mjs` (không cờ),
+  chụp chart từng mã, soi mã, `scaffold.mjs --force`, gọi lại CÙNG người viết cho các scene mới, đăng lại cùng link.
 - `GET /api/config/{id}` → CHỈ lấy `metrics_filter` (bộ lọc đã lưu). Object đó còn chứa bot token Telegram
   của người dùng: không log, không ghi.
 - `POST /api/stocks/filter` — ngoại lệ duy nhất của luật "không POST" (người dùng cho phép 2026-09-29, là
@@ -193,16 +198,16 @@ node scripts/frame-audit.mjs DailyReview --check   # mọi khung hình: nhãn b�
 ```
 
 Scene theo `rules.formats.daily.roles` (người dùng yêu cầu tối ưu giữ người xem 2026-09-29, theo arc
-hook_payoff + đếm ngược của vox-director): hook (ngày, điểm số, câu hỏi "Tiền chảy vào đâu?", lời mời — KHÔNG đọc số mã
+hook_payoff + đếm ngược của vox-director): hook (ngày, điểm số, lời mời — KHÔNG câu hỏi "Tiền chảy vào đâu?", người dùng 2026-10-19: "Remove: Tiền đang chảy vào đâu from the intro"; KHÔNG đọc số mã
 tăng/giảm khi scene 02 là ảnh FireAnt, người dùng 2026-10-05; phiên mà FTD bị mất thì hook MỞ bằng "Thị trường đã mất phiên FTD …
 và đang trong trạng thái nguy hiểm." trên nến FTD rồi mới tới phần cũ, và market nhấn FTD thất bại, thị trường rất nguy hiểm, tìm phiên
 FTD mới — người dùng 2026-10-08, `rules.followThrough.lost`; ở trạng thái điều chỉnh market không đọc luật FTD mà nói
-`rules.status.CORRECTION.say`, "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao.") → flow (SCENE 02, ngay sau hook — người dùng 2026-10-05: 'Daily;
+`rules.status.CORRECTION.say`, "Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao."; ở trạng thái NỖ LỰC PHỤC HỒI — lần đầu 2026-10-09 — market nói hôm nay là ngày mấy của nỗ lực, câu đó có đáy của nỗ lực trên chart, không đồng hồ, không đếm ngưỡng, watch "Thủng <đáy> → nỗ lực thất bại", hai vai của scene soi mã siết lại tới khi có FTD) → flow (SCENE 02, ngay sau hook — người dùng 2026-10-05: 'Daily;
 old chart → weekly', rồi 'move it into the scene 02': ảnh FireAnt "Biến động thị trường" của phiên trả lời câu hỏi của hook,
 beat 1 thẻ dòng tiền — biểu đồ tròn số mã tăng/giảm/đứng giá (đọc số mã thành chữ) và cột phân bổ dòng tiền cùng lúc —,
 beat 2 máy lia xuống thẻ "Top cổ phiếu tác động" — mã kéo / đẩy chỉ số bao nhiêu điểm, khoanh mã dẫn đầu —, kết bằng câu dẫn sang
 market; ảnh lệch phiên thì scene bị bỏ và hook đọc lại số mã) → market (bối cảnh, đồng hồ, trao lời cho các bộ lọc — câu
-"Bộ lọc hôm nay bắt được gì?" mở spike khi market chạm trần chữ) → spike (bảng `movers` CẢ bộ lọc: cột tăng và cột giảm, mỗi cột tối đa 10 mã theo % thay đổi — tăng mạnh nhất / giảm sâu nhất trên đầu, khối lượng in là % so với SMA20 "KL +92%" (người dùng tối 2026-10-01), chỉ kể bảng của nó; mã sẽ soi ngay sau mà bảng có được tô và tạo hiệu ứng ở beat 3 như bảng rs/uptrend — người dùng 2026-10-06: "With the volumn spike also have the animation with this scene for me highlight the symbol must noted" —, `review-picks` soát từ `screener.scenes.spike.movers.focusSince`) → rs (bảng vẽ RS Strong: tối đa 10 mã
+"Bộ lọc hôm nay bắt được gì?" mở spike khi market chạm trần chữ) → spike (bảng `movers` CẢ bộ lọc: cột tăng và cột giảm, mỗi cột tối đa 10 mã theo % thay đổi — tăng mạnh nhất / giảm sâu nhất trên đầu, khối lượng in là % so với SMA20 "KL +92%" (người dùng tối 2026-10-01), chỉ kể bảng của nó; mã sẽ soi ngay sau mà bảng có được tô và tạo hiệu ứng ở beat 3 như bảng rs/uptrend — người dùng 2026-10-06: "With the volumn spike also have the animation with this scene for me highlight the symbol must noted" —, `review-picks` soát từ `screener.scenes.spike.movers.focusSince`) → shortlist (TỪ 2026-10-19 THAY hai scene rs và uptrend dưới đây — người dùng: "combine it to one scene piority the RS strong 1M sort DESC and both existed on 2 filter. And naming this screen like Ma can chu y trong các phien toi", rồi "Remove 2 old screen about the RS strong and Uptrend": MỘT bảng "Mã cần chú ý trong các phiên tới" gồm MỌI mã RS Strong hoặc Uptrend tìm ra, mã cả hai cùng tìm ra xếp trước, mỗi nhóm theo RS 1M giảm dần, chip theo bộ lọc, mười dòng một trang, mỗi beat một trang, beat cuối sáng các mã soi ngay sau và kết bằng lời mời — `rules.formats.daily.screener.scenes.shortlist`, `scaffold.mjs buildShortlist`; rs và uptrend vẫn được xếp hạng vì tầng chọn mã soi đọc chúng) — bản tới 16/10: rs (bảng vẽ RS Strong: tối đa 10 mã
 theo RS 1M giảm dần, MỘT cột, MỘT MÌNH; beat 2 tô và tạo hiệu ứng cho mã sẽ soi ngay sau — `focus`) → uptrend (bảng vẽ Uptrend
 y như rs, kết bằng lời mời gọi tên mã sẽ soi — không có mã nào để soi thì câu cuối dẫn sang kịch bản VN-Index) →
 leader … → #1 (TỐI ĐA BỐN mã — người dùng 2026-10-06: "I want change and allow for the at most 2 with review stock, the number i want is 4"; trước là hai. Bản phiên từ 2026-10-06 CHỈ soi mã có mặt ở CẢ BA bộ lọc, theo RS 1M — người dùng: "remove the
@@ -331,3 +336,9 @@ khoảng lặng, khung hai bên mốc beat). Không lồng tiếng hai reel cùn
   Vì vậy: kết luận phân phối của phiên hôm nay phải đối chiếu cùng-cơ-sở (FireAnt khớp lệnh hôm nay vs SSI chốt hôm qua,
   hoặc Entrade tổng vs Entrade tổng), `session.volumeRatio` của pack KHÔNG lên màn hình, lời chỉ nói "khối lượng thấp/cao
   hơn phiên trước" khi hai cơ sở cùng nói vậy, và trước `approve` chạy lại `pull.mjs` + `facts.mjs` để lấy số chốt.
+- **ĐÁY SSI của phiên hôm nay cũng là số tạm** (đo 2026-10-15): nến 15/10 kéo lúc 20:36 ghi đáy 1690,56, trong khi FireAnt
+  (legend L) và Entrade cùng ghi 1694,77; trước đó đáy tạm 8/10 là 1726,00 (chốt 1737,95), 14/10 là 1699,23 (chốt 1700,74).
+  Đáy quyết định đáy điều chỉnh / đáy nỗ lực và mốc của `watch`, nên đối chiếu đáy hôm nay với FireAnt và Entrade
+  (`services.entrade.com.vn/chart-api/v2/ohlcs/index`); lệch thì đặt đáy hai nguồn kia vào nến hôm nay của
+  `content/review/vnindex.daily.json`, ghi nguồn ở `sameDayLow` của file meta, rồi `facts.mjs`. `pull.mjs` lúc kéo lại trước
+  `approve` ghi đè nến đó: đặt lại nếu SSI vẫn tạm.

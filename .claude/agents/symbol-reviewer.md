@@ -241,8 +241,19 @@ ghi key nguồn. Mức ngang in theo bước giá (§2a); MA50 và trendline in 
 | 4 | `trendline-broken` | `classes` có `trendline-break` | trendline vừa thủng | "Đã thủng trendline ở …" → hạ tỷ trọng một nửa | thoát hết |
 | 5 | `failed-breakout` | `breakout-failed`, hoặc `breakout-rejected` đóng cửa dưới pivot | P1 | "Nếu đóng cửa dưới P1" → hạ tỷ trọng một nửa (trên MA50 > 25%: chốt lời một nửa) | thoát hết |
 | 6 | `extended` | `aboveMa50Percent` > 25 | P1 | "Nếu đóng cửa lại dưới P1" → hạ tỷ trọng, chốt lời một nửa | như cũ (nửa còn lại thoát ở P2, ghi trong `.md`) |
+| 6′ | `extended` từ bản 2026-10-09 (`NEAR_SINCE`); và case 5, 7, 8 khi P1 thấp hơn giá đóng cửa quá 8% (`FAR_SUPPORT`) | nhịp chạy không để lại nền gần giá | **đường gần**: đáy nến đảo chiều (`reversalLow`: bao trùm giảm, outside giảm, key reversal), không có thì đáy hai phiên gần nhất (`low2Sessions`) — P1 mà cao hơn thì giữ P1 | "Nếu đóng cửa dưới đáy nến đảo chiều …" → hành động của case (extended: chốt lời một nửa); nửa còn lại `full`: thoát hết dưới đáy nhịp tăng gần nhất (`higherLow`: đáy thấp hơn phiên trước, cũ ít nhất 3 phiên, chưa phiên nào thủng, trên MA50, thấp hơn đường gần ≥ 1,5%), không có thì P1/P2 | như cũ; case nào ở mức nguy hiểm đã là "thoát hết" thì thoát hết dưới đường gần, không có `full` |
 | 7 | `warning` | `breakout-rejected` còn trên pivot, `trendline-test`, `pullback-to-support`, `ma50-test` | P1 | "Nếu đóng cửa lại dưới P1" → hạ tỷ trọng một nửa | thoát hết |
 | 8 | `trend-intact` | mặc định (trên hai MA, không tin xấu, chưa kéo xa) | P2 | giữ, dời điểm cắt lỗ lên P2 (P2 là MA50: "giữ, cắt lỗ khi đóng cửa dưới MA50 ở …") | "Nếu đóng cửa lại dưới P1" → hạ tỷ trọng một nửa |
+
+**Đường gần (dòng 6′, người dùng 2026-10-11, nguyên văn): "Optimize the SL of PVP since it so far and not make-sense".** PVP
+9/10 chạy cao hơn MA50 30% mà không tạo nền: đường của người giữ ra hỗ trợ nền 19,65, thấp hơn giá đóng cửa 24,10 tới 18,5% —
+người giữ phải chờ giá trả gần hết nhịp tăng mới chốt một nửa. Giờ nửa đầu ra dưới đáy nến đảo chiều 24,00 (bao trùm giảm 9/10),
+nửa còn lại dưới đáy nhịp tăng gần nhất 20,60 (30/9). Hỗ trợ cấu trúc vẫn vẽ trên chart nhưng không còn là đường hành động.
+`measure` in hai số `halfLine`/`fullLine` (kèm `label`: "đáy nến đảo chiều 24,00", "đáy nhịp tăng gần nhất 20,60"), và vai
+người giữ mang thêm `label` + `full` (`priceKey`, `price`, `label`, `then`, `say`) — chép nguyên, validator so cả `full`. Đường
+một nửa phải là một mark `level` (beat 1, cận cảnh) để plate beat 3 nằm trên nó; lời chỉ đọc đường một nửa (`say`, một số);
+`.md` ghi hai câu: "Đang giữ, thủng 24,00 thì chốt lời một nửa." / "Dưới 20,60 thì thoát hết." Bản soi trước 2026-10-09 giữ bảng
+cũ (MSR 7/10, 8/10: extended ở pivot).
 
 Thứ tự: điều đã gãy trước (MA, trendline, vượt đỉnh thất bại) — người giữ không chờ khi mức đã mất; rồi lời đã chạy xa phải khóa
 lại; rồi tín hiệu xấu của phiên; cuối cùng là xu hướng còn nguyên. Điều kiện xét MỌI `classes` của `measure`, không chỉ `setup`
@@ -268,6 +279,7 @@ Người chưa có hàng nghe MỘT câu: không mua đuổi, chờ vượt …,
 
 | # | `case` | Điều kiện | Giá | Thường | Ở mức nguy hiểm |
 |---|---|---|---|---|---|
+| 0 | `downtrend-break` | trendline GIẢM (`trendlineResistanceBroken`) vừa bị phá trong ≤ 5 phiên (`downtrendBrokenSessionsAgo` ≤ `DOWNTREND_BREAK_FRESH`), giá còn trên nó, và mã CHƯA vào xu hướng tăng (dưới MA200, hoặc MA50 dưới MA200) | — (nhãn cạnh nến cuối) | "Chưa có hàng thì chưa mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp hai." | như cũ |
 | 1 | `below-ma` | dưới MA50 hoặc dưới MA200 | MA gần nhất PHÍA TRÊN giá | "Khi giá còn dưới MA50 ở …" → đứng ngoài | như cũ |
 | 2 | `trend-broken` | `classes` có `trendline-break` | trendline vừa thủng | đứng ngoài | như cũ |
 | 3 | `failed-breakout` | `breakout-failed`, hoặc `breakout-rejected` đóng cửa dưới pivot | `failedBreakoutLevel`, không có thì `pivot` | "Khi giá còn dưới …" → đứng ngoài, vượt đỉnh đã thất bại | như cũ |
@@ -278,13 +290,23 @@ Người chưa có hàng nghe MỘT câu: không mua đuổi, chờ vượt …,
 | 8 | `test` | `trendline-test` / `pullback-to-support` / `ma50-test` (theo thứ tự đó) | trendline / `support1` / MA50 | "Nếu kiểm định … giữ được" → mới mua, thủng thì đứng ngoài | đứng ngoài, chưa mở vị thế mới (không mua nhịp chỉnh) |
 | 9 | `default` | còn lại | `resistance1` | như `wait-breakout` | đứng ngoài, chưa mở vị thế mới |
 
+Dòng 0 (người dùng 2026-10-22, PVD phá trendline giảm 9/10–19/10 hôm 21/10, giá vẫn dưới MA200: "Phá được trendline giảm chưa
+mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp 2", rồi "update this rule to the agent review"): một cú phá trendline giảm của mã
+chưa vào xu hướng tăng là nhịp 1 của một lần đảo chiều, chưa phải điểm mua — theo dõi, đợi nền ở nhịp 2. Nó đứng TRƯỚC `below-ma`
+(nếu không, mã như PVD chỉ nghe "đứng ngoài, giá dưới MA200" và mất chuyện của phiên). Khi gặp case này, bản soi PHẢI VẼ trendline
+giảm đã bị phá (mark `trendline`, neo đúng `trendlineResistanceBroken` của measure, nhãn "Trendline giảm bị phá · <giá ở nến
+cuối>", màu xanh, beat có cận cảnh chứa hai điểm neo) và `detail` nói cú phá đó — chi tiết của scene là cú phá, không phải "đi
+ngang". Mã đã trong xu hướng tăng (trên MA200, MA50 trên MA200) phá một trendline giảm ngắn là chuyện khác (nhịp chỉnh kết thúc):
+bảng cũ quyết định.
+
 Hỏng xu hướng trước (1–3: Minervini không mua mã ngoài trend template, O'Neil không mua lại một lần vượt đỉnh vừa thất bại), rồi
 kéo xa (4–5, đúng câu người dùng), rồi điểm mua đang có (6), sắp có (7), nhịp chỉnh về hỗ trợ (8). "Vượt đỉnh thất bại" dùng đúng
 chỗ cắt của §6b, nên hai vai không kể hai chuyện khác nhau về một cây nến: cùng một đường thì mua ở trên, hạ hay thoát ở dưới.
 
 `plate` (≤ 32 ký tự, mở bằng **"Chưa mua:"** — "Chưa có hàng:" ăn 14 ký tự; lời vẫn nói "chưa có hàng"; in giá của đường):
 "Chưa mua: không mua đuổi" · "Chưa mua: dưới 25,05 đứng ngoài" · "Chưa mua: trên 14,50 mua nhỏ" · "Chưa mua: chờ vượt 48,90" ·
-"Chưa mua: chờ về 58,00" · "Chưa mua: chờ kiểm định 23,94" · "Chưa mua: đứng ngoài" (cạnh nến cuối). `say`: "Chưa có hàng thì
+"Chưa mua: chờ về 58,00" · "Chưa mua: chờ kiểm định 23,94" · "Chưa mua: đứng ngoài" (cạnh nến cuối) · "Chưa mua: đợi tạo nền"
+(`downtrend-break`, cạnh nến cuối). `say`: "Chưa có hàng thì
 không mua đuổi, giá đã kéo xa." · "Chưa có hàng thì đứng ngoài, vượt đỉnh đã thất bại." · "Chưa có hàng, vượt 48,90 mới giải ngân
 nhỏ." `.md`: **Chưa có hàng:** <case> — <then> · bậc kế (đường tiếp theo và điều kiện).
 

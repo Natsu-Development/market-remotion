@@ -39,6 +39,9 @@ import {PATHS, cli, configId, die, exists, finishedBars, ict, ictInstant, readJs
 import {fetchFireantBreadth, matchesSession} from './lib/fireant.mjs';
 import {compactRow} from './lib/requested.mjs';
 
+/** Fields of past VNINDEX bars that win over SSI (index lows read on FireAnt — see the bars block below). */
+const OVERRIDES = 'content/review/vnindex.daily.overrides.json';
+
 const {flag, opt} = cli();
 const R = rules();
 const now = new Date();
@@ -106,8 +109,22 @@ if (REBUILD) {
     if (bars[bars.length - 1]?.t !== asOf) die(`--as-of=${asOf}: no VNINDEX session on that date (last before it: ${bars[bars.length - 1]?.t})`);
   }
   session = bars[bars.length - 1].t;
+  // Index lows the reel takes from FireAnt, not SSI (2026-10-16): vendors' intraday lows differ by a few points — 15/10: SSI
+  // same day 1690,56 = VNDirect, SSI final 1691,18, FireAnt = Entrade 1694,77 — and the reel's index chart is FireAnt's, the
+  // platform the user checks against. A date listed in vnindex.daily.overrides.json keeps its listed fields over every pull.
+  const overrides = tryJson(OVERRIDES) ?? {};
+  const overridden = [];
+  for (const b of bars) {
+    for (const [k, v] of Object.entries(overrides[b.t] ?? {})) {
+      if (['o', 'h', 'l', 'c', 'v'].includes(k) && Number.isFinite(v) && b[k] !== v) {
+        overridden.push(`${b.t} ${k} ${b[k]} → ${v}`);
+        b[k] = v;
+      }
+    }
+  }
   writeRows(PATHS.daily, bars);
   writeJson(PATHS.daily.replace(/\.json$/, '.meta.json'), {
+    ...(overridden.length ? {overrides: {file: OVERRIDES, applied: overridden}} : {}),
     source: R.market.source,
     sourceLabel: R.market.sourceLabel,
     symbol: R.market.index,
@@ -122,6 +139,7 @@ if (REBUILD) {
     volumeUnit: 'matched shares per session',
   });
   log(`VNINDEX  ${bars.length} sessions ${bars[0].t} → ${session}${finished.dropped ? ` (dropped ${finished.dropped}: still trading at ${ict(now).hm} ICT)` : ''}`);
+  if (overridden.length) log(`override ${overridden.join(' · ')} (${OVERRIDES})`);
 
   if (flag('no-screener')) {
     log('screener skipped (--no-screener)');
@@ -145,7 +163,8 @@ for (const [fname, f] of Object.entries(R.formats)) {
   }
 }
 const allScenes = {...R.screener.scenes, ...formatScenes};
-const needed = [...new Set(Object.values(allScenes).flatMap((s) => [...s.filters, s.photo]))];
+// A union or base scene's `photo` is the table's own name (the weekly's watchlist, 2026-10-18), not a saved filter: not fetched.
+const needed = [...new Set(Object.values(allScenes).flatMap((s) => [...s.filters, ...(s.match === 'any' || s.match === 'base' ? [] : [s.photo])]))];
 const pick = ({name, match, negate, conditions, groups, exchanges}) => ({name, match, ...(negate ? {negate} : {}), ...(conditions ? {conditions} : {}), ...(groups ? {groups} : {}), ...(exchanges ? {exchanges} : {})});
 let info;
 let saved;
@@ -257,19 +276,43 @@ const volumeVsSmaUnit = Object.values(units)[0] ?? null;
 const bySymbol = new Map(universe.map((s) => [s.symbol, s]));
 const maOk = (s) => !R.screener.dropZeroMa || (s.ema_50 > 0 && s.sma_200 > 0);
 const volumeRatio = (s) => (s.volume_sma20 > 0 ? s.current_volume / s.volume_sma20 : null);
-const sortKey = {volumeRatio: (s) => volumeRatio(s) ?? -Infinity, rs_1m: (s) => s.rs_1m ?? -Infinity};
-const ranked = (rows, by) => {
+const sortKey = {volumeRatio: (s) => volumeRatio(s) ?? -Infinity, rs_1m: (s) => s.rs_1m ?? -Infinity, rs_3m: (s) => s.rs_3m ?? -Infinity};
+/** `then`: a second key for ties (the weekly's watchlist: RS 3M, as the sector board breaks RS 1M ties), then the symbol. */
+const ranked = (rows, by, then = null) => {
   const key = sortKey[by] ?? die(`unknown sortBy "${by}" — one of ${Object.keys(sortKey).join(', ')}`);
-  return [...rows].sort((a, b) => key(b) - key(a) || a.symbol.localeCompare(b.symbol));
+  const key2 = then ? sortKey[then] ?? die(`unknown tieBreak "${then}" — one of ${Object.keys(sortKey).join(', ')}`) : () => 0;
+  return [...rows].sort((a, b) => key(b) - key(a) || key2(b) - key2(a) || a.symbol.localeCompare(b.symbol));
 };
 const picks = {};
 const members = {};
+// A moving average of 0 means "not computable yet" (new listing), not "below the price".
+const filterUsesMa = (n) => /"(?:rhs_)?field":"(?:ema|sma)_/.test(JSON.stringify(saved.find((f) => f.name === n)));
 for (const [scene, spec] of Object.entries(allScenes)) {
-  const sets = spec.filters.map((n) => new Set(server[n]));
-  const inAll = [...sets[0]].filter((sym) => sets.every((s) => s.has(sym)));
-  // A moving average of 0 means "not computable yet" (new listing), not "below the price".
-  const usesMa = spec.filters.some((n) => /"(?:rhs_)?field":"(?:ema|sma)_/.test(JSON.stringify(saved.find((f) => f.name === n))));
-  const rows = ranked(inAll.map((sym) => bySymbol.get(sym)).filter(Boolean).filter((s) => !usesMa || maOk(s)), spec.sortBy);
+  let names;
+  if (spec.match === 'base') {
+    // A base scene (the weekly's watchlist since 2026-10-18 evening, user: "setting the RS1M strong of the RS strong filter
+    // to base and expand the list of symbol? Not limit to 10 symbol … Just piority the stock have RS strong and another
+    // filter also find it at first"): every name of the `base` filter; the other filters only tag and order them.
+    names = (server[spec.base] ?? []).filter((sym) => !filterUsesMa(spec.base) || (bySymbol.get(sym) && maOk(bySymbol.get(sym))));
+  } else if (spec.match === 'any') {
+    // A union scene (the weekly's watchlist, user 2026-10-18: "combine it with the momentum breakout/breakdown, Uptrend
+    // filter, and give me 10 of symbol ranking by the RS1M"): every name ANY of its filters found, each filter read the way
+    // its own scene reads it (the MA test only where that filter uses an average).
+    names = [...new Set(spec.filters.flatMap((n) => (server[n] ?? []).filter((sym) => !filterUsesMa(n) || (bySymbol.get(sym) && maOk(bySymbol.get(sym))))))];
+  } else {
+    const sets = spec.filters.map((n) => new Set(server[n]));
+    const inAll = [...sets[0]].filter((sym) => sets.every((s) => s.has(sym)));
+    const usesMa = spec.filters.some(filterUsesMa);
+    names = inAll.filter((sym) => !usesMa || (bySymbol.get(sym) && maOk(bySymbol.get(sym))));
+  }
+  let rows = ranked(names.map((sym) => bySymbol.get(sym)).filter(Boolean), spec.sortBy, spec.tieBreak ?? null);
+  // `order: overlapFirst`: the names another of the scene's filters also found come first, each group in rank order —
+  // with no base (the daily's shortlist, a union, 2026-10-19), the names two or more of its filters found.
+  if (spec.order === 'overlapFirst') {
+    const found = (sym) => spec.filters.filter((n) => (server[n] ?? []).includes(sym)).length;
+    const also = (sym) => (spec.base ? spec.filters.some((n) => n !== spec.base && (server[n] ?? []).includes(sym)) : found(sym) > 1);
+    rows = [...rows.filter((s) => also(s.symbol)), ...rows.filter((s) => !also(s.symbol))];
+  }
   members[scene] = rows.map((s) => s.symbol);
   picks[scene] = rows.slice(0, spec.top).map((s) => s.symbol);
 }
@@ -301,7 +344,9 @@ picks.leaders = leaderOrder.slice(0, L.top ?? 2);
 const leadersByFormat = {};
 for (const [fname, f] of Object.entries(R.formats)) {
   const FL = f.screener?.leaders;
-  if (!FL) continue;
+  // A format that picks no name by rule (the weekly since 2026-10-09 — user: "i will select the symbol to review with weekly
+  // not follow by the filter value and rule": top 0, from []) ranks nothing here; its reviews are the user's requests.
+  if (!FL || !((FL.top ?? 2) > 0) || ![].concat(FL.from ?? []).flat().length) continue;
   const ftiers = Array.isArray(FL.from) && FL.from.some(Array.isArray) ? FL.from.map((t) => [].concat(t)) : [[].concat(FL.from)];
   const pool = [];
   const poolTier = {};

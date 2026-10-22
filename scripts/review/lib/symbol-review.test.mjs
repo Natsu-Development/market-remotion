@@ -6,7 +6,7 @@
 // level touches counted per session.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {candleOf, candleReads, failedBreakoutOf, levelsOf, structureOf, swingsOf, trendlinesOf, validateReview} from './symbol-review.mjs';
+import {NEAR_SINCE, candleOf, candleReads, failedBreakoutOf, levelsOf, nearLinesOf, rolesOf, structureOf, swingsOf, trendlinesOf, validateReview} from './symbol-review.mjs';
 
 // 40 sessions: a rising zig-zag (swing lows at 5, 15, 25; highs at 10, 20, 30), then a last session that breaks the high
 // intraday and closes low in its range — the MSR 2/10 shape.
@@ -278,4 +278,103 @@ test('a /1 review (before price action) keeps the old rules', () => {
   r.detail.kind = 'pullback';
   r.setup = 'pullback';
   assert.deepEqual(errs(r).filter((x) => /support|resistance|candle|priceAction|structure|setup|trendline/.test(x)), []);
+});
+
+// ---- the holder's near lines (user 2026-10-11: "Optimize the SL of PVP since it so far and not make-sense")
+// PVP 17/9 → 9/10: a run from the 21/9 low (17,95) to 25,55 on 7/10 with one pullback (30/9, low 20,60) and no base, then a
+// bearish engulfing on 9/10 (25,15 → 24,10, low 24,00). FireAnt's MA50 18,52; the nearest support 19,65 is 18,5% under.
+const PVP = [
+  ['2026-09-17', 18.6, 18.75, 18.05, 18.15], ['2026-09-18', 18.2, 18.35, 18.05, 18.1], ['2026-09-21', 18.2, 18.35, 17.95, 18.25],
+  ['2026-09-22', 18.35, 19.5, 18.3, 19.5], ['2026-09-23', 20, 20.5, 19.5, 19.5], ['2026-09-24', 19.9, 20.3, 19, 19.2],
+  ['2026-09-25', 19.35, 20.5, 19.25, 20.5], ['2026-09-28', 21, 21.5, 20.5, 20.85], ['2026-09-29', 21, 22.3, 20.85, 21.9],
+  ['2026-09-30', 21.9, 21.9, 20.6, 20.9], ['2026-10-01', 20.85, 21.7, 20.85, 21.6], ['2026-10-02', 21.95, 23.05, 21.95, 22],
+  ['2026-10-05', 22.4, 23.25, 22.15, 22.85], ['2026-10-06', 23.5, 24, 23, 23.9], ['2026-10-07', 24.25, 25.55, 23.9, 24.6],
+  ['2026-10-08', 24.95, 25.2, 24.15, 25], ['2026-10-09', 25.15, 25.15, 24, 24.1],
+].map(([t, o, h, l, c]) => ({t, o, h, l, c, v: 1e6}));
+const pvpNum = (NL, over = {}) => {
+  const v = {
+    price: 24.1, aboveMa50Percent: 30.13, aboveMa200Percent: 48.67, ma50: 18.52, ma200: 16.21, pivot: 25.55, closeVsPivotPercent: -5.68,
+    support1: 19.64, support2: 19.26, trendlineSupport: 17.02, run15Percent: 34.26,
+    reversalLow: NL.reversal?.price ?? null, low2Sessions: NL.low2.price, higherLow: NL.higherLow?.price ?? null, ...over,
+  };
+  return (k) => v[k] ?? null;
+};
+const EXT = [{kind: 'extended'}, {kind: 'pullback'}, {kind: 'trend'}];
+
+test('PVP 9/10: half under the reversal candle low, the rest under the run\'s last higher low', () => {
+  const NL = nearLinesOf(PVP, 18.52);
+  assert.deepEqual(NL.reversal, {price: 24, t: '2026-10-09', read: 'bear-engulf'});
+  assert.deepEqual(NL.higherLow, {price: 20.6, t: '2026-09-30', under: '2026-09-29', age: 7});
+  const {holder, notHolder} = rolesOf({num: pvpNum(NL), classes: EXT, price: 24.1, danger: true, date: '2026-10-09'});
+  assert.equal(holder.case, 'extended');
+  assert.equal(holder.priceKey, 'reversalLow');
+  assert.equal(holder.price, 24);
+  assert.equal(holder.if, 'Nếu đóng cửa dưới đáy nến đảo chiều 24,00');
+  assert.equal(holder.plate, 'Đang giữ: dưới 24,00 chốt 1/2');
+  assert.equal(holder.say, 'Đang giữ, thủng 24,00 thì chốt lời một nửa.');
+  assert.deepEqual(holder.full, {priceKey: 'higherLow', price: 20.6, label: 'đáy nhịp tăng gần nhất 20,60', then: 'thoát hết', say: 'Dưới 20,60 thì thoát hết.'});
+  assert.equal(notHolder.case, 'exhausted');
+  assert.equal(notHolder.say, 'Chưa có hàng thì không mua đuổi, giá đã kéo xa.');
+});
+
+test('no reversal candle: the half comes off under the last two sessions\' low', () => {
+  const bars2 = [...PVP.slice(0, -1), {t: '2026-10-09', o: 24.9, h: 25.1, l: 24.3, c: 24.5, v: 1e6}];   // an inside day, no engulfing
+  const NL = nearLinesOf(bars2, 18.52);
+  assert.equal(NL.reversal, null);
+  assert.deepEqual(NL.low2, {price: 24.15, t: '2026-10-08'});
+  assert.equal(NL.higherLow.price, 20.6);
+  const {holder} = rolesOf({num: pvpNum(NL, {price: 24.5}), classes: EXT, price: 24.5, date: '2026-10-09'});
+  assert.equal(holder.priceKey, 'low2Sessions');
+  assert.equal(holder.price, 24.15);
+  assert.equal(holder.if, 'Nếu đóng cửa dưới đáy hai phiên gần nhất 24,15');
+  assert.equal(holder.plate, 'Đang giữ: dưới 24,15 chốt 1/2');
+  assert.equal(holder.full.price, 20.6);
+});
+
+test('the guard: a trend whose nearest support is more than 8% under the close trails the near lines too', () => {
+  const NL = nearLinesOf(PVP, 18.52);
+  const far = rolesOf({num: pvpNum(NL, {aboveMa50Percent: 20, pivot: 26, support1: 21.9, support2: 21.2}), classes: [{kind: 'trend'}], price: 24.1, date: '2026-10-09'}).holder;
+  assert.equal(far.case, 'trend-intact');
+  assert.equal(far.price, 24);
+  assert.equal(far.then, 'hạ tỷ trọng một nửa');
+  assert.equal(far.full.price, 20.6);
+  // A support within 8%: the table's line, unchanged (P2 = support2, the stop moves up to it).
+  const near = rolesOf({num: pvpNum(NL, {aboveMa50Percent: 20, pivot: 26, support1: 23.6, support2: 22.8}), classes: [{kind: 'trend'}], price: 24.1, date: '2026-10-09'}).holder;
+  assert.equal(near.priceKey, 'support2');
+  assert.equal(near.full, undefined);
+});
+
+test(`editions before ${NEAR_SINCE} keep the table they were written under`, () => {
+  const NL = nearLinesOf(PVP, 18.52);
+  const {holder} = rolesOf({num: pvpNum(NL), classes: EXT, price: 24.1, danger: true, date: '2026-10-08'});
+  assert.equal(holder.priceKey, 'support1');
+  assert.equal(holder.price, 19.65);
+  assert.equal(holder.full, undefined);
+});
+
+test('a holder whose rest-of-position line differs from the method is rejected', () => {
+  const holder = {case: 'extended', priceKey: 'reversalLow', price: 24, if: 'Nếu đóng cửa dưới đáy nến đảo chiều 24,00', then: 'hạ tỷ trọng, chốt lời một nửa', plate: 'Đang giữ: dưới 24,00 chốt 1/2', full: {priceKey: 'higherLow', price: 20.6, then: 'thoát hết'}};
+  const notHolder = {case: 'exhausted', priceKey: null, price: null, if: null, then: 'không mua đuổi', plate: 'Chưa mua: không mua đuổi'};
+  const r = valid();
+  r.date = '2026-10-09';
+  r.roles = {holder: {...holder, full: {...holder.full, price: 19.65}}, notHolder};
+  const ctx = {measured: {...measured, roles: {holder, notHolder}}};
+  assert.ok(has(errs(r, ctx), /roles\.holder\.full/));
+  r.roles.holder.full.price = 20.6;
+  assert.ok(!has(errs(r, ctx), /roles\.holder\.full/));
+});
+
+test('a fresh break of the descending trendline under MA200: the one without it waits for the base (PVD 22/10)', () => {
+  // User 2026-10-22, PVD broke its 9/10–19/10 downtrend line on 21/10, still under MA200: "Phá được trendline giảm chưa mua
+  // vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp 2" — §6c downtrend-break, ahead of below-ma, at the danger level too.
+  const pvd = {price: 18.9, ma50: 18.58, ma200: 19.29, support1: 18.8, trendlineSupport: 17.48, trendlineResistanceBroken: 17.68, downtrendBrokenSessionsAgo: 1, aboveMa50Percent: 1.72, aboveMa200Percent: -2.02, resistance1: 19};
+  const num = (o) => (k) => (o[k] ?? null);
+  const {notHolder} = rolesOf({num: num(pvd), classes: [{kind: 'ma50-test'}, {kind: 'trend'}], price: 18.9, danger: true, date: '2026-10-22'});
+  assert.equal(notHolder.case, 'downtrend-break');
+  assert.equal(notHolder.say, 'Chưa có hàng thì chưa mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp hai.');
+  assert.equal(notHolder.plate, 'Chưa mua: đợi tạo nền');
+  // a stale break (more than DOWNTREND_BREAK_FRESH sessions back) falls through to below-ma
+  assert.equal(rolesOf({num: num({...pvd, downtrendBrokenSessionsAgo: 9}), classes: [{kind: 'trend'}], price: 18.9, danger: true, date: '2026-10-22'}).notHolder.case, 'below-ma');
+  // a stock already in its uptrend (over MA200, MA50 over MA200) is not a turn: the old table decides
+  assert.notEqual(rolesOf({num: num({...pvd, ma50: 18.2, ma200: 17.9, aboveMa200Percent: 5.6}), classes: [{kind: 'trend'}], price: 18.9, danger: true, date: '2026-10-22'}).notHolder.case, 'downtrend-break');
 });

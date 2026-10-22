@@ -42,7 +42,7 @@ import {reels} from './lib/reels.mjs';
 import {roleOf as roleIn, roleSpec} from './lib/roles.mjs';
 import {loadRules} from './lib/rules.mjs';
 import {artifactOf, dmOf, pageOf, previousArtifact} from './review/lib/artifacts.mjs';
-import {requestKey, requestPool} from './review/lib/requested.mjs';
+import {requestKey, requestMax, requestPool} from './review/lib/requested.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -294,7 +294,11 @@ const cadence = framings ? total / framings : 0;
 const verifyTile = !verify ? ['fail', 'không chạy được'] : nFail ? ['fail', `${nFail} lỗi · ${nWarn} cảnh báo`] : nWarn ? ['warn', `0 lỗi · ${nWarn} cảnh báo`] : ['pass', '0 lỗi · 0 cảnh báo'];
 const factsC = check('facts'), styleC = check('style');
 const nextStep = nFail ? 'Sửa lỗi verify trước — chưa duyệt được' : reel.status === 'reviewed' ? 'Đã duyệt: lồng tiếng và render' : voiced === reel.scenes.length ? 'Duyệt → npm run approve → render' : voiced ? `Duyệt → thu ${reel.scenes.length - voiced} scene chưa có giọng (--force --only) → render` : 'Duyệt → npm run approve → lồng tiếng → render';
-const conclusion = Array.isArray(notes._conclusion) ? notes._conclusion : [];
+// The director's conclusions: {tag, level, text} rows, or plain strings (the weekly's notes.json, 2026-10-06, rendered ten
+// empty bullets) — a string is its text, level pass, no tag.
+const conclusion = (Array.isArray(notes._conclusion) ? notes._conclusion : [])
+  .map((c) => (typeof c === 'string' ? {text: c, level: 'pass'} : c))
+  .filter((c) => c && typeof c === 'object');
 const summary = notes._summary
   ?? 'Đây là điểm dừng duy nhất trước khi lồng tiếng và render. Đọc lời từng scene thành tiếng như người xem sẽ nghe, nhìn khung hình, đọc phần "fact pack không đỡ được", rồi trả lời: duyệt · sửa scene nào, đổi gì · bỏ.';
 const now = new Date();
@@ -341,13 +345,17 @@ const editionDmy = EDITION ? `${dmOf(EDITION)}/${EDITION.slice(0, 4)}` : null;
 // artifact's own db (doc requests/<edition>: {edition, symbols, done, updatedAt}) — the page is published with
 // capabilities {db: {}, user: {}} — and the director reads them back with ArtifactData on the next run, writes
 // content/review/requests/<edition>.json, and the reel gets one `pick` scene per ticker after the filter leaders.
-// The page renders without the db (outside claude.ai) and says so; it never writes on load.
+// Since 2026-10-10 the input works without the db too (outside claude.ai, a slow or null runtime, a read-only viewer):
+// the names stay in the browser's localStorage and the box shows the line to send Claude (picksScript below).
 const picksEdition = reel.rules && facts?.screener?.leaders ? (facts.session?.date ?? reel.edition ?? null) : null;
-const picksTaken = picksEdition ? (facts.screener.leaders.top ?? []).map((x) => x.symbol) : [];
+// The names the reel reviews itself: the pack's leaders, when the reel has `leader` scenes (the weekly has none since
+// 2026-10-09 — it reviews only the names typed here, while a 6/10 pack still lists MSB and DGW).
+const picksLeaders = reel.scenes.some((s) => roleOf(s) === 'leader');
+const picksTaken = picksEdition && picksLeaders ? (facts.screener.leaders.top ?? []).map((x) => x.symbol) : [];
 // No screener in this edition (facts.mjs --no-screener: the terminal did not answer, 2026-10-09): the box still takes
 // tickers — they are reviewed once the terminal answers — but it lists no filter and claims no review.
 const picksDown = picksEdition ? facts.screener.unavailable ?? null : null;
-const picksMax = R.screener?.requested?.max ?? 3;
+const picksMax = requestMax(R, reel.format);
 const picksUni = picksEdition ? (readJson(`.review-cache/${picksEdition}-universe.json`)?.stocks ?? []) : [];
 const picksValid = picksUni.map((x) => x.symbol).filter((sym) => /^[A-Z0-9]{3}$/.test(sym)).sort();
 // Every stock in at least rules.screener.requested.listMinFilters of the three saved filters (user 2026-10-05: "If have
@@ -357,9 +365,10 @@ const picksValid = picksUni.map((x) => x.symbol).filter((sym) => /^[A-Z0-9]{3}$/
 // A format with its own saved-filter scenes (the weekly's Momentum breakout/breakdown, 2026-10-06) lists THOSE, every
 // name in at least one; its requests live under their own key, `<date>-weekly` (lib/requested.mjs requestKey, requestPool).
 const picksRow = new Map(picksUni.map((x) => [x.symbol, x]));
-const picksMembers = picksEdition ? (readJson(`content/review/snapshots/${picksEdition}.json`)?.members ?? {}) : {};
+const picksSnap = picksEdition ? readJson(`content/review/snapshots/${picksEdition}.json`) ?? {} : {};
+const picksMembers = picksSnap.members ?? {};
 const picksKey = picksEdition ? requestKey(reel.format, picksEdition) : null;
-const {own: picksOwn, scenes: picksScenes, min: picksMin, pool: picksPool} = requestPool({R, format: reel.format, members: picksMembers, rows: picksRow, taken: picksTaken});
+const {own: picksOwn, scenes: picksScenes, min: picksMin, pool: picksPool} = requestPool({R, format: reel.format, members: picksMembers, picks: picksSnap.picks ?? {}, filters: picksSnap.filters ?? {}, rows: picksRow, taken: picksTaken});
 const picksAllTag = picksScenes.length === 3 ? 'cả ba' : picksScenes.length === 2 ? 'cả hai' : null;
 const picksIntro = picksOwn
   ? `Các mã có mặt ở ${picksMin <= 1 ? `bộ lọc ${picksScenes.map((s) => esc(s.label)).join(' hoặc ')}` : `từ ${picksMin} trong ${picksScenes.length} bộ lọc ${picksScenes.map((s) => esc(s.label)).join(', ')}`} của phiên`
@@ -374,21 +383,94 @@ const picksAuto = picksAllThree
   ? (picksTaken.length ? `reel tự soi các mã có mặt ở cả ba bộ lọc: ${esc(viList(picksTaken))}; mã ở hai bộ lọc chỉ có scene khi được gõ vào đây` : 'hôm nay không mã nào có mặt ở cả ba bộ lọc nên reel không tự soi mã nào; mã ở hai bộ lọc chỉ có scene khi được gõ vào đây')
   : `reel đã soi ${picksTaken.length ? esc(viList(picksTaken)) : 'các mã đầu bảng'}`;
 const fmtSigned = (n) => (n == null ? '—' : `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(2).replace('.', ',')}%`);
-const picksBlock = picksEdition ? `<section class="card picks" id="picks" data-edition="${esc(picksKey)}" data-session="${esc(picksEdition)}" data-max="${picksMax}" data-taken="${esc(picksTaken.join(','))}">
-    <h3>Soi thêm mã</h3>
-    <p class="sub">${picksDown ? `Terminal chưa trả lời (${esc(picksDown)}), nên bản này chưa có danh sách mã của các bộ lọc và reel chưa soi mã nào. Vẫn gõ được mã muốn soi (tối đa ${picksMax} mã): khi terminal trả lời, mỗi mã thành một scene soi mã riêng, đặt sau các mã của ba bộ lọc. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>` : `${picksIntro} (cột Bộ lọc ghi mã ở bộ lọc nào) — ${picksAuto}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(viList(picksTaken)) : picksAllThree ? 'các bảng bộ lọc' : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").</p>`}
-    ${picksPool.length ? `<table class="pick-pool">
-      <thead><tr><th>Mã</th><th>Bộ lọc</th><th class="num">RS 1M</th><th class="num">% phiên</th><th></th></tr></thead>
-      <tbody>${picksPool.map((r) => `<tr${r.reviewed ? ' class="reviewed"' : ''}><td class="sym">${esc(r.sym)}</td><td class="pick-filters">${r.filters.map((f) => `<span class="pick-filter">${esc(f)}</span>`).join('')}${picksAllTag && r.filters.length === picksScenes.length ? `<span class="pick-all">${picksAllTag}</span>` : ''}</td><td class="num">${r.rs1m ?? '—'}</td><td class="num ${r.change >= 0 ? 'up' : 'down'}">${esc(fmtSigned(r.change))}</td><td>${r.reviewed ? '<span class="pick-tag">đã soi</span>' : ''}</td></tr>`).join('')}</tbody>
-    </table>` : ''}
-    <form id="pick-form" class="pick-form" autocomplete="off" hidden>
+// The weekly's box also lists each ranked ICB group's strongest stocks (pack sectors.groups[].top, the three the board
+// prints on the group's row since 2026-10-09 — user: "With the scene 05 also listing 2-3 stock with this major
+// ranking?"; before, `strongest` alone — director and trader-viewer review 2026-10-09: the box is the owner's main input
+// there), tagged «top 3 · <group>» and listed after the Momentum names in the groups' rank order, strongest first, each
+// name once; a name on a Momentum board keeps its filter tags and gains the group's. Only a pack with `sectors.ok` (the
+// weekly) has them; elsewhere every row is the pool's own and the page is unchanged.
+const picksStrong = picksEdition && facts?.sectors?.ok && Array.isArray(facts.sectors.groups)
+  ? facts.sectors.groups
+    .map((g) => ({g, top: (Array.isArray(g?.top) && g.top.length ? g.top : g?.strongest ? [g.strongest] : []).filter((t) => /^[A-Z0-9]{3}$/.test(t?.symbol ?? ''))}))
+    .filter((x) => x.top.length)
+  : [];
+const picksTopOf = new Map(picksStrong.flatMap(({top}) => top.map((t) => [t.symbol, t])).reverse());
+const picksGroupsOf = new Map();
+for (const {g, top} of picksStrong) for (const t of top) picksGroupsOf.set(t.symbol, [...(picksGroupsOf.get(t.symbol) ?? []), g.short ?? g.name ?? g.code ?? '—']);
+const picksTopN = facts?.sectors?.topPerGroup ?? 3;
+const picksRows = [
+  ...picksPool.map((r) => ({...r, groups: picksGroupsOf.get(r.sym) ?? []})),
+  ...[...picksGroupsOf].filter(([sym]) => !picksPool.some((r) => r.sym === sym)).map(([sym, groups]) => {
+    const u = picksRow.get(sym) ?? {};
+    const t = picksTopOf.get(sym) ?? {};
+    return {sym, filters: [], groups, rs1m: u.rs_1m ?? t.rs1m ?? null, change: u.price_change_pct ?? t.changePercent ?? null, reviewed: picksTaken.includes(sym)};
+  }),
+];
+// The pool's caption on a format whose box is the only way a name gets reviewed (the weekly): which names the table
+// suggests. Its own line under the box (the box opens on the input, 2026-10-10), not in the instruction above it.
+/** The table the pool's first rows come from, when it is one board of the reel (the weekly's watchlist since 2026-10-18). */
+const picksOnBoardName = (() => {
+  const spec = Object.values(R.formats?.[reel.format]?.screener?.scenes ?? {}).find((x) => x?.match === 'base' || x?.match === 'any');
+  return spec ? esc(spec.board?.list ?? spec.photo ?? 'bảng') : null;
+})();
+const picksStrongCopy = picksStrong.length
+  ? (picksPool.length
+    ? ` Sau các mã của ${picksOnBoardName ?? 'các bảng bộ lọc'} là ${picksTopN} mã mạnh nhất (RS 1M) của từng nhóm ngành ICB đã xếp hạng — đúng các mã in trên bảng xếp hạng ngành, thẻ «top ${picksTopN} · ngành»; mã vừa ở bảng vừa trong top ngành mang cả hai thẻ.`
+    : ` ${picksTopN} mã mạnh nhất (RS 1M) của từng nhóm ngành ICB đã xếp hạng — đúng các mã in trên bảng xếp hạng ngành, thẻ «top ${picksTopN} · ngành»${picksScenes.length ? `; tuần này ${picksScenes.map((s) => esc(s.label)).join(' và ')} không có mã nào` : ''}.`)
+  : '';
+// The weekly picks no name by filter value or rule (user 2026-10-09: "Remove the soi ma first, i will select the symbol to
+// review with weekly not follow by the filter value and rule"): a reel of a format with its own filter scenes and no
+// `leader` scene reviews only the names typed here, and the box says so. Every other reel keeps the copy below it.
+const picksChosen = picksOwn && !picksLeaders;
+// Where the typed names play (scaffold.mjs picksAfter): at the slot of the format's LAST saved-filter board, which is there
+// even when this edition prints no board (9/10: neither Momentum filter had a name) — so right after the last board the
+// reel shows, else after the sector ranking, else just before the VN-Index scenario.
+const picksSpecs = R.formats?.[reel.format]?.screener?.scenes ?? {};
+const picksBoardAt = [...reel.scenes].reverse().find((s) => picksSpecs[roleOf(s)]);
+const picksListAt = reel.scenes.find((s) => roleOf(s) === 'picklist');
+const picksAfter = picksListAt ? 'bảng «Mã đáng chú ý tuần sau»' : picksBoardAt ? `bảng ${esc(picksSpecs[roleOf(picksBoardAt)].photo ?? roleOf(picksBoardAt))}`
+  : reel.scenes.some((s) => roleOf(s) === 'sectors' || s.visual?.mode === 'sector') ? 'bảng xếp hạng ngành'
+    : 'các bảng, ngay trước kịch bản VN-Index';
+// A board that takes the picks onto itself (`board.addRequested`, the weekly's watchlist — user 2026-10-18: "allow me to
+// select the stock on this artifact to add directly to this table scene"): the copy says a pick lights up on it, and one
+// it does not list is added to it.
+const picksOnBoard = picksBoardAt && picksSpecs[roleOf(picksBoardAt)]?.board?.addRequested ? esc(picksSpecs[roleOf(picksBoardAt)].board.list ?? picksSpecs[roleOf(picksBoardAt)].photo ?? 'bảng') : null;
+const picksCopy = picksChosen
+  ? (R.formats?.[reel.format]?.roles ?? []).includes('picklist')
+    ? `Bấm «Chọn» ở dòng mã bên dưới (hoặc gõ mã rồi bấm Thêm) — tối đa ${picksMax} mã. Mỗi mã chọn là một dòng của bảng «Mã đáng chú ý tuần sau» (chip bộ lọc, giá theo dõi VƯỢT và giá lưu ý THỦNG)${picksOnBoard ? `; mã chưa có trên ${picksOnBoard} được THÊM vào cuối bảng đó (thẻ THÊM)` : ''}. Nút «Soi chart» ở mỗi mã đã chọn: bật = mã có scene soi chart riêng ngay sau ${picksAfter}, tắt = chỉ nằm trong bảng. Bản tuần chỉ soi những mã bạn chọn ở đây.`
+    : `Bấm «Chọn» ở dòng mã bên dưới (hoặc gõ mã rồi bấm Thêm) — tối đa ${picksMax} mã, mỗi mã một scene «Soi mã» ngay sau ${picksAfter}.${picksOnBoard ? ` Mã chọn sáng lên trên ${picksOnBoard}; mã chưa có trên bảng được THÊM vào cuối bảng (thẻ THÊM).` : ''} Bản tuần chỉ soi những mã bạn chọn ở đây.`
+  : `${picksIntro} (cột Bộ lọc ghi mã ở bộ lọc nào) — ${picksAuto}. Gõ mã muốn soi thêm (trong danh sách hoặc mã khác, tối đa ${picksMax} mã); mỗi mã thành một scene soi mã riêng, dựng như các scene soi mã đang có, đặt sau ${picksTaken.length ? esc(viList(picksTaken)) : picksAllThree ? 'các bảng bộ lọc' : 'các mã dẫn dắt'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").`;
+const picksNote = picksChosen && picksRows.length
+  ? `<p class="meta pick-note">Gợi ý:${picksPool.length ? (picksOnBoardName ? ` các mã của ${picksOnBoardName}, đúng thứ tự trên bảng (cột Bộ lọc ghi mã ở bộ lọc nào).` : ` các mã ở ${picksScenes.map((s) => esc(s.label)).join(' / ')} (cột Bộ lọc ghi mã ở bộ lọc nào).`) : ''}${picksStrongCopy} Gõ được cả mã ngoài danh sách.</p>`
+  : '';
+// "Mã cần cân nhắc · Soi thêm mã" (user 2026-10-10: "also include the section the stock must be consider provide for me a
+// input to input the stock on the artifact"): the input first, visible from the first paint in every view — before 10/10 it
+// stayed `hidden` until the page's db answered, so outside claude.ai (or with a slow or null runtime) there was no input.
+// Then the names typed, the line to send Claude when the page cannot save them, and the pool.
+const picksListed = (R.formats?.[reel.format]?.roles ?? []).includes('picklist');
+const picksBlock = picksEdition ? `<section class="card picks" id="picks" data-edition="${esc(picksKey)}" data-session="${esc(picksEdition)}" data-max="${picksMax}" data-taken="${esc(picksTaken.join(','))}"${picksListed ? ' data-listed="1"' : ''}>
+    <h3>Mã cần cân nhắc · Soi thêm mã</h3>
+    <p class="sub">${picksDown ? `Terminal chưa trả lời (${esc(picksDown)}), nên bản này chưa có danh sách mã của các bộ lọc và reel chưa soi mã nào. Vẫn gõ được mã muốn soi (tối đa ${picksMax} mã): khi terminal trả lời, mỗi mã thành một scene soi mã riêng, đặt sau ${picksChosen ? picksAfter : 'các mã của ba bộ lọc'}. Gõ xong, nhắn Claude "soi thêm mã" (hoặc "tiếp").` : `${picksCopy}${picksChosen ? '' : picksStrongCopy}`}</p>
+    <form id="pick-form" class="pick-form" autocomplete="off">
       <input id="pick-input" maxlength="3" placeholder="VD: PVT" aria-label="Mã cổ phiếu muốn soi thêm" spellcheck="false" autocapitalize="characters">
       <button type="submit">Thêm</button>
     </form>
     <ul id="pick-list" class="pick-list"></ul>
-    <p id="pick-status" class="meta" aria-live="polite">Mở trang này trên claude.ai để chọn mã soi thêm.</p>
+    <p id="pick-status" class="meta" aria-live="polite">Chưa có mã nào.</p>
+    <p id="pick-ask" class="pick-ask" hidden><span>Nhắn Claude:</span> <code id="pick-ask-text"></code> <button type="button" id="pick-copy">Sao chép</button></p>
+    ${picksNote}${picksRows.length ? `<table class="pick-pool">
+      <thead><tr><th>Mã</th><th>${picksStrong.length ? 'Bộ lọc · ngành' : 'Bộ lọc'}</th><th class="num">RS 1M</th><th class="num">% phiên</th><th>Chọn</th></tr></thead>
+      <tbody>${picksRows.map((r) => `<tr data-sym="${esc(r.sym)}"${r.reviewed ? ' class="reviewed"' : ''}><td class="sym">${esc(r.sym)}</td><td class="pick-filters">${r.filters.map((f) => `<span class="pick-filter">${esc(f)}</span>`).join('')}${picksAllTag && r.filters.length === picksScenes.length ? `<span class="pick-all">${picksAllTag}</span>` : ''}${r.groups.map((n) => `<span class="pick-filter">top ${picksTopN} · ${esc(n)}</span>`).join('')}</td><td class="num">${r.rs1m ?? '—'}</td><td class="num ${r.change >= 0 ? 'up' : 'down'}">${esc(fmtSigned(r.change))}</td><td>${r.reviewed ? '<span class="pick-tag">đã soi</span>' : `<button type="button" class="pick-toggle" data-sym="${esc(r.sym)}" aria-pressed="false" aria-label="Chọn ${esc(r.sym)} để soi">Chọn</button>`}</td></tr>`).join('')}</tbody>
+    </table>` : ''}
     <script type="application/json" id="pick-valid">${JSON.stringify(picksValid)}</script>
   </section>` : '';
+// The box works in every view. A name is on screen the moment it is typed; then, when the page's db answered AND the
+// viewer may write (user.can('data.write') not false, no refused write), it goes to the doc requests/<edition> exactly as
+// before ({edition, symbols, done, updatedAt} — the director reads it with ArtifactData). Otherwise — no runtime (outside
+// claude.ai, a preview), a null or slow db, a read-only viewer, a refused or failed write — the list stays in this
+// browser's localStorage (key per edition) and the box shows the line to send Claude, with a copy button. Names typed
+// before the db answered join the doc once its first snapshot arrives (union, at most data-max) and leave localStorage;
+// that is the only write the page makes without a click, and only when the doc lacks one of them.
 const picksScript = picksEdition ? `<script>
 (async function () {
   var box = document.getElementById('picks');
@@ -396,67 +478,303 @@ const picksScript = picksEdition ? `<script>
   var edition = box.dataset.edition, max = Number(box.dataset.max) || 3;
   var taken = box.dataset.taken ? box.dataset.taken.split(',') : [];
   var valid = new Set(JSON.parse((document.getElementById('pick-valid') || {}).textContent || '[]'));
-  var form = document.getElementById('pick-form'), input = document.getElementById('pick-input');
+  var form = document.getElementById('pick-form'), input = document.getElementById('pick-input'), add = form.querySelector('button');
   var list = document.getElementById('pick-list'), status = document.getElementById('pick-status');
-  var symbols = [], done = [], canWrite = false, busy = false, ref = null;
+  var ask = document.getElementById('pick-ask'), askText = document.getElementById('pick-ask-text'), copy = document.getElementById('pick-copy');
+  // The pool's «Chọn» buttons (2026-10-18): a click picks or drops that row's name, the same path as typing it.
+  var toggles = Array.prototype.slice.call(box.querySelectorAll('.pick-toggle'));
+  var KEY = 'chungvit.picks.' + edition;
+  // symbols: the names on screen. canWrite: they mirror the doc. Else: the doc's names (read-only view) + mine (this browser).
+  var symbols = [], done = [], docSyms = [], mine = [], canWrite = false, busy = false, want = null, ref = null;
+  // The picks list (2026-10-18): \`review\` = the names with a chart scene of their own; null = all of them.
+  var listed = box.dataset.listed === '1', review = null;
+  function charted(sym) { return !review || review.indexOf(sym) >= 0; }
+  function isTicker(t) { return typeof t === 'string' && /^[A-Z0-9]{3}$/.test(t); }
+  function union(a, b) { var out = []; a.concat(b).forEach(function (t) { if (isTicker(t) && out.indexOf(t) < 0) out.push(t); }); return out.slice(0, max); }
+  function loadMine() { try { var v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? union(v, []) : []; } catch (e) { return []; } }
+  function keepMine() { try { if (mine.length) localStorage.setItem(KEY, JSON.stringify(mine)); else localStorage.removeItem(KEY); } catch (e) {} }
   function say(t) { status.textContent = t; }
+  function idle() {
+    if (!symbols.length) return 'Chưa có mã nào.';
+    if (canWrite) return 'Đã lưu trên trang. Nhắn Claude "soi thêm mã" (hoặc "tiếp") để thêm scene.';
+    return mine.length ? 'Đã giữ trên máy này — nhắn Claude dòng dưới để thêm scene.' : 'Danh sách mã soi thêm.';
+  }
   function render() {
+    if (!canWrite) symbols = union(docSyms, mine);
     list.replaceChildren.apply(list, symbols.map(function (sym) {
       var li = document.createElement('li');
       li.className = 'pick-chip' + (done.indexOf(sym) >= 0 ? ' done' : '');
       var b = document.createElement('b'); b.textContent = sym; li.appendChild(b);
       var st = document.createElement('span'); st.textContent = done.indexOf(sym) >= 0 ? 'đã có scene' : 'chờ soi'; li.appendChild(st);
-      if (canWrite) {
+      if (listed) {
+        var on = charted(sym), c = document.createElement('button');
+        c.type = 'button'; c.className = 'pick-soi'; c.textContent = on ? 'Soi chart' : 'Chỉ trong bảng';
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+        c.setAttribute('aria-label', (on ? 'Bỏ scene soi chart của ' : 'Thêm scene soi chart cho ') + sym);
+        c.disabled = !canWrite;
+        c.addEventListener('click', function () { flip(sym); });
+        li.appendChild(c);
+      }
+      if (canWrite || mine.indexOf(sym) >= 0) {
         var x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Bỏ ' + sym);
-        x.addEventListener('click', function () { save(symbols.filter(function (t) { return t !== sym; })); });
+        x.addEventListener('click', function () { drop(sym); });
         li.appendChild(x);
       }
       return li;
     }));
-    form.hidden = !canWrite;
-    input.disabled = !canWrite || symbols.length >= max;
+    input.disabled = add.disabled = symbols.length >= max;
+    toggles.forEach(function (t) {
+      var sym = t.dataset.sym, on = symbols.indexOf(sym) >= 0, row = t.closest('tr');
+      t.textContent = on ? '✓ Đã chọn' : 'Chọn';
+      t.setAttribute('aria-pressed', on ? 'true' : 'false');
+      t.setAttribute('aria-label', (on ? 'Bỏ chọn ' : 'Chọn ') + sym);
+      t.disabled = on ? !canWrite && mine.indexOf(sym) < 0 : symbols.length >= max;
+      if (row) row.classList.toggle('picked', on);
+    });
+    askText.textContent = 'soi thêm mã ' + symbols.join(', ');
+    ask.hidden = canWrite || !symbols.length;
+  }
+  // The local fallback for the rest of the visit: every name on screen stays in this browser, the line to Claude shows.
+  function local(why) {
+    mine = union(mine, symbols); canWrite = false; keepMine(); render();
+    say(why + ' — danh sách giữ trên máy này; nhắn Claude dòng dưới.');
+  }
+  async function put(next) {
+    var body = {edition: edition, symbols: next, done: done.filter(function (t) { return next.indexOf(t) >= 0; }), updatedAt: new Date().toISOString()};
+    if (review) body.review = review.filter(function (t) { return next.indexOf(t) >= 0; });
+    try { await ref.set(body); }
+    catch (e) {
+      if (!e || e.code !== 'unavailable') throw e;
+      await new Promise(function (r) { setTimeout(r, 400 + Math.random() * 800); });
+      await ref.set(body);
+    }
   }
   async function save(next) {
+    want = next.slice();
     if (busy || !ref) return;
     busy = true; say('Đang lưu…');
     try {
-      await ref.set({edition: edition, symbols: next, done: done.filter(function (t) { return next.indexOf(t) >= 0; }), updatedAt: new Date().toISOString()});
+      while (want) { var w = want; want = null; await put(w); }
+      busy = false;
+      if (mine.length) { mine = []; keepMine(); }
+      say(idle());
     } catch (e) {
-      if (e && e.code === 'invalid_argument') { canWrite = false; render(); say('Trang này chỉ xem — không lưu được danh sách.'); }
-      else say('Chưa lưu được (' + ((e && e.code) || 'lỗi') + '). Thử lại sau giây lát.');
-    } finally { busy = false; }
+      busy = false; want = null;
+      if (e && (e.code === 'invalid_argument' || e.code === 'transform_error')) local('Trang này chỉ xem');
+      else local('Chưa lưu được lên trang (' + ((e && e.code) || 'lỗi') + ')');
+    }
   }
-  form.addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    var sym = input.value.trim().toUpperCase();
+  function flip(sym) {
+    if (!canWrite) return;
+    var cur = review ? review.slice() : symbols.slice();
+    review = cur.indexOf(sym) >= 0 ? cur.filter(function (t) { return t !== sym; }) : cur.concat([sym]);
+    render(); save(symbols);
+  }
+  function drop(sym) {
+    if (review) review = review.filter(function (t) { return t !== sym; });
+    if (canWrite) { symbols = symbols.filter(function (t) { return t !== sym; }); render(); save(symbols); return; }
+    mine = mine.filter(function (t) { return t !== sym; }); keepMine(); render(); say(idle());
+  }
+  function addSym(sym, typed) {
     if (!/^[A-Z0-9]{3}$/.test(sym)) return say('Mã gồm 3 ký tự, ví dụ FPT.');
     if (valid.size && !valid.has(sym)) return say(sym + ' không có trong danh sách mã của phiên ' + (box.dataset.session || edition) + '.');
     if (taken.indexOf(sym) >= 0) return say(sym + ' ${picksOwn ? 'đã có scene soi mã.' : 'đã có scene soi mã từ ba bộ lọc.'}');
     if (symbols.indexOf(sym) >= 0) return say(sym + ' đã có trong danh sách.');
     if (symbols.length >= max) return say('Tối đa ' + max + ' mã.');
-    input.value = '';
-    save(symbols.concat([sym]));
+    if (typed) input.value = '';
+    if (review) review = review.concat([sym]);
+    if (canWrite) { symbols = symbols.concat([sym]); render(); save(symbols); return; }
+    mine = union(mine, [sym]); keepMine(); render(); say(idle());
+  }
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    addSym(input.value.trim().toUpperCase(), true);
   });
-  var api = window.claude && window.claude.use ? window.claude : null;
-  var db = api ? await api.use('db') : null;
+  toggles.forEach(function (t) {
+    t.addEventListener('click', function () {
+      var sym = t.dataset.sym;
+      if (symbols.indexOf(sym) >= 0) drop(sym); else addSym(sym, false);
+    });
+  });
+  copy.addEventListener('click', function () {
+    var text = askText.textContent;
+    function pick() {
+      var ok = false;
+      try { var r = document.createRange(); r.selectNodeContents(askText); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); ok = document.execCommand('copy'); } catch (e) {}
+      say(ok ? 'Đã sao chép — dán vào khung chat với Claude.' : 'Đã chọn dòng — nhấn ⌘C hoặc Ctrl+C để sao chép.');
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { say('Đã sao chép — dán vào khung chat với Claude.'); }, pick);
+    else pick();
+  });
+  mine = loadMine();
+  render(); say(idle());
+  var api = window.claude && typeof window.claude.use === 'function' ? window.claude : null;
+  var db = null;
+  try { db = api ? await api.use('db') : null; } catch (e) { db = null; }
   if (!db) return;
-  var user = await api.use('user');
-  var can = user ? await user.can('data.write') : null;
-  canWrite = can !== false;
+  var user = null, can = null;
+  try { user = await api.use('user'); can = user ? await user.can('data.write') : null; } catch (e) { can = null; }
+  var writer = can !== false, first = true;
   ref = db.doc('requests/' + edition);
-  say(canWrite ? 'Chưa có mã nào.' : 'Chỉ xem.');
-  render();
   ref.onSnapshot(function (snap) {
     var d = snap.exists ? snap.data() : {};
-    symbols = Array.isArray(d.symbols) ? d.symbols.slice() : [];
+    docSyms = Array.isArray(d.symbols) ? d.symbols.filter(isTicker) : [];
     done = Array.isArray(d.done) ? d.done.slice() : [];
+    if (!busy && !want) review = Array.isArray(d.review) ? d.review.filter(isTicker) : null;
+    if (first) {
+      first = false;
+      if (writer) {
+        // Names typed here before the db answered (or on a visit without it) join the doc: union, at most max.
+        var merged = union(docSyms, mine), left = mine.filter(function (t) { return merged.indexOf(t) < 0; });
+        canWrite = true;
+        if (merged.length > docSyms.length) { symbols = merged; render(); save(merged).then(function () { if (left.length && canWrite) say('Đã lưu trên trang (đủ ' + max + ' mã) — chưa thêm ' + left.join(', ') + '.'); }); return; }
+        if (mine.length) { mine = []; keepMine(); }
+        symbols = docSyms.slice(); render();
+        return say(left.length ? 'Trang đã đủ ' + max + ' mã — chưa thêm ' + left.join(', ') + '.' : idle());
+      }
+    }
+    if (canWrite && !busy && !want) symbols = docSyms.slice();
     render();
-    if (!busy) say(symbols.length ? (canWrite ? 'Đã lưu. Nhắn Claude "soi thêm mã" (hoặc "tiếp") để thêm scene.' : 'Danh sách mã soi thêm.') : (canWrite ? 'Chưa có mã nào.' : 'Chỉ xem.'));
-  }, function (e) { say('Không đọc được danh sách (' + ((e && e.code) || 'lỗi') + ').'); });
+    if (!busy) say(idle());
+  }, function (e) { ref = null; local('Không đọc được danh sách trên trang (' + ((e && e.code) || 'lỗi') + ')'); });
 })();
 </script>` : '';
 
-const html = `<title>${EDITION ? `Tổng kết phiên ${esc(editionDmy)}` : `Duyệt reel ${esc(id)}`}</title>
+// ------------------------------------------------------------------ industry ranking (weekly)
+
+// "Xếp hạng ngành" (user 2026-10-09: "I don't see the major table ranking in this artifact review? Also add it to the
+// artifact of weekly for me" — 'major' = ngành): the pack's whole ICB level-2 ranking (lib/sectors.mjs sectorFacts) as a
+// table, the rows the reel's sector board draws tagged, then the groups too small to rank. Only a pack with `sectors.ok`
+// (the weekly); without it every string below is empty and the page is byte-identical (the daily).
+const SEC = facts?.sectors?.ok && Array.isArray(facts.sectors.groups) && facts.sectors.groups.length ? facts.sectors : null;
+const secAt = SEC ? reel.scenes.findIndex((s) => roleOf(s) === 'sectors' || s.visual?.mode === 'sector') : -1;
+const secScene = secAt >= 0 ? reel.scenes[secAt] : null;
+const secBoard = secScene?.visual?.rows ?? [];
+const secOn = new Set(secBoard.map((r) => r.name));
+const secLit = new Set(secBoard.filter((r) => r.focus).map((r) => r.name));
+const secLitBeat = (secScene?.visual?.emphasis ?? []).find((e) => e.set === 'focus')?.beat;
+const secStray = SEC ? [...secOn].filter((n) => !SEC.groups.some((g) => g.short === n)) : [];
+const secLastOn = SEC ? SEC.groups.reduce((k, g, i) => (secOn.has(g.short) ? i : k), -1) : -1;
+const secPrev = !!SEC?.comparedWith;
+const secCols = 8 + (secPrev ? 1 : 0);
+const secPct = (n) => (n == null ? '—' : `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n).toFixed(2).replace('.', ',')}%`);
+const secDir = (n) => (n > 0 ? ' up' : n < 0 ? ' down' : '');
+const secVol = SEC ? `${(SEC.minVolumeSma20 / 1000).toLocaleString('vi-VN')} nghìn cp` : '';
+const secWhen = (iso) => { const d = new Date(iso ?? ''); return Number.isNaN(d.getTime()) ? esc(iso ?? '—') : esc(d.toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric', year: 'numeric'})); };
+// The board prints the short label (rules.sectors.short); name it under the full one on the rows the board draws.
+const secName = (g) => `${esc(g.name)}${g.short && g.short !== g.name && secOn.has(g.short) ? `<span class="sec-short">bảng in: ${esc(g.short)}</span>` : ''}`;
+const secBlock = SEC ? `
+
+  <section class="card" id="sectors">
+    <h3>Xếp hạng ngành · ICB cấp 2</h3>
+    <p class="sub">${SEC.groups.length} nhóm xếp hạng theo RS 1M trung vị${SEC.unranked?.length ? `, ${SEC.unranked.length} nhóm không xếp (cuối bảng)` : ''}. ${secScene ? `Dòng gắn «trên bảng» là ${secOn.size} dòng bảng của scene ${String(secAt + 1).padStart(2, '0')} «${esc(secScene.eyebrow)}» vẽ${secLit.size ? `; «tô sáng» là ${secLit.size} nhóm sáng lên ở beat ${(secLitBeat ?? 0) + 1}` : ''}.` : 'Reel không có scene xếp hạng ngành.'}${secStray.length ? ` <b>Bảng có dòng không khớp pack: ${secStray.map(esc).join(', ')}.</b>` : ''}</p>
+    <div class="tbl"><table class="sector-rank">
+      <thead><tr><th class="num">#</th><th>Nhóm ngành</th><th class="num">Số mã</th><th class="num">RS 1M trung vị</th><th class="num">% tuần</th><th class="num">% mã trên SMA200</th><th>Mạnh nhất · RS 1M (trên bảng)</th>${secPrev ? `<th class="num">Hạng bản ${esc(dmOf(SEC.comparedWith))}</th>` : ''}<th></th></tr></thead>
+      <tbody>${SEC.groups.map((g, i) => `<tr${i === secLastOn && i < SEC.groups.length - 1 ? ' class="board-end"' : ''}><td class="num rank">${esc(g.rank)}</td><td>${secName(g)}</td><td class="num">${g.members ?? '—'}</td><td class="num">${g.rs1m ?? '—'}</td><td class="num${secDir(g.weekChangePercent)}">${secPct(g.weekChangePercent)}</td><td class="num">${g.aboveSma200Share == null ? '—' : `${g.aboveSma200Share}%`}</td><td class="sym">${Array.isArray(g.top) && g.top.length ? g.top.map((t) => `${esc(t.symbol)} ${t.rs1m ?? '—'}`).join(' · ') : g.strongest ? `${esc(g.strongest.symbol)} · ${g.strongest.rs1m ?? '—'}` : '—'}</td>${secPrev ? `<td class="num">${g.prevRank ?? '—'}</td>` : ''}<td><span class="tags">${secOn.has(g.short) ? '<span class="pick-tag">trên bảng</span>' : ''}${secLit.has(g.short) ? '<span class="pick-all">tô sáng</span>' : ''}</span></td></tr>`).join('')}</tbody>
+      ${SEC.unranked?.length ? `<tbody class="unranked"><tr class="sub-head"><td colspan="${secCols}">Không xếp hạng — dưới ${esc(SEC.minMembers)} mã có KL TB20 ≥ ${secVol}</td></tr>${SEC.unranked.map((g) => `<tr><td class="num">—</td><td>${secName(g)}</td><td class="num">${g.members ?? '—'}</td><td colspan="${secCols - 3}">${g.members ?? 0}/${esc(SEC.minMembers)} mã đủ thanh khoản — quá ít để lấy trung vị</td></tr>`).join('')}</tbody>` : ''}
+    </table></div>
+    <p class="meta" style="margin:12px 0 0">Nguồn ngành: ${esc(SEC.source)}, bản đồ tải ${secWhen(SEC.mapFetchedAt)} (terminal không có trường ngành) · thước đo: RS 1M trung vị${facts.session?.date ? ` phiên ${esc(dmOf(facts.session.date))}` : ''} của các mã trong nhóm có KL TB20 ≥ ${secVol}; % tuần và % mã trên SMA200 tính trên cùng các mã · so với: ${secPrev ? `bản tuần ${esc(dmOf(SEC.comparedWith))}` : 'chưa có bản tuần trước để so hạng'}.</p>
+  </section>` : '';
+const secCss = SEC ? `
+.sector-rank th.num,.sector-rank td.num{text-align:right;font-variant-numeric:tabular-nums}
+.sector-rank td.up{color:var(--pass)} .sector-rank td.down{color:var(--fail)}
+.sector-rank td.rank{color:var(--gold);font-weight:700}
+.sector-rank td.sym{font-family:"JetBrains Mono",monospace;white-space:nowrap}
+.sector-rank .sec-short{display:block;color:var(--ink-3);font-size:12px}
+.sector-rank .tags{display:flex;gap:6px;flex-wrap:wrap}
+.sector-rank tr.board-end td{border-bottom:2px solid var(--gold)}
+.sector-rank tr.sub-head td{background:var(--chip);color:var(--ink-3);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.sector-rank tbody.unranked td{color:var(--ink-2)}` : '';
+
+// ------------------------------------------------------------------ weekly top (2026-10-09)
+
+// The weekly's page opens on what the owner approves (director and trader-viewer review 2026-10-09): "Tuần này nói gì",
+// six plain lines from the pack and the content, right under the status strip; then the "Soi thêm mã" box (the weekly
+// reviews only the names typed there) and the ICB ranking; the director's conclusion folds to its first line. A strip
+// tile says how many names still fit the format's length. Weekly only — every string below is empty for any other reel,
+// and the daily page is byte-identical. A missing pack field prints "—".
+const WEEKLY = !!reel.rules && reel.format === 'weekly';
+const DASH = '—';
+/** Decimal points of the pack's own strings ("thủng đáy nhịp hồi 1651.2") written the page's way (1651,2). */
+const viNums = (t) => esc(String(t ?? '').replace(/(\d)\.(\d)/g, '$1,$2'));
+/** voiceover.mjs's sentence split: at [.!?…] + space, a straggler under three words folded into the sentence before. */
+const sentencesOf = (text) => String(text ?? '').replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s+/).map((x) => x.trim()).filter(Boolean)
+  .reduce((acc, p) => { if (acc.length && p.split(' ').length < 3) acc[acc.length - 1] += ` ${p}`; else acc.push(p); return acc; }, []);
+const written = (s) => !!s && typeof s.narration === 'string' && s.narration.trim() !== '' && !/^\s*TODO\b/.test(s.narration);
+/** The ticker a review scene (leader, pick) is about: its eyebrow "Soi mã · MSB", else its photo's file name. */
+const tickerOf = (s) => /·\s*([A-Z0-9]{3})\b/.exec(s.eyebrow ?? '')?.[1] ?? /(?:^|\/)([A-Z0-9]{3})(?=[-_.][^/]*$)/.exec(s.visual?.src ?? '')?.[1] ?? null;
+const reviewScenes = reel.scenes.filter((s) => ['leader', 'pick'].includes(roleOf(s)));
+const reviewNames = [...new Set(reviewScenes.map(tickerOf).filter(Boolean))];
+const weekRows = [];
+if (WEEKLY) {
+  const W = facts?.weekly ?? null, ST = facts?.state ?? null, DD = facts?.distribution ?? null, SC = facts?.scenario ?? null;
+  const pct = (n) => (typeof n === 'number' ? fmtSigned(n) : DASH);
+  const dmAt = (d) => (/^\d{4}-\d{2}-\d{2}$/.test(d ?? '') ? dmOf(d) : null);
+  // (a) the state from last Friday (the last snapshot before the week, weekly.comparedWith) to the edition's close, the
+  // distribution-day count and the week's change.
+  const trs = Array.isArray(W?.transitions) ? W.transitions : [];
+  const fromDm = dmAt(W?.comparedWith) ?? 'tuần trước', toDm = dmAt(W?.to) ?? facts?.session?.dm ?? 'nay';
+  const path = !ST?.label ? DASH
+    : trs.length ? `«${esc(trs[0].from ?? DASH)}» → ${trs.map((x) => `«${esc(x.to ?? DASH)}» (${esc(x.dm ?? DASH)})`).join(' → ')}`
+      : `giữ nguyên «${esc(ST.label)}»${ST.sinceDm ? ` (từ ${esc(ST.sinceDm)})` : ''}`;
+  const weekDd = Array.isArray(W?.distributionDays) ? W.distributionDays : null;
+  const ddText = typeof DD?.count === 'number'
+    ? `${DD.count}${DD.window ? `/${DD.window}` : ''} phiên phân phối${weekDd ? (weekDd.length ? `, tuần này thêm ${weekDd.length} (${weekDd.map((d) => esc(d.dm)).join(', ')})` : ', tuần này không thêm phiên nào') : ''}${DD.danger ? ' · đang ở mức nguy hiểm' : ''}`
+    : `${DASH} phiên phân phối`;
+  const weekText = W ? `VN-Index tuần ${esc(W.fromDm ?? DASH)} → ${esc(toDm)}: ${pct(W.changePercent)}${typeof W.prevClose === 'number' && typeof W.close === 'number' ? ` (${num(W.prevClose)} → ${num(W.close)})` : ''}` : `VN-Index tuần: ${DASH}`;
+  weekRows.push(['Trạng thái', `${esc(fromDm)} → ${esc(toDm)}: ${path} · ${ddText} · ${weekText}`]);
+  // (b) the plan's two levels: the first zone overhead and underneath (pack scenario), each with the next one as its "thì".
+  const zone = (z) => {
+    if (!z) return DASH;
+    const at = z.low != null && z.high != null && z.low !== z.high ? `${num(z.low)}–${num(z.high)}` : num(z.at ?? z.low ?? z.high ?? DASH);
+    const who = (z.members ?? []).map((m) => `${esc(m.name ?? DASH)}${m.dm ? ` ${esc(m.dm)}` : ''}`).join(' · ');
+    return `${at}${who ? ` (${who})` : ''}`;
+  };
+  const leg = (zs, verb) => (Array.isArray(zs) && zs.length ? `${verb} ${zone(zs[0])}${zs[1] ? ` → ${zone(zs[1])}` : ''}` : DASH);
+  weekRows.push(['Kịch bản', SC ? `tích cực: ${leg(SC.up, 'vượt')} · tiêu cực: ${leg(SC.down, 'thủng')}` : DASH]);
+  // (c) what changes the state next (pack watch[]); in a correction the next state needs a new FTD (the rule's day and %).
+  const ftdNeed = ST?.status === 'CORRECTION'
+    ? `cần một phiên FTD mới${facts?.rules?.ftdMinDay != null && facts?.rules?.ftdMinChangePercent != null ? ` (từ ngày ${esc(facts.rules.ftdMinDay)} của nỗ lực hồi phục, tăng từ ${num(facts.rules.ftdMinChangePercent)}% với khối lượng cao hơn)` : ''}`
+    : null;
+  const watchText = (Array.isArray(facts?.watch) ? facts.watch : []).map((x) => `${viNums(x.if ?? DASH)} → ${viNums(x.then ?? DASH)}`);
+  weekRows.push(['Đổi trạng thái khi', [ftdNeed, ...watchText].filter(Boolean).join(' · ') || DASH]);
+  // (d) the plan's action lines: the last two sentences of the watch scene ("Kịch bản VN-Index"), as the writer wrote them.
+  const watchScene = reel.scenes.find((s) => roleOf(s) === 'watch');
+  weekRows.push(['Hành động', !watchScene ? DASH : written(watchScene) ? `«${esc(sentencesOf(watchScene.narration).slice(-2).join(' '))}»` : 'chưa viết']);
+  // (e) the names on both Momentum boards and the names the reel reviews.
+  const board = (b, fallback) => (!b ? null : `${esc(b.filter ?? fallback)}${typeof b.count === 'number' ? ` (${b.count})` : ''}: ${Array.isArray(b.top) && b.top.length ? b.top.map((x) => esc(x.symbol)).join(', ') : 'không mã nào'}${typeof b.count === 'number' && Array.isArray(b.top) && b.count > b.top.length ? ` +${b.count - b.top.length}` : ''}`);
+  weekRows.push(['Momentum', [board(facts?.screener?.breakout, 'Momentum breakout'), board(facts?.screener?.breakdown, 'Momentum breakdown')].filter(Boolean).join(' · ') || DASH]);
+  weekRows.push(['Soi mã', reviewNames.length ? esc(reviewNames.join(', ')) : 'chưa có mã soi — chọn ở hộp dưới']);
+}
+const weekBlock = weekRows.length ? `<section class="card" id="week-summary">
+    <h3>Tuần này nói gì</h3>
+    <dl class="wsum">${weekRows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>
+  </section>` : '';
+// "Chỗ cho mã soi": the content's seconds (scene durations: estimated at scaffold, measured once voiced) against the top of
+// the format's band, ~14 s a review scene, capped by the names the box still takes.
+const PICK_SECONDS = 14;
+const band = R.formats?.[reel.format]?.totalSeconds;
+const bandTop = WEEKLY && Array.isArray(band) && typeof band[1] === 'number' ? band[1] : null;
+const pickScenes = reel.scenes.filter((s) => roleOf(s) === 'pick').length;
+const roomN = bandTop == null ? null : Math.max(0, Math.min(Math.floor((bandTop - total) / PICK_SECONDS), picksMax - pickScenes));
+const roomTile = roomN == null ? '' : `
+    <div class="tile ${roomN > 0 ? 'pass' : 'warn'}"><span class="k">Chỗ cho mã soi</span><span class="v small">còn chỗ cho ${roomN} mã</span><span class="tile-sub">~${Math.round(total)}s / trần ${num(bandTop)}s · ~${PICK_SECONDS}s mỗi mã${reviewScenes.length ? ` · đang soi ${reviewScenes.length} mã` : ''}</span></div>`;
+// The director's conclusion, folded to its first line on the weekly (the page opens on "Tuần này nói gì").
+const conclusionItem = (c) => (c.tag ? `<li><span class="sev ${LEVEL[c.level]?.[1] ?? 'pass'}">${esc(c.tag)}</span><span>${esc(c.text ?? '')}</span></li>` : `<li style="grid-template-columns:1fr"><span>${esc(c.text ?? '')}</span></li>`);
+const conclusionFold = WEEKLY && conclusion.length ? `<section class="card">
+    <h3>Kết luận của đạo diễn</h3>
+    <details class="concl"><summary>${conclusion[0].tag ? `<span class="sev ${LEVEL[conclusion[0].level]?.[1] ?? 'pass'}">${esc(conclusion[0].tag)}</span> ` : ''}${esc(conclusion[0].text ?? '')}</summary>${conclusion.length > 1 ? `<ul class="fixes">${conclusion.slice(1).map(conclusionItem).join('')}</ul>` : ''}</details>
+  </section>` : '';
+const weekCss = WEEKLY ? `
+.wsum{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:10px 18px;margin:0}
+.wsum dt{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:2px}
+.wsum dd{margin:0;max-width:80ch}
+.tile-sub{display:block;margin-top:6px;font-size:12px;color:var(--ink-3)}
+.concl summary{font-weight:500;color:var(--ink);line-height:1.5}
+.concl[open] summary{margin-bottom:12px}
+@media (max-width:720px){.wsum{grid-template-columns:1fr;gap:2px}.wsum dd{margin-bottom:8px}}` : '';
+
+const html = `<title>${EDITION ? `Tổng kết phiên ${esc(editionDmy)}` : reel.rules && reel.format === 'weekly' ? 'Tổng kết tuần' : `Duyệt reel ${esc(id)}`}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
 <style>
@@ -553,12 +871,18 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
 .pick-form{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .pick-form input{font:600 16px "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.06em;width:12ch;padding:8px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink)}
 .pick-form button{font:600 14px "Be Vietnam Pro",system-ui,sans-serif;padding:8px 16px;border-radius:8px;border:0;background:var(--gold);color:var(--surface);cursor:pointer}
-.pick-form input:focus-visible,.pick-form button:focus-visible,.pick-chip button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.pick-form input:focus-visible,.pick-form button:focus-visible,.pick-chip button:focus-visible,.pick-ask button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .pick-list{list-style:none;margin:0 0 8px;padding:0;display:flex;gap:8px;flex-wrap:wrap}
 .pick-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--chip);font-size:13px;color:var(--ink-2)}
 .pick-chip b{font-family:"JetBrains Mono",monospace;color:var(--ink);letter-spacing:.04em}
 .pick-chip.done{background:var(--pass-soft)}
 .pick-chip button{border:0;background:transparent;color:var(--ink-3);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+.pick-form input:disabled,.pick-form button:disabled{opacity:.55;cursor:not-allowed}
+.pick-ask{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border-radius:8px;background:var(--gold-soft);color:var(--ink);font-size:14px}
+.pick-ask[hidden]{display:none}
+.pick-ask code{font-weight:700;user-select:all}
+.pick-ask button{font:600 13px "Be Vietnam Pro",system-ui,sans-serif;padding:5px 12px;border-radius:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}
+.pick-note{max-width:72ch;margin:0 0 10px}
 .pick-pool{margin:0 0 16px;max-width:640px}
 .pick-filters{display:flex;gap:6px;flex-wrap:wrap}
 .pick-filter{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--ink-2);white-space:nowrap}
@@ -566,8 +890,17 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
 .pick-pool td.sym{font-family:"JetBrains Mono",monospace;font-weight:700;letter-spacing:.04em}
 .pick-pool td.up{color:var(--pass)} .pick-pool td.down{color:var(--fail)}
 .pick-pool tr.reviewed td{color:var(--ink-3)}
+.pick-pool tr.picked td{background:var(--gold-soft)}
+.pick-toggle{font:600 13px "Be Vietnam Pro",system-ui,sans-serif;padding:5px 12px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;white-space:nowrap}
+.pick-toggle[aria-pressed="true"]{background:var(--gold);color:var(--surface)}
+.pick-toggle:disabled{opacity:.45;cursor:not-allowed}
+.pick-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.pick-soi{font:600 12px "Be Vietnam Pro",system-ui,sans-serif;padding:2px 8px;border-radius:999px;border:1px solid var(--rule);background:transparent;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.pick-soi[aria-pressed="true"]{border-color:var(--pass);background:var(--pass-soft);color:var(--pass)}
+.pick-soi:disabled{opacity:.6;cursor:default}
+.pick-soi:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .pick-tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--pass-soft);color:var(--pass)}
-.prev-edition a{color:var(--gold);font-weight:600}
+.prev-edition a{color:var(--gold);font-weight:600}${secCss}${weekCss}
 </style>
 <div class="wrap">
   <div class="rule"></div>
@@ -582,8 +915,12 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
     <div class="tile ${cadence && cadence <= 5 ? 'pass' : 'warn'}"><span class="k">Nhịp đổi khung</span><span class="v">~${num(Math.round(cadence * 10) / 10)}s</span></div>
     <div class="tile"><span class="k">Chữ đọc</span><span class="v">${totalWords}${before ? ` <span style="font-size:14px;color:var(--ink-3);font-weight:500">(trước ${before.scenes.reduce((a, x) => a + words(x.narration), 0)})</span>` : ''}</span></div>
     <div class="tile ${nFail ? 'fail' : 'warn'}"><span class="k">Bước kế</span><span class="v small">${esc(nextStep)}</span></div>
-    <div class="tile"><span class="k">Nguồn</span><span class="v small">Số: ${esc(srcLabel)}${reconstructed ? ' · <b>CHUỖI DỰNG LẠI</b>' : ''}${facts?.daily ? ' · zionle.io.vn (ngày)' : ''}${imgSources.length ? ` · ảnh: ${imgSources.map(esc).join(', ')}` : ''}</span></div>
-  </div>
+    <div class="tile"><span class="k">Nguồn</span><span class="v small">Số: ${esc(srcLabel)}${reconstructed ? ' · <b>CHUỖI DỰNG LẠI</b>' : ''}${facts?.daily ? ' · zionle.io.vn (ngày)' : ''}${imgSources.length ? ` · ảnh: ${imgSources.map(esc).join(', ')}` : ''}</span></div>${roomTile}
+  </div>${WEEKLY ? `
+
+  ${weekBlock}
+
+  ${picksBlock}${secBlock}` : ''}
 
   ${VIDEO ? `<section class="card" style="margin:0 0 28px">
     <h3>Video — xem như trên điện thoại</h3>
@@ -591,12 +928,12 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offs
     ${opt('video-note') ? `<p class="meta" style="margin:10px 0 0">${esc(opt('video-note'))}</p>` : ''}
   </section>` : ''}
 
-  ${conclusion.length ? `<section class="card">
+  ${WEEKLY ? conclusionFold : conclusion.length ? `<section class="card">
     <h3>Kết luận của đạo diễn</h3>
-    <ul class="fixes">${conclusion.map((c) => `<li><span class="sev ${LEVEL[c.level]?.[1] ?? 'pass'}">${esc(c.tag ?? '')}</span><span>${esc(c.text ?? '')}</span></li>`).join('')}</ul>
+    <ul class="fixes">${conclusion.map((c) => (c.tag ? `<li><span class="sev ${LEVEL[c.level]?.[1] ?? 'pass'}">${esc(c.tag)}</span><span>${esc(c.text ?? '')}</span></li>` : `<li style="grid-template-columns:1fr"><span>${esc(c.text ?? '')}</span></li>`)).join('')}</ul>
   </section>` : ''}
 
-  ${picksBlock}
+  ${WEEKLY ? '' : `${picksBlock}${secBlock}`}
 
   ${reel.unsupported?.length ? `<section>
     <h3>Ý đồ mà fact pack không đỡ được — đọc trước khi duyệt</h3>

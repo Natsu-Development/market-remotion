@@ -8,12 +8,17 @@
  * Per group, the members are the stocks with volume_sma20 ≥ rules.sectors.minVolumeSma20 and an RS 1M. The group shows
  * their count, their median RS 1M (whole), the median % change of the week (SSI closes cached by breadth.mjs through
  * lib/stock-bars.mjs — null when fewer than half the members have bars; nothing here goes to the network), the share of
- * members with an SMA200 whose price is above it (whole %), and its strongest member by RS 1M (brief only). Groups with
+ * members with an SMA200 whose price is above it (whole %), and its rules.sectors.topPerGroup (3) strongest members by
+ * RS 1M (`top`, strongest first — printed on the board's row since 2026-10-09; `strongest` = top[0]). Groups with
  * fewer than rules.sectors.minMembers members are listed under `unranked`, never ranked (5/10: Bảo hiểm had one liquid
  * stock at RS 92 and would have topped the table). Order: median RS 1M, then more members, then the ICB code.
  *
  *   sectorFacts({date, R})   the pack block `sectors`, or {ok: false, why} when the universe cache or the map is missing
  *   sectorBoard({S, R})      the board visual (mode 'sector', src/scenes/FilterBoard.tsx) and the brief's row lines
+ *   sectorLeaderOf({S, R, format, taken, noChart})
+ *                            the edition's sector leader (pack sectors.review): the strongest stock of the #1 group, else
+ *                            of #2 … #5 (rules.formats.<format>.sectors.leader), skipping a name already reviewed or
+ *                            without a chart — user 2026-10-10: "Get one of stock on this marjor best ranking to review"
  */
 import {readdirSync} from 'node:fs';
 import {PATHS, abs, round, signed, tryJson, vi} from './common.mjs';
@@ -52,6 +57,7 @@ export function sectorFacts({date, R}) {
   if (!map?.groups?.length) return {ok: false, why: `no ${mapPath} — run node scripts/review/industries.mjs`};
   const floor = SR.minVolumeSma20 ?? 100000;
   const minMembers = SR.minMembers ?? 5;
+  const perGroup = Math.max(1, Math.min(3, SR.topPerGroup ?? 3));
   const bySym = new Map(uni.map((s) => [s.symbol, s]));
 
   const rows = map.groups.map((g) => {
@@ -59,7 +65,19 @@ export function sectorFacts({date, R}) {
     const weeks = members.map((s) => weekChangePercent(readBars(date, s.symbol), date));
     const priced = weeks.filter((x) => x != null).length;
     const withSma = members.filter((s) => s.sma_200 > 0);
-    const best = [...members].sort((a, b) => b.rs_1m - a.rs_1m || b.volume_sma20 - a.volume_sma20 || a.symbol.localeCompare(b.symbol))[0];
+    // The group's strongest liquid members by RS 1M (ties: RS 3M, then the symbol), rules.sectors.topPerGroup of them
+    // (user 2026-10-09: "With the scene 05 also listing 2-3 stock with this major ranking?"): the board prints their
+    // tickers on the group's row, strongest first. `strongest` stays top[0] for the readers written before.
+    const top = members
+      .map((s, i) => ({s, wk: weeks[i]}))
+      .sort((a, b) => b.s.rs_1m - a.s.rs_1m || (b.s.rs_3m ?? -1) - (a.s.rs_3m ?? -1) || a.s.symbol.localeCompare(b.s.symbol))
+      .slice(0, perGroup)
+      .map(({s, wk}) => ({
+        symbol: s.symbol,
+        rs1m: s.rs_1m,
+        changePercent: Number.isFinite(s.price_change_pct) ? round(s.price_change_pct, 2) : null,
+        ...(wk != null ? {weekChangePercent: round(wk, 2)} : {}),
+      }));
     const rs = median(members.map((s) => s.rs_1m));
     const wk = members.length && priced * 2 >= members.length ? median(weeks) : null;
     return {
@@ -70,7 +88,8 @@ export function sectorFacts({date, R}) {
       rs1m: rs == null ? null : Math.round(rs),
       weekChangePercent: wk == null ? null : round(wk, 2),
       aboveSma200Share: withSma.length ? Math.round((100 * withSma.filter((s) => s.current_price > s.sma_200).length) / withSma.length) : null,
-      strongest: best ? {symbol: best.symbol, rs1m: best.rs_1m} : null,
+      top,
+      strongest: top[0] ? {symbol: top[0].symbol, rs1m: top[0].rs1m} : null,
       _rs: rs,
     };
   });
@@ -86,6 +105,7 @@ export function sectorFacts({date, R}) {
     mapFetchedAt: map.fetchedAt,
     minVolumeSma20: floor,
     minMembers,
+    topPerGroup: perGroup,
     sortBy: 'medianRs1m',
     comparedWith: prev?.date ?? null,
     groups: ranked.map((r, i) => ({rank: i + 1, ...strip(r), prevRank: prev?.ranks.get(r.code) ?? null})),
@@ -94,20 +114,53 @@ export function sectorFacts({date, R}) {
   };
 }
 
+/**
+ * The sector leader of an edition (user 2026-10-10: "Get one of stock on this marjor best ranking to review 1-5 ranking"):
+ * rules.formats.<format>.sectors.leader = {fromRanks: [1, 5], pick: 'strongest', count: 1}. The candidates are the
+ * strongest liquid stock (top[0], highest RS 1M) of each ranked group from fromRanks[0] to fromRanks[1], in rank order;
+ * the pick is the first one that is not `taken` (a name with a review scene of its own — the user's requested names) and
+ * does not lack a chart (`noChart(sym)` gives the reason, else null). Returns null when the format has no leader rule or
+ * the block did not rank; else {symbol, group, groupRank, rs1m, reason, skipped: [{symbol, groupRank, why}]} with
+ * symbol null when every candidate was skipped.
+ */
+export function sectorLeaderOf({S, R, format, taken = [], noChart = () => null}) {
+  const L = R.formats?.[format]?.sectors?.leader;
+  if (!L || !S?.ok || !S.groups?.length) return null;
+  const [from, to] = [].concat(L.fromRanks ?? [1, 5]).map(Number);
+  if ((L.pick ?? 'strongest') !== 'strongest') throw new Error(`rules.formats.${format}.sectors.leader.pick "${L.pick}" — only "strongest" (the group's top[0] by RS 1M)`);
+  const skipped = [];
+  for (const g of S.groups.filter((x) => x.rank >= (from || 1) && x.rank <= (to || from || 1))) {
+    const c = g.top?.[0] ?? g.strongest;
+    if (!c?.symbol) { skipped.push({symbol: null, groupRank: g.rank, why: `#${g.rank} ${g.name} has no liquid stock with an RS 1M`}); continue; }
+    if (taken.includes(c.symbol)) { skipped.push({symbol: c.symbol, groupRank: g.rank, why: `${c.symbol} (#${g.rank} ${g.name}) already has a review scene — a name the user requested`}); continue; }
+    const why = noChart(c.symbol);
+    if (why) { skipped.push({symbol: c.symbol, groupRank: g.rank, why: `${c.symbol} (#${g.rank} ${g.name}) lacks a chart — ${why}`}); continue; }
+    const lead = g.rank === S.groups[0].rank;
+    return {
+      symbol: c.symbol, group: g.name, groupShort: g.short, groupRank: g.rank, rs1m: c.rs1m,
+      reason: `the strongest stock (RS 1M ${c.rs1m}) of the #${g.rank} ICB group ${g.name}${lead ? '' : ` — ${skipped.map((x) => x.why).join('; ')}`}`,
+      skipped,
+    };
+  }
+  return {symbol: null, group: null, groupRank: null, rs1m: null, reason: `no candidate in ranks ${from}–${to}: ${skipped.map((x) => x.why).join('; ') || 'no ranked group'}`, skipped};
+}
+
 const FOCUS_LABEL = ['', 'Nhóm ngành dẫn đầu', 'Hai nhóm ngành dẫn đầu', 'Ba nhóm ngành dẫn đầu'];
 
 /**
  * The drawn ranking: one row per ranked group, at most rules.sectors.top (≤ 10), the strongest three lit on beat 2.
  * Rows carry the figures as the board prints them (members and the shares whole, the week's change 2dp), so verify's
- * facts check traces each one to the pack.
+ * facts check traces each one to the pack, and (column `topSymbols`, 2026-10-09) the group's strongest tickers in the
+ * pack's `top` order — verify review-sectors compares them.
  */
 export function sectorBoard({S, R}) {
   const SR = R.sectors ?? {};
-  const columns = SR.columns ?? ['members', 'rs1m', 'weekChange', 'aboveSma200Share'];
+  const columns = SR.columns ?? ['topSymbols', 'members', 'rs1m', 'weekChange', 'aboveSma200Share'];
   const top = S.groups.slice(0, Math.min(SR.top ?? 10, 10));
   const nFocus = Math.min(SR.focus ?? 3, top.length, 3);
   const rows = top.map((g, i) => ({
     name: g.short,
+    ...(columns.includes('topSymbols') && g.top?.length ? {topSymbols: g.top.map((t) => t.symbol)} : {}),
     members: g.members,
     rs1m: g.rs1m,
     ...(columns.includes('weekChange') && g.weekChangePercent != null ? {weekChangePercent: g.weekChangePercent} : {}),
@@ -128,7 +181,7 @@ export function sectorBoard({S, R}) {
     `RS 1M trung vị ${g.rs1m}`,
     g.weekChangePercent != null ? `tuần ${signed(g.weekChangePercent)}%` : 'tuần —',
     g.aboveSma200Share != null ? `${g.aboveSma200Share}% trên SMA200` : null,
-    g.strongest ? `mạnh nhất ${g.strongest.symbol} (RS 1M ${g.strongest.rs1m})` : null,
+    g.top?.length ? `mạnh nhất (RS 1M, in trên bảng) ${g.top.map((t) => `${t.symbol} ${t.rs1m}`).join(', ')}` : g.strongest ? `mạnh nhất ${g.strongest.symbol} (RS 1M ${g.strongest.rs1m})` : null,
     g.prevRank != null ? `tuần trước hạng ${g.prevRank}` : null,
   ].filter(Boolean).join(' · '));
   return {visual, rowLines, top, focus: top.slice(0, nFocus), label, floorText: vi(S.minVolumeSma20 / 1000, 0)};

@@ -1,25 +1,20 @@
 {
- "source": "ssi",
- "sourceLabel": "SSI iBoard",
- "symbol": "VNINDEX",
- "resolution": "daily",
- "reconstructed": false,
- "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400",
- "from": "2013-01-02",
- "to": "2026-10-15",
- "bars": 3416,
- "fetchedAt": "2026-10-15T14:28:27.856Z",
- "droppedIntraday": null,
- "volumeUnit": "matched shares per session",
- "sameDayLow": {
-  "date": "2026-10-15",
-  "l": 1694.77,
-  "source": "FireAnt VNINDEX 1D legend \"O1701.20 H1709.54 L1694.77 C1698.35\" at 20:37:57 ICT (public/shots/review/2026-10-15/vnindex-daily.png) = DNSE Entrade 1D bar (services.entrade.com.vn chart-api v2, l 1694.77) fetched 20:50 ICT",
-  "ssiProvisional": {
-   "l": 1690.56,
-   "fetchedAt": "2026-10-15T13:36:23.880Z"
+  "overrides": {
+    "file": "content/review/vnindex.daily.overrides.json",
+    "applied": [
+      "2026-10-15 l 1691.18 → 1694.77"
+    ]
   },
-  "note": "SSI same-day lows are provisional (8/10 1726,00 → final 1737,95; 14/10 1699,23 → final 1700,74). The next pull.mjs replaces this with the SSI bar — re-pull before approve and re-apply if SSI still reads 1690.56.",
-  "reapplied": "after the pre-approve re-pull at 21:29:01 ICT — SSI still provisional (1690.56)"
- }
+  "source": "ssi",
+  "sourceLabel": "SSI iBoard",
+  "symbol": "VNINDEX",
+  "resolution": "daily",
+  "reconstructed": false,
+  "url": "https://iboard-api.ssi.com.vn/statistics/charts/history?resolution=1D&symbol=VNINDEX&from=1356998400",
+  "from": "2013-01-02",
+  "to": "2026-10-22",
+  "bars": 3421,
+  "fetchedAt": "2026-10-22T11:14:31.862Z",
+  "droppedIntraday": null,
+  "volumeUnit": "matched shares per session"
 }

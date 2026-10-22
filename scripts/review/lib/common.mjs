@@ -112,12 +112,26 @@ export const configId = () => {
   die('no zionle config id — put it in .zionle-config or $ZIONLE_CONFIG_ID (CLAUDE.md, "Nguồn dữ liệu")');
 };
 
+/**
+ * Where the terminal answers (user 2026-10-22: zionle.io.vn gave 522 all afternoon and the user served the same app from
+ * their Ubuntu machine through ngrok — "access to the location: https://….ngrok-free.app/ with user zion"): $ZIONLE_ORIGIN,
+ * else the gitignored .zionle-origin, else https://zionle.io.vn. Same app, same API, same config id; only the host changes.
+ */
+export const zionleOrigin = () => {
+  const f = abs('.zionle-origin');
+  const v = process.env.ZIONLE_ORIGIN?.trim() || (existsSync(f) ? readFileSync(f, 'utf8').trim() : '');
+  return (v || 'https://zionle.io.vn').replace(/\/+$/, '');
+};
+
+/** ngrok's free tunnels answer an HTML warning page instead of the API unless the request carries this header. */
+const hostHeaders = (url) => (/\.ngrok(-free)?\.(app|dev|io)$/.test(new URL(url).hostname) ? {'ngrok-skip-browser-warning': '1'} : {});
+
 const request = async (url, {method = 'GET', body, timeout = 45000} = {}) => {
   let res;
   try {
     res = await fetch(url, {
       method,
-      headers: body === undefined ? UA : {...UA, 'Content-Type': 'application/json'},
+      headers: {...UA, ...hostHeaders(url), ...(body === undefined ? {} : {'Content-Type': 'application/json'})},
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(timeout),
     });
@@ -140,7 +154,7 @@ export const zionle = async (path, {body, withId = true, timeout} = {}) => {
   if (body !== undefined && path !== rules().screener.endpoint) {
     throw new Error(`refusing POST ${path}: the only POST this skill may send is ${rules().screener.endpoint} (user rule, 2026-09-29)`);
   }
-  const url = new URL(path, 'https://zionle.io.vn');
+  const url = new URL(path, zionleOrigin());
   if (withId) url.searchParams.set('config_id', configId());
   return request(url.toString(), {method: body === undefined ? 'GET' : 'POST', body, timeout});
 };

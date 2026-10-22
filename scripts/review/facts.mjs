@@ -5,6 +5,8 @@
  *   node scripts/review/facts.mjs --format=daily            latest pulled session
  *   node scripts/review/facts.mjs --format=weekly --date=2026-10-02
  *   node scripts/review/facts.mjs --format=daily --date=2026-10-02 --out=content/review/archive/2026-10-02-daily.facts.json
+ *   node scripts/review/facts.mjs --format=weekly --no-chart=PVP   the weekly's sector leader skips PVP (FireAnt could not
+ *                                                                  draw it) and falls to the next group's strongest
  *                                                           a past session's pack, the live one untouched
  *
  * Reads content/review/vnindex.daily.json, the session's snapshot (and, for the weekly
@@ -20,8 +22,8 @@ import {PATHS, cli, die, dm, dmy, exists, ict, readJson, round, rules, tryJson, 
 import {analyze, backtest} from './lib/market-state.mjs';
 import {citedNumbers, levelsOf, loadReview, reviewPath, swingsOf, validateReview} from './lib/symbol-review.mjs';
 import {FLOW_PHOTO, flowFacts} from './lib/fireant-flow.mjs';
-import {compactRow, readRequests, requestKey, requestsPath} from './lib/requested.mjs';
-import {sectorFacts} from './lib/sectors.mjs';
+import {compactRow, readRequests, requestKey, requestMax, requestsPath} from './lib/requested.mjs';
+import {sectorFacts, sectorLeaderOf} from './lib/sectors.mjs';
 import {structureOf} from './lib/symbol-review.mjs';
 import {weeklyBars} from './lib/week-fireant.mjs';
 import {readBars as readStockBars, weekChangePercent as stockWeekChange} from './lib/stock-bars.mjs';
@@ -102,6 +104,14 @@ const session = {
     while (i >= 0 && (down ? bars[i].c >= mark : bars[i].c <= mark)) i--;
     return {level: mark, direction: down ? 'down' : 'up', lastSide: i >= 0 ? {date: bars[i].t, dm: dm(bars[i].t), close: round(bars[i].c, 2)} : null};
   })(),
+  /**
+   * The price gap the session left open (user 2026-10-22: "thanh khoản cao nhưng hiện tại đang có gap khoảng giá"): today's
+   * low above yesterday's high (up) or today's high under yesterday's low (down) — the band no trade touched, still open
+   * at the close by definition. 22/10: 1738,91 → 1746,15.
+   */
+  gap: last.l > prev.h ? {direction: 'up', from: round(prev.h, 2), to: round(last.l, 2), points: round(last.l - prev.h, 2)}
+    : last.h < prev.l ? {direction: 'down', from: round(last.h, 2), to: round(prev.l, 2), points: round(prev.l - last.h, 2)}
+      : null,
   /** Advancers and decliners of the session, per exchange, from the screener's universe (the hook's opener). */
   breadthToday: (() => {
     const uni = tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? [];
@@ -335,20 +345,66 @@ const weekOf = (sym) => {
   const w = stockWeekChange(readStockBars(date, sym), date);
   return w == null ? null : round(w, 2);
 };
+// How many rows of the session's universe carry ANY of the terminal's signal flags (trendline breakout/breakdown, RSI
+// divergence). 0 = the flags were not computed for that cache — 9/10/2026: the terminal came back after an outage with a
+// 15:00 cache whose 1492 rows carry no signal at all (8/10: 187/239 breakout, 170/127 breakdown, 54/34 RSI) — so an empty
+// Momentum filter is missing data, not a market fact; scaffold drops its board instead of drawing it empty. null = no
+// universe cache on disk.
+const SIGNAL_FLAGS = ['has_breakout_confirmed', 'has_breakout_potential', 'has_breakdown_confirmed', 'has_breakdown_potential', 'has_bullish_rsi', 'has_bearish_rsi'];
+const universeSignals = (() => {
+  const uni = tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks;
+  return uni ? uni.filter((r) => SIGNAL_FLAGS.some((f) => r[f] === true)).length : null;
+})();
+// The edition's requested names (the review page's picks), read here: the weekly's watchlist adds the ones that are not its
+// rows (below); the pick scenes are built from them further down.
+const REQ = readRequests(date, R, opt('requests') ?? requestsPath(requestKey(FORMAT, date)), FORMAT);
+/** A board row for any name of the session: the snapshot's row, else the cached universe's (a name no scene ranked). */
+const anyRow = (sym) => {
+  if (snap.rows?.[sym]) return rowOf(sym);
+  const u = (tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? []).find((x) => x.symbol === sym);
+  return u ? {symbol: sym, ...compactRow(u)} : null;
+};
+/**
+ * The names the user picked that are not rows of a board whose spec says `board.addRequested` (the weekly's watchlist, user
+ * 2026-10-18: "allow me to select the stock on this artifact to add directly to this table scene"): appended after its rows,
+ * in the order picked, `added: true` (FilterBoard draws the chip THÊM), with the filters that found them like any row.
+ */
+const addedRows = (spec, top, kind) => {
+  const picks = REQ?.listed ?? REQ?.symbols ?? [];
+  if (!spec.board?.addRequested || !picks.length) return [];
+  const on = new Set(top.map((x) => x.symbol));
+  const out = [];
+  for (const sym of picks.filter((x) => !on.has(x)).slice(0, requestMax(R, FORMAT))) {
+    const r = anyRow(sym);
+    if (!r) { console.warn(`watchlist: ${sym} (picked) is not in the ${date} universe — not added to the table`); continue; }
+    out.push({...show(r, top.length + out.length + 1), ...trendOf(r), rs3m: r.rs_3m ?? null, signal: signalOf(r, kind), weekChangePercent: weekOf(sym), added: true});
+  }
+  return out;
+};
 const ownTables = Object.fromEntries(Object.entries(ownScenes).map(([k, spec]) => {
   const t = tableScene(k);
   const kind = spec.board?.signal ?? null;
   const rows = (snap.members[k] ?? []).map(rowOf);
   const weeks = rows.map((r) => weekOf(r.symbol)).filter((w) => w != null);
+  // A union scene (the weekly's watchlist, 2026-10-18): its count is the names ANY of its filters found, and it carries each
+  // filter's own count — its `photo` is the table's name, not a saved filter.
+  const union = spec.match === 'any' || spec.match === 'base' ? {count: (snap.members[k] ?? []).length, sources: spec.filters.map((n) => ({filter: n, count: snap.filters?.[n]?.count ?? null}))} : {};
   return [k, {
     ...t,
+    ...union,
     signalKind: kind,
     confirmed: rows.filter((r) => signalOf(r, kind) === 'confirmed').length,
     potential: rows.filter((r) => signalOf(r, kind) === 'potential').length,
     weekUp: weeks.filter((w) => w > 0).length,
     weekDown: weeks.filter((w) => w < 0).length,
     weekOf: weekStart(date),
-    top: t.top.map((x) => ({...x, rs3m: snap.rows[x.symbol]?.rs_3m ?? null, signal: signalOf(rowOf(x.symbol), kind), weekChangePercent: weekOf(x.symbol)})),
+    universeSignals,
+    top: [
+      // A union / base table's chips are its own filters only (the daily's shortlist shows RS Strong and Uptrend, 2026-10-19 —
+      // the Volume spike board is a scene of its own).
+      ...t.top.map((x) => ({...x, ...(union.count != null ? {filters: (x.filters ?? []).filter((f) => spec.filters.includes(f))} : {}), rs3m: snap.rows[x.symbol]?.rs_3m ?? null, signal: signalOf(rowOf(x.symbol), kind), weekChangePercent: weekOf(x.symbol)})),
+      ...addedRows(spec, t.top, kind),
+    ],
   }];
 }));
 // The chart countdown: rules.screener.leaders.from is a list of TIERS of scene keys — the names in all
@@ -376,7 +432,10 @@ const pool = (snap.members.leaders ?? []).filter(inTiers);
 // snap.picks.leaders is the head of that tier-ordered pool, so the picks inside the format's tiers are exactly the head
 // of the format's own pool: a later tier's name is only ever picked after every name of the earlier tiers.
 const picksAll = snap.picks.leaders ?? [];
-const picksKept = picksAll.filter(inTiers);
+// The edition's requests file may drop a rule pick (`skip`, user 2026-10-20: "Remove the ORS review") — that edition only.
+const skipped = new Set(REQ?.skip ?? []);
+const picksKept = picksAll.filter(inTiers).filter((s) => !skipped.has(s));
+if (picksAll.some((s) => skipped.has(s))) console.log(`${FORMAT}: ${picksAll.filter((s) => skipped.has(s)).join(', ')} not reviewed — skipped by ${REQ.path} (${REQ.source ?? 'requests file'})`);
 const tierWords = (t) => filtersOfTier(t).join(' ∩ ');
 {
   const left = picksAll.filter((s) => !inTiers(s));
@@ -434,9 +493,16 @@ if (snap.leaders && JSON.stringify(normTiers(snap.leaders.from)) !== JSON.string
  * tier order, each right after its own board, so top[k] is review scene k and top[k].tierScene the board that leads into
  * it. Rows are shaped like the daily leaders' (leaderDetail + review), so the leader scene, shots.mjs and symbol-review
  * read them unchanged. null for a format without its own leaders — the pack then carries `leaders` above.
+ * A format whose own leaders pick nothing (`top: 0` / `from: []` — the weekly since 2026-10-09, user: "i will select the
+ * symbol to review with weekly not follow by the filter value and rule") carries an EMPTY block, never the daily's leaders:
+ * its reviews are the requested names below.
  */
 const weeklyLeaders = fmt.screener?.leaders ? (() => {
   const FL = fmt.screener.leaders;
+  if (!((FL.top ?? 2) > 0) || ![].concat(FL.from ?? []).flat().length) {
+    console.log(`${FORMAT}: no review picked by rule (rules.formats.${FORMAT}.screener.leaders) — the reviews are the names requested on the review page`);
+    return {from: [], order: null, perTier: null, filters: [], tiers: [], count: 0, top: [], alsoSpiking: [], byRule: false};
+  }
   const ftiers = normTiers(FL.from);
   const got = snap.leadersByFormat?.[FORMAT];
   if (!got) console.warn(`${FORMAT}: the ${date} snapshot has no leadersByFormat.${FORMAT} (pulled before 2026-10-06) — run node scripts/review/pull.mjs --rebuild --as-of=${date}; no review scene`);
@@ -461,12 +527,11 @@ const weeklyLeaders = fmt.screener?.leaders ? (() => {
 // --requests=<file>: another requests file (a staging copy) in place of content/review/requests/<date>.json.
 // A non-daily format reads its own requests (content/review/requests/<date>-<format>.json): the daily of the same
 // session keys its file by the bare date, and the first weekly test (5/10) built the daily's VIC pick (2026-10-06).
-const REQ = readRequests(date, R, opt('requests') ?? requestsPath(requestKey(FORMAT, date)));
 const requested = (() => {
   if (!REQ) return [];
   const uni = tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? [];
   const leaderSyms = new Set((weeklyLeaders ?? leaders).top.map((x) => x.symbol));
-  if (REQ.dropped.length) console.warn(`requests: ${REQ.dropped.join(', ')} past rules.screener.requested.max (${R.screener?.requested?.max ?? 3}) — not reviewed`);
+  if (REQ.dropped.length) console.warn(`requests: ${REQ.dropped.join(', ')} past the requests cap (${requestMax(R, FORMAT)}, rules.formats.${FORMAT}.screener.requested.max else rules.screener.requested.max) — not reviewed`);
   if (REQ.invalid.length) console.warn(`requests: ${REQ.invalid.join(', ')} are not tickers — ignored`);
   return REQ.symbols.flatMap((sym) => {
     if (leaderSyms.has(sym)) { console.warn(`requests: ${sym} is already a leader of ${date} — it has its scene`); return []; }
@@ -478,6 +543,44 @@ const requested = (() => {
     return [{...leaderDetail(sym, 0, row, exists(rel) ? rel : null), review: reviewOf(sym), requested: true}];
   }).map((x, i) => ({...x, rank: i + 1}));
 })();
+/**
+ * The weekly's "Mã đáng chú ý tuần sau" (role picklist — user 2026-10-18: "Also have scene for all my picked stock and its
+ * filter, also include the price must be monitor and notice"): EVERY pick — the reviewed ones first, in review order, then
+ * the listed-only ones — with its filters and the two prices its symbol review watches: the first "nếu … thì" branch that
+ * closes ABOVE a price (watchUp — "vượt", "trên") and the first that closes UNDER one (watchDown — "dưới", "thủng"). A pick
+ * with no valid review is listed without prices.
+ */
+const PRICE_RE = /(?<![\p{L}\d.,])(\d{1,3}(?:\.\d{3})*(?:,\d+)?)(?![\p{L}\d])/u;
+const levelOf = (branches, keyRe, notRe = null) => {
+  for (const b of branches ?? []) {
+    const t = String(b?.if ?? '');
+    if (notRe?.test(t)) continue;
+    const k = keyRe.exec(t);
+    if (!k) continue;
+    const m = PRICE_RE.exec(t.slice(k.index + k[0].length));
+    if (m) return {price: Number(m[1].replace(/\./g, '').replace(',', '.')), if: t};
+  }
+  return null;
+};
+const picklist = (() => {
+  if (!REQ?.listed?.length || !fmt.roles?.includes('picklist')) return null;
+  const order = [...REQ.symbols, ...REQ.listed.filter((x) => !REQ.symbols.includes(x))];
+  const rows = order.flatMap((sym) => {
+    const r = anyRow(sym);
+    if (!r) { console.warn(`picklist: ${sym} is not in the ${date} universe — not listed`); return []; }
+    const raw = loadReview(date, sym);
+    const ok = !!raw && !validateReview(raw).length;
+    if (!ok) console.warn(`picklist: ${sym} has no valid symbol review (${reviewPath(date, sym)}) — listed without prices`);
+    const up = ok ? levelOf(raw.branches, /vượt|trên/iu, /dưới|thủng/iu) : null;
+    const down = ok ? levelOf(raw.branches, /dưới|thủng/iu) : null;
+    return [{
+      ...show(r, 0), weekChangePercent: weekOf(sym), reviewed: REQ.symbols.includes(sym), setup: ok ? raw.detail?.kind ?? null : null,
+      ...(up ? {watchUp: up.price, upIf: up.if} : {}), ...(down ? {watchDown: down.price, downIf: down.if} : {}),
+    }];
+  }).map((x, i) => ({...x, rank: i + 1}));
+  return {count: rows.length, reviewed: rows.filter((x) => x.reviewed).map((x) => x.symbol), rows};
+})();
+if (picklist) console.log(`picklist  ${picklist.rows.map((x) => `${x.symbol}${x.reviewed ? '*' : ''} ▲${x.watchUp ?? '—'} ▼${x.watchDown ?? '—'}`).join(' · ')}`);
 // What each table board highlights (user 2026-10-01 evening: "If the symbol have both on RS strong and Uptrend
 // highlight it"), counted on the rows the board shows: `both` = in every filter of the last tier (RS Strong and
 // Uptrend), `all3` = in every filter of the first tier (also Volume spike), `only` = shown but not in both. The
@@ -589,7 +692,17 @@ const flow = fmt.roles.includes('flow')
     const photo = `${PATHS.shots}/${date}/${FLOW_PHOTO}.png`;
     const side = tryJson(`public/${photo.replace(/\.png$/, '')}.json`);
     if (!side) return {ok: false, why: `no photo public/${photo} — run node scripts/review/shots.mjs --format=${FORMAT} --only=flow, then facts.mjs again`};
-    return flowFacts(side, {date, close: round(last.c, 2), freshAfter: R.screener.freshAfter, tolerance: R.shots.fireantFlow?.matchTolerance, photo});
+    const f = flowFacts(side, {date, close: round(last.c, 2), freshAfter: R.screener.freshAfter, tolerance: R.shots.fireantFlow?.matchTolerance, photo});
+    // The number behind "hầu hết các cổ phiếu đều bật từ dưới đáy lên" (user 2026-10-21, the flow scene's own sentence):
+    // the photo's exchange's names up today that have an SMA200 on the terminal, and how many closed under it — the
+    // terminal's own SMA200, the field the weekly's breadth counts.
+    const uni = f.ok ? tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? [] : [];
+    const up = uni.filter((s) => s.exchange === f.exchange && s.price_change_pct > 0 && s.sma_200 > 0);
+    if (up.length) {
+      const below = up.filter((s) => s.current_price < s.sma_200).length;
+      f.gainersBelowMa200 = {exchange: f.exchange, up: up.length, below, percent: round((100 * below) / up.length, 1), source: `terminal universe ${date} (${PATHS.cache}/${date}-universe.json), sma_200`};
+    }
+    return f;
   })()
   : null;
 
@@ -655,7 +768,12 @@ if (FORMAT === 'weekly') {
     changePercent: round(pct(last.c, before[before.length - 1].c), 2),
     volumeVsPriorWeek: pw.length ? round(vol(wk) / wk.length / (vol(pw) / pw.length), 2) : null,
     distributionDays: weekDd,
-    transitions: st.transitions.filter((x) => x.t >= from).map((x) => ({date: x.t, dm: dm(x.t), from: label(x.from).vi, to: label(x.to).vi})),
+    // A turn into the correction carries why (the sixth DD, an undercut FTD rally low, an undercut attempt) and, when a rally
+    // attempt was undercut, that attempt (its day 1, the low it lost, how many sessions it ran) — the week of 12/10 lost two.
+    transitions: st.transitions.filter((x) => x.t >= from).map((x) => ({
+      date: x.t, dm: dm(x.t), from: label(x.from).vi, to: label(x.to).vi, why: x.why,
+      ...(x.attempt ? {attempt: {day1: x.attempt.day1, day1Dm: dm(x.attempt.day1), rallyLow: round(x.attempt.rallyLow, 2), days: x.attempt.days}} : {}),
+    })),
     snapshots: snaps.map((s) => s.date),
     spikeNamesThisWeek: snaps.length ? spikeWeek.length : null,
     newLeaders: prevSnap ? snap.members.leaders.filter((s) => !prevSnap.members.leaders.includes(s)) : null,
@@ -747,7 +865,9 @@ const openWeekday = (() => {
 // VN-Index · Khung ngày (role daily; user 2026-10-06: "eval the VNIndex as daily and weekly of this week"): STRUCTURE and
 // TREND on the daily chart — the last two swing highs and lows of the 142 sessions the FireAnt photo shows, FireAnt's
 // MA50/MA200 and where the close sits against them, the week's sessions. The if-then levels stay with `scenario` (watch).
-const indexDaily = fmt.roles.includes('daily')
+// Since 2026-10-09 the weekly's market scene opens on it (rules.formats.weekly.market.daily — user: "Combine the scene 03 and
+// 04 to one scene but still keep it meaningful"), with no daily role left in the format.
+const indexDaily = fmt.roles.includes('daily') || !!fmt.market?.daily
   ? (() => {
     const win = bars.slice(-142);
     const pa = priceActionOf(win, last.c);
@@ -798,8 +918,53 @@ const indexWeekly = fmt.roles.includes('week') && weekly
   : null;
 // ICB industry groups ranked by the median RS 1M of their liquid stocks (lib/sectors.mjs, rules.sectors; user
 // 2026-10-06: "Also include major ranking", picked "ICB groups by RS"). {ok: false, why} when the session's universe
-// cache or content/review/industries.json is missing — scaffold then drops the scene and prints why.
+// cache or content/review/industries.json is missing — scaffold then drops the scene and prints why. Each ranked group
+// carries `top`, its rules.sectors.topPerGroup strongest liquid stocks by RS 1M (user 2026-10-09: "With the scene 05 also
+// listing 2-3 stock with this major ranking?"), printed on its board row.
 const sectors = fmt.roles.includes('sectors') ? sectorFacts({date, R}) : null;
+// The sector leader (user 2026-10-10: "Get one of stock on this marjor best ranking to review 1-5 ranking, on the scene
+// 05, mentiond the major raking from 1 to 3 and mention its stock on this major"; rules.formats.<format>.sectors.leader):
+// the strongest stock of the #1 group, else of #2 … #5 when the one above already has a review scene (a requested name)
+// or lacks a chart (its /analyze holds no bars, or --no-chart=<SYM,…>: the director could not photograph it on FireAnt).
+// The pack carries the choice (sectors.review) and the name shaped like a requested entry (screener.sectorLeader), so
+// shots.mjs (--only=requested), the symbol-reviewer and scaffold's pick builder read it like a requested name. Nothing is
+// fetched here: a missing /analyze is one printed line.
+const NO_CHART = new Set((opt('no-chart') ?? '').split(',').map((x) => x.trim().toUpperCase()).filter(Boolean));
+const sectorLeader = (() => {
+  const pick = sectorLeaderOf({
+    S: sectors, R, format: FORMAT,
+    taken: [...(weeklyLeaders ?? leaders).top.map((x) => x.symbol), ...requested.map((x) => x.symbol)],
+    noChart: (sym) => {
+      if (NO_CHART.has(sym)) return 'facts.mjs --no-chart (FireAnt could not draw it)';
+      const a = tryJson(`${PATHS.analyze}/${date}/${sym}.json`);
+      return a && !(a.price_history ?? []).length ? `${PATHS.analyze}/${date}/${sym}.json holds no bars` : null;
+    },
+  });
+  if (!pick) return null;
+  sectors.review = {symbol: pick.symbol, group: pick.group, groupRank: pick.groupRank, rs1m: pick.rs1m, reason: pick.reason, ...(pick.skipped.length ? {skipped: pick.skipped} : {})};
+  for (const x of pick.skipped) console.log(`sector leader: skipped ${x.why}`);
+  if (!pick.symbol) { console.warn(`sector leader: none — ${pick.reason}`); return null; }
+  const sym = pick.symbol;
+  const u = (tryJson(`${PATHS.cache}/${date}-universe.json`)?.stocks ?? []).find((x) => x.symbol === sym);
+  const row = snap.rows?.[sym] ? rowOf(sym) : u ? {symbol: sym, ...compactRow(u)} : null;
+  if (!row) { console.warn(`sector leader ${sym}: not in the ${date} universe (${PATHS.cache}/${date}-universe.json) — no review scene`); return null; }
+  const rel = `${PATHS.analyze}/${date}/${sym}.json`;
+  const shot = `shots/review/${date}/${sym.toLowerCase()}-fireant.png`;
+  const entry = {
+    ...leaderDetail(sym, 1, row, exists(rel) ? rel : null),
+    review: reviewOf(sym),
+    sectorLeader: true,
+    group: pick.group, groupShort: pick.groupShort, groupRank: pick.groupRank,
+    analyze: exists(rel) ? rel : null,
+    photo: exists(`public/${shot}`) ? shot : null,
+  };
+  const where = `(#${pick.groupRank} ${pick.group}, RS 1M ${pick.rs1m})`;
+  if (!entry.analyze) console.log(`sector leader ${sym} ${where}: analyze missing — run node scripts/review/pull.mjs --symbols=${sym} --analyze-only`);
+  else if (!entry.photo) console.log(`sector leader ${sym} ${where}: no FireAnt photo yet — node scripts/review/shots.mjs --format=${FORMAT} --only=requested --symbols=${sym}, then facts.mjs again`);
+  else if (!entry.review) console.log(`sector leader ${sym} ${where}: no valid symbol review — one symbol-reviewer agent (node scripts/review/lib/symbol-review.mjs measure ${date} ${sym} --format=${FORMAT}), then facts.mjs again`);
+  else console.log(`sector leader ${sym} ${where}: analyze, photo and review ready`);
+  return entry;
+})();
 
 // ------------------------------------------------------------------ backtest and anchors
 
@@ -842,6 +1007,8 @@ const pack = {
     ...ownTables,
     leaders: weeklyLeaders ?? leaders,
     ...(REQ ? {requested} : {}),
+    ...(picklist ? {picklist} : {}),
+    ...(sectorLeader ? {sectorLeader} : {}),
     ...(breadth ? {breadth} : {}),
   },
   ...(weekly ? {weekly} : {}),
@@ -863,16 +1030,19 @@ pack.anchors = [
   {label: `Volume spike (${spike.count} mã · ${spike.up} tăng · ${spike.down} giảm)`, value: `${spike.sortedBy === 'changePercent' ? 'xếp theo % thay đổi (tăng mạnh nhất / giảm sâu nhất trước) · ' : 'xếp theo RS 1M · '}tăng: ${spike.gainers.map((s) => `${s.symbol} +${v(s.changePercent)}%${s.volumeVsSma20Percent != null ? ` KL +${s.volumeVsSma20Percent}%` : ''}`).join(' · ')} — giảm: ${spike.losers.map((s) => `${s.symbol} ${v(s.changePercent)}%${s.volumeVsSma20Percent != null ? ` KL +${s.volumeVsSma20Percent}%` : ''}`).join(' · ')}`, path: 'screener.spike.gainers / losers'},
   ...Object.entries(tables).map(([k, t]) => ({label: `${t.filter} (${t.count} mã · ${t.up} tăng · ${t.down} giảm)`, value: t.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%`).join(' · ') || '—', path: `screener.${k}.top`})),
   // The weekly's own reviews (one per Momentum filter, 2026-10-06) when the format has them, else the shared leaders.
-  ...[weeklyLeaders ?? leaders].map((LD) => ({label: `${weeklyLeaders ? 'Soi mã mỗi bộ lọc' : 'Dẫn dắt'} · ${LD.from.map((t) => [].concat(t).map((k) => sceneSpec(k)?.photo ?? k).join(' ∩ ')).join(' → ')} (${LD.count} mã)`, value: LD.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%${s.tierScene ? ` (${sceneSpec(s.tierScene)?.photo ?? s.tierScene})` : s.filters?.length ? ` (${s.filters.join(', ')})` : ''}`).join(' · ') || '—', path: 'screener.leaders.top'})),
+  // (No anchor when the format picks no name by rule — the weekly since 2026-10-09: its reviews are the requested rows below.)
+  ...[weeklyLeaders ?? leaders].filter((LD) => LD.byRule !== false).map((LD) => ({label: `${weeklyLeaders ? 'Soi mã mỗi bộ lọc' : 'Dẫn dắt'} · ${LD.from.map((t) => [].concat(t).map((k) => sceneSpec(k)?.photo ?? k).join(' ∩ ')).join(' → ')} (${LD.count} mã)`, value: LD.top.map((s) => `${s.symbol} RS1M ${s.rs1m} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}%${s.tierScene ? ` (${sceneSpec(s.tierScene)?.photo ?? s.tierScene})` : s.filters?.length ? ` (${s.filters.join(', ')})` : ''}`).join(' · ') || '—', path: 'screener.leaders.top'})),
   ...requested.map((s) => ({label: `Soi thêm · ${s.symbol} (người dùng chọn)`, value: `${s.price} · ${s.changePercent >= 0 ? '+' : ''}${v(s.changePercent)}% · RS1M ${s.rs1m ?? '—'}${s.filters.length ? ` · ${s.filters.join(', ')}` : ' · ngoài ba bộ lọc'} — ${s.review ? `${s.review.setup} — ${s.review.detail}` : 'chưa có bản soi của symbol-reviewer'}`, path: `screener.requested[${s.rank - 1}]`})),
-  ...leaders.top.map((s, i) => ({label: `Soi mã · ${s.symbol}`, value: s.review ? `${s.review.setup} — ${s.review.detail}${s.review.pending.length ? ` (chờ: ${s.review.pending.join(', ')})` : ''}` : 'chưa có bản soi của symbol-reviewer', path: `screener.leaders.top[${i}].review`})),
+  // The pack's own review rows (a format with its own leaders — the weekly — never lists the daily's pool here).
+  ...(weeklyLeaders ?? leaders).top.map((s, i) => ({label: `Soi mã · ${s.symbol}`, value: s.review ? `${s.review.setup} — ${s.review.detail}${s.review.pending.length ? ` (chờ: ${s.review.pending.join(', ')})` : ''}` : 'chưa có bản soi của symbol-reviewer', path: `screener.leaders.top[${i}].review`})),
   ...(breadth ? [{label: 'Độ rộng', value: `${breadth.count.above}/${breadth.count.with} mã${breadth.count.floor ? ' có thanh khoản' : ''} trên SMA200 (${v(breadth.count.percent, 1)}%, terminal)${breadth.week?.screenerChange != null ? ` · tuần ${breadth.week.screenerChange >= 0 ? '+' : ''}${breadth.week.screenerChange} từ ${breadth.week.fromDm}` : breadth.week ? ` · đường tuần ${breadth.week.lineChange >= 0 ? '+' : ''}${breadth.week.lineChange} từ ${breadth.week.fromDm}` : ''} · ${breadth.up} tăng · ${breadth.down} giảm${breadth.line ? ` · đường SSI ${breadth.line.sessions} phiên: ${breadth.line.countFirst} (${breadth.line.fromDm}) → ${breadth.line.countLast} mã (lệch ${breadth.line.residual ?? '—'} so với terminal) trong khi chỉ số ${breadth.line.indexChangePercent >= 0 ? '+' : ''}${v(breadth.line.indexChangePercent, 1)}%` : ''}`, path: 'screener.breadth'}] : []),
   ...(flow ? [{label: `Biến động thị trường (FireAnt, ${flow.ok ? `HOSE ${flow.dm}` : 'không dùng được'})`, value: flow.ok ? `${flow.up} tăng · ${flow.down} giảm · ${flow.flat} đứng giá (${flow.countWord}) · tiền ${v(flow.money.up, 1)} / ${v(flow.money.down, 1)} / ${v(flow.money.flat, 1)} tỷ (${flow.moneyWord}, ×${v(flow.moneyLeadRatio)}${flow.agree ? `, ${flow.agree === 'same' ? 'cùng chiều' : 'NGƯỢC chiều'} số mã` : ''}) · ảnh ${flow.fetchedIct} ICT` : flow.why, path: 'flow'}] : []),
   {label: 'Kịch bản VN-Index', value: `đóng ${v(scenario.close)} · lên: ${scenario.up.map((z) => z.members.map((m) => `${m.name} ${v(m.price)}`).join(' + ')).join(' → ') || '—'} · xuống: ${scenario.down.map((z) => z.members.map((m) => `${m.name} ${v(m.price)}`).join(' + ')).join(' → ') || '—'}`, path: 'scenario'},
   {label: 'Bộ lọc terminal', value: snap.unavailable ? `KHÔNG CÓ — ${snap.unavailable}` : `cache ${pack.source.screenerCachedIct} ICT · ${snap.universe} mã · volume_vs_sma đọc là ${snap.volumeVsSmaUnit === 'percent' ? '% trên TB20' : 'bội số TB20'}`, path: 'screener'},
   {label: `Backtest FTD (${bars.length} phiên)`, value: bt.map((r) => `+${String(r.threshold).replace('.', ',')}%: ${r.ftds} FTD, ${r.higherPercent}% cao hơn sau ${R.followThrough.backtestForwardSessions} phiên`).join(' · '), path: 'backtest.rows'},
   ...(weekly ? [{label: `Tuần ${weekly.fromDm} → ${session.dm}`, value: `${weekly.changePercent >= 0 ? '+' : ''}${v(weekly.changePercent)}% · KL/phiên ×${v(weekly.volumeVsPriorWeek)} tuần trước · ${weekly.distributionDays.length} phiên phân phối`, path: 'weekly'}] : []),
-  ...(sectors?.ok && sectors.groups.length ? [{label: `Nhóm ngành ICB (RS 1M trung vị, ${sectors.groups.length} nhóm xếp hạng)`, value: `${sectors.groups.slice(0, 3).map((g) => `#${g.rank} ${g.short} ${g.rs1m}`).join(' · ')} … #${sectors.groups.length} ${sectors.groups.at(-1).short} ${sectors.groups.at(-1).rs1m}${sectors.unranked.length ? ` · không xếp: ${sectors.unranked.map((g) => `${g.short} (${g.members} mã)`).join(', ')}` : ''}`, path: 'sectors'}] : []),
+  ...(sectorLeader ? [{label: `Soi mã ngành · ${sectorLeader.symbol} (#${sectorLeader.groupRank} ${sectorLeader.groupShort})`, value: `${sectorLeader.price} · ${sectorLeader.changePercent >= 0 ? '+' : ''}${v(sectorLeader.changePercent)}% · RS1M ${sectorLeader.rs1m ?? '—'} — ${sectorLeader.review ? `${sectorLeader.review.setup} — ${sectorLeader.review.detail}` : !sectorLeader.analyze ? 'chưa có /analyze' : !sectorLeader.photo ? 'chưa có ảnh FireAnt' : 'chưa có bản soi của symbol-reviewer'}`, path: 'screener.sectorLeader'}] : []),
+  ...(sectors?.ok && sectors.groups.length ? [{label: `Nhóm ngành ICB (RS 1M trung vị, ${sectors.groups.length} nhóm xếp hạng)`, value: `${sectors.groups.slice(0, 3).map((g) => `#${g.rank} ${g.short} ${g.rs1m}${g.top?.length ? ` (${g.top.map((t) => t.symbol).join(', ')})` : ''}`).join(' · ')} … #${sectors.groups.length} ${sectors.groups.at(-1).short} ${sectors.groups.at(-1).rs1m}${sectors.unranked.length ? ` · không xếp: ${sectors.unranked.map((g) => `${g.short} (${g.members} mã)`).join(', ')}` : ''}`, path: 'sectors'}] : []),
 ];
 
 // No screener: its rows would read "null mã · 0 tăng" — the "Bộ lọc terminal" row says why they are missing.

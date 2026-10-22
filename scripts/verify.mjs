@@ -238,7 +238,9 @@ function checkSchema(t, reel) {
         // 2026-10-06: "Also include major ranking"): one row per group — its short name in place of a ticker, its number
         // of liquid stocks, its median RS 1M with the bar, and optionally its median % of the week and its share above
         // SMA200. No price and no day's change; a missing optional figure prints "—".
-        const SCOLS = {members: 'members', rs1m: 'rs1m', weekChange: 'weekChangePercent', aboveSma200Share: 'aboveSma200Share'};
+        // `topSymbols` (2026-10-09, user: "With the scene 05 also listing 2-3 stock with this major ranking?"): the group's
+        // strongest tickers by RS 1M, ≤ 3, strongest first — review-sectors compares them with the pack.
+        const SCOLS = {members: 'members', rs1m: 'rs1m', weekChange: 'weekChangePercent', aboveSma200Share: 'aboveSma200Share', topSymbols: 'topSymbols'};
         const cols = Array.isArray(v.columns) ? v.columns : [];
         const unknown = cols.filter((c) => !(c in SCOLS));
         if (unknown.length) errs.push(`${at}: sector board columns ${unknown.join(', ')} are not ${Object.keys(SCOLS).join('|')}`);
@@ -250,6 +252,7 @@ function checkSchema(t, reel) {
             if (typeof r.name !== 'string' || !r.name.trim() || !Number.isFinite(r.rs1m)) { errs.push(`${at}: sector board rows need name and rs1m`); break; }
             if (r.name.length > 22) { errs.push(`${at}: sector name "${r.name}" is longer than 22 characters (rules.sectors.short)`); break; }
             if (cols.includes('members') && !Number.isInteger(r.members)) { errs.push(`${at}: sector row ${r.name} has no members count`); break; }
+            if (r.topSymbols != null && (!Array.isArray(r.topSymbols) || r.topSymbols.length > 3 || r.topSymbols.some((x) => typeof x !== 'string' || !/^[A-Z0-9]{3,4}$/.test(x)))) { errs.push(`${at}: sector row ${r.name} topSymbols must be ≤ 3 tickers (3–4 capitals)`); break; }
           }
         }
         for (const e of v.emphasis ?? []) {
@@ -263,22 +266,35 @@ function checkSchema(t, reel) {
         // its figure on every row (a row without one prints "—", which is only right for a missing average).
         // The weekly's Momentum boards (2026-10-06) print the WEEK's change in the change slot (`weekChange`, the board
         // has no day column then), the terminal's trendline signal as a pill (`signal`, coloured by `signalKind`) and RS 3M.
-        const COLS = {price: 'price', change: 'changePercent', rs1m: 'rs1m', rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent', weekChange: 'weekChangePercent', rs3m: 'rs3m', signal: 'signal'};
+        // The weekly's watchlist (2026-10-18) adds `filters`: one chip per saved filter that found the name — a list of the
+        // terminal's filter names, at least one.
+        const COLS = {price: 'price', change: 'changePercent', rs1m: 'rs1m', rs52w: 'rs52w', volume: 'volumeVsSma20Percent', aboveEma50: 'aboveEma50Percent', aboveSma200: 'aboveSma200Percent', weekChange: 'weekChangePercent', rs3m: 'rs3m', signal: 'signal', filters: 'filters', watchUp: 'watchUp', watchDown: 'watchDown'};
         const cols = Array.isArray(v.columns) ? v.columns : [];
         const unknown = cols.filter((c) => !(c in COLS));
         if (unknown.length) errs.push(`${at}: board columns ${unknown.join(', ')} are not ${Object.keys(COLS).join('|')}`);
-        const changeSlot = cols.includes('change') ? 'change' : cols.includes('weekChange') ? 'weekChange' : null;
-        if (!changeSlot) errs.push(`${at}: a board shows change (user 2026-10-01: "must have the RS1M column, price change"; a weekly board may show the week's, weekChange)`);
-        if (!cols.includes('rs1m')) errs.push(`${at}: a board shows rs1m (user 2026-10-01: "must have the RS1M column, price change")`);
-        const extra = cols.filter((c) => !['price', changeSlot, 'rs1m'].includes(c));
-        if (extra.length > 2) errs.push(`${at}: board has ${extra.length} extra columns (${extra.join(', ')}); the table fits two`);
+        // The weekly's picks list (2026-10-18, user: "have scene for all my picked stock and its filter, also include the price
+        // must be monitor and notice") is not a screener table: price, the filter chips and the two prices to watch, exactly.
+        const watchBoard = cols.includes('watchUp') || cols.includes('watchDown');
+        if (watchBoard) {
+          if (cols.join() !== 'price,filters,watchUp,watchDown') errs.push(`${at}: a picks-list board shows exactly price, filters, watchUp, watchDown (it has ${cols.join(', ')})`);
+        } else {
+          const changeSlot = cols.includes('change') ? 'change' : cols.includes('weekChange') ? 'weekChange' : null;
+          if (!changeSlot) errs.push(`${at}: a board shows change (user 2026-10-01: "must have the RS1M column, price change"; a weekly board may show the week's, weekChange)`);
+          if (!cols.includes('rs1m')) errs.push(`${at}: a board shows rs1m (user 2026-10-01: "must have the RS1M column, price change")`);
+          const extra = cols.filter((c) => !['price', changeSlot, 'rs1m'].includes(c));
+          if (extra.length > 2) errs.push(`${at}: board has ${extra.length} extra columns (${extra.join(', ')}); the table fits two`);
+        }
         if (cols.includes('signal') && !['breakout', 'breakdown'].includes(v.signalKind)) errs.push(`${at}: a board with a signal column needs signalKind breakout|breakdown (it colours the pill)`);
         if (!Array.isArray(v.rows) || !v.rows.length) errs.push(`${at}: board.rows needs at least one row`);
-        else if (v.rows.length > 10) errs.push(`${at}: board has ${v.rows.length} rows; it fits ten`);
+        else if (v.rows.length > (Array.isArray(v.scroll) && v.scroll.length ? 40 : 10)) errs.push(`${at}: board has ${v.rows.length} rows; it fits ${Array.isArray(v.scroll) && v.scroll.length ? 'forty, a page of ten at a time' : 'ten'}`);
         else {
+          // A scrolling board (the weekly's watchlist, 2026-10-18): each step names a beat ≥ 1 and the first row it shows.
+          for (const sc of Array.isArray(v.scroll) ? v.scroll : []) {
+            if (!Number.isInteger(sc?.beat) || sc.beat < 1 || !Number.isInteger(sc?.offset) || sc.offset < 0 || sc.offset >= v.rows.length) { errs.push(`${at}: board scroll step ${JSON.stringify(sc)} needs a beat ≥ 1 and a row offset inside the rows`); break; }
+          }
           for (const r of v.rows) {
             if (typeof r.symbol !== 'string' || !Number.isFinite(r.changePercent) || !Number.isFinite(r.rs1m)) { errs.push(`${at}: board rows need symbol, changePercent and rs1m`); break; }
-            const missing = cols.filter((c) => !['aboveEma50', 'aboveSma200'].includes(c) && (c === 'signal' ? !['confirmed', 'potential'].includes(r.signal) : !Number.isFinite(r[COLS[c]])));
+            const missing = cols.filter((c) => !['aboveEma50', 'aboveSma200'].includes(c) && (c === 'signal' ? !['confirmed', 'potential'].includes(r.signal) : c === 'filters' ? !(Array.isArray(r.filters) && r.filters.length && r.filters.every((n) => typeof n === 'string' && n.trim())) : !Number.isFinite(r[COLS[c]])));
             if (missing.length) { errs.push(`${at}: board row ${r.symbol} has no ${missing.map((c) => COLS[c]).join(', ')}`); break; }
           }
         }
@@ -289,9 +305,23 @@ function checkSchema(t, reel) {
         if (legacy.length || v.legend) errs.push(`${at}: board ${legacy.length ? `rows ${legacy.join(', ')} carry both/all3/pick` : ''}${legacy.length && v.legend ? ' and ' : ''}${v.legend ? 'a legend' : ''} — the overlap highlight the user dropped 2026-10-05; re-run node scripts/review/scaffold.mjs (rows carry focus)`);
         for (const e of v.emphasis ?? []) {
           if (!Number.isInteger(e.beat) || e.beat < 1) errs.push(`${at}: board emphasis beat ${e.beat} — emphasis plays on beat 2 or later (index ≥ 1)`);
+          // A spotlight (2026-10-21, the user's sentence on VPB and HDB): the rows marked `spot`, lit until its `until` beat.
+          if (e.set === 'spot') {
+            if (!(v.rows ?? []).some((r) => r?.spot)) errs.push(`${at}: board spotlight lights the spot rows but no row has spot: true`);
+            if (e.until !== undefined && (!Number.isInteger(e.until) || e.until <= e.beat)) errs.push(`${at}: board spotlight until ${e.until} — must be a beat after its own (${e.beat})`);
+            if (e.collapse !== undefined) errs.push(`${at}: a board spotlight does not collapse the table`);
+            continue;
+          }
           if (e.set !== 'focus') errs.push(`${at}: board emphasis set "${e.set}" is not focus${['both', 'all3', 'picks', 'only'].includes(e.set) ? ' — the overlap/picks sets of 2026-10-01 are gone; re-run node scripts/review/scaffold.mjs' : ''}`);
           else if (!(v.rows ?? []).some((r) => r?.focus)) errs.push(`${at}: board emphasis lights the focus rows but no row has focus: true`);
+          // `collapse` (a scrolling board's focus beat, 2026-10-18): exactly the focus rows, each once — the table clears to them.
+          if (e.collapse !== undefined) {
+            const lit = (v.rows ?? []).filter((r) => r?.focus).map((r) => r.symbol);
+            const c = Array.isArray(e.collapse) ? e.collapse : [];
+            if (!c.length || new Set(c).size !== c.length || c.length !== lit.length || c.some((x) => !lit.includes(x))) errs.push(`${at}: board emphasis collapse [${c.join(', ')}] must list each focus row once (${lit.join(', ') || 'none'})`);
+          }
         }
+        for (const r of v.rows ?? []) if (r?.added !== undefined && r.added !== true) { errs.push(`${at}: board row ${r.symbol}: added is true or absent`); break; }
       }
       if (v.type === 'lines') {
         for (const side of ['top', 'bottom']) {
@@ -413,15 +443,21 @@ function checkNarration(t, reel) {
         }
       }
     }
+    // A format's own budget for a role (rules.formats.<format>.<role> — the weekly's market scene opens on the daily frame
+    // since 2026-10-09 and carries two scenes' words): its maxWords / warnWords / maxSentences replace the reel-wide ones.
+    const own = R.formats?.[reel.format]?.[roleOf(R, s)] ?? {};
+    const maxW = own.maxWords ?? N.maxWordsPerScene;
+    const warnW = own.warnWords ?? N.warnWordsPerScene;
+    const maxS = own.maxSentences ?? N.maxSentencesPerScene;
     const w = words(s.narration).length;
-    if (w < N.minWordsPerScene || w > N.maxWordsPerScene) {
-      bad.push(`${s.id}: ${w} words, outside ${N.minWordsPerScene}-${N.maxWordsPerScene}`);
-    } else if (w < N.warnWordsPerScene[0] || w > N.warnWordsPerScene[1]) {
+    if (w < N.minWordsPerScene || w > maxW) {
+      bad.push(`${s.id}: ${w} words, outside ${N.minWordsPerScene}-${maxW}`);
+    } else if (w < warnW[0] || w > warnW[1]) {
       warn.push(`${s.id}: ${w} words`);
     }
     const n = sentences(s.narration).length;
-    if (n < N.minSentencesPerScene || n > N.maxSentencesPerScene) {
-      warn.push(`${s.id}: ${n} sentences, outside ${N.minSentencesPerScene}-${N.maxSentencesPerScene}`);
+    if (n < N.minSentencesPerScene || n > maxS) {
+      warn.push(`${s.id}: ${n} sentences, outside ${N.minSentencesPerScene}-${maxS}`);
     }
   }
   if (bad.length) add(t, 'narration', SEV.fail, `${bad.length} narration problem(s)`, bad.join('; '));
@@ -450,9 +486,10 @@ function checkStyle(t, reel) {
   const spokenNumbers = (text) => {
     const toks = String(text).toLowerCase().replace(/[.,!?;:…()]/g, ' ').split(/\s+/).filter(Boolean);
     // 'không' is part of the number in 'một nghìn không trăm chín mươi chín' (1099) and 'hai nghìn không trăm
-    // hai mươi hai'; elsewhere (hai không mười tám, không phải) it is not a figure.
+    // hai mươi hai', and on either side of 'phẩy' ('không phẩy không bảy phần trăm' is ONE number — 8/10 weekly);
+    // elsewhere (hai không mười tám, không phải) it is not a figure.
     const isTok = (i) => BASIC.has(toks[i]) || STRONG.has(toks[i]) || (toks[i] === 'phần' && toks[i + 1] === 'trăm')
-      || (toks[i] === 'không' && (toks[i + 1] === 'trăm' || toks[i - 1] === 'nghìn'));
+      || (toks[i] === 'không' && (toks[i + 1] === 'trăm' || toks[i - 1] === 'nghìn' || toks[i + 1] === 'phẩy' || toks[i - 1] === 'phẩy'));
     let runs = 0;
     for (let i = 0; i < toks.length;) {
       if (!isTok(i)) { i++; continue; }
@@ -480,9 +517,12 @@ function checkStyle(t, reel) {
       if (hi - lo < S.sentenceContrastWords) warn.push(`${sc.id}: every sentence is ${lo}–${hi} words — follow a long sentence with a short one`);
     }
     const total = perSentence.reduce((a, b) => a + b, 0);
-    if (total > S.maxSpokenNumbersPerScene) warn.push(`${sc.id}: ${total} spoken numbers in one scene (max ${S.maxSpokenNumbersPerScene}) — let the headline carry the digits`);
-    else if (perSentence.some((c) => c > S.maxSpokenNumbersPerSentence)) warn.push(`${sc.id}: a sentence speaks ${Math.max(...perSentence)} numbers — one per sentence`);
-    if (S.openingNumberWarn && sents[0]) {
+    // The format's own cap for the role (rules.formats.<format>.<role>.maxSpokenNumbers — the weekly's merged market scene).
+    const ownStyle = R.formats?.[reel.format]?.[roleOf(R, sc)] ?? {};
+    const maxNums = ownStyle.maxSpokenNumbers ?? S.maxSpokenNumbersPerScene;
+    if (total > maxNums) warn.push(`${sc.id}: ${total} spoken numbers in one scene (max ${maxNums}) — let the headline carry the digits`);
+    else if (perSentence.some((c) => c > (ownStyle.maxSpokenNumbersPerSentence ?? S.maxSpokenNumbersPerSentence))) warn.push(`${sc.id}: a sentence speaks ${Math.max(...perSentence)} numbers — one per sentence`);
+    if (S.openingNumberWarn && !ownStyle.numberFirst && sents[0]) {
       const first = sents[0].toLowerCase();
       const opener = first.split(/\s+/).slice(0, 6).join(' ');
       if (spokenNumbers(opener) > 0) warn.push(`${sc.id}: opens with a number ("${sents[0].slice(0, 40)}…") — open with what you see or a question`);
@@ -566,7 +606,9 @@ function checkArc(t, reel) {
     seen = at;
   }
   const secs = Math.round(reel.scenes.reduce((a, s) => a + (s.duration ?? 0), 0) * 10) / 10;
-  const [lo, hi] = R.arc.totalSecondsWarn ?? [0, Infinity];
+  // A format's own length (rules.formats.<format>.totalSeconds — the weekly's [80, 180] since its six picks, 2026-10-18)
+  // replaces the channel's.
+  const [lo, hi] = R.formats?.[reel.format]?.totalSeconds ?? R.arc.totalSecondsWarn ?? [0, Infinity];
   if (secs < lo || secs > hi) {
     note('totalSeconds', `${secs}s in all, outside ${lo}-${hi}s — ${secs > hi ? 'cut a scene or tighten the longest ones' : 'the reel ends before its argument lands'}`);
   }
@@ -755,6 +797,7 @@ function checkFacts(t, reel) {
       ...(sc.visual?.type === 'board' && sc.visual.mode === 'sector' ? [
         ...(sc.visual.rows ?? []).map((r) => ['visual.rows', [
           r.name,
+          ...(Array.isArray(r.topSymbols) ? r.topSymbols : []),
           r.members != null ? String(r.members) : '',
           String(r.rs1m),
           r.weekChangePercent != null ? Number(r.weekChangePercent).toFixed(2) : '',
@@ -813,8 +856,11 @@ function checkClaims(t, reel) {
   if (!SERIES) { add(t, 'claims', SEV.skip, `${R.series.path} not readable`); return; }
   const lastMonth = SERIES[SERIES.length - 1].t;
   const warn = [];
+  // The user's fixed sentences are not the writer's claims: the weekly sectors invitation (rules.formats.<format>.sectors
+  // .invite, user 2026-10-11 — "… đang mạnh nhất thị trường nhé", the RS 1M leaders) is said word for word every week.
+  const fixed = [R.formats?.[reel.format]?.sectors?.invite].filter(Boolean).map((x) => x.toLowerCase());
   for (const s of reel.scenes) {
-    const text = [s.narration ?? '', ...s.beats.flatMap((b) => [b.line1, b.line2 ?? ''])].join(' ').toLowerCase();
+    const text = fixed.reduce((acc, f) => acc.split(f).join(' '), [s.narration ?? '', ...s.beats.flatMap((b) => [b.line1, b.line2 ?? ''])].join(' ').toLowerCase());
     const v = s.visual ?? {};
     if (R.claims.recencyMarkers.some((m) => text.includes(m))) {
       const refs = [...(v.marks ?? []).map((m) => m.month), v.divergence?.to].filter(Boolean);

@@ -3,7 +3,7 @@
 // break these.
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {requestKey, requestPool, requestsPath} from './requested.mjs';
+import {requestKey, requestMax, requestPool, requestsPath} from './requested.mjs';
 
 const R = {
   screener: {scenes: {spike: {photo: 'Volume spike'}, rs: {photo: 'RS Strong'}, uptrend: {photo: 'Uptrend'}}, requested: {listMinFilters: 2}},
@@ -37,4 +37,12 @@ test("a format with its own scenes lists THEIR names, every one in at least one 
   assert.deepEqual(r.scenes.map((s) => s.label), ['Momentum breakout', 'Momentum breakdown']);
   assert.deepEqual(r.pool.map((p) => p.sym), ['EEE', 'DDD', 'FFF']);
   assert.deepEqual(r.pool[0].filters, ['Momentum breakout', 'Momentum breakdown']);
+});
+
+test("the box takes the format's own max, else the shared one, else 3", () => {
+  const RR = {screener: {requested: {max: 3}}, formats: {daily: {}, weekly: {screener: {requested: {max: 4, listMinFilters: 1}}}}};
+  assert.equal(requestMax(RR, 'weekly'), 4);
+  assert.equal(requestMax(RR, 'daily'), 3);
+  assert.equal(requestMax(R, 'weekly'), 3, 'before the weekly has its own block');
+  assert.equal(requestMax({}, undefined), 3);
 });

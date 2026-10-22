@@ -254,7 +254,9 @@ if (ONLY.has('screener')) {
 // The names the user asked for on the review page (facts.screener.requested, user 2026-10-05: "… i can choose and fill
 // the symbol on the artifact to review beside existed symbol on 3 filter") are photographed the same way: `leaders` shoots
 // the leaders and them, `requested` only them.
-const REQUESTED = facts.screener.requested ?? [];
+// The weekly's sector leader (facts.screener.sectorLeader, user 2026-10-10: "Get one of stock on this marjor best ranking to
+// review") is photographed with them, first — `--only=requested --symbols=<SYM>` shoots it alone.
+const REQUESTED = [...(facts.screener.sectorLeader ? [facts.screener.sectorLeader] : []), ...(facts.screener.requested ?? [])];
 async function fireantStocks(list) {
   if (!CALIB_ONLY && existsSync(PY)) wake();
   // The tab is found by its own symbol only: other tabs of the user's may carry a pick's ticker (their 2nd tab read

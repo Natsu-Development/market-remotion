@@ -73,6 +73,24 @@ export const STEP_GAP = 1.5;
 /** A climax run: +25% in 15 sessions, or +15% with a climax mark on the session (upper wick ≥ 40%, range ≥ 2× its average, gap ≥ 3%). */
 export const RUN_EXHAUSTED = 25;
 export const RUN_CLIMAX = 15;
+/**
+ * A descending trendline closed through this many sessions ago or less is a FRESH break (user 2026-10-22, PVD broke its
+ * 9/10–19/10 downtrend line on 21/10: "Phá được trendline giảm chưa mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp 2", then
+ * "update this rule to the agent review"): §6c `downtrend-break` while the stock is not yet in an uptrend.
+ */
+export const DOWNTREND_BREAK_FRESH = 5;
+/**
+ * Near lines (user 2026-10-11: "Optimize the SL of PVP since it so far and not make-sense" — PVP 9/10 ran 30% above MA50 with
+ * no base, and the holder's line came out as the base support 19,65, 18,5% under the close 24,10). From the edition of
+ * NEAR_SINCE on, an `extended` holder, and a holder whose nearest support (P1) is more than FAR_SUPPORT % under the close,
+ * takes half off under the reversal candle's low (else the last two sessions' low) and the rest under the run's last higher
+ * low — a dip at least HL_AGE sessions old, of the last HL_LOOKBACK sessions, that no low since has undercut, above FireAnt's
+ * MA50. Reviews of earlier editions keep the table they were written under (MSR 7/10 and 8/10, `extended` at its pivot).
+ */
+export const FAR_SUPPORT = 8;
+export const NEAR_SINCE = '2026-10-09';
+const HL_AGE = 3;
+const HL_LOOKBACK = 60;
 /** Words the roles never use: no target, no certainty, no leverage, no position size but "một nửa". */
 export const ROLE_FORBIDDEN = ['mục tiêu', 'target', 'lên tới', 'mua ngay', 'chắc chắn', 'margin', 'ký quỹ', 'vay', 'all in', 'all-in', 'tất tay', 'take profit', 'stop loss', 'một phần ba', 'phần trăm'];
 /** Bars FireAnt shows after interval D + reset view (VNINDEX 1D tab, calibrated 2026-10-01: 142 bars). */
@@ -453,7 +471,7 @@ const packOf = (date, format = 'daily', factsPath = null) => {
  * the writer speaks them), `headline` the action beat's line (≤ 26 characters). At the user's danger level (five distribution
  * days, `danger`) both tables tighten. Pure: the numbers of `measure`, its setup classes, the close, the danger flag.
  */
-export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}) => {
+export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE', date = null}) => {
   const has = (k) => classes.some((c) => c.kind === k);
   const INDICATOR = new Set(['ma50', 'ma200', 'trendlineSupport', 'trendlineSupportBroken']);
   const printed = (key) => {
@@ -473,6 +491,12 @@ export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}
   const P1 = below(['pivot', 'support1', 'trendlineSupport', 'ma50'], price);
   const P2 = P1 ? below(['support1', 'support2', 'trendlineSupport', 'ma50'], P1.price * (1 - STEP_GAP / 100) + 1e-9) : null;
   const line = (key) => (printed(key) == null ? null : {key, price: printed(key)});
+  // The near lines (2026-10-11, FAR_SUPPORT): what a trader trails a run that left no base with. Each has its words.
+  const LABEL = {reversalLow: 'đáy nến đảo chiều', low2Sessions: 'đáy hai phiên gần nhất', higherLow: 'đáy nhịp tăng gần nhất', pivot: 'đỉnh 20 phiên', support1: 'hỗ trợ', support2: 'hỗ trợ', trendlineSupport: 'trendline', ma50: 'MA50'};
+  const labelOf = (L) => `${LABEL[L.key] ?? 'đường'} ${f(L.price)}`;
+  const nearLines = date == null || date >= NEAR_SINCE;
+  const farP1 = P1 != null && (1 - P1.price / price) * 100 > FAR_SUPPORT;
+  const nearLine = () => ['reversalLow', 'low2Sessions'].map(line).find((L) => L && L.price < price) ?? null;
 
   // ---- §6b, the one holding the stock
   const holder = (() => {
@@ -481,6 +505,21 @@ export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}
     const take = {then: 'hạ tỷ trọng, chốt lời một nửa', plate: (L) => `Đang giữ: dưới ${f(L.price)} chốt 1/2`, headline: 'Đang giữ: chốt lời 1/2', say: 'chốt lời một nửa'};
     const out = {then: 'thoát hết', plate: (L) => fit(`Đang giữ: dưới ${f(L.price)} thoát hết`, `Đang giữ: dưới ${f(L.price)} thoát`), headline: 'Đang giữ: thoát hết', say: 'thoát hết'};
     const step = (L, s, ifText, keys) => ({if: L ? (ifText ?? `Nếu đóng cửa dưới ${said(L)}`) : null, ...at(L, s.then, L ? s.plate(L) : `Đang giữ: ${s.headline.replace('Đang giữ: ', '')}`, s.headline, s.say), keys});
+    // Two lines for a run that left no base (2026-10-11): `s` at the near line — the structure's P1 when it is the nearer one,
+    // never a looser line — and "thoát hết" for the rest under the run's last higher low (else the next drawn line), at least
+    // STEP_GAP % under it. `s` = out leaves nothing for a second line. null when there is no near line under the close.
+    const nearly = (caseId, s, keys) => {
+      const N = nearLine();
+      const H = N && P1 && P1.price > N.price ? P1 : N;
+      if (!H) return null;
+      const gap = H.price * (1 - STEP_GAP / 100) + 1e-9;
+      const F = s === out ? null : [line('higherLow'), P1, P2].find((x) => x && x.key !== H.key && x.price < gap) ?? null;
+      return {
+        case: caseId, ...step(H, s, `Nếu đóng cửa dưới ${labelOf(H)}`, [...keys, H.key, F?.key].filter(Boolean)), label: labelOf(H),
+        full: F ? {priceKey: F.key, price: F.price, label: labelOf(F), then: 'thoát hết', say: `Dưới ${said(F)} thì thoát hết.`} : null,
+      };
+    };
+    const guard = (caseId, s, keys) => (nearLines && farP1 ? nearly(caseId, s, keys) : null);
     if (a50 != null && a200 != null && a50 < 0 && a200 < 0) {
       const loss = a200 <= LOSS_MA200;
       return {case: 'exit-downtrend', if: 'Đã đóng cửa dưới MA50 và MA200', priceKey: null, price: null, then: loss ? 'cắt lỗ, không chờ hồi' : 'thoát hết, không chờ hồi', plate: loss ? 'Đang giữ: cắt lỗ' : 'Đang giữ: thoát hết', headline: loss ? 'Đang giữ: cắt lỗ' : 'Đang giữ: thoát hết', say: loss ? 'Đang giữ thì cắt lỗ, giá đã dưới MA200.' : 'Đang giữ thì thoát hết, giá đã dưới MA200.', keys: ['aboveMa50Percent', 'aboveMa200Percent']};
@@ -499,14 +538,19 @@ export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}
       return {case: 'trendline-broken', ...step(L, danger ? out : half, L ? `Đã thủng trendline ở ${f(L.price)}` : null, ['trendlineSupportBroken', 'price']), say: `Đang giữ, trendline đã gãy, ${danger ? 'thoát hết' : 'hạ một nửa'}.`};
     }
     if (has('breakout-failed') || (has('breakout-rejected') && cvp != null && cvp < 0)) {
-      return {case: 'failed-breakout', ...step(P1, danger ? out : a50 != null && a50 > EXTENDED_MA50 ? take : half, null, ['closeVsPivotPercent', P1?.key].filter(Boolean))};
+      const s = danger ? out : a50 != null && a50 > EXTENDED_MA50 ? take : half;
+      return guard('failed-breakout', s, ['closeVsPivotPercent']) ?? {case: 'failed-breakout', ...step(P1, s, null, ['closeVsPivotPercent', P1?.key].filter(Boolean))};
     }
     if (a50 != null && a50 > EXTENDED_MA50) {
-      return {case: 'extended', ...step(P1, take, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, ['aboveMa50Percent', P1?.key].filter(Boolean))};
+      // Extended: the near lines always (2026-10-11) — a run this far from MA50 is trailed, not held to the base it left.
+      return (nearLines ? nearly('extended', take, ['aboveMa50Percent']) : null) ?? {case: 'extended', ...step(P1, take, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, ['aboveMa50Percent', P1?.key].filter(Boolean))};
     }
     if (has('breakout-rejected') || has('trendline-test') || has('pullback-to-support') || has('ma50-test')) {
-      return {case: 'warning', ...step(P1, danger ? out : half, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, [P1?.key, 'closeRangePercent'].filter(Boolean))};
+      return guard('warning', danger ? out : half, ['closeRangePercent']) ?? {case: 'warning', ...step(P1, danger ? out : half, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, [P1?.key, 'closeRangePercent'].filter(Boolean))};
     }
+    // No support within FAR_SUPPORT % of the close: half at the near line, the rest under the last higher low (2026-10-11).
+    const far = guard('trend-intact', half, ['aboveMa50Percent']);
+    if (far) return far;
     // The trend holds: the stop goes up to the structure's line — at the danger level half the position leaves at the nearer one.
     if (danger || !P2) return {case: 'trend-intact', ...step(P1, half, P1 ? `Nếu đóng cửa lại dưới ${said(P1)}` : null, ['aboveMa50Percent', P1?.key].filter(Boolean))};
     const viaMa = P2.key === 'ma50';
@@ -522,6 +566,15 @@ export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}
   const notHolder = (() => {
     const stay = (L, ifText, sayWhy, keys, caseId) => ({case: caseId, if: L ? ifText : null, priceKey: L?.key ?? null, price: L?.price ?? null, then: 'đứng ngoài', plate: L ? `Chưa mua: dưới ${f(L.price)} đứng ngoài` : 'Chưa mua: đứng ngoài', headline: 'Chưa mua: đứng ngoài', say: `Chưa có hàng thì đứng ngoài, ${sayWhy}.`, keys});
     const m50 = line('ma50'), m200 = line('ma200');
+    // A fresh break of the descending trendline by a stock not yet in an uptrend (under MA200, or MA50 under MA200 — user
+    // 2026-10-22, PVD: "Phá được trendline giảm chưa mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp 2"): the first leg of
+    // a turn — no buy yet; watch it and wait for its base on the second leg. Ahead of `below-ma`, at the danger level too.
+    const dtb = num('downtrendBrokenSessionsAgo');
+    const dtl = num('trendlineResistanceBroken');
+    const notUp = (m200 && price < m200.price) || (m50 && m200 && m50.price < m200.price);
+    if (dtb != null && dtb <= DOWNTREND_BREAK_FRESH && dtl != null && price > dtl && notUp) {
+      return {case: 'downtrend-break', if: 'Khi trendline giảm vừa bị phá', priceKey: null, price: null, then: 'chưa mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp 2', plate: 'Chưa mua: đợi tạo nền', headline: 'Chưa mua: đợi tạo nền', say: 'Chưa có hàng thì chưa mua vội, theo dõi và đợi cổ phiếu tạo nền ở nhịp hai.', keys: ['trendlineResistanceBroken', 'downtrendBrokenSessionsAgo', 'price', 'ma50', 'ma200'].filter((k) => num(k) != null)};
+    }
     if ((m50 && price < m50.price) || (m200 && price < m200.price)) {
       const L = [m50, m200].filter((x) => x && x.price > price).sort((a, b) => a.price - b.price)[0];
       return stay(L, `Khi giá còn dưới ${said(L)}`, `giá dưới ${MA_NAME[L.key]}`, ['price', 'ma50', 'ma200'].filter((k) => num(k) != null), 'below-ma');
@@ -575,6 +628,34 @@ export const rolesOf = ({num, classes, price, danger = false, exchange = 'HOSE'}
   return {holder, notHolder};
 };
 
+/**
+ * The holder's near lines on the bars up to the session (user 2026-10-11, rolesOf): `reversal` — the last candle's low when
+ * it is a reversal (bear engulfing; outside bar closing under the previous close; key reversal: a higher high, a lower close,
+ * a red body); `low2` — the lowest low of the last two sessions; `higherLow` — the run's last higher low: a dip (a low under
+ * the session before it) at least HL_AGE sessions old, of the last HL_LOOKBACK, that no low since has undercut, above
+ * FireAnt's MA50 and at least STEP_GAP % under `low2`. Pure; null with too few bars.
+ */
+export const nearLinesOf = (bars, ma50) => {
+  if (bars.length < HL_AGE + 2) return null;
+  const last = bars.at(-1);
+  const p = bars.at(-2);
+  const k = candleOf(bars, bars.length - 1);
+  const read = k.engulf === 'bear' ? 'bear-engulf' : k.outside && k.c < p.c ? 'outside-down' : k.h > p.h && k.c < p.c && k.c < k.o ? 'key-reversal' : null;
+  const two = bars.slice(-2).reduce((m, b) => (b.l < m.l ? b : m));
+  let higherLow = null;
+  if (ma50 != null) {
+    for (let i = bars.length - 1 - HL_AGE; i >= Math.max(1, bars.length - HL_LOOKBACK); i--) {
+      const b = bars[i];
+      if (!(b.l < bars[i - 1].l) || bars.slice(i + 1).some((x) => x.l < b.l)) continue;
+      if (b.l <= ma50) break;
+      if (b.l >= two.l * (1 - STEP_GAP / 100)) continue;
+      higherLow = {price: b.l, t: b.t, under: bars[i - 1].t, age: bars.length - 1 - i};
+      break;
+    }
+  }
+  return {reversal: read ? {price: last.l, t: last.t, read} : null, low2: {price: two.l, t: two.t}, higherLow};
+};
+
 export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   const SYM = sym.toUpperCase();
   const {F, factsPath} = packOf(date, format, facts);
@@ -598,6 +679,8 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
       const req = F?.screener?.requested ?? [];
       const j = req.findIndex((x) => x.symbol === SYM);
       if (j >= 0) { row = req[j]; rowPath = `${factsPath}#screener.requested[${j}]`; break; }
+      // The weekly's sector leader (screener.sectorLeader, user 2026-10-10), reviewed like a requested name.
+      if (F?.screener?.sectorLeader?.symbol === SYM) { row = F.screener.sectorLeader; rowPath = `${factsPath}#screener.sectorLeader`; break; }
     }
   }
   let source = 'facts';
@@ -721,6 +804,15 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   add('aboveMa50Percent', ma50 ? (price / ma50 - 1) * 100 : null, 'derived', 'price / ma50 (FireAnt) − 1', {formula: 'price / ma50 − 1'});
   add('aboveMa200Percent', ma200 ? (price / ma200 - 1) * 100 : null, 'derived', 'price / ma200 (FireAnt) − 1', {formula: 'price / ma200 − 1'});
 
+  // The near lines (user 2026-10-11, rolesOf): the reversal candle's low, the last two sessions' low, the run's last higher low.
+  const NL = nearLinesOf(bars, ma50);
+  if (NL?.reversal) add('reversalLow', NL.reversal.price, 'analyze', at(`l on ${NL.reversal.t} — the low of the reversal candle (${NL.reversal.read})`), {date: NL.reversal.t, read: NL.reversal.read});
+  if (NL) add('low2Sessions', NL.low2.price, 'analyze', at(`min(l) of the last two sessions (${bars.at(-2).t}, ${last.t})`), {date: NL.low2.t});
+  if (NL?.higherLow) {
+    add('higherLow', NL.higherLow.price, 'analyze', at(`l on ${NL.higherLow.t} — the last higher low of the run: under ${NL.higherLow.under}, no low since under it, ${NL.higherLow.age} sessions old, above MA50`), {date: NL.higherLow.t});
+    dates.higherLow = NL.higherLow.t;
+  }
+
   // ---- price action (method /2): on the bars the photo shows, so every level and line can be drawn on it
   const W = windowOf(date, SYM, bars);
   const wb = W?.list ?? bars.slice(-DEFAULT_WINDOW);
@@ -764,6 +856,11 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
       const br = tl[role].broken;
       if (br) add(`${K}Broken`, br.price, 'derived', wat(`line through ${br.a.t} (${br.a.price}) and ${br.b.t} (${br.b.price}), closed through on ${br.brokenAt}; value at ${last.t}`), {anchors: [{date: br.a.t, price: br.a.price}, {date: br.b.t, price: br.b.price}], brokenAt: br.brokenAt});
     }
+    // How fresh the break of the descending trendline is (§6c downtrend-break, user 2026-10-22): sessions from the close
+    // through it to this session, 0 = this session.
+    const rb = tl.resistance.broken;
+    const rbAt = rb?.brokenAt ? wb.findIndex((b) => b.t === rb.brokenAt) : -1;
+    if (rbAt >= 0) add('downtrendBrokenSessionsAgo', wb.length - 1 - rbAt, 'derived', `sessions from ${rb.brokenAt} (the close through the descending trendline) to ${last.t}`, {date: rb.brokenAt});
     const fb = failedBreakoutOf(wb, sw);
     if (fb) add('failedBreakoutLevel', fb.price, 'analyze', wat(`swing high of ${fb.t}, closed above on ${fb.aboveOn}, closed back under on ${last.t}`), {date: fb.t});
     // The last three candles: the session and the two before it (d0 = the session, d1 = the one before, …).
@@ -866,7 +963,13 @@ export const measure = (date, sym, {format = 'daily', facts = null} = {}) => {
   // first correction since the roles: facts' `danger` is false outside an uptrend). A rally attempt is still a correction
   // until its FTD (2026-10-09, the first attempt since the roles), so it stays tightened as well.
   const tight = D?.danger === true || F?.state?.status === 'CORRECTION' || F?.state?.status === 'RALLY_ATTEMPT';
-  const roles = rolesOf({num, classes, price, danger: tight, exchange: row.exchange ?? 'HOSE'});
+  const roles = rolesOf({num, classes, price, danger: tight, exchange: row.exchange ?? 'HOSE', date});
+  // The holder's two lines (2026-10-11), as numbers the writer reads with their words.
+  const H = roles.holder;
+  if (H.full !== undefined && Number.isFinite(H.price)) {
+    add('halfLine', H.price, 'derived', `roles.holder: ${H.priceKey} on the price step — the half comes off under it`, {label: H.label, ref: H.priceKey});
+    if (H.full) add('fullLine', H.full.price, 'derived', `roles.holder.full: ${H.full.priceKey} on the price step — the rest leaves under it`, {label: H.full.label, ref: H.full.priceKey});
+  }
 
   return {
     symbol: SYM, date, method: METHOD,
@@ -897,7 +1000,9 @@ const othersAbove = (date, sym, format = 'daily') => {
   // The leaders in their ranking, then the names the user asked for (screener.requested), the higher RS 1M first: the rule
   // "the higher RS 1M keeps the setup, the other avoids it" holds for the picks too (2026-10-06: VCI, RS 22, keeps
   // far-from-high; CII, RS 16, takes its next setup). Before, a pick ranked nowhere and had to take its first setup.
-  const picks = [...(S.requested ?? [])].sort((a, b) => (b.rs1m ?? -1) - (a.rs1m ?? -1)).map((x) => x.symbol);
+  // The weekly's sector leader (screener.sectorLeader, 2026-10-10) comes LAST, whatever its RS 1M: it is added on top of the
+  // user's picks, so it avoids their setups and a review the user's names already passed never turns invalid because of it.
+  const picks = [...(S.requested ?? [])].sort((a, b) => (b.rs1m ?? -1) - (a.rs1m ?? -1)).map((x) => x.symbol).concat(S.sectorLeader ? [S.sectorLeader.symbol] : []);
   const top = [...(S.leaders?.top ?? []).map((x) => x.symbol), ...picks];
   const mine = top.indexOf(sym);
   if (mine < 0) return [];
@@ -908,10 +1013,17 @@ const othersAbove = (date, sym, format = 'daily') => {
  * Error strings for one review (empty = valid). `ctx.window` (from windowOf) bounds prices and dates;
  * without it the validator loads the bars the review names.
  */
+/**
+ * The format a review was written for: the pack its `inputs.facts` cites (content/review-weekly.facts.json#… → weekly). The
+ * weekly's picks are names the daily pack may not hold at all (DCL 16/10: no 52-week distance in the daily pack, so the
+ * daily re-run measured "trend" where the weekly measured "far-from-high"), so a review is re-measured in its own edition.
+ */
+export const reviewFormat = (r) => /review-([a-z]+)\.facts\.json/.exec(r?.inputs?.facts ?? '')?.[1] ?? null;
 export const validateReview = (r, ctx = {}) => {
   const errs = [];
   const e = (m) => errs.push(m);
   if (!r || typeof r !== 'object') return ['not an object'];
+  const FMT = ctx.format ?? reviewFormat(r) ?? 'daily';
   const SYM = r.symbol;
   // The exchange whose price step the review prints on (HOSE unless the review or the caller says otherwise).
   const EX = ctx.exchange ?? r.exchange ?? 'HOSE';
@@ -985,7 +1097,7 @@ export const validateReview = (r, ctx = {}) => {
   const priced = (label, price) => numbersIn(label).some((n) => Math.abs(Math.abs(n.value) - Math.abs(price)) <= 0.5 * 10 ** -n.dp + 1e-6 && (n.dp >= 1 || Math.abs(price) >= 100));
   let M = ctx.measured ?? null;
   if (v2 && !M && isDate(r.date) && typeof SYM === 'string') {
-    try { M = measure(r.date, SYM, {format: ctx.format ?? 'daily', facts: ctx.facts ?? null}); } catch (err) { e(`cannot re-run the method for ${SYM} on ${r.date}: ${err.message}`); }
+    try { M = measure(r.date, SYM, {format: FMT, facts: ctx.facts ?? null}); } catch (err) { e(`cannot re-run the method for ${SYM} on ${r.date}: ${err.message}`); }
   }
   const mNum = (k) => M?.numbers?.find((n) => n.key === k)?.value ?? null;
 
@@ -1120,7 +1232,7 @@ export const validateReview = (r, ctx = {}) => {
       if (lines.some((l) => inPrice(l.price)) && !marks.some((m) => m?.kind === 'trendline')) e(`no trendline on the chart — the method fits ${lines.map((l) => `${l.a.date}→${l.b.date} (${l.price})`).join(', ')}; it is mandatory when there is one`);
       // The setup is the method's: the first measured class, unless a higher-ranked leader of the same edition holds it.
       const kinds = (M.classes ?? []).map((c) => c.kind);
-      const taken = new Set((ctx.others ?? othersAbove(r.date, SYM, ctx.format ?? 'daily')).map((o) => o.setup));
+      const taken = new Set((ctx.others ?? othersAbove(r.date, SYM, FMT)).map((o) => o.setup));
       const allowed = kinds.find((k) => !taken.has(k)) ?? kinds[0];
       if (r.detail?.kind && !kinds.includes(r.detail.kind)) e(`setup "${r.detail.kind}" is not a class the method measures (${kinds.join(', ')})`);
       else if (r.detail?.kind && allowed && r.detail.kind !== allowed) e(`setup "${r.detail.kind}" — the method's setup is "${allowed}"${taken.size ? ` (a higher-ranked leader holds ${[...taken].join(', ')})` : ''}`);
@@ -1195,12 +1307,17 @@ export const validateReview = (r, ctx = {}) => {
           for (const k of ['case', 'priceKey', 'if', 'then', 'plate']) if ((x?.[k] ?? null) !== (want[k] ?? null)) e(`${at}.${k} ${JSON.stringify(x?.[k] ?? null)} — the method's is ${JSON.stringify(want[k] ?? null)} (copy measure's roles)`);
           const same = (x?.price == null && want.price == null) || (Number.isFinite(x?.price) && Number.isFinite(want.price) && Math.abs(x.price - want.price) <= 0.006);
           if (!same) e(`${at}.price ${x?.price ?? null} — the method's is ${want.price ?? null}`);
+          // The rest of the position's line (near lines, 2026-10-11): same key, same price, same action.
+          if (want.full || x?.full) {
+            const w = want.full ?? null, y = x?.full ?? null;
+            if ((y?.priceKey ?? null) !== (w?.priceKey ?? null) || (y?.then ?? null) !== (w?.then ?? null) || !((y?.price == null && w?.price == null) || (Number.isFinite(y?.price) && Number.isFinite(w?.price) && Math.abs(y.price - w.price) <= 0.006))) e(`${at}.full ${JSON.stringify(y && {priceKey: y.priceKey, price: y.price, then: y.then})} — the method's is ${JSON.stringify(w && {priceKey: w.priceKey, price: w.price, then: w.then})}`);
+          }
         }
         const prefix = who === 'holder' ? 'Đang giữ:' : 'Chưa mua:';
         if (typeof x?.plate !== 'string' || !x.plate.startsWith(prefix)) e(`${at}.plate must open with "${prefix}"`);
         else if ([...x.plate].length > 32) e(`${at}.plate "${x.plate}" is ${[...x.plate].length} characters — at most 32`);
         if (typeof x?.then !== 'string' || !x.then.trim()) e(`${at}.then missing — the action`);
-        const words = [x?.if, x?.then, x?.plate, x?.say, x?.headline].map(lower).join(' \n ');
+        const words = [x?.if, x?.then, x?.plate, x?.say, x?.headline, x?.full?.then, x?.full?.say].map(lower).join(' \n ');
         for (const w of ROLE_FORBIDDEN) if (words.includes(w)) e(`${at}: "${w}" — a role names a line and an action, never a target, a certainty, leverage or a size but "một nửa"`);
       }
     }
@@ -1209,7 +1326,8 @@ export const validateReview = (r, ctx = {}) => {
 };
 
 /** The roles' texts, labelled for the number checks (method /3). */
-const roleTexts = (r) => ['holder', 'notHolder'].flatMap((who) => ['if', 'then', 'plate', 'say', 'headline'].map((k) => [`roles.${who}.${k}`, r?.roles?.[who]?.[k]]));
+const roleTexts = (r) => ['holder', 'notHolder'].flatMap((who) => ['if', 'then', 'plate', 'say', 'headline'].map((k) => [`roles.${who}.${k}`, r?.roles?.[who]?.[k]]))
+  .concat([['roles.holder.full.say', r?.roles?.holder?.full?.say]]);
 
 /**
  * The numbers a review actually cites — in its mark labels, detail, branches and verdict — as {key: value}.

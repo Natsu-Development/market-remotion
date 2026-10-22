@@ -62,7 +62,65 @@
       "url": "https://claude.ai/artifact/Roro36EbNjSaAZdKSfgiBc",
       "page": "out/review/daily-2026-10-15",
       "video": "out/review/daily-2026-10-15.mp4",
-      "updatedAt": "2026-10-15T14:28:07.847Z"
+      "updatedAt": "2026-10-15T14:28:07.847Z",
+      "deleted": "2026-10-17",
+      "deletedNote": "The artifact watch ended 17/10 and a read answers \"artifact not found\" (deleted, or no longer shared with this account); the local page folder and video stay. Kept for the record; previousArtifact never links it."
+    },
+    "2026-10-16": {
+      "url": "https://claude.ai/artifact/3WvQ5n9j59n3iwMdqJKXtT",
+      "page": "out/review/daily-2026-10-16",
+      "video": "out/review/daily-2026-10-16.mp4",
+      "updatedAt": "2026-10-16T10:29:26.538Z",
+      "deleted": "2026-10-17",
+      "deletedNote": "The artifact watch ended 17/10 and a read answers \"artifact not found\" (deleted, or no longer shared with this account); the local page folder and video stay. Kept for the record; previousArtifact never links it."
+    },
+    "2026-10-19": {
+      "url": "https://claude.ai/artifact/HDHwSwDB47PHfMRw4Yh4UM",
+      "page": "out/review/daily-2026-10-19",
+      "video": "out/review/daily-2026-10-19.mp4",
+      "updatedAt": "2026-10-19T08:30:55.579Z"
+    },
+    "2026-10-20": {
+      "url": "https://claude.ai/artifact/K9URwcwLiDnmuVx1JbHv2d",
+      "page": "out/review/daily-2026-10-20",
+      "video": "out/review/daily-2026-10-20.mp4",
+      "updatedAt": "2026-10-20T08:30:07.300Z"
+    },
+    "2026-10-21": {
+      "url": "https://claude.ai/artifact/3N7Q238YsTSYSVZyJMmZXs",
+      "page": "out/review/daily-2026-10-21",
+      "video": "out/review/daily-2026-10-21.mp4",
+      "updatedAt": "2026-10-21T08:30:59.707Z"
+    },
+    "2026-10-22": {
+      "url": "https://claude.ai/artifact/989ULSMkxHyMbRhB27UkYE",
+      "page": "out/review/daily-2026-10-22",
+      "video": "out/review/daily-2026-10-22.mp4",
+      "updatedAt": "2026-10-22T08:38:38.000Z"
+    }
+  },
+  "weekly": {
+    "2026-10-09": {
+      "url": "https://claude.ai/artifact/QPSCTBaTfEqhLggU2Ymtsp",
+      "page": "out/review/review-weekly-2026-10-09",
+      "video": "out/review/weekly-2026-10-09.mp4",
+      "account": "tinnt@trueprofit.io",
+      "note": "First real weekly (rounds 1-3, 9/10-11/10), published from the squirrelfish worktree on account tinnt@trueprofit.io - not readable from catl sessions. Its page folder was copied to out/review/review-weekly-2026-10-09 on 17/10."
+    },
+    "2026-10-16": {
+      "url": "https://claude.ai/artifact/3AVyMR7C9is8etx1AZ26ic",
+      "page": "out/review/review-weekly",
+      "video": "out/review/weekly-2026-10-16.mp4",
+      "account": "catl@trueprofit.io",
+      "updatedAt": "2026-10-18T10:52:18.954Z",
+      "note": "The weekly's link from 17/10: the weekly keeps ONE artifact (weekly-review SKILL.md), but the 9/10 one is on another account, so this edition started a new one on catl; later weeks republish this link.",
+      "version": 7,
+      "facebook": {
+        "draft": "2026-10-18 17:51",
+        "page": "Chứng Vịt",
+        "list": "Business Suite > Nội dung > Bản nháp",
+        "caption": "out/weeklyreview.caption.txt"
+      }
     }
   }
 }

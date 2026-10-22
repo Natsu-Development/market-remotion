@@ -1,0 +1,16 @@
+{
+  "edition": "2026-10-22",
+  "symbols": [
+    "VPB",
+    "GMD",
+    "PVD"
+  ],
+  "say": [
+    {
+      "scene": "market",
+      "text": "Thanh khoản cao nhưng hiện tại đang có gap khoảng giá."
+    }
+  ],
+  "source": "user chat 2026-10-22: \"also include the sentence: thanh khoản cao nhưng hiện tại đang có gap khoảng giá and enrich for me, place this sentence on the scene 03, remove the sentence: Nguy cơ thủng đáy phiên nỗ lực phục hồi đầu tiên rất cao to something like: gia khong duoc thung phien no luc phuc hoi dau tien.\" + \"Also review for me GMD, PVD, VPB\" + \"edit the scene 05: Cùng mình xem kỹ ORS, VPB, GMD, PVD\" (review order)",
+  "readAt": "2026-10-22T11:00:00.000Z"
+}

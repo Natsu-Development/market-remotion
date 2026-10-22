@@ -253,6 +253,22 @@ def legend_rows_of(arr, im):
         # again with the box held to its own text before giving up on it.
         if not words:
             words = ocr_band(1, 1, f'row-{y0}-tight')
+        # The same dotted line running ALONG the row past its last value (AAS 21/10: close 10.30 level with the MA Cross
+        # row) keeps x_end at the pane's edge, and tesseract reads nothing in the long box. End the box where only a
+        # stripe one or two pixels tall goes on — no glyph column is that thin for 22 px.
+        if not words:
+            tall = ((((band.mean(axis=2) > 95) & ((band.max(axis=2) - band.min(axis=2)) < 45)) | (((band.max(axis=2) - band.min(axis=2)) > 60) & (band.max(axis=2) > 90))).sum(axis=0)) >= 3
+            x_cut, gap = TITLE_X[0], 0
+            for x in range(TITLE_X[0], x_end + 1):
+                if tall[x]:
+                    x_cut, gap = x, 0
+                else:
+                    gap += 1
+                    if gap > 22 and x > TITLE_X[0] + 60:
+                        break
+            if x_cut < x_end:
+                x_end = x_cut
+                words = ocr_band(3, 4, f'row-{y0}-cut')
         rows.append({'y0': y0, 'y1': y1, 'x0': 62, 'x1': x_end, 'words': words, 'text': ' '.join(w['text'] for w in words)})
     return rows
 
@@ -292,6 +308,9 @@ for r in value_rows:
             li = next((i for i, w in enumerate(ws) if re.match(r'^L\s*\d', w['text'])), None)
             if li is not None and li + 1 < len(ws) and re.match(r'^\d+[.,]\d+$', ws[li + 1]['text']):
                 cw = [ws[li + 1]]
+            # … or read it as a word of its own ("L1694.77 C 1705.91", VNINDEX 1W 16/10): the close is the number after it.
+            elif li is not None and li + 2 < len(ws) and re.match(r'^[C©€]$', ws[li + 1]['text']) and re.match(r'^\d+[.,]\d+$', ws[li + 2]['text']):
+                cw = [ws[li + 2]]
         reads = [re.sub(r'^[C©€]', '', cw[-1]['text'])] + list(reread_dark(cw[-1]['x'], cw[-1]['y'], cw[-1]['w'], cw[-1]['h'], 'hover-close')) if cw else []
         got, _ = consensus(reads)
         hover_check = {'expectClose': spec['expectClose'], 'readClose': got, 'ok': got is not None and abs(got - spec['expectClose']) < 0.011, 'header': text}
